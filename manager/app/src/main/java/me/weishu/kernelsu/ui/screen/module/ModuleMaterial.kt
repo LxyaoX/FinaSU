@@ -58,7 +58,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -116,7 +115,6 @@ import me.weishu.kernelsu.data.model.Module
 import me.weishu.kernelsu.data.model.ModuleUpdateInfo
 import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.data.repository.isSoftRebootPreferred
-import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
 import me.weishu.kernelsu.modulebanner.ModuleCardConfig
 import me.weishu.kernelsu.ui.component.ObserveAsEvents
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
@@ -288,16 +286,6 @@ fun ModulePagerMaterial(
                     }
                 },
                 actions = {
-                    FolkIconButton(
-                        onClick = {
-                            ModuleBannerConfig.updateEnabled(!ModuleBannerConfig.enabled)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Image,
-                            contentDescription = stringResource(id = R.string.module_banner_title)
-                        )
-                    }
                     FolkIconButton(
                         onClick = { showSortSheet = true }
                     ) {

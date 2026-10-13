@@ -53,6 +53,9 @@ object ModuleBannerConfig {
 
     val effectiveApiSource: String get() = apiSource.trim()
 
+    val policy: BannerPolicy
+        get() = BannerPolicy(enabled, folkEnabled, apiModeEnabled, effectiveApiSource)
+
     fun load() {
         val p = prefs
         enabled = p.getBoolean(KEY_ENABLED, true)

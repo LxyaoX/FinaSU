@@ -42,8 +42,7 @@ internal object MainWallpaperAsset : ThemedAsset {
             WallpaperManager.applyFile(context, target)
         }
         WallpaperConfig.updateEnabled(enabled)
-        // Apply before the per-page assets so a multi-mode theme is remembered even when no page
-        // image survives; each page asset still turns multi mode on when it restores an image.
+        // Per-page asset restoration must preserve these explicit switches, including master off.
         WallpaperConfig.updateMultiBackgroundEnabled(
             json.optBoolean("isMultiBackgroundEnabled", false)
         )
@@ -173,7 +172,7 @@ private fun currentPageFile(uri: String?): File? {
 /** Restores a page background from [file], or clears that page when the theme has none. */
 private suspend fun applyPageBackground(context: Context, page: Int, file: File?) {
     if (file != null) {
-        check(WallpaperManager.savePageBackground(context, page, Uri.fromFile(file)))
+        check(WallpaperManager.savePageBackground(context, page, Uri.fromFile(file), activate = false))
     } else {
         WallpaperManager.clearPageBackground(context, page)
     }

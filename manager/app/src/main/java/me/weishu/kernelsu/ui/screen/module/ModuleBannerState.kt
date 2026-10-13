@@ -3,12 +3,14 @@ package me.weishu.kernelsu.ui.screen.module
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.modulebanner.ApmBannerSlot
 import me.weishu.kernelsu.modulebanner.BannerApiClient
+import me.weishu.kernelsu.modulebanner.BannerPolicy
 import me.weishu.kernelsu.modulebanner.CustomModuleInfo
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
 import me.weishu.kernelsu.modulebanner.ModuleBannerResolver
@@ -39,44 +41,37 @@ fun rememberModuleCardVisual(
     moduleId: String,
     slot: ModuleBannerSlot = ApmBannerSlot,
 ): ModuleCardVisual {
-    val enabled = ModuleBannerConfig.enabled
-    val folkEnabled = ModuleBannerConfig.folkEnabled
-    val apiMode = ModuleBannerConfig.apiModeEnabled
-    val apiSource = ModuleBannerConfig.effectiveApiSource
+    val policy = ModuleBannerConfig.policy
     val reloadKey = ModuleBannerConfig.reloadKey
     val context = LocalContext.current
 
-    val state = produceState(
-        initialValue = ModuleCardVisual(),
-        moduleId, slot, context, enabled, folkEnabled, apiMode, apiSource, reloadKey,
-    ) {
-        value = withContext(Dispatchers.IO) {
-            ModuleCardVisual(
-                banner = resolveBanner(context, slot, moduleId, enabled, folkEnabled, apiMode, apiSource),
-                customInfo = ModuleCustomInfoStorage(slot, context).read(moduleId),
-            )
+    // produceState keys restart work but retain its previous value. A composition key also resets
+    // the holder, so rapid off/on, source edits and recycled cards cannot show an old banner.
+    val state = key(moduleId, slot, context, policy, reloadKey) {
+        produceState(initialValue = ModuleCardVisual()) {
+            value = withContext(Dispatchers.IO) {
+                ModuleCardVisual(
+                    banner = resolveBanner(context, slot, moduleId, policy),
+                    customInfo = ModuleCustomInfoStorage(slot, context).read(moduleId),
+                )
+            }
         }
     }
-    return state.value
+    return if (policy.active) state.value else state.value.copy(banner = null)
 }
 
 private suspend fun resolveBanner(
     context: Context,
     slot: ModuleBannerSlot,
     moduleId: String,
-    enabled: Boolean,
-    folkEnabled: Boolean,
-    apiMode: Boolean,
-    apiSource: String,
+    policy: BannerPolicy,
 ): ModuleBannerVisual? {
-    if (!enabled) return null
+    if (!policy.active) return null
 
-    if (apiMode && apiSource.isNotEmpty()) {
-        BannerApiClient.load(context, moduleId, apiSource)?.let { return ModuleBannerVisual(it) }
+    if (policy.apiActive && policy.apiSource.isNotEmpty()) {
+        BannerApiClient.load(context, moduleId, policy.apiSource)?.let { return ModuleBannerVisual(it) }
     }
-    if (folkEnabled) {
-        ModuleBannerStorage(slot, context).read(moduleId)?.let { return ModuleBannerVisual(it) }
-    }
+    ModuleBannerStorage(slot, context).read(moduleId)?.let { return ModuleBannerVisual(it) }
     if (slot.supportsModulePropBanner) {
         val declared = ModuleBannerResolver.readModulePropBanner(slot, moduleId)
         if (!declared.isNullOrBlank()) {

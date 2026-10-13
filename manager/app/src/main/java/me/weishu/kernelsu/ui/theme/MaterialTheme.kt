@@ -47,7 +47,10 @@ fun MaterialKernelSUTheme(
     val dynamicColor = appSettings.useSystemDynamicColor
 
     val wallpaperPage = LocalWallpaperPage.current
-    val wallpaperActive = WallpaperConfig.isActive
+    val videoActive = me.weishu.kernelsu.media.VisualMediaConfig.let {
+        it.videoEnabled && it.file(context, true) != null
+    }
+    val wallpaperActive = WallpaperConfig.isPageActive(wallpaperPage, videoActive)
     // The accent palette is derived from one fixed image, never from the page currently on screen:
     // a page swipe must not re-theme every component (`animateAsState` would then drag the whole
     // app through a color transition and make the swipe feel laggy). Only the background itself and
@@ -55,7 +58,7 @@ fun MaterialKernelSUTheme(
     val seedPage = if (WallpaperConfig.multiBackgroundEnabled) WallpaperConfig.PAGE_HOME else wallpaperPage
     val pageSeed = WallpaperConfig.pageSeed(seedPage)
     val wallpaperSeed = if (
-        wallpaperActive && WallpaperConfig.useWallpaperColor && pageSeed != 0
+        WallpaperConfig.isActive && WallpaperConfig.useWallpaperColor && pageSeed != 0
     ) {
         Color(pageSeed)
     } else {

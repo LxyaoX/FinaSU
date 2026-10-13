@@ -41,17 +41,28 @@ object WallpaperManager {
     private val surfaceLocks = ConcurrentHashMap<SurfaceId, Mutex>()
 
     /** Copies the picked image into app storage, extracts its color/luminance and enables it. */
-    suspend fun save(context: Context, source: Uri): Boolean = withContext(Dispatchers.IO) {
-        runCatching {
-            val ext = resolveExtension(context, source)
-            // Stage then rename, so a failed copy never deletes the wallpaper already in place.
-            val target = replaceSurfaceImage(context.filesDir, FILENAME_BASE, ext) { staged ->
-                copyToFile(context, source, staged)
-            }
-            clearOldFiles(context, except = target)
-            applyFile(context, target)
-            true
-        }.getOrDefault(false)
+    suspend fun save(context: Context, source: Uri): Boolean {
+        val revision = WallpaperConfig.switchRevision
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val ext = resolveExtension(context, source)
+                // Stage then rename, so a failed copy never deletes the wallpaper already in place.
+                val target = replaceSurfaceImage(context.filesDir, FILENAME_BASE, ext) { staged ->
+                    copyToFile(context, source, staged)
+                }
+                clearOldFiles(context, except = target)
+                val luminance = computeLuminance(target) ?: -1f
+                val seed = computeSeed(target) ?: 0
+                withContext(NonCancellable + Dispatchers.Main.immediate) {
+                    WallpaperConfig.updateUri("${Uri.fromFile(target)}?revision=${UUID.randomUUID()}")
+                    WallpaperConfig.updateDerivedLuminance(luminance)
+                    WallpaperConfig.updateDerivedSeed(seed)
+                    WallpaperConfig.activatePickedImage(revision)
+                    WallpaperConfig.save(context)
+                }
+                true
+            }.getOrDefault(false)
+        }
     }
 
     /** Deletes the stored image and turns the wallpaper off, keeping the user's slider values. */
@@ -169,11 +180,18 @@ object WallpaperManager {
     /**
      * Copies the picked image into app storage as the background for [page] (0..4).
      *
-     * Extracts the page's luminance and seed, then turns multi mode and the master wallpaper switch
-     * on so the new image is immediately visible. Unknown page indexes are ignored.
+     * Interactive picks enable multi mode unless a newer switch decision superseded the pick.
+     * Imports pass [activate] = false to preserve the theme's explicit switch values.
+     * Unknown page indexes are ignored.
      */
-    suspend fun savePageBackground(context: Context, page: Int, source: Uri): Boolean =
-        withContext(Dispatchers.IO) {
+    suspend fun savePageBackground(
+        context: Context,
+        page: Int,
+        source: Uri,
+        activate: Boolean = true,
+    ): Boolean {
+        val revision = WallpaperConfig.switchRevision
+        return withContext(Dispatchers.IO) {
             val base = pageFilenameBase(page) ?: return@withContext false
             runCatching {
                 val ext = resolveExtension(context, source)
@@ -182,16 +200,19 @@ object WallpaperManager {
                     copyToFile(context, source, staged)
                 }
                 clearPageFiles(context, base, except = target)
-                val stamped = "${Uri.fromFile(target)}?t=${System.currentTimeMillis()}"
-                updatePageUri(page, stamped)
-                updatePageLuminance(page, computeLuminance(target) ?: -1f)
-                updatePageSeed(page, computeSeed(target) ?: 0)
-                WallpaperConfig.updateMultiBackgroundEnabled(true)
-                WallpaperConfig.updateEnabled(true)
-                WallpaperConfig.save(context)
+                val luminance = computeLuminance(target) ?: -1f
+                val seed = computeSeed(target) ?: 0
+                withContext(NonCancellable + Dispatchers.Main.immediate) {
+                    updatePageUri(page, "${Uri.fromFile(target)}?revision=${UUID.randomUUID()}")
+                    updatePageLuminance(page, luminance)
+                    updatePageSeed(page, seed)
+                    if (activate) WallpaperConfig.activatePickedImage(revision, multi = true)
+                    WallpaperConfig.save(context)
+                }
                 true
             }.getOrDefault(false)
         }
+    }
 
     /** Deletes [page]'s stored image and clears its URI/derived values. Unknown indexes are ignored. */
     fun clearPageBackground(context: Context, page: Int) {

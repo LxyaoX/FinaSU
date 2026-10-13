@@ -106,6 +106,10 @@ object WallpaperConfig {
     var multiBackgroundEnabled by mutableStateOf(false)
         private set
 
+    // An in-flight image pick must not overwrite a newer switch decision.
+    internal var switchRevision = 0
+        private set
+
     var homeBackgroundUri by mutableStateOf<String?>(null)
         private set
     var pluginBackgroundUri by mutableStateOf<String?>(null)
@@ -168,10 +172,8 @@ object WallpaperConfig {
     val activeUri: String? get() = if (enabled) uri else null
 
     /**
-     * Whether wallpaper mode is on for the app. The master [enabled] switch gates every mode: with
-     * it off nothing is active, even if a per-page image is still remembered. In multi mode it is
-     * enough that any page has an image, because the theme is global even though the painted image
-     * is per page.
+     * Whether any image slot or the independently controlled video is enabled app-wide.
+     * Used for the stable global accent; page surface materials must use [isPageActive] instead.
      */
     val isActive: Boolean
         get() = (me.weishu.kernelsu.media.VisualMediaConfig.videoEnabled &&
@@ -187,7 +189,12 @@ object WallpaperConfig {
      * mode only that page's own URI applies.
      */
     fun pageUri(page: Int): String? =
-        if (!enabled) null else if (multiBackgroundEnabled) pageOwnUri(page) else uri
+        (if (!enabled) null else if (multiBackgroundEnabled) pageOwnUri(page) else uri)
+            ?.takeIf { it.isNotBlank() }
+
+    /** Page materials follow the image actually selected for this page, not another page's slot. */
+    fun isPageActive(page: Int, videoActive: Boolean = false): Boolean =
+        videoActive || pageUri(page) != null
 
     /** Background luminance to adapt against for [page] (0..4); -1f when the master switch is off. */
     fun pageLuminance(page: Int): Float =
@@ -233,6 +240,7 @@ object WallpaperConfig {
     fun effectiveWorkCardOpacity(isDark: Boolean): Float = workCardSurface.effectiveOpacity(isDark)
 
     fun updateEnabled(value: Boolean) {
+        switchRevision++
         enabled = value
     }
 
@@ -277,7 +285,14 @@ object WallpaperConfig {
     }
 
     fun updateMultiBackgroundEnabled(value: Boolean) {
+        switchRevision++
         multiBackgroundEnabled = value
+    }
+
+    internal fun activatePickedImage(revision: Int, multi: Boolean = false) {
+        if (revision != switchRevision) return
+        if (multi) updateMultiBackgroundEnabled(true)
+        updateEnabled(true)
     }
 
     fun updateHomeBackgroundUri(value: String?) {
@@ -433,6 +448,7 @@ object WallpaperConfig {
     }
 
     fun reset() {
+        switchRevision++
         enabled = false
         uri = null
         opacity = DEFAULT_OPACITY

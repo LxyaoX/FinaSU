@@ -97,8 +97,9 @@ fun ModuleBannerSettingsSection() {
     val context = LocalContext.current
     val navigator = LocalNavigator.current
     var showSourceDialog by remember { mutableStateOf(false) }
-    val folkActive = ModuleBannerConfig.enabled && ModuleBannerConfig.folkEnabled
-    val apiActive = folkActive && ModuleBannerConfig.apiModeEnabled
+    val policy = ModuleBannerConfig.policy
+    val folkActive = policy.active
+    val apiActive = policy.apiActive
 
     SegmentedColumn(
         modifier = SectionModifier,

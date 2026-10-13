@@ -79,7 +79,7 @@ fun CardBannerDialog(
     var author by remember(subject.id) { mutableStateOf(initialAuthor) }
     var description by remember(subject.id) { mutableStateOf(initialDescription) }
     var hasBanner by remember(subject.id) { mutableStateOf(bannerStorage.exists(subject.id)) }
-    val showBannerSection = ModuleBannerConfig.enabled && ModuleBannerConfig.folkEnabled
+    val showBannerSection = ModuleBannerConfig.policy.active
 
     val hasChanges = name != initialName || version != initialVersion ||
         author != initialAuthor || description != initialDescription

@@ -3,6 +3,7 @@ package me.weishu.kernelsu.modulebanner
 import android.content.Context
 import android.net.Uri
 import java.io.File
+import java.io.IOException
 import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,17 +31,31 @@ object BannerApiClient {
 
     suspend fun load(context: Context, moduleId: String, source: String): ByteArray? =
         withContext(Dispatchers.IO) {
-            val src = source.trim()
-            if (src.isEmpty()) return@withContext null
-            val cache = cacheFile(context, src, moduleId)
-            readFresh(cache)?.let { return@withContext it }
-            val bytes = if (isLocalDirectory(src)) {
-                readLocalDirectory(moduleId, src)
-            } else {
-                fetchRemote(moduleId, src)
+            try {
+                val src = source.trim()
+                if (src.isEmpty()) return@withContext null
+                val cache = cacheFile(context, src, moduleId)
+                readFresh(cache)?.let { return@withContext it }
+                val bytes = if (isLocalDirectory(src)) {
+                    readLocalDirectory(moduleId, src)
+                } else {
+                    fetchRemote(moduleId, src)
+                }
+                if (bytes != null && bytes.isNotEmpty()) {
+                    try {
+                        cache.writeBytes(bytes)
+                    } catch (_: IOException) {
+                        // Cache persistence is optional; the fetched image is still usable.
+                    }
+                }
+                bytes
+            } catch (_: IOException) {
+                // A broken cache or local API directory must not prevent normal banner fallback.
+                null
+            } catch (_: IllegalArgumentException) {
+                // Invalid user-entered URL.
+                null
             }
-            if (bytes != null && bytes.isNotEmpty()) cache.writeBytes(bytes)
-            bytes
         }
 
     /** Synchronous cached read for the initial value of a banner state holder. */
@@ -98,7 +113,7 @@ object BannerApiClient {
                     response.body.bytes().takeIf { it.isNotEmpty() }
                 }
             }
-        } catch (t: Throwable) {
+        } catch (_: IOException) {
             null
         }
     }
