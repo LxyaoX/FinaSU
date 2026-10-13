@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">深入瞭解 KernelSU</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_TW/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">知曉安裝、使用 KernelSU 本體與其模組功能的方法</string>
+    <string name="home_learn_finasu">深入瞭解 FinaSU</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">認識 FinaSU 的功能與模組</string>
     <string name="home_support_title">協助發展</string>
     <string name="home_support_content">KernelSU 一向以免費與開放原始碼自居，矢志不渝。若想協助我們，可以用小額捐款表達你對專案發展的大力支持。</string>
     <string name="home_gki_warning">自 v3.0.0 起，GKI 工作模式將僅用於測試環境。我們不建議日常使用，也不再提供映像檔。</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">首頁底部卡片</string>
+    <string name="settings_support_links_summary">選擇首頁底部顯示的內容。</string>
+    <string name="settings_support_links_finasu">深入瞭解 FinaSU</string>
+    <string name="settings_support_links_legacy">協助發展與 KernelSU</string>
+    <string name="settings_support_links_hidden">隱藏</string>
     <string name="settings_category_general">一般</string>
     <string name="settings_category_appearance">外觀</string>
     <string name="settings_category_behavior">行為</string>

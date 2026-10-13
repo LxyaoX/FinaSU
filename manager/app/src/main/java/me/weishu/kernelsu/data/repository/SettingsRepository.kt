@@ -24,6 +24,7 @@ interface SettingsRepository {
     var moduleDescriptionMaxLines: Int
     var enableWebDebugging: Boolean
     var homeLayoutStyle: String
+    var supportLinksStyle: String
     var moduleSortGroups: Set<ModuleSortGroup>
     var moduleSortEnabledFirst: Boolean
     var moduleSortCustomOrder: List<String>

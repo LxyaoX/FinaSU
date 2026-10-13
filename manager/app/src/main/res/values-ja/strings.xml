@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">KernelSU について</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/ja_JP/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">KernelSU のインストール方法やモジュールの使い方はこちら</string>
+    <string name="home_learn_finasu">FinaSU について</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">FinaSU の機能とモジュールをご覧ください。</string>
     <string name="home_support_title">支援する</string>
     <string name="home_support_content">KernelSU はこれからもずっと無料でオープンソースです。寄付をして頂くことで、開発を支援していただけます。</string>
     <string name="home_gki_warning">バージョン 3.0.0 以降、GKI ワークモードはテスト環境でのみ使用されます。日常的な使用には推奨されません。また、イメージファイルの提供も停止されます。</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">ホーム下部のカード</string>
+    <string name="settings_support_links_summary">ホーム画面の下部に表示する内容を選択します。</string>
+    <string name="settings_support_links_finasu">FinaSU について</string>
+    <string name="settings_support_links_legacy">支援と KernelSU</string>
+    <string name="settings_support_links_hidden">非表示</string>
     <string name="settings_category_general">一般</string>
     <string name="settings_category_appearance">外観</string>
     <string name="settings_category_behavior">動作</string>

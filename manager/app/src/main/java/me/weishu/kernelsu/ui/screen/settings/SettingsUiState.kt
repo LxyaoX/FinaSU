@@ -7,6 +7,7 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
+import me.weishu.kernelsu.data.model.SupportLinksStyle
 
 @Immutable
 data class SettingsUiState(
@@ -22,6 +23,7 @@ data class SettingsUiState(
     val moduleDescriptionMaxLines: Int = 4,
     val enableWebDebugging: Boolean = false,
     val homeLayoutStyle: String = HomeLayoutStyle.DEFAULT,
+    val supportLinksStyle: String = SupportLinksStyle.DEFAULT,
 
     // Su Compat
     val suCompatStatus: String = "",
@@ -105,6 +107,7 @@ data class SettingsScreenActions(
     val onSetDefaultUmountModules: (Boolean) -> Unit,
     val onSetEnableWebDebugging: (Boolean) -> Unit,
     val onSetHomeLayoutStyle: (String) -> Unit,
+    val onSetSupportLinksStyle: (String) -> Unit,
     val onSetEnableNavigationBadge: (Boolean) -> Unit,
     val onSetEnablePredictiveBack: (Boolean) -> Unit,
     val onSetPageScale: (Float) -> Unit,

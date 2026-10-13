@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">Poznaj KernelSU</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">Dowiedz się jak zainstalować KernelSU i jak korzystać z modułów.</string>
+    <string name="home_learn_finasu">Poznaj FinaSU</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">Odkryj funkcje i moduły FinaSU.</string>
     <string name="home_support_title">Wesprzyj nas</string>
     <string name="home_support_content">KernelSU jest i zawsze będzie darmowy oraz otwarty. Niemniej jednak możesz nam pokazać, że Ci zależy, wysyłając darowiznę.</string>
     <string name="home_gki_warning">Począwszy od wersji 3.0.0, tryb pracy GKI będzie używany wyłącznie w środowiskach testowych. Nie zalecamy jego stosowania w codziennym użytkowaniu, a pliki obrazów nie będą już udostępniane.</string>
@@ -329,6 +332,11 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">Dolna karta ekranu głównego</string>
+    <string name="settings_support_links_summary">Wybierz, co ma się pojawiać na dole ekranu głównego.</string>
+    <string name="settings_support_links_finasu">Poznaj FinaSU</string>
+    <string name="settings_support_links_legacy">Wsparcie i KernelSU</string>
+    <string name="settings_support_links_hidden">Ukryte</string>
     <string name="settings_category_general">Ogólne</string>
     <string name="settings_category_appearance">Wygląd</string>
     <string name="settings_category_behavior">Zachowanie</string>

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Lock
@@ -40,6 +41,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
+import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.ui.component.KsuIsValid
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
@@ -218,6 +220,32 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                     onItemSelected = { index ->
                         actions.onSetHomeLayoutStyle(
                             supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
+                        )
+                    }
+                )
+            }
+            add {
+                val supportedSupportLinks = SupportLinksStyle.supported
+                val supportLinksItems = supportedSupportLinks.map { style ->
+                    stringResource(
+                        when (style) {
+                            SupportLinksStyle.LEGACY -> R.string.settings_support_links_legacy
+                            SupportLinksStyle.HIDDEN -> R.string.settings_support_links_hidden
+                            else -> R.string.settings_support_links_finasu
+                        }
+                    )
+                }
+                val selectedSupportLinks =
+                    supportedSupportLinks.indexOf(uiState.supportLinksStyle).coerceAtLeast(0)
+                SegmentedDropdownItem(
+                    icon = Icons.Filled.Info,
+                    title = stringResource(id = R.string.settings_support_links),
+                    summary = stringResource(id = R.string.settings_support_links_summary),
+                    items = supportLinksItems,
+                    selectedIndex = selectedSupportLinks,
+                    onItemSelected = { index ->
+                        actions.onSetSupportLinksStyle(
+                            supportedSupportLinks.getOrElse(index) { SupportLinksStyle.DEFAULT }
                         )
                     }
                 )

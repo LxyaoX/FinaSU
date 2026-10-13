@@ -18,6 +18,7 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.ModuleSortPriorityStore
+import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.magica.BootCompletedReceiver
@@ -122,6 +123,12 @@ class SettingsRepositoryImpl : SettingsRepository {
             prefs.getString("home_layout_style", HomeLayoutStyle.DEFAULT)
         )
         set(value) = prefs.edit { putString("home_layout_style", HomeLayoutStyle.fromValue(value)) }
+
+    override var supportLinksStyle: String
+        get() = SupportLinksStyle.fromValue(
+            prefs.getString("support_links_style", SupportLinksStyle.DEFAULT)
+        )
+        set(value) = prefs.edit { putString("support_links_style", SupportLinksStyle.fromValue(value)) }
 
     override var moduleSortGroups: Set<ModuleSortGroup>
         get() = ModuleSortPriorityStore.decode(prefs.getString(ModuleSortPriorityStore.Key, null))

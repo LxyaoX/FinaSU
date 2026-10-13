@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">了解一下 KernelSU 喵</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">看看怎么装 KernelSU、怎么写模块喵</string>
+    <string name="home_learn_finasu">了解一下 FinaSU 喵</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">看看 FinaSU 有什么好玩的喵</string>
     <string name="home_support_title">支持人家嘛喵</string>
     <string name="home_support_content">KernelSU 会一直免费开源喵，给开发者捐点小钱钱就是最好的鼓励啦</string>
     <string name="home_gki_warning">从 v3.0.0 起，GKI 工作模式只在测试环境用喵，人家不建议日常使唤它，镜像文件也不提供啦</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">首页底部小卡片喵</string>
+    <string name="settings_support_links_summary">挑挑首页底下要显示什么喵～</string>
+    <string name="settings_support_links_finasu">了解一下 FinaSU 喵</string>
+    <string name="settings_support_links_legacy">支持人家嘛喵与 KernelSU</string>
+    <string name="settings_support_links_hidden">藏起来喵</string>
     <string name="settings_category_general">通用</string>
     <string name="settings_category_appearance">外观</string>
     <string name="settings_category_behavior">行为</string>

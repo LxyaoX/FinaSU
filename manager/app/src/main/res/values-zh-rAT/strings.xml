@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">探寻 KernelSU</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">探寻如何蒙恩 KernelSU 与铸造圣光阵之法</string>
+    <string name="home_learn_finasu">探寻 FinaSU</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">领略 FinaSU 的功能与恩典</string>
     <string name="home_support_title">圣光援助</string>
     <string name="home_support_content">KernelSU 永为自由开源，愿以捐赠献上圣光</string>
     <string name="home_gki_warning">自 v3.0.0 起，GKI 运转模式仅用于试炼之境，不荐于日常；镜像圣匣亦不再降下。</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">首页底部圣牌</string>
+    <string name="settings_support_links_summary">择首页底端所显之圣物。</string>
+    <string name="settings_support_links_finasu">探寻 FinaSU</string>
+    <string name="settings_support_links_legacy">圣光援助与 KernelSU</string>
+    <string name="settings_support_links_hidden">隐匿</string>
     <string name="settings_category_general">圣域基础</string>
     <string name="settings_category_appearance">圣光外观</string>
     <string name="settings_category_behavior">神谕指令</string>

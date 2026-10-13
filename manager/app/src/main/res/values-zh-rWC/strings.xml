@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">参悟 KernelSU</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_CN/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">探 KernelSU 引仙入道之法，明炼化仙符之术。</string>
+    <string name="home_learn_finasu">参悟 FinaSU</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">探 FinaSU 引仙入道之法，明炼化仙符之术。</string>
     <string name="home_support_title">道力支持</string>
     <string name="home_support_content">KernelSU 恒久免费开源，向道门捐赠以表道心。</string>
     <string name="home_gki_warning">自 v3.0.0 起，GKI 修炼模式唯用于试炼之境；吾等不荐日常修持，亦不复供镜像卷宗。</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">首页底下道牌</string>
+    <string name="settings_support_links_summary">择首页底端所现之道。</string>
+    <string name="settings_support_links_finasu">参悟 FinaSU</string>
+    <string name="settings_support_links_legacy">道力支持与 KernelSU</string>
+    <string name="settings_support_links_hidden">隐去</string>
     <string name="settings_category_general">凡尘设置</string>
     <string name="settings_category_appearance">道韵外观</string>
     <string name="settings_category_behavior">功法运转</string>

@@ -15,6 +15,7 @@ import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
+import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.ksuApp
@@ -48,6 +49,7 @@ class SettingsViewModel(
             val moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines
             val enableWebDebugging = repo.enableWebDebugging
             val homeLayoutStyle = repo.homeLayoutStyle
+            val supportLinksStyle = repo.supportLinksStyle
             val colorStyle = repo.colorStyle
             val colorSpec = repo.colorSpec
             val isLkmMode = repo.isLkmMode()
@@ -106,6 +108,7 @@ class SettingsViewModel(
                     moduleDescriptionMaxLines = moduleDescriptionMaxLines,
                     enableWebDebugging = enableWebDebugging,
                     homeLayoutStyle = homeLayoutStyle,
+                    supportLinksStyle = supportLinksStyle,
                     colorStyle = colorStyle,
                     colorSpec = colorSpec,
                     suCompatStatus = suCompatStatus,
@@ -226,6 +229,12 @@ class SettingsViewModel(
         val normalized = HomeLayoutStyle.fromValue(style)
         repo.homeLayoutStyle = normalized
         _uiState.update { it.copy(homeLayoutStyle = normalized) }
+    }
+
+    fun setSupportLinksStyle(style: String) {
+        val normalized = SupportLinksStyle.fromValue(style)
+        repo.supportLinksStyle = normalized
+        _uiState.update { it.copy(supportLinksStyle = normalized) }
     }
 
     fun setSuCompatMode(mode: Int) {

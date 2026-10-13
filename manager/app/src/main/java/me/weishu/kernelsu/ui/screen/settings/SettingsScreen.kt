@@ -80,6 +80,7 @@ fun rememberSettingsActions(
         onSetDefaultUmountModules = viewModel::setDefaultUmountModules,
         onSetEnableWebDebugging = viewModel::setEnableWebDebugging,
         onSetHomeLayoutStyle = viewModel::setHomeLayoutStyle,
+        onSetSupportLinksStyle = viewModel::setSupportLinksStyle,
         onSetEnableNavigationBadge = viewModel::setEnableNavigationBadge,
         onSetEnablePredictiveBack = { enabled ->
             viewModel.setEnablePredictiveBack(enabled)

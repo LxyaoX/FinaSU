@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">瞧瞧 KernelSU</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">瞧瞧 KernelSU 咋上灶、招牌菜咋研发。</string>
+    <string name="home_learn_finasu">瞧瞧 FinaSU</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">尝尝 FinaSU 的招牌菜和新菜式</string>
     <string name="home_support_title">给大厨捧个场</string>
     <string name="home_support_content">KernelSU 一直免费开源，打赏一下就是最大的支持。</string>
     <string name="home_gki_warning">打 v3.0.0 起，GKI 干活模式只在试菜时用，不推荐日常下厨，镜像文件也不再供了。</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">首页底部小灶</string>
+    <string name="settings_support_links_summary">挑挑首页底下摆哪道菜。</string>
+    <string name="settings_support_links_finasu">瞧瞧 FinaSU</string>
+    <string name="settings_support_links_legacy">给大厨捧个场与 KernelSU</string>
+    <string name="settings_support_links_hidden">收起来</string>
     <string name="settings_category_general">家常</string>
     <string name="settings_category_appearance">门面</string>
     <string name="settings_category_behavior">脾性</string>

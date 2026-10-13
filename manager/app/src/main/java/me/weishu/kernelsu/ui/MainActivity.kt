@@ -104,6 +104,7 @@ import me.weishu.kernelsu.ui.screen.executemoduleaction.ExecuteModuleActionScree
 import me.weishu.kernelsu.ui.screen.flash.FlashScreen
 import me.weishu.kernelsu.ui.screen.home.HomePager
 import me.weishu.kernelsu.ui.screen.home.LocalHomeLayoutStyle
+import me.weishu.kernelsu.ui.screen.home.LocalSupportLinksStyle
 import me.weishu.kernelsu.ui.screen.install.InstallScreen
 import me.weishu.kernelsu.ui.screen.module.ModulePager
 import me.weishu.kernelsu.ui.screen.plugin.PluginPager
@@ -243,6 +244,7 @@ open class MainActivity : FragmentActivity() {
                 LocalEnableNavigationBadge provides uiState.enableNavigationBadge,
                 LocalModuleDescriptionMaxLines provides uiState.moduleDescriptionMaxLines,
                 LocalHomeLayoutStyle provides uiState.homeLayoutStyle,
+                LocalSupportLinksStyle provides uiState.supportLinksStyle,
                 LocalWallpaperPage provides selectedMainPage,
                 LocalCapabilityState provides capability,
                 LocalAppAuthenticator provides authenticationSession.authenticator,

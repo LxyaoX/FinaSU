@@ -143,6 +143,9 @@
     <string name="home_learn_kernelsu">了解 KernelSU</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_CN/guide/what-is-kernelsu.html</string>
     <string name="home_click_to_learn_kernelsu">了解如何合成 KernelSU 以及如何开发模组</string>
+    <string name="home_learn_finasu">了解 FinaSU</string>
+    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
+    <string name="home_click_to_learn_finasu">了解如何合成 FinaSU 以及如何开发模组</string>
     <string name="home_support_title">给绿宝石</string>
     <string name="home_support_content">KernelSU 永远免费开源，往合成台投喂绿宝石就是最好的支持</string>
     <string name="home_gki_warning">自 v3.0.0 起 GKI 工作模式将仅用于测试环境，我们不建议用于日常使用，也不再提供镜像文件</string>
@@ -325,6 +328,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_support_links">首页底部合成台</string>
+    <string name="settings_support_links_summary">选择首页底部展示的物品。</string>
+    <string name="settings_support_links_finasu">了解 FinaSU</string>
+    <string name="settings_support_links_legacy">给绿宝石与 KernelSU</string>
+    <string name="settings_support_links_hidden">隐藏</string>
     <string name="settings_category_general">通用</string>
     <string name="settings_category_appearance">外观</string>
     <string name="settings_category_behavior">行为</string>

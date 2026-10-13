@@ -48,6 +48,7 @@ class MainActivityViewModel(
             enableNavigationBadge = settingRepo.enableNavigationBadge,
             moduleDescriptionMaxLines = settingRepo.moduleDescriptionMaxLines,
             homeLayoutStyle = settingRepo.homeLayoutStyle,
+            supportLinksStyle = settingRepo.supportLinksStyle,
         )
     }
 
@@ -66,6 +67,7 @@ class MainActivityViewModel(
             "module_description_max_lines",
             "enable_navigation_badge",
             "home_layout_style",
+            "support_links_style",
         )
     }
 }
