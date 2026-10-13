@@ -1,5 +1,6 @@
 package me.weishu.kernelsu.ui.component.bottombar
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.fletchmckee.liquid.LiquidState
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
+import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 /** Vertical space the floating bar occupies from the screen bottom, excluding system insets. */
 fun floatingBarReservedHeight(compact: Boolean, style: FloatingBarConfig.Style): Dp =
@@ -62,6 +64,13 @@ internal fun FloatingBar(
     val destinations = BottomBarDestination.entries
     val selectedIndex = mainPagerState.selectedPage
     val containerColor = BottomBarControl.style(BottomBarLayout.Floating).containerColor
+    // Outside wallpaper mode the pill's fill is derived from the page, so it does not carry the raised
+    // neutral's own lift and a tonal tint on top would only pull it back toward the canvas it was
+    // moved off of. It is given a hairline edge instead: an outline depends on nothing the theme
+    // painted behind the bar, so the shape stays legible even where the step is small. Wallpaper mode
+    // keeps the lift it has always had.
+    val wallpaperActive = LocalFolkWallpaperTokens.current != null
+    val barTonalElevation = if (wallpaperActive) 3.dp else 0.dp
 
     BoxWithConstraints(
         modifier = modifier
@@ -105,8 +114,13 @@ internal fun FloatingBar(
                     ),
                 shape = barShape,
                 color = if (useGlass) Color.Transparent else containerColor,
-                tonalElevation = if (useGlass) 0.dp else 3.dp,
+                tonalElevation = if (useGlass) 0.dp else barTonalElevation,
                 shadowElevation = if (useGlass) 0.dp else 8.dp,
+                border = if (useGlass || wallpaperActive) {
+                    null
+                } else {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                },
             ) {
                 if (style == FloatingBarConfig.Style.Drawer) {
                     FloatingBarDrawer(

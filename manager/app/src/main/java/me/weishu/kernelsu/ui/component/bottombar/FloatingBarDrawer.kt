@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 /**
  * Drawer floating form: the selected destination expands into a pill and reveals its label,
@@ -47,6 +48,15 @@ internal fun FloatingBarDrawer(
     if (destinations.isEmpty()) return
     val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
     val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+    // Outside wallpaper mode the bar's own fill is the raised neutral, so a selected pill in that
+    // same colour would vanish into it. There the selection takes the accent pill the standard form
+    // already draws; over a photo the raised neutral is still the readable highlight.
+    val wallpaperActive = LocalFolkWallpaperTokens.current != null
+    val selectedContainer = if (wallpaperActive) {
+        MaterialTheme.colorScheme.surfaceBright
+    } else {
+        MaterialTheme.colorScheme.secondaryContainer
+    }
     BoxWithConstraints(modifier = modifier) {
         val barWidth = (56.dp * destinations.size + 88.dp).coerceAtMost(maxWidth)
         val extraWidth = (barWidth - 16.dp - 4.dp * (destinations.size - 1) - 48.dp * destinations.size)
@@ -63,11 +73,15 @@ internal fun FloatingBarDrawer(
                     val expansion by animateFloatAsState(if (selected) 1f else 0f, spatialSpec, label = "drawerExpansion")
                     val iconScale by animateFloatAsState(if (selected) 1f else 0.9f, spatialSpec, label = "drawerIconScale")
                     val background by animateColorAsState(
-                        if (selected) MaterialTheme.colorScheme.surfaceBright else Color.Transparent,
+                        if (selected) selectedContainer else Color.Transparent,
                         effectsSpec,
                         label = "drawerSelection",
                     )
-                    val tint = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                    val tint = when {
+                        !selected -> MaterialTheme.colorScheme.onSurfaceVariant
+                        wallpaperActive -> MaterialTheme.colorScheme.onSurface
+                        else -> MaterialTheme.colorScheme.onSecondaryContainer
+                    }
                     val navBadge = badge(destination)
                     Row(
                         modifier = Modifier
