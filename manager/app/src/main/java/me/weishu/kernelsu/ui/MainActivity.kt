@@ -197,7 +197,8 @@ open class MainActivity : FragmentActivity() {
         WallpaperConfig.load(this)
         FontConfig.load(this)
         ProfileConfig.load(this)
-        me.weishu.kernelsu.modulebanner.ModuleBannerConfig.load()
+        // Activity recreation must not overwrite a slider edit still waiting for its debounce.
+        me.weishu.kernelsu.modulebanner.ModuleBannerConfig.loadOnce()
         me.weishu.kernelsu.modulebanner.ModuleCardConfig.load()
         me.weishu.kernelsu.media.MusicConfig.load(this)
         me.weishu.kernelsu.media.SoundEffectConfig.load(this)

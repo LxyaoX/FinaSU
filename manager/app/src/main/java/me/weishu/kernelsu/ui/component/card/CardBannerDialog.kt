@@ -30,7 +30,9 @@ import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.modulebanner.ApmBannerSlot
 import me.weishu.kernelsu.modulebanner.CustomModuleInfo
+import me.weishu.kernelsu.modulebanner.ModuleBannerCache
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
+import me.weishu.kernelsu.modulebanner.ModuleBannerResolver
 import me.weishu.kernelsu.modulebanner.ModuleBannerSlot
 import me.weishu.kernelsu.modulebanner.ModuleBannerStorage
 import me.weishu.kernelsu.modulebanner.ModuleCustomInfoStorage
@@ -79,7 +81,9 @@ fun CardBannerDialog(
     var author by remember(subject.id) { mutableStateOf(initialAuthor) }
     var description by remember(subject.id) { mutableStateOf(initialDescription) }
     var hasBanner by remember(subject.id) { mutableStateOf(bannerStorage.exists(subject.id)) }
-    val showBannerSection = ModuleBannerConfig.policy.active
+    // The pick/clear rows follow the same switches the banners do: they are hidden whenever custom
+    // banners or module banners are switched off.
+    val showBannerSection = ModuleBannerConfig.policy.localActive
 
     val hasChanges = name != initialName || version != initialVersion ||
         author != initialAuthor || description != initialDescription
@@ -91,6 +95,12 @@ fun CardBannerDialog(
                 val bytes = withContext(Dispatchers.IO) { bannerStorage.write(subject.id, uri) }
                 if (bytes != null) {
                     hasBanner = true
+                    // Show the new image at once instead of waiting for a fresh resolution.
+                    ModuleBannerCache.put(
+                        slot,
+                        subject.id,
+                        ModuleBannerCache.Entry(ModuleBannerCache.Origin.UserPick, bytes = bytes),
+                    )
                     ModuleBannerConfig.requestReload()
                 }
             }
@@ -114,8 +124,12 @@ fun CardBannerDialog(
                         SegmentedListItem(
                             onClick = {
                                 scope.launch {
-                                    withContext(Dispatchers.IO) { bannerStorage.clear(subject.id) }
+                                    withContext(Dispatchers.IO) {
+                                        bannerStorage.clear(subject.id)
+                                        ModuleBannerResolver.clearLegacyBannerFile(slot, subject.id)
+                                    }
                                     hasBanner = false
+                                    ModuleBannerCache.remove(slot, subject.id)
                                     ModuleBannerConfig.requestReload()
                                 }
                             },

@@ -13,6 +13,8 @@ import me.weishu.kernelsu.data.model.Plugin
 import me.weishu.kernelsu.data.repository.PluginCommandException
 import me.weishu.kernelsu.data.repository.PluginRepository
 import me.weishu.kernelsu.data.repository.PluginRepositoryImpl
+import me.weishu.kernelsu.modulebanner.ModuleBannerCache
+import me.weishu.kernelsu.modulebanner.PluginBannerSlot
 import me.weishu.kernelsu.ui.screen.plugin.PluginUiState
 
 /** Exit code reported when a package does not define the requested callback. */
@@ -258,6 +260,8 @@ class PluginViewModel(
         _uiState.update {
             it.copy(isRefreshing = false, hasLoaded = true, plugins = plugins)
         }
+        // Forget banners of plugins that are no longer installed, the way the module list does.
+        ModuleBannerCache.prune(PluginBannerSlot, plugins.map { it.id }.toSet())
     }
 
     private fun fail(error: Throwable) {

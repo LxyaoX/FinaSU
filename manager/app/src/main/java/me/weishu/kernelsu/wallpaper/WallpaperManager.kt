@@ -72,7 +72,7 @@ object WallpaperManager {
         WallpaperConfig.updateEnabled(false)
         WallpaperConfig.updateDerivedSeed(0)
         WallpaperConfig.updateDerivedLuminance(-1f)
-        WallpaperConfig.save(context)
+        WallpaperConfig.save(context, durable = true)
     }
 
     /** Points the config at [target] and (re)derives luminance + seed. Blocking. */
@@ -82,7 +82,7 @@ object WallpaperManager {
         WallpaperConfig.updateDerivedLuminance(computeLuminance(target) ?: -1f)
         WallpaperConfig.updateDerivedSeed(computeSeed(target) ?: 0)
         WallpaperConfig.updateEnabled(true)
-        WallpaperConfig.save(context)
+        WallpaperConfig.save(context, durable = true)
     }
 
     /** Copies the picked image into app storage and points the grid work card at it. */

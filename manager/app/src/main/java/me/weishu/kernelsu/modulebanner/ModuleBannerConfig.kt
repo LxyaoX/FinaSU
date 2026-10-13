@@ -9,12 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.edit
 import me.weishu.kernelsu.ksuApp
 
-/**
- * Banner appearance and behaviour state.
- *
- * Fields are Compose state so an edit in Settings repaints the module list without a ViewModel;
- * persistence lives in a dedicated prefs file, and every mutator saves itself.
- */
+/** Shared Compose state keeps settings and cards on the same banner configuration. */
 object ModuleBannerConfig {
     private const val PREFS_NAME = "module_banner"
     private const val KEY_ENABLED = "banner_enabled"
@@ -31,7 +26,7 @@ object ModuleBannerConfig {
     var enabled by mutableStateOf(true)
         private set
 
-    /** Whether the user-selected per-module image participates. */
+    /** Gates all banner sources while retaining their nested settings. */
     var folkEnabled by mutableStateOf(true)
         private set
 
@@ -56,6 +51,14 @@ object ModuleBannerConfig {
     val policy: BannerPolicy
         get() = BannerPolicy(enabled, folkEnabled, apiModeEnabled, effectiveApiSource)
 
+    private var loaded = false
+
+    fun loadOnce() {
+        if (loaded) return
+        load()
+        loaded = true
+    }
+
     fun load() {
         val p = prefs
         enabled = p.getBoolean(KEY_ENABLED, true)
@@ -67,7 +70,8 @@ object ModuleBannerConfig {
             ?: p.getString(KEY_LEGACY_API_SOURCE, "").orEmpty()
     }
 
-    fun save() = prefs.edit {
+    // Waiting for disk prevents a completed edit from reverting after abrupt process death.
+    private fun save(durable: Boolean = false) = prefs.edit(commit = durable) {
         putBoolean(KEY_ENABLED, enabled)
         putBoolean(KEY_FOLK_ENABLED, folkEnabled)
         putBoolean(KEY_CUSTOM_OPACITY_ENABLED, customOpacityEnabled)
@@ -78,32 +82,37 @@ object ModuleBannerConfig {
 
     fun updateEnabled(value: Boolean) {
         enabled = value
-        save()
+        save(durable = true)
     }
 
     fun updateFolkEnabled(value: Boolean) {
         folkEnabled = value
-        save()
+        save(durable = true)
     }
 
     fun updateCustomOpacityEnabled(value: Boolean) {
         customOpacityEnabled = value
-        save()
+        save(durable = true)
     }
 
-    fun updateCustomOpacity(value: Float) {
-        customOpacity = value
-        save()
+    /** Live edit while a slider gesture is in flight; cards repaint, prefs are untouched. */
+    fun editCustomOpacity(value: Float) {
+        customOpacity = value.coerceIn(0f, 1f)
+    }
+
+    // Debounce and disposal also flush edits when scrolling cancels the slider's finish callback.
+    fun persist() {
+        save(durable = true)
     }
 
     fun updateApiModeEnabled(value: Boolean) {
         apiModeEnabled = value
-        save()
+        save(durable = true)
     }
 
     fun updateApiSource(value: String) {
         apiSource = value
-        save()
+        save(durable = true)
     }
 
     fun requestReload() {

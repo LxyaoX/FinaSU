@@ -47,8 +47,13 @@ object BannerApiClient {
                     } catch (_: IOException) {
                         // Cache persistence is optional; the fetched image is still usable.
                     }
+                    bytes
+                } else {
+                    // A source that cannot answer right now - an endpoint that is slow, rate limited or
+                    // briefly offline is the normal case for the shared banner APIs - must not empty the
+                    // card. The last image stays until a fresh one arrives.
+                    readStale(cache)
                 }
-                bytes
             } catch (_: IOException) {
                 // A broken cache or local API directory must not prevent normal banner fallback.
                 null
@@ -57,13 +62,6 @@ object BannerApiClient {
                 null
             }
         }
-
-    /** Synchronous cached read for the initial value of a banner state holder. */
-    fun loadSync(context: Context, moduleId: String, source: String): ByteArray? {
-        val src = source.trim()
-        if (src.isEmpty()) return null
-        return readFresh(cacheFile(context, src, moduleId))
-    }
 
     fun clearAll(context: Context) {
         cacheDir(context).listFiles()?.forEach { it.delete() }
@@ -80,14 +78,16 @@ object BannerApiClient {
     private fun cacheFile(context: Context, source: String, moduleId: String): File =
         File(cacheDir(context), "${md5Hex(source).take(8)}_${sanitizeModuleKey(moduleId)}")
 
+    /** The cached image while it is inside [CACHE_TTL_MS]; an older image is refreshed, not dropped. */
     private fun readFresh(file: File): ByteArray? {
         if (!file.isFile) return null
-        if (System.currentTimeMillis() - file.lastModified() > CACHE_TTL_MS) {
-            file.delete()
-            return null
-        }
+        if (System.currentTimeMillis() - file.lastModified() > CACHE_TTL_MS) return null
         return file.readBytes().takeIf { it.isNotEmpty() }
     }
+
+    /** The cached image regardless of age, used when the source cannot be reached at all. */
+    private fun readStale(file: File): ByteArray? =
+        if (!file.isFile) null else file.readBytes().takeIf { it.isNotEmpty() }
 
     private fun readLocalDirectory(moduleId: String, source: String): ByteArray? {
         val dir = File(Uri.parse(source).path ?: source)

@@ -16,6 +16,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.modulebanner.BannerApiClient
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
@@ -98,19 +101,23 @@ fun ModuleBannerSettingsSection() {
     val navigator = LocalNavigator.current
     var showSourceDialog by remember { mutableStateOf(false) }
     val policy = ModuleBannerConfig.policy
-    val folkActive = policy.active
-    val apiActive = policy.apiActive
+    // API controls follow the same parent gates used by card rendering.
+    val apiRowsVisible = policy.apiActive
+    val apiConfigured = ModuleBannerConfig.effectiveApiSource.isNotEmpty()
 
     SegmentedColumn(
         modifier = SectionModifier,
         title = stringResource(R.string.settings_module_banner),
     ) {
+        // Every switch here is a full-width row that sits right above the opacity slider, so it must
+        // not be flipped by a drag aimed at the slider: these rows answer to a real tap only.
         item {
             SegmentedSwitchItem(
                 icon = Icons.Filled.Wallpaper,
                 title = stringResource(R.string.module_banner_enabled),
                 summary = stringResource(R.string.module_banner_enabled_summary),
                 checked = ModuleBannerConfig.enabled,
+                requireStationaryTap = true,
                 onCheckedChange = ModuleBannerConfig::updateEnabled,
             )
         }
@@ -120,33 +127,34 @@ fun ModuleBannerSettingsSection() {
                 title = stringResource(R.string.module_banner_folk),
                 summary = stringResource(R.string.module_banner_folk_summary),
                 checked = ModuleBannerConfig.folkEnabled,
+                requireStationaryTap = true,
                 onCheckedChange = ModuleBannerConfig::updateFolkEnabled,
             )
         }
-        item(visible = folkActive) {
+        item(visible = policy.active) {
             SegmentedSwitchItem(
                 icon = Icons.Outlined.Cloud,
                 title = stringResource(R.string.module_banner_api_mode),
                 summary = stringResource(R.string.module_banner_api_mode_summary),
                 checked = ModuleBannerConfig.apiModeEnabled,
+                requireStationaryTap = true,
                 onCheckedChange = ModuleBannerConfig::updateApiModeEnabled,
             )
         }
-        item(visible = apiActive) {
-            val configured = ModuleBannerConfig.effectiveApiSource.isNotEmpty()
+        item(visible = apiRowsVisible) {
             SegmentedListItem(
                 onClick = { showSourceDialog = true },
                 leadingContent = { Icon(Icons.Outlined.Cloud, null) },
                 headlineContent = { Text(stringResource(R.string.module_banner_api_source)) },
                 supportingContent = {
                     Text(
-                        if (configured) ModuleBannerConfig.effectiveApiSource
+                        if (apiConfigured) ModuleBannerConfig.effectiveApiSource
                         else stringResource(R.string.module_banner_api_source_not_configured)
                     )
                 },
             )
         }
-        item(visible = apiActive) {
+        item(visible = apiRowsVisible) {
             SegmentedListItem(
                 onClick = { navigator.push(Route.ApiMarketplace) },
                 leadingContent = { Icon(Icons.Outlined.Cloud, null) },
@@ -154,7 +162,7 @@ fun ModuleBannerSettingsSection() {
                 supportingContent = { Text(stringResource(R.string.module_banner_marketplace_summary)) },
             )
         }
-        item(visible = apiActive) {
+        item(visible = apiRowsVisible) {
             SegmentedListItem(
                 onClick = {
                     BannerApiClient.clearAll(context)
@@ -171,6 +179,7 @@ fun ModuleBannerSettingsSection() {
                 title = stringResource(R.string.module_banner_custom_opacity),
                 summary = stringResource(R.string.module_banner_custom_opacity_summary),
                 checked = ModuleBannerConfig.customOpacityEnabled,
+                requireStationaryTap = true,
                 onCheckedChange = ModuleBannerConfig::updateCustomOpacityEnabled,
             )
         }
@@ -181,8 +190,19 @@ fun ModuleBannerSettingsSection() {
                 value = ModuleBannerConfig.customOpacity,
                 valueRange = 0.1f..1f,
                 valueText = { "${(it * 100).toInt()}%" },
-                onValueChangeFinished = ModuleBannerConfig::updateCustomOpacity,
+                onValueChange = ModuleBannerConfig::editCustomOpacity,
+                onValueChangeFinished = { ModuleBannerConfig.persist() },
             )
+            // The surrounding scroll container can take a gesture over mid-drag, in which case the
+            // slider never reports that it finished. A short debounce still writes the value the
+            // user settled on, and leaving the page flushes whatever is left.
+            LaunchedEffect(ModuleBannerConfig.customOpacity) {
+                delay(400)
+                ModuleBannerConfig.persist()
+            }
+            DisposableEffect(Unit) {
+                onDispose { ModuleBannerConfig.persist() }
+            }
         }
     }
 

@@ -1,9 +1,12 @@
 package me.weishu.kernelsu.ui.component.material
 
+import android.os.SystemClock
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +38,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSliderState
@@ -63,6 +67,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -78,11 +84,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.zIndex
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
 private val SegmentedOuterRadius = 16.dp
@@ -287,6 +294,25 @@ fun SegmentedColumn(
                             Box(
                                 modifier = Modifier
                                     .zIndex(if (entry.visible) (entries.size - index).toFloat() else -index.toFloat())
+                                    .pointerInput(entries.map { it.visible }) {
+                                        awaitEachGesture {
+                                            val down = awaitFirstDown(
+                                                requireUnconsumed = false,
+                                                pass = PointerEventPass.Initial,
+                                            )
+                                            // Moving rows cannot reliably match a new press to its intended control.
+                                            val moving = progresses.indices.any { row ->
+                                                progresses[row].value != if (entries[row].visible) 1f else 0f
+                                            }
+                                            if (!entry.visible || moving) {
+                                                down.consume()
+                                                do {
+                                                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                                                    event.changes.forEach { it.consume() }
+                                                } while (event.changes.any { it.pressed })
+                                            }
+                                        }
+                                    }
                                     .graphicsLayer {
                                         val progress = progresses[index].value.coerceAtLeast(0f)
                                         clip = true
@@ -321,7 +347,10 @@ fun SegmentedColumn(
                 }
                 layout(constraints.maxWidth, y.roundToInt().coerceAtLeast(0)) {
                     placeables.forEachIndexed { index, placeable ->
-                        placeable.placeRelative(0, positions[index])
+                        // Unplaced rows keep their state but cannot intercept touches on visible rows.
+                        if (progresses[index].value > 0f) {
+                            placeable.placeRelative(0, positions[index])
+                        }
                     }
                 }
             }
@@ -533,6 +562,12 @@ fun SegmentedListItem(
     }
 }
 
+// Three touch slops reject long slides while allowing slow horizontal drift during an ordinary tap.
+private const val SlideTravelMultiplier = 3f
+
+// Measured short flicks exceed 0.5 px/ms; apply the speed limit only after leaving touch slop.
+private const val FlickSpeedPxPerMs = 0.5f
+
 @Composable
 fun SegmentedSwitchItem(
     icon: ImageVector? = null,
@@ -541,16 +576,50 @@ fun SegmentedSwitchItem(
     colors: ListItemColors = defaultSegmentedColors(),
     checked: Boolean,
     enabled: Boolean = true,
+    requireStationaryTap: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
+    val dragged = remember { mutableStateOf(false) }
+    // Watching without consuming lets vertical drags scroll even when a row rejects the click.
+    val guard = if (requireStationaryTap) {
+        Modifier.pointerInput(enabled, title) {
+            val slideSlop = viewConfiguration.touchSlop * SlideTravelMultiplier
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                val startedAt = SystemClock.uptimeMillis()
+                var pull = 0f
+                var vertical = 0f
+                while (true) {
+                    val event = awaitPointerEvent(PointerEventPass.Final)
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    val delta = change.position - down.position
+                    pull = maxOf(pull, delta.getDistance())
+                    vertical = maxOf(vertical, abs(delta.y))
+                    val elapsed = (SystemClock.uptimeMillis() - startedAt).coerceAtLeast(1L)
+                    val flick = pull > viewConfiguration.touchSlop && pull / elapsed > FlickSpeedPxPerMs
+                    if (pull > slideSlop || vertical > viewConfiguration.touchSlop || flick) {
+                        dragged.value = true
+                    }
+                    if (!change.pressed) break
+                }
+                // The Final pass follows click handling, so a rejected gesture cannot swallow the next tap.
+                dragged.value = false
+            }
+        }
+    } else {
+        Modifier
+    }
 
     SegmentedListItem(
         onClick = {
-            haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-            onCheckedChange(!checked)
+            if (!(requireStationaryTap && dragged.value)) {
+                haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                onCheckedChange(!checked)
+            }
         },
+        modifier = guard,
         enabled = enabled,
         interactionSource = interactionSource,
         colors = colors,
@@ -568,6 +637,14 @@ fun SegmentedSwitchItem(
     )
 }
 
+/**
+ * A settings row with a slider.
+ *
+ * Pass [onValueChange] when the caller owns the value (FolkPatch's shape): the thumb, the label and
+ * the stored value then come from one place and can never disagree, so a gesture that never reports
+ * its end cannot leave a stale value behind. Callers that only want a commit-on-release value leave
+ * it unset and keep the local slider state.
+ */
 @Composable
 fun SegmentedSliderItem(
     icon: ImageVector? = null,
@@ -578,8 +655,10 @@ fun SegmentedSliderItem(
     valueText: (Float) -> String,
     colors: ListItemColors = defaultSegmentedColors(),
     enabled: Boolean = true,
+    onValueChange: ((Float) -> Unit)? = null,
     onValueChangeFinished: (Float) -> Unit,
 ) {
+    val hoisted = onValueChange != null
     val sliderState = rememberSliderState(value = value, trackRange = valueRange)
 
     SegmentedListItem(
@@ -587,16 +666,29 @@ fun SegmentedSliderItem(
         colors = colors,
         headlineContent = { Text(title) },
         leadingContent = icon?.let { { Icon(it, title) } },
-        trailingContent = { Text(valueText(sliderState.value)) },
+        trailingContent = { Text(valueText(if (hoisted) value else sliderState.value)) },
         supportingContent = {
             Column {
                 summary?.let { Text(it) }
-                Slider(
-                    state = sliderState,
-                    onValueChangeFinished = { onValueChangeFinished(sliderState.value) },
-                    enabled = enabled,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (hoisted) {
+                    // The caller owns both the thumb and label; no saved slider value may override it.
+                    val state = remember(valueRange) { SliderState(value = value, trackRange = valueRange) }
+                    if (state.value != value) state.value = value
+                    Slider(
+                        state = state,
+                        onValueChange = onValueChange,
+                        onValueChangeFinished = { onValueChangeFinished(state.value) },
+                        enabled = enabled,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    Slider(
+                        state = sliderState,
+                        onValueChangeFinished = { onValueChangeFinished(sliderState.value) },
+                        enabled = enabled,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         },
     )

@@ -414,8 +414,15 @@ object WallpaperConfig {
         SurfaceStore.load(context)
     }
 
-    fun save(context: Context = ksuApp) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit {
+    /**
+     * Writes the current values out.
+     *
+     * [durable] waits for the write instead of queueing it, which is what the on/off switch needs: a
+     * queued write is only flushed on a graceful stop, so a switch flipped right before the app goes
+     * away can be lost and the wallpaper comes back on the next launch. Slider traffic stays queued.
+     */
+    fun save(context: Context = ksuApp, durable: Boolean = false) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit(commit = durable) {
             putBoolean(KEY_ENABLED, enabled)
             putString(KEY_URI, uri)
             putFloat(KEY_OPACITY, opacity)

@@ -340,7 +340,7 @@ fun WallpaperScreen() {
         onBack = dropUnlessResumed { navigator.pop() },
         onToggleEnabled = {
             WallpaperConfig.updateEnabled(it)
-            WallpaperConfig.save(context)
+            WallpaperConfig.save(context, durable = true)
         },
         onPickImage = { mainPickToken += 1 },
         onClear = {

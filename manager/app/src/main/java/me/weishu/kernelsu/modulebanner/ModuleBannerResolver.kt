@@ -56,6 +56,16 @@ object ModuleBannerResolver {
     fun isRemoteSource(value: String): Boolean =
         value.startsWith("http://", ignoreCase = true) || value.startsWith("https://", ignoreCase = true)
 
+    /**
+     * Deletes the extensionless `banner` file an older version of the app wrote into the module
+     * directory (FolkPatch drops the same legacy file when a banner is cleared).
+     */
+    fun clearLegacyBannerFile(slot: ModuleBannerSlot, moduleId: String): Boolean {
+        val dir = resolveModuleDir(slot, moduleId) ?: return false
+        val path = "$dir/${BannerFileNames.first()}"
+        return SuFile(path).let { !it.exists() || it.delete() }
+    }
+
     private fun readBannerFile(path: String): ByteArray? {
         val file = SuFile(path)
         if (!file.isFile) return null
