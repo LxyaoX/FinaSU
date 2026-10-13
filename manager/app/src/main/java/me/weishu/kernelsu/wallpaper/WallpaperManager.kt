@@ -44,9 +44,11 @@ object WallpaperManager {
     suspend fun save(context: Context, source: Uri): Boolean = withContext(Dispatchers.IO) {
         runCatching {
             val ext = resolveExtension(context, source)
-            clearOldFiles(context)
-            val target = File(context.filesDir, "$FILENAME_BASE$ext")
-            if (!copyToFile(context, source, target)) return@runCatching false
+            // Stage then rename, so a failed copy never deletes the wallpaper already in place.
+            val target = replaceSurfaceImage(context.filesDir, FILENAME_BASE, ext) { staged ->
+                copyToFile(context, source, staged)
+            }
+            clearOldFiles(context, except = target)
             applyFile(context, target)
             true
         }.getOrDefault(false)
@@ -175,9 +177,11 @@ object WallpaperManager {
             val base = pageFilenameBase(page) ?: return@withContext false
             runCatching {
                 val ext = resolveExtension(context, source)
-                clearPageFiles(context, base)
-                val target = File(context.filesDir, "$base$ext")
-                if (!copyToFile(context, source, target)) return@runCatching false
+                // Stage then rename, so a failed copy never deletes the page image already in place.
+                val target = replaceSurfaceImage(context.filesDir, base, ext) { staged ->
+                    copyToFile(context, source, staged)
+                }
+                clearPageFiles(context, base, except = target)
                 val stamped = "${Uri.fromFile(target)}?t=${System.currentTimeMillis()}"
                 updatePageUri(page, stamped)
                 updatePageLuminance(page, computeLuminance(target) ?: -1f)
@@ -239,11 +243,11 @@ object WallpaperManager {
         }
     }
 
-    /** Deletes every stored file variant for a page background. */
-    private fun clearPageFiles(context: Context, base: String) {
+    /** Deletes every stored file variant for a page background, except [except]. */
+    private fun clearPageFiles(context: Context, base: String, except: File? = null) {
         KNOWN_EXTENSIONS.forEach { ext ->
             val file = File(context.filesDir, "$base$ext")
-            if (file.exists()) file.delete()
+            if (file != except && file.exists()) file.delete()
         }
     }
 
@@ -428,10 +432,11 @@ object WallpaperManager {
         false
     }
 
-    private fun clearOldFiles(context: Context) {
+    /** Deletes every stored wallpaper variant, except [except]. */
+    private fun clearOldFiles(context: Context, except: File? = null) {
         KNOWN_EXTENSIONS.forEach { ext ->
             val file = File(context.filesDir, "$FILENAME_BASE$ext")
-            if (file.exists()) file.delete()
+            if (file != except && file.exists()) file.delete()
         }
     }
 

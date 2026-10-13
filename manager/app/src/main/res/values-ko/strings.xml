@@ -586,7 +586,6 @@
     <string name="wallpaper_crop_message">이미지를 화면에 맞게 자를까요, 아니면 그대로 사용할까요?</string>
     <string name="wallpaper_crop_confirm">자르기</string>
     <string name="wallpaper_crop_direct">그대로 사용</string>
-    <string name="wallpaper_crop_unsupported">이 기기에서는 자르기가 지원되지 않습니다. 원본 이미지를 사용합니다</string>
     <string name="wallpaper_saved">배경 화면이 업데이트되었습니다</string>
     <string name="wallpaper_removed">배경 화면이 제거되었습니다</string>
     <string name="wallpaper_save_failed">이미지를 불러오지 못했습니다</string>

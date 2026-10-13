@@ -586,7 +586,6 @@
     <string name="wallpaper_crop_message">將圖片裁切以符合螢幕，或直接使用？</string>
     <string name="wallpaper_crop_confirm">裁切</string>
     <string name="wallpaper_crop_direct">直接使用</string>
-    <string name="wallpaper_crop_unsupported">此裝置不支援裁切，將直接使用原圖</string>
     <string name="wallpaper_saved">桌布已更新</string>
     <string name="wallpaper_removed">桌布已移除</string>
     <string name="wallpaper_save_failed">圖片載入失敗</string>

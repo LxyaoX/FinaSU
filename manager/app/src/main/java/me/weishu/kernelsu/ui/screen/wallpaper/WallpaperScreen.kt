@@ -48,15 +48,16 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -65,7 +66,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.ui.component.CropRequest
+import me.weishu.kernelsu.ui.component.ImageCropPickerHost
 import me.weishu.kernelsu.ui.component.SurfaceImagePickerHost
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface
@@ -75,7 +76,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
-import me.weishu.kernelsu.ui.component.rememberSystemCropLauncher
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.wallpaper.FolkThemeIO
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
@@ -155,12 +155,11 @@ fun WallpaperScreen() {
     val snackbarHost = remember { SnackbarHostState() }
 
     var isSaving by remember { mutableStateOf(false) }
-    var pendingCrop by remember { mutableStateOf<Uri?>(null) }
-    var showCropDialog by remember { mutableStateOf(false) }
     var pendingSurface by remember { mutableStateOf<SurfaceId?>(null) }
-    var pendingPage by remember { mutableIntStateOf(NO_PAGE) }
-    var pendingPageCrop by remember { mutableStateOf<Uri?>(null) }
-    var showPageCropDialog by remember { mutableStateOf(false) }
+    // Page index and crop tokens survive a config change so an in-flight pick is not dropped.
+    var pendingPage by rememberSaveable { mutableStateOf(NO_PAGE) }
+    var mainPickToken by rememberSaveable { mutableStateOf(0) }
+    var pagePickToken by rememberSaveable { mutableStateOf(0) }
     var showResetDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
 
@@ -216,27 +215,41 @@ fun WallpaperScreen() {
         }
     }
 
-    val cropLauncher = rememberSystemCropLauncher(cacheName = "wallpaper_crop_cache") { cropped ->
-        persist(cropped)
-    }
-
-    val pageCropLauncher = rememberSystemCropLauncher(cacheName = "wallpaper_page_crop_cache") { cropped ->
-        persistPage(pendingPage, cropped)
-    }
-
-    val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
-            pendingCrop = uri
-            showCropDialog = true
+    // Wallpapers fill the app window with ContentScale.Crop, so the crop frame is locked to the
+    // window aspect: whatever the user frames is exactly what the wallpaper shows.
+    val configuration = LocalConfiguration.current
+    val windowAspect = remember(configuration.screenWidthDp, configuration.screenHeightDp) {
+        if (configuration.screenWidthDp > 0 && configuration.screenHeightDp > 0) {
+            configuration.screenWidthDp.toFloat() / configuration.screenHeightDp.toFloat()
+        } else {
+            1f
         }
     }
 
-    val pickPageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
-            pendingPageCrop = uri
-            showPageCropDialog = true
-        }
-    }
+    ImageCropPickerHost(
+        trigger = mainPickToken.takeIf { it > 0 },
+        aspect = windowAspect,
+        onDismissRequest = { mainPickToken = 0 },
+        onPicked = { cropped ->
+            mainPickToken = 0
+            persist(cropped)
+        },
+    )
+
+    ImageCropPickerHost(
+        trigger = pagePickToken.takeIf { it > 0 },
+        aspect = windowAspect,
+        onDismissRequest = {
+            pagePickToken = 0
+            pendingPage = NO_PAGE
+        },
+        onPicked = { cropped ->
+            val page = pendingPage
+            pagePickToken = 0
+            pendingPage = NO_PAGE
+            if (page != NO_PAGE) persistPage(page, cropped)
+        },
+    )
 
     val requestImport = rememberThemeImportRequest { result ->
             scope.launch {
@@ -273,46 +286,6 @@ fun WallpaperScreen() {
         )
     }
 
-    if (showCropDialog) {
-        val target = pendingCrop
-        AlertDialog(
-            onDismissRequest = {
-                showCropDialog = false
-                pendingCrop = null
-            },
-            title = { Text(stringResource(R.string.wallpaper_crop_title)) },
-            text = { Text(stringResource(R.string.wallpaper_crop_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showCropDialog = false
-                    pendingCrop = null
-                    if (target != null) {
-                        val launched = runCatching { cropLauncher.launch(CropRequest(target)) }.isSuccess
-                        if (!launched) {
-                            scope.launch {
-                                snackbarHost.showSnackbar(
-                                    resources.getString(R.string.wallpaper_crop_unsupported)
-                                )
-                            }
-                            persist(target)
-                        }
-                    }
-                }) {
-                    Text(stringResource(R.string.wallpaper_crop_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showCropDialog = false
-                    pendingCrop = null
-                    if (target != null) persist(target)
-                }) {
-                    Text(stringResource(R.string.wallpaper_crop_direct))
-                }
-            },
-        )
-    }
-
     SurfaceImagePickerHost(
         request = pendingSurface,
         onDismissRequest = { pendingSurface = null },
@@ -321,47 +294,6 @@ fun WallpaperScreen() {
             persistSurface(id, uri)
         },
     )
-
-    if (showPageCropDialog) {
-        val target = pendingPageCrop
-        AlertDialog(
-            onDismissRequest = {
-                showPageCropDialog = false
-                pendingPageCrop = null
-                pendingPage = NO_PAGE
-            },
-            title = { Text(stringResource(R.string.wallpaper_crop_title)) },
-            text = { Text(stringResource(R.string.wallpaper_crop_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showPageCropDialog = false
-                    pendingPageCrop = null
-                    if (target != null) {
-                        val launched = runCatching { pageCropLauncher.launch(CropRequest(target)) }.isSuccess
-                        if (!launched) {
-                            scope.launch {
-                                snackbarHost.showSnackbar(
-                                    resources.getString(R.string.wallpaper_crop_unsupported)
-                                )
-                            }
-                            persistPage(pendingPage, target)
-                        }
-                    }
-                }) {
-                    Text(stringResource(R.string.wallpaper_crop_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showPageCropDialog = false
-                    pendingPageCrop = null
-                    if (target != null) persistPage(pendingPage, target)
-                }) {
-                    Text(stringResource(R.string.wallpaper_crop_direct))
-                }
-            },
-        )
-    }
 
     if (showResetDialog) {
         AlertDialog(
@@ -410,7 +342,7 @@ fun WallpaperScreen() {
             WallpaperConfig.updateEnabled(it)
             WallpaperConfig.save(context)
         },
-        onPickImage = { pickImageLauncher.launch("image/*") },
+        onPickImage = { mainPickToken += 1 },
         onClear = {
             WallpaperManager.clear(context)
             scope.launch { snackbarHost.showSnackbar(resources.getString(R.string.wallpaper_removed)) }
@@ -452,23 +384,23 @@ fun WallpaperScreen() {
         },
         onPickHomeBackground = {
             pendingPage = WallpaperConfig.PAGE_HOME
-            pickPageLauncher.launch("image/*")
+            pagePickToken += 1
         },
         onPickPluginBackground = {
             pendingPage = WallpaperConfig.PAGE_PLUGIN
-            pickPageLauncher.launch("image/*")
+            pagePickToken += 1
         },
         onPickSuperuserBackground = {
             pendingPage = WallpaperConfig.PAGE_SUPERUSER
-            pickPageLauncher.launch("image/*")
+            pagePickToken += 1
         },
         onPickModuleBackground = {
             pendingPage = WallpaperConfig.PAGE_MODULE
-            pickPageLauncher.launch("image/*")
+            pagePickToken += 1
         },
         onPickSettingsBackground = {
             pendingPage = WallpaperConfig.PAGE_SETTINGS
-            pickPageLauncher.launch("image/*")
+            pagePickToken += 1
         },
         onSetSurfaceToggle = { id, field, value ->
             SurfaceStore.update(id) { it.withToggle(field, value) }

@@ -586,7 +586,6 @@
     <string name="wallpaper_crop_message">Pangkas gambar agar pas dengan layar, atau gunakan apa adanya?</string>
     <string name="wallpaper_crop_confirm">Pangkas</string>
     <string name="wallpaper_crop_direct">Gunakan apa adanya</string>
-    <string name="wallpaper_crop_unsupported">Pemangkasan tidak didukung di perangkat ini; menggunakan gambar asli</string>
     <string name="wallpaper_saved">Wallpaper diperbarui</string>
     <string name="wallpaper_removed">Wallpaper dihapus</string>
     <string name="wallpaper_save_failed">Gagal memuat gambar</string>
