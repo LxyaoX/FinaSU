@@ -37,6 +37,9 @@ pub const ASSET_SUFFIX: &str = "_nomount.ko";
 /// Whiteout marker: a character device with `rdev == 0`.
 pub const WHITEOUT_FLAG: u32 = 1 << 2;
 
+/// Intermediate directory the kernel created to host a deeper rule.
+pub const VIRTUAL_DIR_FLAG: u32 = 1 << 1;
+
 /// Driver state as reported by [`probe`], never inferred from a load attempt.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DriverState {
@@ -96,6 +99,8 @@ pub struct Rule {
     pub virtual_path: String,
     pub real_path: Option<String>,
     pub whiteout: bool,
+    /// True for directories the kernel created to host deeper rules.
+    pub virtual_dir: bool,
     pub uid: u32,
 }
 
@@ -106,6 +111,7 @@ impl Rule {
             virtual_path: virtual_path.into(),
             real_path: None,
             whiteout: true,
+            virtual_dir: false,
             uid: 0,
         }
     }
@@ -116,6 +122,7 @@ impl Rule {
             virtual_path: virtual_path.into(),
             real_path: Some(real_path.into()),
             whiteout: false,
+            virtual_dir: false,
             uid: 0,
         }
     }
@@ -487,6 +494,9 @@ impl<T: Transport> Driver<T> {
         let stale: Vec<String> = self
             .list_rules()?
             .into_iter()
+            // Directories the kernel created to host deeper rules are not ours
+            // to drop: they disappear on their own when their children go.
+            .filter(|rule| !rule.virtual_dir)
             .map(|rule| rule.virtual_path)
             .filter(|path| !wanted.contains(path.as_str()))
             .collect();
@@ -620,6 +630,7 @@ pub fn parse_list_records(data: &[u8]) -> Result<Vec<Rule>> {
             virtual_path,
             real_path,
             whiteout: flags & WHITEOUT_FLAG != 0,
+            virtual_dir: flags & VIRTUAL_DIR_FLAG != 0,
             uid,
         });
         cursor = end;
@@ -1081,6 +1092,7 @@ pub fn print_rules(json: bool) -> Result<()> {
                     "virtual": rule.virtual_path,
                     "real": rule.real_path,
                     "whiteout": rule.whiteout,
+                    "virtual_dir": rule.virtual_dir,
                     "uid": rule.uid,
                 }))
                 .collect::<Vec<_>>(),
@@ -1090,6 +1102,8 @@ pub fn print_rules(json: bool) -> Result<()> {
         for rule in &rules {
             if rule.whiteout {
                 writeln!(out, "{} (whiteout)", rule.virtual_path)
+            } else if rule.virtual_dir {
+                writeln!(out, "{} (virtual dir)", rule.virtual_path)
             } else {
                 writeln!(
                     out,

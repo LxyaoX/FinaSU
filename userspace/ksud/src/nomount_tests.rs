@@ -75,6 +75,37 @@ fn decode_command(raw: u32) -> Command {
     }
 }
 
+/// Encode one rule the way the kernel would report it.
+///
+/// The client encoder only produces redirects and whiteouts; the kernel also
+/// reports the intermediate directories it created, which carry no target.
+fn kernel_record(rule: &Rule) -> Vec<u8> {
+    let flags = if rule.whiteout {
+        WHITEOUT_FLAG
+    } else if rule.virtual_dir {
+        VIRTUAL_DIR_FLAG
+    } else {
+        0
+    };
+    let real = rule.real_path.as_deref().unwrap_or_default();
+    let mut out = Vec::new();
+    out.extend_from_slice(&flags.to_le_bytes());
+    out.extend_from_slice(&rule.uid.to_le_bytes());
+    out.extend_from_slice(
+        &u16::try_from(rule.virtual_path.len())
+            .expect("path fits")
+            .to_le_bytes(),
+    );
+    out.extend_from_slice(
+        &u16::try_from(real.len())
+            .expect("target fits")
+            .to_le_bytes(),
+    );
+    out.extend_from_slice(rule.virtual_path.as_bytes());
+    out.extend_from_slice(real.as_bytes());
+    out
+}
+
 impl Transport for Rc<FakeKernel> {
     fn send(&self, payload: &mut Payload) -> Result<()> {
         self.dispatch(payload)
@@ -113,8 +144,7 @@ impl FakeKernel {
                 let start = usize::try_from(payload.arg1)?;
                 let mut cursor = 0_usize;
                 for rule in rules.iter().skip(start) {
-                    let encoded = encode_batches(std::slice::from_ref(rule))?;
-                    let record = encoded.first().cloned().unwrap_or_default();
+                    let record = kernel_record(rule);
                     if cursor + record.len() > BUFFER_SIZE {
                         break;
                     }
@@ -293,6 +323,7 @@ fn redirect_without_a_target_is_rejected() {
         virtual_path: "/system/etc/hosts".to_string(),
         real_path: None,
         whiteout: false,
+        virtual_dir: false,
         uid: 0,
     };
     assert!(encode_batches(std::slice::from_ref(&broken)).is_err());
@@ -436,6 +467,44 @@ fn a_later_rule_for_the_same_path_wins() {
     assert_eq!(
         rules[0].real_path.as_deref(),
         Some("/data/adb/modules/second/system/etc/hosts")
+    );
+}
+
+#[test]
+fn reconcile_keeps_kernel_created_virtual_directories() {
+    let (driver, kernel) = driver(Mode::Ready);
+    // The fake kernel reports one of our rules and one directory it made up.
+    kernel.state.borrow_mut().rules.push(Rule {
+        virtual_path: "/system/etc/hosts".to_string(),
+        real_path: Some("/data/adb/modules/m/system/etc/hosts".to_string()),
+        whiteout: false,
+        virtual_dir: false,
+        uid: 0,
+    });
+    kernel.state.borrow_mut().rules.push(Rule {
+        virtual_path: "/system/etc/newdir".to_string(),
+        real_path: None,
+        whiteout: false,
+        virtual_dir: true,
+        uid: 0,
+    });
+
+    let (applied, removed) = driver
+        .reconcile_rules(&[Rule::redirect(
+            "/system/etc/hosts",
+            "/data/adb/modules/m/system/etc/hosts",
+        )])
+        .unwrap();
+    assert_eq!(
+        (applied, removed),
+        (1, 0),
+        "the virtual directory must survive"
+    );
+    assert!(
+        kernel
+            .written_rules()
+            .iter()
+            .any(|rule| rule.virtual_dir && rule.virtual_path == "/system/etc/newdir")
     );
 }
 
