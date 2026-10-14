@@ -537,6 +537,12 @@
     <string name="nomount_selected_count">已选择 %1$d 个应用</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">保存</string>
+    <string name="nomount_follow_profiles">跟随应用 Profile</string>
+    <string name="nomount_follow_profiles_summary">在列表范围内选中那些 Profile 里"卸载模块"的应用。默认非 root Profile 对所有应用生效，所以通常会选中其中绝大多数。</string>
+    <string name="nomount_clear_everything">清空全部</string>
+    <string name="nomount_clear_everything_summary">清除全部规则与例外，直到下次重启。</string>
+    <string name="nomount_deferred">注入由其它模块接管</string>
+    <string name="nomount_deferred_summary">已安装的模块 %1$s 驱动同一个内核驱动；内置后端已让位，避免两边同时写规则。</string>
     <string name="sulog_log_files">日志文件</string>
     <string name="sulog_failed_to_load">加载 SU 日志失败</string>
     <string name="sulog_disabled_title">SU 日志未启用</string>

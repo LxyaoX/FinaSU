@@ -376,6 +376,15 @@ class SettingsRepositoryImpl : SettingsRepository {
         }
     }
 
+    override suspend fun clearNomountEverything(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            // Rules first, then the exclusions: if a step fails, the failure is
+            // reported instead of leaving a half-cleared state looking done.
+            check(execKsud("nomount clear", true)) { "ksud nomount clear failed" }
+            check(execKsud("nomount uid set", true)) { "ksud nomount uid set failed" }
+        }
+    }
+
     override suspend fun setNomountUids(uids: List<Int>): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             // UIDs are integers from the app list; nothing user-typed reaches the shell.

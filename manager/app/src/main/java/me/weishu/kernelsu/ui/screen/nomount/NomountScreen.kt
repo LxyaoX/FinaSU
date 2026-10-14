@@ -109,6 +109,24 @@ private fun DriverSection(state: NomountUiState, viewModel: NomountViewModel) {
                 trailingContent = { Icon(Icons.Filled.Refresh, null) },
             )
         }
+        item(visible = state.status?.deferredTo != null) {
+            // Another module drives the same driver: say so instead of showing a
+            // healthy backend that is not the one injecting.
+            SegmentedListItem(
+                headlineContent = { Text(stringResource(R.string.nomount_deferred)) },
+                supportingContent = {
+                    Text(
+                        stringResource(
+                            R.string.nomount_deferred_summary,
+                            state.status?.deferredTo.orEmpty(),
+                        )
+                    )
+                },
+                leadingContent = { Icon(Icons.Filled.Layers, null) },
+                enabled = false,
+                onClick = {},
+            )
+        }
     }
 }
 
@@ -211,6 +229,18 @@ private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel
                 leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
                 enabled = ready && status?.uids?.isNotEmpty() == true,
                 onClick = viewModel::clearExclusions,
+            )
+        }
+        item {
+            SegmentedListItem(
+                headlineContent = { Text(stringResource(R.string.nomount_clear_everything)) },
+                supportingContent = {
+                    Text(stringResource(R.string.nomount_clear_everything_summary))
+                },
+                leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
+                enabled = ready &&
+                    ((status?.rulesApplied ?: 0) > 0 || status?.uids?.isNotEmpty() == true),
+                onClick = viewModel::clearEverything,
             )
         }
         item {

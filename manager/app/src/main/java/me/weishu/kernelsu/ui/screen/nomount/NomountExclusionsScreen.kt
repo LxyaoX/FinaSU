@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -61,6 +63,7 @@ fun NomountExclusionsScreen() {
         mutableStateOf(state.status?.uids?.toSet() ?: emptySet())
     }
     var query by rememberSaveable { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     val visible = state.apps.filter { app ->
         (state.showSystemApps || !app.isSystem) &&
@@ -110,6 +113,23 @@ fun NomountExclusionsScreen() {
                         title = stringResource(R.string.nomount_show_system_apps),
                         checked = state.showSystemApps,
                         onCheckedChange = viewModel::setShowSystemApps,
+                    )
+                }
+                item {
+                    SegmentedListItem(
+                        headlineContent = {
+                            Text(stringResource(R.string.nomount_follow_profiles))
+                        },
+                        supportingContent = {
+                            Text(stringResource(R.string.nomount_follow_profiles_summary))
+                        },
+                        enabled = !state.appsLoading && !state.isWriting,
+                        onClick = {
+                            scope.launch {
+                                selected = selected +
+                                    viewModel.profileExcludedUids(state.showSystemApps)
+                            }
+                        },
                     )
                 }
             }

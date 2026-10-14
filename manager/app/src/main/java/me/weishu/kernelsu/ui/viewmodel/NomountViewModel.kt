@@ -72,6 +72,9 @@ class NomountViewModel(
 
     fun clearRules() = runAction { repo.clearNomountRules() }
 
+    /** Drop every rule and every exclusion. */
+    fun clearEverything() = runAction { repo.clearNomountEverything() }
+
     fun setIsolated(enabled: Boolean) = runAction { repo.setNomountIsolated(enabled) }
 
     /** Add a module's rules without waiting for a reboot. */
@@ -106,6 +109,24 @@ class NomountViewModel(
 
     /** Drop every exclusion. */
     fun clearExclusions() = runAction { repo.setNomountUids(emptyList()) }
+
+    /**
+     * UIDs whose app profile hides modules from them.
+     *
+     * The kernel answers that per UID and the default profile hides modules from
+     * every non-root app, so this usually selects almost everything; the picker
+     * shows the count before the user saves.
+     */
+    suspend fun profileExcludedUids(includeSystem: Boolean): List<Int> =
+        withContext(kotlinx.coroutines.Dispatchers.IO) {
+        _uiState.value.apps
+            .filter { app ->
+                (includeSystem || !app.isSystem) &&
+                    runCatching { me.weishu.kernelsu.Natives.uidShouldUmount(app.uid) }
+                        .getOrDefault(false)
+            }
+            .map { app -> app.uid }
+    }
 
     private fun runAction(block: suspend () -> Result<Unit>) {
         if (_uiState.value.isWriting) return

@@ -89,6 +89,7 @@ interface SettingsRepository {
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>
     suspend fun injectNomountRules(): Result<Unit>
     suspend fun clearNomountRules(): Result<Unit>
+    suspend fun clearNomountEverything(): Result<Unit>
     suspend fun setNomountUids(uids: List<Int>): Result<Unit>
     suspend fun hotLoadNomountModule(id: String): Result<Unit>
     suspend fun hotUnloadNomountModule(id: String): Result<Unit>
