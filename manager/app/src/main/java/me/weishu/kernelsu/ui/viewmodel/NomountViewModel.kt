@@ -8,9 +8,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
+import me.weishu.kernelsu.ui.util.execKsudResult
+
+/** One row of the exclusion picker. */
+@Immutable
+data class ExclusionApp(
+    val uid: Int,
+    val label: String,
+    val packageName: String,
+    val isSystem: Boolean,
+    val excluded: Boolean,
+)
 
 /**
  * NoMount detail screen state.
@@ -25,6 +37,9 @@ data class NomountUiState(
     val status: NomountStatus? = null,
     val readError: Boolean = false,
     val actionError: Boolean = false,
+    val apps: List<ExclusionApp> = emptyList(),
+    val appsLoading: Boolean = true,
+    val showSystemApps: Boolean = false,
 )
 
 class NomountViewModel(
@@ -59,6 +74,39 @@ class NomountViewModel(
 
     fun setIsolated(enabled: Boolean) = runAction { repo.setNomountIsolated(enabled) }
 
+    /** Add a module's rules without waiting for a reboot. */
+    fun hotLoad(id: String) = runAction { repo.hotLoadNomountModule(id) }
+
+    /** Drop a module's rules without waiting for a reboot. */
+    fun hotUnload(id: String) = runAction { repo.hotUnloadNomountModule(id) }
+
+    /** Keep a module running but stop injecting its files (and re-apply at once). */
+    fun setSkip(id: String, skip: Boolean) =
+        runAction {
+            repo.setModuleSkip(id, skip).also { result ->
+                if (result.isSuccess) repo.injectNomountRules()
+            }
+        }
+
+    fun setShowSystemApps(show: Boolean) {
+        _uiState.update { it.copy(showSystemApps = show) }
+    }
+
+    /** Load the installed apps so the exclusion picker can offer them. */
+    fun loadApps() {
+        if (_uiState.value.apps.isNotEmpty() || !_uiState.value.appsLoading) return
+        viewModelScope.launch {
+            val apps = NomountAppList.load()
+            _uiState.update { it.copy(apps = apps, appsLoading = false) }
+        }
+    }
+
+    /** Persist the exclusions chosen in the picker. */
+    fun saveExclusions(uids: List<Int>) = runAction { repo.setNomountUids(uids) }
+
+    /** Drop every exclusion. */
+    fun clearExclusions() = runAction { repo.setNomountUids(emptyList()) }
+
     private fun runAction(block: suspend () -> Result<Unit>) {
         if (_uiState.value.isWriting) return
         _uiState.update { it.copy(isWriting = true, actionError = false) }
@@ -76,5 +124,36 @@ class NomountViewModel(
                 )
             }
         }
+    }
+}
+
+/**
+ * Installed apps for the picker, loaded through the manager's own app list.
+ *
+ * The exclusion list is a list of UIDs, so a shared UID (for example a shared
+ * system user id) selects every app that reports it.
+ */
+private object NomountAppList {
+    suspend fun load(): List<ExclusionApp> = withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val result = execKsudResult("nomount status --json")
+        val excluded = runCatching {
+            org.json.JSONObject(result.out.firstOrNull { it.isNotBlank() }.orEmpty())
+                .optJSONArray("uids")
+                ?.let { array -> List(array.length()) { index -> array.optInt(index, 0) } }
+                .orEmpty()
+        }.getOrDefault(emptyList())
+        SuperUserViewModel().let { vm ->
+            if (SuperUserViewModel.apps.isEmpty()) vm.fetchAppList()
+        }
+        SuperUserViewModel.apps.map { app ->
+            ExclusionApp(
+                uid = app.uid,
+                label = app.label,
+                packageName = app.packageName,
+                isSystem = ((app.packageInfo.applicationInfo?.flags ?: 0)
+                    and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0,
+                excluded = excluded.contains(app.uid),
+            )
+        }.distinctBy { it.uid }
     }
 }

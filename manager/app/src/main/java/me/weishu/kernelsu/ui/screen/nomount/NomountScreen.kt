@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PlayArrow
@@ -39,6 +40,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
+import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.NomountUiState
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
 
@@ -89,6 +91,7 @@ fun NomountScreen() {
         ) {
             DriverSection(state, viewModel)
             InjectionSection(state, viewModel)
+            ModulesSection(state, viewModel)
             VisibilitySection(state, viewModel)
         }
     }
@@ -177,17 +180,37 @@ private fun rulesSummary(status: NomountStatus?): String {
 private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel) {
     val status = state.status
     val ready = status?.apiOk == true && !state.isWriting
+    val navigator = LocalNavigator.current
     SegmentedColumn(title = stringResource(R.string.nomount_section_visibility)) {
         item {
             SegmentedListItem(
                 headlineContent = { Text(stringResource(R.string.nomount_uid_exclusions)) },
                 supportingContent = {
-                    Text(stringResource(R.string.nomount_uid_exclusions_value, status?.uidCount ?: 0))
+                    Text(
+                        stringResource(
+                            R.string.nomount_uid_exclusions_value,
+                            status?.uidsActive?.size ?: (status?.uidCount ?: 0),
+                        )
+                    )
                 },
                 overlineContent = { Text(stringResource(R.string.nomount_uid_source_hint)) },
                 leadingContent = { Icon(Icons.Filled.VisibilityOff, null) },
-                enabled = false,
-                onClick = {},
+                enabled = ready,
+                onClick = { navigator.push(Route.NomountExclusions) },
+                trailingContent = {
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                },
+            )
+        }
+        item {
+            SegmentedListItem(
+                headlineContent = { Text(stringResource(R.string.nomount_clear_exclusions)) },
+                supportingContent = {
+                    Text(stringResource(R.string.nomount_clear_exclusions_summary))
+                },
+                leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
+                enabled = ready && status?.uids?.isNotEmpty() == true,
+                onClick = viewModel::clearExclusions,
             )
         }
         item {
@@ -199,6 +222,52 @@ private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel
                 enabled = ready,
                 onCheckedChange = viewModel::setIsolated,
             )
+        }
+    }
+}
+
+/**
+ * Per-module control: how many rules each module asks for, and the hot
+ * load/unload the metamodule's WebUI offered without a reboot.
+ */
+@Composable
+private fun ModulesSection(state: NomountUiState, viewModel: NomountViewModel) {
+    val status = state.status
+    val modules = status?.modules.orEmpty()
+    if (modules.isEmpty()) return
+    val ready = status?.apiOk == true && !state.isWriting
+    SegmentedColumn(title = stringResource(R.string.nomount_section_modules)) {
+        item {
+            SegmentedListItem(
+                headlineContent = {
+                    Text(stringResource(R.string.nomount_modules_count, modules.size))
+                },
+                supportingContent = { Text(stringResource(R.string.nomount_modules_hint)) },
+                leadingContent = { Icon(Icons.Filled.Layers, null) },
+                enabled = false,
+                onClick = {},
+            )
+        }
+        modules.forEach { module ->
+            item(key = module.id) {
+                SegmentedListItem(
+                    headlineContent = { Text(module.id) },
+                    supportingContent = {
+                        Text(stringResource(R.string.nomount_module_rules, module.rules))
+                    },
+                    leadingContent = { Icon(Icons.Filled.PlayArrow, null) },
+                    enabled = ready,
+                    onClick = { viewModel.hotLoad(module.id) },
+                    trailingContent = {
+                        TextButton(
+                            enabled = ready,
+                            onClick = { viewModel.hotUnload(module.id) },
+                        ) {
+                            Text(stringResource(R.string.nomount_hot_unload))
+                        }
+                    },
+                )
+            }
         }
     }
 }

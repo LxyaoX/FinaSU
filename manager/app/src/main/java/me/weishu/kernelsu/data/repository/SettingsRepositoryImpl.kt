@@ -40,6 +40,14 @@ private const val KEY_USE_SOFT_REBOOT = "soft_reboot"
 val DEFAULT_BACKUP_PARTITIONS = setOf("boot", "init_boot", "vendor_boot")
 
 /** Prefer soft reboot: always in jailbreak mode, or when the setting is enabled. */
+/**
+ * Single-quote a value for the root shell.
+ *
+ * Module ids are already validated by ksud; this keeps the command line
+ * unambiguous even if a caller passes something unexpected.
+ */
+private fun shellQuote(value: String): String = "'" + value.replace("'", "'\"'\"'") + "'"
+
 fun isSoftRebootPreferred(): Boolean =
     Natives.isLateLoadMode || ksuApp.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
         .getBoolean(KEY_USE_SOFT_REBOOT, false)
@@ -365,6 +373,41 @@ class SettingsRepositoryImpl : SettingsRepository {
     override suspend fun clearNomountRules(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             check(execKsud("nomount clear", true)) { "ksud nomount clear failed" }
+        }
+    }
+
+    override suspend fun setNomountUids(uids: List<Int>): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            // UIDs are integers from the app list; nothing user-typed reaches the shell.
+            val list = uids.distinct().sorted().joinToString(" ")
+            // An empty list clears every exclusion.
+            val command = if (list.isEmpty()) "nomount uid set" else "nomount uid set $list"
+            check(execKsud(command, true)) { "ksud nomount uid set failed" }
+        }
+    }
+
+    override suspend fun hotLoadNomountModule(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount hot-load ${shellQuote(id)}", true)) {
+                "ksud nomount hot-load failed"
+            }
+        }
+    }
+
+    override suspend fun hotUnloadNomountModule(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount hot-unload ${shellQuote(id)}", true)) {
+                "ksud nomount hot-unload failed"
+            }
+        }
+    }
+
+    override suspend fun setModuleSkip(id: String, skip: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val flag = if (skip) "" else " --off"
+            check(execKsud("module skip ${shellQuote(id)}$flag", true)) {
+                "ksud module skip failed"
+            }
         }
     }
 
