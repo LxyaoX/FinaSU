@@ -760,15 +760,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     if provider == Provider::None {
         info!("folk mount: mounting is disabled (mode=off)");
         let boot_id = current_boot_id().unwrap_or_default();
-        finish_runtime(
-            &boot_id,
-            provider,
-            "disabled",
-            false,
-            0,
-            None,
-            None,
-        );
+        finish_runtime(&boot_id, provider, "disabled", false, 0, None, None);
         return Ok(MountOutcome::empty(Provider::None));
     }
     ensure_init_mnt_ns()?;
