@@ -807,7 +807,9 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 &boot_id,
                 provider,
                 result,
-                provider == Provider::Builtin,
+                // The metamodule is a black box; the built-in engine and the
+                // NoMount backend both know how many targets they published.
+                provider != Provider::Metamodule,
                 outcome.target_count,
                 None,
                 warning,
@@ -828,7 +830,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 &boot_id,
                 provider,
                 result,
-                provider == Provider::Builtin,
+                provider != Provider::Metamodule,
                 outcome.target_count,
                 Some(format!("{error:#}")),
                 fallback,

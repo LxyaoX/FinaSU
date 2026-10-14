@@ -931,6 +931,8 @@ pub struct Status {
     pub probe: DriverProbe,
     pub expected_rules: usize,
     pub applied_rules: usize,
+    /// Everything the kernel holds, including directories it created itself.
+    pub kernel_rules: usize,
     pub uid_count: usize,
     pub isolated_blocked: bool,
     pub error: Option<String>,
@@ -948,6 +950,7 @@ impl Status {
             probe,
             expected_rules: plan.rules.len(),
             applied_rules: 0,
+            kernel_rules: 0,
             uid_count: 0,
             isolated_blocked: false,
             error: None,
@@ -956,7 +959,12 @@ impl Status {
             status.error = Some("driver is not ready".to_string());
             return Ok(status);
         }
-        status.applied_rules = driver.list_rules().map_or(0, |rules| rules.len());
+        if let Ok(rules) = driver.list_rules() {
+            // Report the rules we published separately from the directories the
+            // kernel made up for them, so the two never contradict each other.
+            status.applied_rules = rules.iter().filter(|rule| !rule.virtual_dir).count();
+            status.kernel_rules = rules.len();
+        }
         status.uid_count = driver.list_uids().map_or(0, |uids| uids.len());
         status.isolated_blocked = driver.isolated_state().unwrap_or(false);
         Ok(status)
@@ -975,6 +983,7 @@ impl Status {
                 "api_ok": self.probe.ready(),
                 "rules_expected": self.expected_rules,
                 "rules_applied": self.applied_rules,
+                "kernel_rules": self.kernel_rules,
                 "uid_count": self.uid_count,
                 "isolated_blocked": self.isolated_blocked,
                 "error": self.error,
@@ -995,6 +1004,8 @@ impl Status {
             writeln!(out, "rules_expected={}", self.expected_rules)
                 .context("failed to write nomount status")?;
             writeln!(out, "rules_applied={}", self.applied_rules)
+                .context("failed to write nomount status")?;
+            writeln!(out, "kernel_rules={}", self.kernel_rules)
                 .context("failed to write nomount status")?;
             writeln!(out, "uid_count={}", self.uid_count)
                 .context("failed to write nomount status")?;
