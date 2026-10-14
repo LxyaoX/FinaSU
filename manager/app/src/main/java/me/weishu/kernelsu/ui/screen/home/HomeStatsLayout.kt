@@ -35,6 +35,7 @@ import me.weishu.kernelsu.data.HomeMetrics
 import me.weishu.kernelsu.ui.component.chart.ModulePieChart
 import me.weishu.kernelsu.ui.component.chart.PieSlice
 import me.weishu.kernelsu.ui.component.chart.WaveChart
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.theme.FolkType
 
 /**
@@ -142,7 +143,8 @@ private fun StatsMonitorTile(
             Text(
                 text = stringResource(R.string.home_metric_cpu_frequency),
                 style = FolkType.Caption,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = LocalWallpaperSupportingColor.current
+                    ?: MaterialTheme.colorScheme.onSurfaceVariant,
             )
             clusters.forEach { cluster ->
                 MetricBar(
@@ -246,7 +248,8 @@ private fun ChartLegend(
         Text(
             text = label,
             style = FolkType.Summary,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = LocalWallpaperSupportingColor.current
+                ?: MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

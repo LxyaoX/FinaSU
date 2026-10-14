@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
@@ -105,7 +106,9 @@ internal fun HomeFactRow(
         Text(
             text = "$label: ",
             style = FolkType.Summary,
-            color = overColor?.copy(alpha = 0.8f) ?: MaterialTheme.colorScheme.onSurfaceVariant,
+            color = overColor?.copy(alpha = 0.8f)
+                ?: LocalWallpaperSupportingColor.current
+                ?: MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = value,
@@ -211,7 +214,9 @@ private fun SusfsHomeRow(status: me.weishu.kernelsu.data.susfs.SusfsStatus, onCl
             Text("SUSFS · ${status.version} · ${status.implementation}", style = FolkType.Summary,
                 color = overColor ?: MaterialTheme.colorScheme.onSurface)
             Text(me.weishu.kernelsu.ui.screen.susfsManagementLabel(status.management), style = FolkType.Machine,
-                color = overColor?.copy(alpha = 0.8f) ?: MaterialTheme.colorScheme.onSurfaceVariant)
+                color = overColor?.copy(alpha = 0.8f)
+                    ?: LocalWallpaperSupportingColor.current
+                    ?: MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Text(stringResource(R.string.susfs_manage), style = FolkType.Summary,
             color = overColor ?: MaterialTheme.colorScheme.primary)
@@ -230,11 +235,14 @@ internal fun InfoRow(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // On wallpaper the material carries its own supporting colour, tuned against the translucent
+        // fill; off it we keep the semantic greys.
+        val supportingColor = LocalWallpaperSupportingColor.current
         Icon(
             imageVector = icon,
             contentDescription = label,
             modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -242,7 +250,7 @@ internal fun InfoRow(
             Text(
                 text = value,
                 style = FolkType.Machine,
-                color = MaterialTheme.colorScheme.outline
+                color = supportingColor ?: MaterialTheme.colorScheme.outline
             )
         }
         if (trailingContent != null) {

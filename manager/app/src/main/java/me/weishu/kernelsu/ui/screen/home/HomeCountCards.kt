@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.FolkMetricValue
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.theme.FolkType
 
 /** The axis a host lays the two count cards along. */
@@ -123,20 +124,23 @@ internal fun CountCard(
     emphasis: CountCardEmphasis = CountCardEmphasis.Label,
     available: Boolean = true,
 ) {
+    // On wallpaper the card material carries its own supporting colour, tuned against the
+    // translucent fill; off it we keep the semantic greys.
+    val supportingColor = LocalWallpaperSupportingColor.current
     val labelStyle = when (emphasis) {
         CountCardEmphasis.Label -> FolkType.Summary
         CountCardEmphasis.Value -> FolkType.Caption
     }
     val labelColor = when (emphasis) {
         CountCardEmphasis.Label -> MaterialTheme.colorScheme.onSurface
-        CountCardEmphasis.Value -> MaterialTheme.colorScheme.onSurfaceVariant
+        CountCardEmphasis.Value -> supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant
     }
     val valueStyle = when (emphasis) {
         CountCardEmphasis.Label -> FolkType.Numeral
         CountCardEmphasis.Value -> FolkType.Title
     }
     val valueColor = when (emphasis) {
-        CountCardEmphasis.Label -> MaterialTheme.colorScheme.outline
+        CountCardEmphasis.Label -> supportingColor ?: MaterialTheme.colorScheme.outline
         CountCardEmphasis.Value -> MaterialTheme.colorScheme.onSurface
     }
 
@@ -152,7 +156,7 @@ internal fun CountCard(
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(CountCardDefaults.IconSize),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.width(CountCardDefaults.IconTextSpacing))
                 Column {
