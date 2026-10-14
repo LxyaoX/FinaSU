@@ -15,6 +15,7 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
+import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.ModuleSortPriorityStore
@@ -333,6 +334,37 @@ class SettingsRepositoryImpl : SettingsRepository {
             check(execKsud("mount set-mode ${mode.token}", true)) {
                 "ksud mount set-mode ${mode.token} failed"
             }
+        }
+    }
+
+    override suspend fun getNomountStatus(): Result<NomountStatus> = withContext(Dispatchers.IO) {
+        runCatching {
+            val result = execKsudResult("nomount status --json")
+            check(result.isSuccess) { "ksud nomount status failed (exit ${result.code})" }
+            val payload = result.out.firstOrNull { it.isNotBlank() }
+                ?: error("ksud nomount status returned no payload")
+            NomountStatus.fromJson(JSONObject(payload))
+        }
+    }
+
+    override suspend fun setNomountIsolated(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val state = if (enabled) "on" else "off"
+            check(execKsud("nomount uid isolated $state", true)) {
+                "ksud nomount uid isolated $state failed"
+            }
+        }
+    }
+
+    override suspend fun injectNomountRules(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount inject", true)) { "ksud nomount inject failed" }
+        }
+    }
+
+    override suspend fun clearNomountRules(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount clear", true)) { "ksud nomount clear failed" }
         }
     }
 

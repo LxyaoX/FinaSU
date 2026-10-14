@@ -537,9 +537,9 @@ enum Mount {
         json: bool,
     },
 
-    /// Set mount mode: auto | builtin | metamodule
+    /// Set mount mode: auto | builtin | metamodule | nomount | off
     SetMode {
-        /// one of: auto, builtin, metamodule
+        /// one of: auto, builtin, metamodule, nomount, off
         mode: String,
     },
 }

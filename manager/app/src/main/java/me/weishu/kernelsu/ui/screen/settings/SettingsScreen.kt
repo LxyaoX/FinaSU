@@ -74,6 +74,7 @@ fun rememberSettingsActions(
         onSetSulogEnabled = viewModel::setSulogEnabled,
         onSetAvcSpoofEnabled = viewModel::setAvcSpoofEnabled,
         onSetFolkMountMode = viewModel::setFolkMountMode,
+        onOpenNomount = { navigator.push(Route.Nomount) },
         onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,

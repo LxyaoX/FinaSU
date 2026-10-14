@@ -11,7 +11,9 @@ import org.json.JSONObject
 enum class FolkMountMode(val token: String) {
     AUTO("auto"),
     BUILTIN("builtin"),
-    METAMODULE("metamodule");
+    METAMODULE("metamodule"),
+    NOMOUNT("nomount"),
+    OFF("off");
 
     companion object {
         fun fromToken(token: String?): FolkMountMode? =
@@ -25,7 +27,9 @@ enum class FolkMountMode(val token: String) {
  */
 enum class FolkMountProvider(val token: String) {
     BUILTIN("builtin"),
-    METAMODULE("metamodule");
+    METAMODULE("metamodule"),
+    NOMOUNT("nomount"),
+    NONE("none");
 
     companion object {
         fun fromToken(token: String?): FolkMountProvider? =
@@ -34,14 +38,14 @@ enum class FolkMountProvider(val token: String) {
 }
 
 /**
- * Decoded `ksud mount status --json` payload (`schema_version = 1`).
+ * Decoded `ksud mount status --json` payload (`schema_version` 1 or 2).
  *
  * Property names map one-to-one to the ksud JSON keys:
  * [configuredMode] <- `configured_mode`, [nextProvider] <- `next_provider`,
  * [metamoduleId] <- `metamodule_id`, [metamoduleEnabled] <- `metamodule_enabled`,
  * [bootId] <- `boot_id`, [bootProvider] <- `boot_provider`,
  * [bootResult] <- `boot_result`, [targetCount] <- `target_count`,
- * [error] <- `error`.
+ * [bootWarning] <- `boot_warning` (schema 2), [error] <- `error`.
  */
 @Immutable
 data class FolkMountStatus(
@@ -53,10 +57,14 @@ data class FolkMountStatus(
     val bootProvider: FolkMountProvider?,
     val bootResult: String,
     val targetCount: Int?,
+    /** Provider-specific degradation for this boot, e.g. a NoMount fallback. */
+    val bootWarning: String?,
     val error: String?,
 ) {
     companion object {
-        const val SCHEMA_VERSION = 1
+        /** Newest schema this app understands; older schemas stay readable. */
+        const val SCHEMA_VERSION = 2
+        private const val OLDEST_SCHEMA_VERSION = 1
 
         /**
          * Decode a `ksud mount status --json` object.
@@ -66,6 +74,10 @@ data class FolkMountStatus(
          * than falling back to a default mode.
          */
         fun fromJson(json: JSONObject): FolkMountStatus {
+            val schema = json.optInt("schema_version", -1)
+            check(schema in OLDEST_SCHEMA_VERSION..SCHEMA_VERSION) {
+                "unsupported folk mount schema_version $schema"
+            }
             val configuredMode = FolkMountMode.fromToken(json.optStringOrNull("configured_mode"))
                 ?: error("folk mount status has no valid configured_mode")
             return FolkMountStatus(
@@ -77,6 +89,7 @@ data class FolkMountStatus(
                 bootProvider = FolkMountProvider.fromToken(json.optStringOrNull("boot_provider")),
                 bootResult = json.optString("boot_result", "unknown"),
                 targetCount = json.optIntOrNull("target_count"),
+                bootWarning = json.optStringOrNull("boot_warning"),
                 error = json.optStringOrNull("error"),
             )
         }

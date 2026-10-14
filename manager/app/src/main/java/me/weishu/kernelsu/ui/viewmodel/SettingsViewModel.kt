@@ -93,6 +93,7 @@ class SettingsViewModel(
             val isLateLoadMode = Natives.isLateLoadMode
 
             val folkMountResult = repo.getFolkMountStatus()
+            val nomountResult = repo.getNomountStatus()
             val folkZygiskResult = repo.getFolkZygiskStatus()
 
             if (generation != refreshGeneration) return@launch
@@ -137,6 +138,9 @@ class SettingsViewModel(
                     folkMountStatus = folkMountResult.getOrNull(),
                     folkMountReadError = folkMountResult.isFailure,
                     isFolkMountLoading = false,
+                    nomountStatus = nomountResult.getOrNull(),
+                    nomountReadError = nomountResult.isFailure,
+                    isNomountLoading = false,
                     folkZygiskStatus = folkZygiskResult.getOrNull(),
                     folkZygiskReadError = folkZygiskResult.isFailure,
                     isFolkZygiskLoading = false,

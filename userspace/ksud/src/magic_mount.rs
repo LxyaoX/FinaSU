@@ -29,6 +29,8 @@ pub enum MountMode {
     Builtin,
     Metamodule,
     Nomount,
+    /// Inject nothing: modules stay inert until a provider is chosen.
+    Off,
 }
 
 impl MountMode {
@@ -39,6 +41,7 @@ impl MountMode {
             Self::Builtin => "builtin",
             Self::Metamodule => "metamodule",
             Self::Nomount => "nomount",
+            Self::Off => "off",
         }
     }
 
@@ -50,6 +53,7 @@ impl MountMode {
             "builtin" => Some(Self::Builtin),
             "metamodule" => Some(Self::Metamodule),
             "nomount" => Some(Self::Nomount),
+            "off" => Some(Self::Off),
             _ => None,
         }
     }
@@ -61,6 +65,8 @@ pub enum Provider {
     Builtin,
     Metamodule,
     Nomount,
+    /// No provider runs this boot.
+    None,
 }
 
 impl Provider {
@@ -70,6 +76,7 @@ impl Provider {
             Self::Builtin => "builtin",
             Self::Metamodule => "metamodule",
             Self::Nomount => "nomount",
+            Self::None => "none",
         }
     }
 }
@@ -147,9 +154,12 @@ struct RuntimeRecord {
 
 /// Read the configured mount mode from [`defs::FOLK_MOUNT_CONFIG`].
 ///
-/// A missing file or an unrecognised value falls back to [`MountMode::Auto`]
-/// (the latter with a warning). Other I/O errors are returned so an unreadable
-/// configuration never silently selects a provider.
+/// A missing file selects [`MountMode::Nomount`] for a fresh install and
+/// [`MountMode::Auto`] for a device that already mounted modules with an
+/// earlier version, so upgrading never silently stops injecting them. An
+/// unrecognised value falls back to [`MountMode::Auto`] with a warning. Other
+/// I/O errors are returned so an unreadable configuration never silently
+/// selects a provider.
 ///
 /// # Errors
 /// Returns an error when the configuration file exists but cannot be read.
@@ -164,7 +174,23 @@ pub fn read_mount_mode() -> Result<MountMode> {
             );
             MountMode::Auto
         })),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(MountMode::Auto),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            // An earlier boot left a runtime record, so this device already had
+            // modules injected: keep the previous behaviour instead of switching
+            // the backend behind the user's back.
+            let upgraded = Path::new(defs::FOLK_MOUNT_RUNTIME).exists();
+            let mode = if upgraded {
+                warn!("folk mount: no mode recorded but modules were mounted before; keeping auto");
+                MountMode::Auto
+            } else {
+                MountMode::Nomount
+            };
+            // Record the decision so the default only applies once.
+            if let Err(e) = write_mount_mode(mode) {
+                warn!("folk mount: could not persist the default mode: {e:#}");
+            }
+            Ok(mode)
+        }
         Err(e) => Err(e).with_context(|| format!("failed to read {}", defs::FOLK_MOUNT_CONFIG)),
     }
 }
@@ -228,6 +254,7 @@ fn metamodule_state() -> (Option<String>, bool) {
 
 const fn provider_for(mode: MountMode, metamodule_enabled: bool) -> Provider {
     match mode {
+        MountMode::Off => Provider::None,
         MountMode::Metamodule => Provider::Metamodule,
         MountMode::Nomount => Provider::Nomount,
         MountMode::Auto if metamodule_enabled => Provider::Metamodule,
@@ -698,6 +725,8 @@ fn run_provider(provider: Provider) -> ProviderRun {
                 error,
             },
         },
+        // Handled before this point: mounting is disabled for this boot.
+        Provider::None => ProviderRun::Ok(MountOutcome::empty(Provider::None)),
     }
 }
 
@@ -728,6 +757,20 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     }
 
     let provider = resolve_provider()?;
+    if provider == Provider::None {
+        info!("folk mount: mounting is disabled (mode=off)");
+        let boot_id = current_boot_id().unwrap_or_default();
+        finish_runtime(
+            &boot_id,
+            provider,
+            "disabled",
+            false,
+            0,
+            None,
+            None,
+        );
+        return Ok(MountOutcome::empty(Provider::None));
+    }
     ensure_init_mnt_ns()?;
 
     let boot_id = current_boot_id().unwrap_or_default();
