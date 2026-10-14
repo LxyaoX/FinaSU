@@ -2,6 +2,8 @@ package me.weishu.kernelsu.ui.screen.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
@@ -14,6 +16,10 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.KernelSUApplication
+import me.weishu.kernelsu.R
+import me.weishu.kernelsu.data.model.FolkMountMode
+import me.weishu.kernelsu.ui.component.dialog.ConfirmResult
+import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.navigation3.Navigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.SettingsViewModel
@@ -57,6 +63,24 @@ fun rememberSettingsActions(
 ): SettingsScreenActions {
     val context = LocalContext.current
     val activity = LocalActivity.current
+    val scope = rememberCoroutineScope()
+    val confirm = rememberConfirmDialog()
+    // Switching to NoMount changes who can see the injected files, so confirm it
+    // once with the difference spelled out instead of changing it silently.
+    val onSetFolkMountMode: (FolkMountMode) -> Unit = { mode ->
+        if (mode == FolkMountMode.NOMOUNT) {
+            scope.launch {
+                val result = confirm.awaitConfirm(
+                    title = context.getString(R.string.settings_folk_mount_mode_nomount),
+                    content = context.getString(R.string.settings_folk_mount_nomount_confirm),
+                    confirm = context.getString(R.string.settings_folk_mount_nomount_confirm_ok),
+                )
+                if (result is ConfirmResult.Confirmed) viewModel.setFolkMountMode(mode)
+            }
+        } else {
+            viewModel.setFolkMountMode(mode)
+        }
+    }
     return SettingsScreenActions(
         onSetCheckUpdate = viewModel::setCheckUpdate,
         onSetCheckModuleUpdate = viewModel::setCheckModuleUpdate,
@@ -73,7 +97,7 @@ fun rememberSettingsActions(
         onSetSELinuxMode = viewModel::setSELinuxMode,
         onSetSulogEnabled = viewModel::setSulogEnabled,
         onSetAvcSpoofEnabled = viewModel::setAvcSpoofEnabled,
-        onSetFolkMountMode = viewModel::setFolkMountMode,
+        onSetFolkMountMode = onSetFolkMountMode,
         onOpenNomount = { navigator.push(Route.Nomount) },
         onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,

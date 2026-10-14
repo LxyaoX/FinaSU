@@ -228,11 +228,13 @@ private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel
             SegmentedListItem(
                 headlineContent = { Text(stringResource(R.string.nomount_uid_exclusions)) },
                 supportingContent = {
+                    val count = status?.uidsActive?.size ?: (status?.uidCount ?: 0)
                     Text(
-                        stringResource(
-                            R.string.nomount_uid_exclusions_value,
-                            status?.uidsActive?.size ?: (status?.uidCount ?: 0),
-                        )
+                        if (count == 0) {
+                            stringResource(R.string.nomount_uid_exclusions_none)
+                        } else {
+                            stringResource(R.string.nomount_uid_exclusions_value, count)
+                        }
                     )
                 },
                 overlineContent = { Text(stringResource(R.string.nomount_uid_source_hint)) },
@@ -242,6 +244,17 @@ private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel
                 trailingContent = {
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
                 },
+            )
+        }
+        item {
+            SegmentedListItem(
+                headlineContent = { Text(stringResource(R.string.nomount_visibility_model)) },
+                supportingContent = {
+                    Text(stringResource(R.string.nomount_visibility_model_hint))
+                },
+                leadingContent = { Icon(Icons.Filled.VisibilityOff, null) },
+                enabled = false,
+                onClick = {},
             )
         }
         item {
