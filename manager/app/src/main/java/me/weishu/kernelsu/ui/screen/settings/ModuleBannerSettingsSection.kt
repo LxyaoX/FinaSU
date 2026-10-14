@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.modulebanner.BannerApiClient
@@ -40,6 +41,9 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
+
+// The slider edits whole percents so the stored value and the label can never disagree.
+private fun snapToPercent(value: Float): Float = (value * 100f).roundToInt() / 100f
 
 @Composable
 fun ModuleCardSettingsSection() {
@@ -189,8 +193,8 @@ fun ModuleBannerSettingsSection() {
                 title = stringResource(R.string.module_banner_opacity),
                 value = ModuleBannerConfig.customOpacity,
                 valueRange = 0.1f..1f,
-                valueText = { "${(it * 100).toInt()}%" },
-                onValueChange = ModuleBannerConfig::editCustomOpacity,
+                valueText = { "${(it * 100f).roundToInt()}%" },
+                onValueChange = { ModuleBannerConfig.editCustomOpacity(snapToPercent(it)) },
                 onValueChangeFinished = { ModuleBannerConfig.persist() },
             )
             // The surrounding scroll container can take a gesture over mid-drag, in which case the

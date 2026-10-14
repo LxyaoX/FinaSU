@@ -1,6 +1,5 @@
 package me.weishu.kernelsu.ui.component.material
 
-import android.os.SystemClock
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -50,6 +49,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
@@ -262,6 +262,10 @@ fun SegmentedColumn(
             }
         }
 
+        // Read through updated state so the gesture handler below never works from a stale frame.
+        val visibilityState = rememberUpdatedState(entries.map { it.visible })
+        val progressesState = rememberUpdatedState(progresses)
+
         val firstVisible = entries.indexOfFirst { it.visible }
         val lastVisible = entries.indexOfLast { it.visible }
 
@@ -294,17 +298,19 @@ fun SegmentedColumn(
                             Box(
                                 modifier = Modifier
                                     .zIndex(if (entry.visible) (entries.size - index).toFloat() else -index.toFloat())
-                                    .pointerInput(entries.map { it.visible }) {
+                                    .pointerInput(entry.key ?: index) {
                                         awaitEachGesture {
                                             val down = awaitFirstDown(
                                                 requireUnconsumed = false,
                                                 pass = PointerEventPass.Initial,
                                             )
-                                            // Moving rows cannot reliably match a new press to its intended control.
-                                            val moving = progresses.indices.any { row ->
-                                                progresses[row].value != if (entries[row].visible) 1f else 0f
-                                            }
-                                            if (!entry.visible || moving) {
+                                            val visibleNow = visibilityState.value.getOrNull(index) ?: false
+                                            val progressNow = progressesState.value.getOrNull(index)?.value ?: 0f
+                                            // Only a hidden row or one that is still opening can slide out from
+                                            // under the finger; a settled row keeps the press it received, so a
+                                            // press during the reveal animation is no longer silently dropped.
+                                            val opening = progressNow != if (visibleNow) 1f else 0f
+                                            if (!visibleNow || opening) {
                                                 down.consume()
                                                 do {
                                                     val event = awaitPointerEvent(PointerEventPass.Initial)
@@ -563,10 +569,8 @@ fun SegmentedListItem(
 }
 
 // Three touch slops reject long slides while allowing slow horizontal drift during an ordinary tap.
+// Distance alone decides which gestures are drags; a speed limit also rejected genuine quick taps.
 private const val SlideTravelMultiplier = 3f
-
-// Measured short flicks exceed 0.5 px/ms; apply the speed limit only after leaving touch slop.
-private const val FlickSpeedPxPerMs = 0.5f
 
 @Composable
 fun SegmentedSwitchItem(
@@ -588,7 +592,6 @@ fun SegmentedSwitchItem(
             val slideSlop = viewConfiguration.touchSlop * SlideTravelMultiplier
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
-                val startedAt = SystemClock.uptimeMillis()
                 var pull = 0f
                 var vertical = 0f
                 while (true) {
@@ -597,9 +600,7 @@ fun SegmentedSwitchItem(
                     val delta = change.position - down.position
                     pull = maxOf(pull, delta.getDistance())
                     vertical = maxOf(vertical, abs(delta.y))
-                    val elapsed = (SystemClock.uptimeMillis() - startedAt).coerceAtLeast(1L)
-                    val flick = pull > viewConfiguration.touchSlop && pull / elapsed > FlickSpeedPxPerMs
-                    if (pull > slideSlop || vertical > viewConfiguration.touchSlop || flick) {
+                    if (pull > slideSlop || vertical > viewConfiguration.touchSlop) {
                         dragged.value = true
                     }
                     if (!change.pressed) break
@@ -679,7 +680,20 @@ fun SegmentedSliderItem(
                         onValueChange = onValueChange,
                         onValueChangeFinished = { onValueChangeFinished(state.value) },
                         enabled = enabled,
-                        modifier = Modifier.fillMaxWidth(),
+                        // Only a drag may move the value: a stationary press is cancelled here, before the
+                        // slider's own tap handling can jump the thumb to an accidental touch.
+                        modifier = Modifier.fillMaxWidth().pointerInput(title) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                                var dragged = false
+                                do {
+                                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) dragged = true
+                                    if (!change.pressed && !dragged) change.consume()
+                                } while (event.changes.any { it.pressed })
+                            }
+                        },
                     )
                 } else {
                     Slider(
