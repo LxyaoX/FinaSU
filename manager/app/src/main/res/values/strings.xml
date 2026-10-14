@@ -335,6 +335,7 @@
     <string name="nomount_block_isolated_summary">Isolated processes (WebView, SDK sandboxes) also see the stock filesystem.</string>
     <string name="nomount_loading">Reading status…</string>
     <string name="nomount_read_error">Status unavailable. ksud must be up to date.</string>
+    <string name="nomount_refresh">Refresh</string>
     <string name="feature_status_unsupported_summary">Kernel does not support this feature</string>
     <string name="feature_status_managed_summary">This feature is managed by a module</string>
     <string name="settings_mode_enable_by_default">Enable (Default)</string>

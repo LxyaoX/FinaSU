@@ -523,6 +523,7 @@
     <string name="nomount_block_isolated_summary">隔离进程（WebView、SDK 沙箱等）同样只能看到原厂文件系统。</string>
     <string name="nomount_loading">正在读取状态…</string>
     <string name="nomount_read_error">状态不可用，请确保 ksud 已更新。</string>
+    <string name="nomount_refresh">刷新</string>
     <string name="sulog_log_files">日志文件</string>
     <string name="sulog_failed_to_load">加载 SU 日志失败</string>
     <string name="sulog_disabled_title">SU 日志未启用</string>
