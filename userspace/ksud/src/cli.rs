@@ -570,6 +570,9 @@ enum Nomount {
         /// Emit a single JSON object instead of key=value lines
         #[arg(long)]
         json: bool,
+        /// With --dry-run, print every rule and every skip reason
+        #[arg(long)]
+        verbose: bool,
     },
 
     /// Show the rules the kernel currently holds
@@ -1029,7 +1032,11 @@ pub fn run() -> Result<()> {
                 crate::nomount::log_probe(&status.probe);
                 status.print(json)
             }
-            Nomount::Inject { dry_run, json } => crate::nomount::inject(dry_run, json),
+            Nomount::Inject {
+                dry_run,
+                json,
+                verbose,
+            } => crate::nomount::inject(dry_run, json, verbose),
             Nomount::List { json } => crate::nomount::print_rules(json),
             Nomount::Clear => crate::nomount::clear_rules(),
             Nomount::HotLoad { id } => {

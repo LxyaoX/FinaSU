@@ -742,6 +742,9 @@ pub fn collect_rule_counts() -> Result<Vec<(String, usize)>> {
 /// Returns an error when the driver is not usable or the kernel refuses a rule.
 #[cfg(target_os = "android")]
 pub fn hot_load(id: &str) -> Result<usize> {
+    if let Some(owner) = installed_driver_module() {
+        bail!("nomount: module {owner} owns NoMount injection; not writing rules as well");
+    }
     let driver = Driver::kernel();
     ensure_usable(&driver.probe())?;
     let plan = collect_plan_for(id)?;
@@ -956,6 +959,9 @@ pub struct InjectionResult {
 /// cannot be walked, or the kernel refuses the rules.
 #[cfg(target_os = "android")]
 pub fn apply_current_plan() -> Result<InjectionResult> {
+    if let Some(owner) = installed_driver_module() {
+        bail!("nomount: module {owner} owns NoMount injection; not writing rules as well");
+    }
     let driver = Driver::kernel();
     let (probe, loaded) = probe_or_load()?;
     if let Some(loaded) = loaded {
@@ -1022,6 +1028,10 @@ pub struct Status {
     pub uids: Vec<u32>,
     /// UIDs the kernel is excluding right now.
     pub uids_active: Vec<u32>,
+    /// Non-empty when an installed module owns injection instead of us.
+    pub deferred_to: Option<String>,
+    /// True when this backend is the one injecting right now.
+    pub owns_injection: bool,
     pub uid_count: usize,
     pub isolated_blocked: bool,
     pub error: Option<String>,
@@ -1044,6 +1054,8 @@ impl Status {
             uids: read_uid_config(std::path::Path::new(crate::defs::NOMOUNT_UIDS))
                 .map_or_else(|_| Vec::new(), |config| config.uids),
             uids_active: Vec::new(),
+            deferred_to: installed_driver_module(),
+            owns_injection: false,
             uid_count: 0,
             isolated_blocked: false,
             error: None,
@@ -1052,6 +1064,11 @@ impl Status {
             status.error = Some("driver is not ready".to_string());
             return Ok(status);
         }
+        status.owns_injection = matches!(
+            crate::magic_mount::read_mount_mode().unwrap_or(crate::magic_mount::MountMode::Auto),
+            crate::magic_mount::MountMode::Nomount
+        ) && status.deferred_to.is_none()
+            && status.probe.ready();
         if let Ok(rules) = driver.list_rules() {
             // Report the rules we published separately from the directories the
             // kernel made up for them, so the two never contradict each other.
@@ -1087,6 +1104,8 @@ impl Status {
                     .collect::<Vec<_>>(),
                 "uids": self.uids,
                 "uids_active": self.uids_active,
+                "deferred_to": self.deferred_to,
+                "owns_injection": self.owns_injection,
                 "uid_count": self.uid_count,
                 "isolated_blocked": self.isolated_blocked,
                 "error": self.error,
@@ -1118,6 +1137,14 @@ impl Status {
                 .context("failed to write nomount status")?;
             writeln!(out, "uids_active={}", join_uids(&self.uids_active))
                 .context("failed to write nomount status")?;
+            writeln!(
+                out,
+                "deferred_to={}",
+                self.deferred_to.as_deref().unwrap_or("")
+            )
+            .context("failed to write nomount status")?;
+            writeln!(out, "owns_injection={}", self.owns_injection)
+                .context("failed to write nomount status")?;
             writeln!(out, "uid_count={}", self.uid_count)
                 .context("failed to write nomount status")?;
             writeln!(out, "isolated_blocked={}", self.isolated_blocked)
@@ -1139,7 +1166,7 @@ impl Status {
 /// Returns an error when the plan cannot be built or the driver refuses the
 /// rules; a refused injection is never reported as success.
 #[cfg(target_os = "android")]
-pub fn inject(dry_run: bool, json: bool) -> Result<()> {
+pub fn inject(dry_run: bool, json: bool, verbose: bool) -> Result<()> {
     let stdout = std::io::stdout();
     let mut out = stdout.lock();
     if dry_run {
@@ -1156,6 +1183,21 @@ pub fn inject(dry_run: bool, json: bool) -> Result<()> {
             writeln!(out, "rules={}", plan.rules.len()).context("failed to write dry run")?;
             for (id, reason) in &plan.skipped {
                 writeln!(out, "skipped={id} ({reason})").context("failed to write dry run")?;
+            }
+            if verbose {
+                for rule in &plan.rules {
+                    if rule.whiteout {
+                        writeln!(out, "whiteout={}", rule.virtual_path)
+                    } else {
+                        writeln!(
+                            out,
+                            "rule={} -> {}",
+                            rule.virtual_path,
+                            rule.real_path.as_deref().unwrap_or("-")
+                        )
+                    }
+                    .context("failed to write dry run")?;
+                }
             }
         }
         return out.flush().context("failed to flush dry run");
@@ -1248,6 +1290,62 @@ pub fn print_rules(json: bool) -> Result<()> {
 pub fn apply_stored_uids() -> Result<(usize, usize)> {
     let wanted = read_uid_config(std::path::Path::new(crate::defs::NOMOUNT_UIDS))?;
     sync_uids(&Driver::kernel(), &wanted)
+}
+
+/// An installed module that drives NoMount itself, if there is one.
+///
+/// The upstream NoMount distribution is a metamodule that ships its own `nm`
+/// tool and LKM. When one of those is installed it owns injection: our backend
+/// defers to it instead of becoming a second writer of the same rules, which
+/// the kernel would resolve as last-writer-wins.
+///
+/// The test is deliberately narrow: a metamodule whose id is `nomount`, that
+/// ships `bin/nm`, or that carries a NoMount LKM. A metamodule that only mounts
+/// files (overlayfs, magic mount) is not one.
+#[cfg(target_os = "android")]
+#[must_use]
+pub fn installed_driver_module() -> Option<String> {
+    let path = crate::metamodule::get_metamodule_path()?;
+    if path.join(crate::defs::DISABLE_FILE_NAME).exists() {
+        return None;
+    }
+    let id = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or_default()
+        .to_string();
+    let ships_tool = path.join("bin/nm").exists();
+    let ships_lkm = ["lkm/nomount.ko", "nomount.ko"]
+        .iter()
+        .any(|candidate| path.join(candidate).exists());
+    if id == "nomount" || ships_tool || ships_lkm {
+        Some(id)
+    } else {
+        None
+    }
+}
+
+/// True when the built-in backend is the one injecting right now.
+///
+/// Used to block installing a metamodule that would inject on its own while
+/// this backend is active: two injectors would fight over the same paths.
+///
+/// # Errors
+/// Returns an error when the mount mode cannot be read.
+#[cfg(target_os = "android")]
+pub fn owns_injection() -> Result<bool> {
+    if !matches!(
+        crate::magic_mount::read_mount_mode()?,
+        crate::magic_mount::MountMode::Nomount
+    ) {
+        return Ok(false);
+    }
+    // An installed module that drives the same driver wins: we are not the
+    // injector even though the mode says NoMount.
+    if installed_driver_module().is_some() {
+        return Ok(false);
+    }
+    Ok(Driver::kernel().probe().ready())
 }
 
 /// Load the embedded NoMount module for the running KMI.

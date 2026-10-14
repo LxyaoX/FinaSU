@@ -663,6 +663,16 @@ fn run_metamodule() -> Result<MountOutcome> {
 /// API has to answer afterwards, because the loader rewrites vermagic and
 /// relocates symbols and can therefore install a module that does not work.
 fn run_nomount() -> Result<MountOutcome> {
+    // An installed module that drives NoMount itself owns injection: running our
+    // own rules as well would make the two writers race on the same paths.
+    if let Some(owner) = crate::nomount::installed_driver_module() {
+        warn!("nomount: module {owner} owns NoMount injection; deferring to it");
+        let mut outcome = run_metamodule()?;
+        outcome.warnings.push(format!(
+            "Deferred to the installed NoMount module {owner} (it drives the same driver)"
+        ));
+        return Ok(outcome);
+    }
     let result = crate::nomount::apply_current_plan()?;
     for warning in &result.warnings {
         warn!("nomount: {warning}");
