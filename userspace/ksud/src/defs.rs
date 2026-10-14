@@ -63,6 +63,13 @@ mod android {
     pub const FOLK_MOUNT_RUNTIME: &str = concatcp!(WORKING_DIR, "mount_runtime");
     pub const FOLK_MOUNT_LOCK: &str = concatcp!(WORKING_DIR, "mount.lock");
 
+    // Built-in NoMount backend.
+    /// Per-boot record of the driver state and the injection result.
+    pub const NOMOUNT_RUNTIME: &str = concatcp!(WORKING_DIR, "nomount_runtime");
+    /// UIDs that must see the stock filesystem, one per line. Written by the
+    /// manager from the app profiles and replayed into the kernel on boot.
+    pub const NOMOUNT_UIDS: &str = concatcp!(WORKING_DIR, "nomount_uids");
+
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";
     pub const BACKUP_FILENAME: &str = "stock_image.sha1";

@@ -181,6 +181,12 @@ enum Commands {
         command: Mount,
     },
 
+    /// Manage the built-in NoMount backend
+    Nomount {
+        #[command(subcommand)]
+        command: Nomount,
+    },
+
     /// Manage dynamic managers
     Dynamic {
         #[command(subcommand)]
@@ -535,6 +541,76 @@ enum Mount {
     SetMode {
         /// one of: auto, builtin, metamodule
         mode: String,
+    },
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum Nomount {
+    /// Print driver state, rule counts, and UID exclusions
+    Status {
+        /// Emit a single JSON object instead of key=value lines
+        #[arg(long)]
+        json: bool,
+    },
+
+    /// Build the rule list from the modules without touching the kernel
+    Inject {
+        /// Report what would be applied; never talks to the kernel
+        #[arg(long)]
+        dry_run: bool,
+        /// Emit a single JSON object instead of key=value lines
+        #[arg(long)]
+        json: bool,
+    },
+
+    /// Show the rules the kernel currently holds
+    List {
+        /// Emit a single JSON object instead of text
+        #[arg(long)]
+        json: bool,
+    },
+
+    /// Drop every redirection rule; UID exclusions are kept
+    Clear,
+
+    /// Manage the UID exclusions (apps that see the stock filesystem)
+    Uid {
+        #[command(subcommand)]
+        command: NomountUid,
+    },
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum NomountUid {
+    /// Show the active and stored UID exclusions
+    List {
+        /// Emit a single JSON object instead of text
+        #[arg(long)]
+        json: bool,
+    },
+
+    /// Replace the stored list with these UIDs, then apply it
+    Set {
+        #[arg(required = true)]
+        uids: Vec<u32>,
+    },
+
+    /// Add these UIDs to the stored list, then apply it
+    Add {
+        #[arg(required = true)]
+        uids: Vec<u32>,
+    },
+
+    /// Remove these UIDs from the stored list, then apply it
+    Del {
+        #[arg(required = true)]
+        uids: Vec<u32>,
+    },
+
+    /// Whether isolated processes also see the stock filesystem
+    Isolated {
+        /// `on` or `off`
+        state: String,
     },
 }
 
@@ -924,6 +1000,42 @@ pub fn run() -> Result<()> {
         Commands::Mount { command } => match command {
             Mount::Status { json } => crate::magic_mount::print_status(json),
             Mount::SetMode { mode } => crate::magic_mount::set_mode(&mode),
+        },
+        Commands::Nomount { command } => match command {
+            Nomount::Status { json } => {
+                let status = crate::nomount::Status::collect()?;
+                crate::nomount::log_probe(&status.probe);
+                status.print(json)
+            }
+            Nomount::Inject { dry_run, json } => crate::nomount::inject(dry_run, json),
+            Nomount::List { json } => crate::nomount::print_rules(json),
+            Nomount::Clear => crate::nomount::clear_rules(),
+            Nomount::Uid { command } => match command {
+                NomountUid::List { json } => crate::nomount::uid_edit(None, &[], json),
+                NomountUid::Set { uids } => {
+                    crate::nomount::uid_edit(Some(crate::nomount::UidEdit::Set), &uids, false)
+                }
+                NomountUid::Add { uids } => {
+                    crate::nomount::uid_edit(Some(crate::nomount::UidEdit::Add), &uids, false)
+                }
+                NomountUid::Del { uids } => {
+                    crate::nomount::uid_edit(Some(crate::nomount::UidEdit::Del), &uids, false)
+                }
+                NomountUid::Isolated { state } => {
+                    let on = match state.as_str() {
+                        "on" | "1" | "true" => true,
+                        "off" | "0" | "false" => false,
+                        other => {
+                            anyhow::bail!("invalid isolated state {other:?}; expected on or off")
+                        }
+                    };
+                    crate::nomount::uid_edit(
+                        Some(crate::nomount::UidEdit::Isolated(on)),
+                        &[],
+                        false,
+                    )
+                }
+            },
         },
         Commands::Dynamic { command } => match command {
             Dynamic::GetSign { apk, uid, json } => {

@@ -53,6 +53,12 @@ mod module_config;
 mod module_markers;
 mod mount_plan;
 #[cfg(any(target_os = "android", test))]
+#[cfg_attr(not(target_os = "android"), allow(dead_code))]
+mod nomount;
+#[cfg(any(target_os = "android", test))]
+#[cfg_attr(not(target_os = "android"), allow(dead_code))]
+mod nomount_plan;
+#[cfg(any(target_os = "android", test))]
 mod plugin;
 #[cfg(target_os = "android")]
 mod profile;

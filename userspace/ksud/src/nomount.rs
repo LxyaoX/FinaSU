@@ -1,0 +1,1248 @@
+//! NoMount backend: driver transport, probing and rule application.
+//!
+//! NoMount is a VFS path redirection module: instead of mounting anything it
+//! hijacks lookups and directory iteration, so ksud talks to it through a
+//! single custom key type. Every command is one `add_key()` call whose payload
+//! is a page-aligned 4096-byte structure the kernel reads and writes back in
+//! place; `add_key` itself always fails, so the answer is the `status` field.
+//!
+//! The protocol is pinned to the vendored module revision: see
+//! `userspace/nomount/UPSTREAM.md` for provenance and the payload layout this
+//! module encodes. Nothing here is derived from upstream userspace code, which
+//! is deliberately not vendored.
+
+use std::fmt::Write as _;
+use std::io::Write;
+
+use anyhow::{Context, Result, bail, ensure};
+
+/// Kernel/userspace payload size; the kernel maps exactly one page.
+pub const PAGE_SIZE: usize = 4096;
+
+/// Magic stamped into every payload (`"NOMOUNT"` as a big-endian word).
+pub const MAGIC: u64 = u64::from_be_bytes(*b"\0NOMOUNT");
+
+/// Bytes of the payload available to command data.
+pub const BUFFER_SIZE: usize = PAGE_SIZE - PAYLOAD_HEADER_SIZE;
+
+const PAYLOAD_HEADER_SIZE: usize = 28;
+
+/// Oldest kernel API this backend accepts. The vendored module (v2.1.1)
+/// reports `21`; anything lower predates the payload this code encodes.
+pub const MIN_API_VERSION: u32 = 21;
+
+/// Base name of the module inside the embedded assets.
+pub const ASSET_SUFFIX: &str = "_nomount.ko";
+
+/// Whiteout marker: a character device with `rdev == 0`.
+pub const WHITEOUT_FLAG: u32 = 1 << 2;
+
+/// Driver state as reported by [`probe`], never inferred from a load attempt.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DriverState {
+    /// The key type is not registered: no built-in support and no module loaded.
+    Absent,
+    /// The API answered but its version is below [`MIN_API_VERSION`].
+    Outdated,
+    /// The API answered and is usable.
+    Ready,
+}
+
+impl DriverState {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Absent => "absent",
+            Self::Outdated => "outdated",
+            Self::Ready => "ready",
+        }
+    }
+}
+
+/// A probe result: the driver state plus the version string when one was read.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DriverProbe {
+    pub state: DriverState,
+    pub version: Option<String>,
+}
+
+impl DriverProbe {
+    #[must_use]
+    pub const fn ready(&self) -> bool {
+        matches!(self.state, DriverState::Ready)
+    }
+}
+
+/// Commands understood by the kernel side.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum Command {
+    GetVersion = 1,
+    AddRule = 2,
+    DelRule = 3,
+    AddUid = 4,
+    DelUid = 5,
+    ClearRules = 7,
+    GetList = 9,
+    GetUids = 10,
+    BlockIsolatedUids = 11,
+    GetIsolatedState = 12,
+}
+
+/// One redirection: `real_path` is served at `virtual_path`, or the path is
+/// hidden when `whiteout` is set.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Rule {
+    pub virtual_path: String,
+    pub real_path: Option<String>,
+    pub whiteout: bool,
+    pub uid: u32,
+}
+
+impl Rule {
+    #[must_use]
+    pub fn whiteout(virtual_path: impl Into<String>) -> Self {
+        Self {
+            virtual_path: virtual_path.into(),
+            real_path: None,
+            whiteout: true,
+            uid: 0,
+        }
+    }
+
+    #[must_use]
+    pub fn redirect(virtual_path: impl Into<String>, real_path: impl Into<String>) -> Self {
+        Self {
+            virtual_path: virtual_path.into(),
+            real_path: Some(real_path.into()),
+            whiteout: false,
+            uid: 0,
+        }
+    }
+}
+
+/// Wire layout shared with the kernel module. Packed and page-sized on purpose:
+/// the kernel rejects a payload that straddles two pages.
+#[repr(C, packed)]
+pub struct Payload {
+    pub magic: u64,
+    pub cmd: u32,
+    pub target_uid: u32,
+    pub status: i32,
+    pub arg1: u32,
+    pub data_size: u32,
+    pub buffer: [u8; BUFFER_SIZE],
+}
+
+const _: () = assert!(size_of::<Payload>() == PAGE_SIZE);
+
+/// A zeroed, page-aligned payload.
+///
+/// The kernel maps exactly the page the payload starts on and writes results
+/// back through it, so the payload has to be aligned and writable. Keeping it
+/// on the stack also makes construction infallible.
+#[repr(C, align(4096))]
+pub struct PageBuffer {
+    bytes: [u8; PAGE_SIZE],
+}
+
+impl PageBuffer {
+    #[must_use]
+    pub const fn zeroed() -> Self {
+        Self {
+            bytes: [0; PAGE_SIZE],
+        }
+    }
+
+    #[must_use]
+    pub const fn as_mut(&mut self) -> &mut Payload {
+        // SAFETY: `bytes` is page aligned and `PAGE_SIZE` bytes long, which is
+        // exactly the size of `Payload`, so the cast is layout-correct.
+        unsafe { &mut *self.bytes.as_mut_ptr().cast::<Payload>() }
+    }
+
+    #[must_use]
+    pub fn data_size(&self) -> u32 {
+        // Volatile: the kernel produced this value through its own mapping.
+        // SAFETY: the payload pointer is valid and `data_size` is a plain field.
+        unsafe { std::ptr::read_volatile(std::ptr::addr_of!((*self.as_ptr()).data_size)) }
+    }
+
+    const fn as_ptr(&self) -> *const Payload {
+        self.bytes.as_ptr().cast()
+    }
+
+    /// Copy `len` bytes of command data the kernel wrote into `buffer`.
+    ///
+    /// # Errors
+    /// Returns an error when `len` exceeds the payload buffer.
+    pub fn data(&self, len: usize) -> Result<Vec<u8>> {
+        ensure!(
+            len <= BUFFER_SIZE,
+            "nomount: kernel reported {len} bytes, buffer holds {BUFFER_SIZE}"
+        );
+        // SAFETY: `buffer` lives inside the payload and `len` was bounded above.
+        let src = unsafe { std::ptr::addr_of!((*self.as_ptr()).buffer).cast::<u8>() };
+        Ok(unsafe { std::slice::from_raw_parts(src, len) }.to_vec())
+    }
+}
+
+/// One command round trip. Split out so the encoding and the command semantics
+/// can be tested without a kernel.
+pub trait Transport {
+    /// Send `payload` and wait for the kernel's answer.
+    ///
+    /// # Errors
+    /// Returns an error when the payload cannot be delivered or the kernel
+    /// reports a non-zero status.
+    fn send(&self, payload: &mut Payload) -> Result<()>;
+}
+
+/// The real transport: one `add_key()` against the `nomount` key type.
+pub struct KernelTransport;
+
+impl Transport for KernelTransport {
+    fn send(&self, payload: &mut Payload) -> Result<()> {
+        payload.status = -1;
+        let address = std::ptr::from_mut::<Payload>(payload) as u64;
+        // `add_key` is the whole protocol: the key type's `preparse` reads the
+        // address, runs the command and returns `-ECANCELED`, so the syscall's
+        // own return value carries no information.
+        unsafe {
+            libc::syscall(
+                libc::SYS_add_key,
+                c"nomount".as_ptr(),
+                c"trigger".as_ptr(),
+                std::ptr::addr_of!(address),
+                8_usize,
+                -1_isize,
+            );
+        }
+        // Copy the fields out: `Payload` is packed, so only value reads are
+        // sound, never references to its fields.
+        let status = unsafe { std::ptr::read_volatile(std::ptr::addr_of!(payload.status)) };
+        let cmd = payload.cmd;
+        ensure!(status == 0, "nomount: command {cmd} failed with {status}");
+        Ok(())
+    }
+}
+
+/// A driver handle bound to a transport.
+pub struct Driver<T: Transport> {
+    transport: T,
+}
+
+impl Driver<KernelTransport> {
+    #[must_use]
+    pub const fn kernel() -> Self {
+        Self {
+            transport: KernelTransport,
+        }
+    }
+}
+
+impl<T: Transport> Driver<T> {
+    #[cfg(test)]
+    #[must_use]
+    pub const fn new(transport: T) -> Self {
+        Self { transport }
+    }
+
+    /// Ask the kernel for its API version.
+    ///
+    /// # Errors
+    /// Returns an error when the key type is not registered or the reply is
+    /// not valid UTF-8.
+    pub fn version(&self) -> Result<String> {
+        let mut page = PageBuffer::zeroed();
+        page.as_mut().magic = MAGIC;
+        page.as_mut().cmd = Command::GetVersion as u32;
+        self.transport.send(page.as_mut())?;
+        let len = usize::try_from(page.data_size()).context("nomount: bad version length")?;
+        let bytes = page.data(len)?;
+        String::from_utf8(bytes).context("nomount: version reply is not UTF-8")
+    }
+
+    /// Probe the driver without changing any state.
+    ///
+    /// A version reply alone is not enough: the listing command also has to
+    /// answer, otherwise a half-registered key type would look healthy.
+    #[must_use]
+    pub fn probe(&self) -> DriverProbe {
+        let version = match self.version() {
+            Ok(version) => version,
+            Err(error) => {
+                log::debug!("nomount: driver absent ({error:#})");
+                return DriverProbe {
+                    state: DriverState::Absent,
+                    version: None,
+                };
+            }
+        };
+        let state = match parse_api_version(&version) {
+            Some(api) if api >= MIN_API_VERSION => DriverState::Ready,
+            _ => DriverState::Outdated,
+        };
+        if state == DriverState::Ready
+            && let Err(error) = self.list_rules()
+        {
+            log::debug!("nomount: listing refused ({error:#}); driver not ready");
+            return DriverProbe {
+                state: DriverState::Outdated,
+                version: Some(version),
+            };
+        }
+        DriverProbe {
+            state,
+            version: Some(version),
+        }
+    }
+
+    /// Apply rules, then read the kernel's rule list back to prove they landed.
+    ///
+    /// The verification is the point: a transport that silently drops rules
+    /// must not be reported as a successful injection.
+    ///
+    /// # Errors
+    /// Returns an error when a rule cannot be encoded, the kernel refuses a
+    /// batch, or the read-back does not contain every virtual path.
+    pub fn apply_rules(&self, rules: &[Rule]) -> Result<usize> {
+        if rules.is_empty() {
+            return Ok(0);
+        }
+        for batch in encode_batches(rules)? {
+            self.command(Command::AddRule, &batch)?;
+        }
+        let applied: std::collections::HashSet<String> = self
+            .list_rules()?
+            .into_iter()
+            .map(|rule| rule.virtual_path)
+            .collect();
+        let missing: Vec<&str> = rules
+            .iter()
+            .map(|rule| rule.virtual_path.as_str())
+            .filter(|path| !applied.contains(*path))
+            .collect();
+        ensure!(
+            missing.is_empty(),
+            "nomount: kernel did not accept {} rule(s), first missing: {}",
+            missing.len(),
+            missing[0]
+        );
+        Ok(rules.len())
+    }
+
+    /// The rules currently active in the kernel.
+    ///
+    /// # Errors
+    /// Returns an error when the reply is malformed or the kernel refuses the
+    /// command.
+    pub fn list_rules(&self) -> Result<Vec<Rule>> {
+        let mut rules = Vec::new();
+        loop {
+            let mut page = PageBuffer::zeroed();
+            page.as_mut().magic = MAGIC;
+            page.as_mut().cmd = Command::GetList as u32;
+            page.as_mut().arg1 = u32::try_from(rules.len()).context("nomount: rule overflow")?;
+            self.transport.send(page.as_mut())?;
+            let len = usize::try_from(page.data_size()).context("nomount: bad list length")?;
+            if len == 0 {
+                return Ok(rules);
+            }
+            let batch = parse_list_records(&page.data(len)?)?;
+            let count = batch.len();
+            rules.extend(batch);
+            if count == 0 {
+                return Ok(rules);
+            }
+        }
+    }
+
+    /// Remove specific virtual paths.
+    ///
+    /// # Errors
+    /// Returns an error when a path is too long or the kernel refuses a batch.
+    pub fn delete_rules(&self, virtual_paths: &[String]) -> Result<()> {
+        if virtual_paths.is_empty() {
+            return Ok(());
+        }
+        let mut page = PageBuffer::zeroed();
+        let mut cursor = 0_usize;
+        for path in virtual_paths {
+            let len = u16::try_from(path.len()).context("nomount: path too long")?;
+            let record = 6 + path.len();
+            ensure!(
+                record <= BUFFER_SIZE,
+                "nomount: {path} does not fit in one payload"
+            );
+            if cursor + record > BUFFER_SIZE {
+                self.flush(Command::DelRule, &mut page, cursor)?;
+                cursor = 0;
+            }
+            let buffer = &mut page.as_mut().buffer;
+            buffer[cursor..cursor + 4].copy_from_slice(&0_u32.to_le_bytes());
+            buffer[cursor + 4..cursor + 6].copy_from_slice(&len.to_le_bytes());
+            buffer[cursor + 6..cursor + 6 + path.len()].copy_from_slice(path.as_bytes());
+            cursor += record;
+        }
+        self.flush(Command::DelRule, &mut page, cursor)
+    }
+
+    /// Block or unblock isolated-process UIDs.
+    ///
+    /// # Errors
+    /// Returns an error when the kernel refuses the command.
+    pub fn block_isolated(&self, on: bool) -> Result<()> {
+        let mut page = PageBuffer::zeroed();
+        page.as_mut().magic = MAGIC;
+        page.as_mut().cmd = Command::BlockIsolatedUids as u32;
+        page.as_mut().arg1 = u32::from(on);
+        self.transport.send(page.as_mut())
+    }
+
+    /// Isolated-process blocking state.
+    ///
+    /// # Errors
+    /// Returns an error when the kernel refuses the command.
+    pub fn isolated_state(&self) -> Result<bool> {
+        let mut page = PageBuffer::zeroed();
+        page.as_mut().magic = MAGIC;
+        page.as_mut().cmd = Command::GetIsolatedState as u32;
+        self.transport.send(page.as_mut())?;
+        let len = usize::try_from(page.data_size()).context("nomount: bad state length")?;
+        Ok(page.data(len)?.first() == Some(&b'1'))
+    }
+
+    /// Add UIDs to the exclusion list (they see the stock filesystem).
+    ///
+    /// # Errors
+    /// Returns an error when the kernel refuses a UID.
+    pub fn add_uids(&self, uids: &[u32]) -> Result<()> {
+        self.each_uid(Command::AddUid, uids)
+    }
+
+    /// Remove UIDs from the exclusion list.
+    ///
+    /// # Errors
+    /// Returns an error when the kernel refuses a UID.
+    pub fn del_uids(&self, uids: &[u32]) -> Result<()> {
+        self.each_uid(Command::DelUid, uids)
+    }
+
+    /// The UIDs currently excluded from redirection.
+    ///
+    /// # Errors
+    /// Returns an error when the reply is malformed.
+    pub fn list_uids(&self) -> Result<Vec<u32>> {
+        let mut uids = Vec::new();
+        loop {
+            let mut page = PageBuffer::zeroed();
+            page.as_mut().magic = MAGIC;
+            page.as_mut().cmd = Command::GetUids as u32;
+            page.as_mut().arg1 = u32::try_from(uids.len()).context("nomount: uid overflow")?;
+            self.transport.send(page.as_mut())?;
+            let len = usize::try_from(page.data_size()).context("nomount: bad uid length")?;
+            if len < 4 {
+                return Ok(uids);
+            }
+            let bytes = page.data(len)?;
+            let count = bytes.len() / 4;
+            let mut index = 0;
+            while index + 4 <= bytes.len() {
+                uids.push(u32::from_le_bytes([
+                    bytes[index],
+                    bytes[index + 1],
+                    bytes[index + 2],
+                    bytes[index + 3],
+                ]));
+                index += 4;
+            }
+            if count == 0 {
+                return Ok(uids);
+            }
+        }
+    }
+
+    /// Drop every redirection rule, keeping UID exclusions.
+    ///
+    /// # Errors
+    /// Returns an error when the kernel refuses the command.
+    pub fn clear_rules(&self) -> Result<()> {
+        self.command(Command::ClearRules, &[])
+    }
+
+    /// Make the kernel's rules match `rules` exactly.
+    ///
+    /// Stale rules from an earlier module state are removed, so re-running the
+    /// injection for the same boot converges instead of accumulating paths.
+    ///
+    /// # Errors
+    /// Returns an error when the kernel refuses a change or the read-back does
+    /// not contain every wanted path.
+    pub fn reconcile_rules(&self, rules: &[Rule]) -> Result<(usize, usize)> {
+        let wanted: std::collections::HashSet<&str> = rules
+            .iter()
+            .map(|rule| rule.virtual_path.as_str())
+            .collect();
+        let stale: Vec<String> = self
+            .list_rules()?
+            .into_iter()
+            .map(|rule| rule.virtual_path)
+            .filter(|path| !wanted.contains(path.as_str()))
+            .collect();
+        let removed = stale.len();
+        if !stale.is_empty() {
+            self.delete_rules(&stale)?;
+        }
+        let applied = self.apply_rules(rules)?;
+        Ok((applied, removed))
+    }
+
+    fn each_uid(&self, command: Command, uids: &[u32]) -> Result<()> {
+        for uid in uids {
+            let mut page = PageBuffer::zeroed();
+            page.as_mut().magic = MAGIC;
+            page.as_mut().cmd = command as u32;
+            page.as_mut().target_uid = *uid;
+            self.transport.send(page.as_mut())?;
+        }
+        Ok(())
+    }
+
+    fn command(&self, command: Command, data: &[u8]) -> Result<()> {
+        ensure!(data.len() <= BUFFER_SIZE, "nomount: command data too large");
+        let mut page = PageBuffer::zeroed();
+        page.as_mut().magic = MAGIC;
+        page.as_mut().cmd = command as u32;
+        page.as_mut().buffer[..data.len()].copy_from_slice(data);
+        page.as_mut().data_size = u32::try_from(data.len()).context("nomount: data too large")?;
+        self.transport.send(page.as_mut())
+    }
+
+    fn flush(&self, command: Command, page: &mut PageBuffer, len: usize) -> Result<()> {
+        if len == 0 {
+            return Ok(());
+        }
+        // Stamp the magic here so no batching path can forget it: the kernel
+        // rejects a payload without it.
+        page.as_mut().magic = MAGIC;
+        page.as_mut().cmd = command as u32;
+        page.as_mut().data_size = u32::try_from(len).context("nomount: batch too large")?;
+        page.as_mut().arg1 = 0;
+        self.transport.send(page.as_mut())
+    }
+}
+
+/// Parse the leading integer of a version string (`"21"`, `"21 (1234)"`).
+#[must_use]
+pub fn parse_api_version(version: &str) -> Option<u32> {
+    let digits: String = version
+        .trim()
+        .chars()
+        .take_while(char::is_ascii_digit)
+        .collect();
+    digits.parse().ok()
+}
+
+/// Encode rules into wire batches, preserving input order.
+///
+/// # Errors
+/// Returns an error when a rule has no target, or a path does not fit the
+/// payload buffer.
+pub fn encode_batches(rules: &[Rule]) -> Result<Vec<Vec<u8>>> {
+    let mut batches = Vec::new();
+    let mut current = Vec::new();
+    for rule in rules {
+        let real = rule.real_path.as_deref().unwrap_or_default();
+        if rule.whiteout {
+            ensure!(
+                rule.real_path.is_none(),
+                "nomount: a whiteout rule must not carry a target"
+            );
+        } else {
+            ensure!(
+                !real.is_empty(),
+                "nomount: rule for {} has no target",
+                rule.virtual_path
+            );
+        }
+        let v_len = u16::try_from(rule.virtual_path.len()).context("nomount: path too long")?;
+        let r_len = u16::try_from(real.len()).context("nomount: target too long")?;
+        let record = 12 + rule.virtual_path.len() + real.len();
+        ensure!(
+            record <= BUFFER_SIZE,
+            "nomount: rule for {} does not fit in one payload",
+            rule.virtual_path
+        );
+        if current.len() + record > BUFFER_SIZE {
+            batches.push(std::mem::take(&mut current));
+        }
+        let flags = if rule.whiteout { WHITEOUT_FLAG } else { 0 };
+        current.extend_from_slice(&flags.to_le_bytes());
+        current.extend_from_slice(&rule.uid.to_le_bytes());
+        current.extend_from_slice(&v_len.to_le_bytes());
+        current.extend_from_slice(&r_len.to_le_bytes());
+        current.extend_from_slice(rule.virtual_path.as_bytes());
+        current.extend_from_slice(real.as_bytes());
+    }
+    if !current.is_empty() {
+        batches.push(current);
+    }
+    Ok(batches)
+}
+
+/// Decode the kernel's rule list reply.
+///
+/// # Errors
+/// Returns an error when a record is truncated or not valid UTF-8.
+pub fn parse_list_records(data: &[u8]) -> Result<Vec<Rule>> {
+    let mut rules = Vec::new();
+    let mut cursor = 0_usize;
+    while cursor + 12 <= data.len() {
+        let header = &data[cursor..cursor + 12];
+        let flags = u32::from_le_bytes([header[0], header[1], header[2], header[3]]);
+        let uid = u32::from_le_bytes([header[4], header[5], header[6], header[7]]);
+        let v_len = usize::from(u16::from_le_bytes([header[8], header[9]]));
+        let r_len = usize::from(u16::from_le_bytes([header[10], header[11]]));
+        let end = cursor + 12 + v_len + r_len;
+        ensure!(end <= data.len(), "nomount: truncated rule record");
+        let virtual_path = String::from_utf8(data[cursor + 12..cursor + 12 + v_len].to_vec())
+            .context("nomount: rule path is not UTF-8")?;
+        let real_path = if r_len == 0 {
+            None
+        } else {
+            Some(
+                String::from_utf8(data[cursor + 12 + v_len..end].to_vec())
+                    .context("nomount: rule target is not UTF-8")?,
+            )
+        };
+        rules.push(Rule {
+            virtual_path,
+            real_path,
+            whiteout: flags & WHITEOUT_FLAG != 0,
+            uid,
+        });
+        cursor = end;
+    }
+    ensure!(
+        cursor == data.len(),
+        "nomount: trailing bytes after the last rule record"
+    );
+    Ok(rules)
+}
+
+/// Parse a `/proc/modules` listing for the vendored module.
+#[must_use]
+pub fn module_loaded(proc_modules: &str) -> bool {
+    proc_modules
+        .lines()
+        .any(|line| line.split_whitespace().next() == Some("nomount"))
+}
+
+/// Fail closed when a load attempt produced no usable API.
+///
+/// A module can load and still be unusable: ksud's loader rewrites vermagic and
+/// relocates symbols, so a mismatched build may install itself without
+/// implementing what this code talks to.
+///
+/// # Errors
+/// Returns an error describing the unusable state.
+pub fn ensure_usable(probe: &DriverProbe) -> Result<()> {
+    match probe.state {
+        DriverState::Ready => Ok(()),
+        DriverState::Absent => bail!("nomount: driver did not answer after loading"),
+        DriverState::Outdated => bail!(
+            "nomount: driver is {} but this build needs API {MIN_API_VERSION}; refusing to inject",
+            probe.version.as_deref().unwrap_or("unknown")
+        ),
+    }
+}
+
+/// Log helper used by the CLI so operators can see what was parsed.
+pub fn log_probe(probe: &DriverProbe) {
+    log::debug!(
+        "nomount: driver={} version={}",
+        probe.state.as_str(),
+        probe.version.as_deref().unwrap_or("-")
+    );
+}
+
+// ---------------------------------------------------------------------------
+// CLI entry points
+// ---------------------------------------------------------------------------
+
+/// Rules the module directory currently asks for.
+///
+/// # Errors
+/// Returns an error when the module tree cannot be walked.
+#[cfg(target_os = "android")]
+pub fn collect_plan() -> Result<crate::nomount_plan::Plan> {
+    let cfg = crate::nomount_plan::PlanConfig::new(
+        std::path::Path::new(crate::defs::MODULE_DIR),
+        std::path::Path::new("/"),
+        std::path::Path::new("/system"),
+    );
+    let fs = crate::nomount_plan::StdFs::new(
+        crate::magic_mount::read_opaque as fn(&std::path::Path) -> Result<bool>,
+    );
+    crate::nomount_plan::collect_rules(&fs, &cfg)
+}
+
+/// What the manager wants the visibility policy to be.
+///
+/// The kernel holds the active state; this is the desired state, persisted so
+/// it survives a reboot and so ksud does not have to enumerate app profiles.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct UidConfig {
+    /// Apps that must see the stock filesystem.
+    pub uids: Vec<u32>,
+    /// Whether isolated processes see the stock filesystem too.
+    pub block_isolated: bool,
+}
+
+/// Read the stored visibility policy: bare UIDs plus an optional
+/// `isolated=<on|off>` directive; blank lines and `#` comments are ignored.
+///
+/// # Errors
+/// Returns an error when the file exists but cannot be read, contains a
+/// non-numeric UID, or carries an unrecognised directive.
+pub fn read_uid_config(path: &std::path::Path) -> Result<UidConfig> {
+    let contents = match std::fs::read_to_string(path) {
+        Ok(contents) => contents,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Ok(UidConfig::default());
+        }
+        Err(error) => {
+            return Err(error).with_context(|| format!("read {}", path.display()));
+        }
+    };
+    let mut uids = Vec::new();
+    let mut block_isolated = false;
+    for line in contents.lines() {
+        let entry = line.trim();
+        if entry.is_empty() || entry.starts_with('#') {
+            continue;
+        }
+        if let Some(value) = entry.strip_prefix("isolated=") {
+            block_isolated = match value {
+                "on" | "1" | "true" => true,
+                "off" | "0" | "false" => false,
+                other => bail!("invalid isolated directive {other:?} in {}", path.display()),
+            };
+            continue;
+        }
+        let uid: u32 = entry
+            .parse()
+            .with_context(|| format!("invalid uid {entry:?} in {}", path.display()))?;
+        uids.push(uid);
+    }
+    uids.sort_unstable();
+    uids.dedup();
+    Ok(UidConfig {
+        uids,
+        block_isolated,
+    })
+}
+
+/// Replace the stored visibility policy.
+///
+/// # Errors
+/// Returns an error when the file cannot be written.
+pub fn write_uid_config(path: &std::path::Path, config: &UidConfig) -> Result<()> {
+    let mut body = String::new();
+    if config.block_isolated {
+        body.push_str("isolated=on\n");
+    }
+    for uid in &config.uids {
+        let _ = writeln!(body, "{uid}");
+    }
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+    }
+    std::fs::write(path, body).with_context(|| format!("write {}", path.display()))
+}
+
+/// Make the kernel's visibility policy match `wanted`, and report the change.
+///
+/// The kernel list is the source of truth for what is active, so the diff is
+/// computed against it rather than against a cached guess.
+///
+/// # Errors
+/// Returns an error when the kernel refuses a change or the list cannot be read.
+pub fn sync_uids<T: Transport>(driver: &Driver<T>, wanted: &UidConfig) -> Result<(usize, usize)> {
+    let current = driver.list_uids()?;
+    let added: Vec<u32> = wanted
+        .uids
+        .iter()
+        .copied()
+        .filter(|uid| !current.contains(uid))
+        .collect();
+    let removed: Vec<u32> = current
+        .iter()
+        .copied()
+        .filter(|uid| !wanted.uids.contains(uid))
+        .collect();
+    if !added.is_empty() {
+        driver.add_uids(&added)?;
+    }
+    if !removed.is_empty() {
+        driver.del_uids(&removed)?;
+    }
+    if driver.isolated_state()? != wanted.block_isolated {
+        driver.block_isolated(wanted.block_isolated)?;
+    }
+    Ok((added.len(), removed.len()))
+}
+
+/// Per-boot NoMount record, read back by `ksud nomount status` and the manager.
+#[derive(Debug, Clone, Default)]
+pub struct RuntimeRecord {
+    pub boot_id: String,
+    pub driver_state: String,
+    pub driver_version: String,
+    pub rules_applied: usize,
+    pub rules_removed: usize,
+    pub uid_count: usize,
+    pub isolated_blocked: bool,
+    pub error: Option<String>,
+}
+
+/// Persist the per-boot NoMount record.
+///
+/// # Errors
+/// Returns an error when the record cannot be written.
+pub fn write_runtime_record(path: &std::path::Path, record: &RuntimeRecord) -> Result<()> {
+    let mut body = String::new();
+    let _ = writeln!(body, "boot_id={}", record.boot_id);
+    let _ = writeln!(body, "driver_state={}", record.driver_state);
+    let _ = writeln!(body, "driver_version={}", record.driver_version);
+    let _ = writeln!(body, "rules_applied={}", record.rules_applied);
+    let _ = writeln!(body, "rules_removed={}", record.rules_removed);
+    let _ = writeln!(body, "uid_count={}", record.uid_count);
+    let _ = writeln!(body, "isolated_blocked={}", record.isolated_blocked);
+    let _ = writeln!(
+        body,
+        "error={}",
+        record.error.as_deref().unwrap_or("").replace('\n', " ")
+    );
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+    }
+    std::fs::write(path, body).with_context(|| format!("write {}", path.display()))
+}
+
+/// Current boot id, used to tell this boot's record from a stale one.
+#[must_use]
+pub fn current_boot_id() -> String {
+    std::fs::read_to_string("/proc/sys/kernel/random/boot_id")
+        .map_or_else(|_| String::new(), |value| value.trim().to_string())
+}
+
+/// Outcome of one injection round, mirroring the per-boot record.
+#[derive(Debug, Clone)]
+pub struct InjectionResult {
+    pub driver_state: String,
+    pub driver_version: String,
+    pub applied: usize,
+    pub removed: usize,
+    pub skipped: usize,
+    pub uid_count: usize,
+    pub isolated_blocked: bool,
+    pub warnings: Vec<String>,
+}
+
+/// Probe (loading the embedded module when needed), apply the current module
+/// rules and sync the stored visibility policy.
+///
+/// Every step that can silently degrade is either recorded or returned as a
+/// warning, so callers never have to guess whether the injection happened.
+///
+/// # Errors
+/// Returns an error when the driver cannot be made usable, the module tree
+/// cannot be walked, or the kernel refuses the rules.
+#[cfg(target_os = "android")]
+pub fn apply_current_plan() -> Result<InjectionResult> {
+    let driver = Driver::kernel();
+    let (probe, loaded) = probe_or_load()?;
+    if let Some(loaded) = loaded {
+        log::info!("nomount: driver loaded from {loaded}");
+    }
+    let plan = collect_plan()?;
+    let (applied, removed) = driver.reconcile_rules(&plan.rules)?;
+
+    let mut warnings = Vec::new();
+    let mut uid_count = 0_usize;
+    let mut isolated_blocked = false;
+    match apply_stored_uids() {
+        Ok((added, dropped)) => {
+            log::info!("nomount: uid exclusions +{added}/-{dropped}");
+            uid_count = driver.list_uids().map_or(0, |uids| uids.len());
+            isolated_blocked = driver.isolated_state().unwrap_or(false);
+        }
+        Err(error) => {
+            // Without the exclusions, apps that should see the stock filesystem
+            // can observe injected files, so this is surfaced, not swallowed.
+            warnings.push(format!("UID exclusions not applied: {error:#}"));
+        }
+    }
+
+    let record = RuntimeRecord {
+        boot_id: current_boot_id(),
+        driver_state: probe.state.as_str().to_string(),
+        driver_version: probe.version.clone().unwrap_or_default(),
+        rules_applied: applied,
+        rules_removed: removed,
+        uid_count,
+        isolated_blocked,
+        error: warnings.first().cloned(),
+    };
+    if let Err(error) =
+        write_runtime_record(std::path::Path::new(crate::defs::NOMOUNT_RUNTIME), &record)
+    {
+        warnings.push(format!("runtime record not written: {error:#}"));
+    }
+
+    Ok(InjectionResult {
+        driver_state: probe.state.as_str().to_string(),
+        driver_version: probe.version.unwrap_or_default(),
+        applied,
+        removed,
+        skipped: plan.skipped.len(),
+        uid_count,
+        isolated_blocked,
+        warnings,
+    })
+}
+
+/// Status reported by `ksud nomount status`.
+#[derive(Debug, Clone)]
+pub struct Status {
+    pub probe: DriverProbe,
+    pub expected_rules: usize,
+    pub applied_rules: usize,
+    pub uid_count: usize,
+    pub isolated_blocked: bool,
+    pub error: Option<String>,
+}
+
+impl Status {
+    /// # Errors
+    /// Returns an error when the module tree cannot be walked.
+    #[cfg(target_os = "android")]
+    pub fn collect() -> Result<Self> {
+        let driver = Driver::kernel();
+        let probe = driver.probe();
+        let plan = collect_plan()?;
+        let mut status = Self {
+            probe,
+            expected_rules: plan.rules.len(),
+            applied_rules: 0,
+            uid_count: 0,
+            isolated_blocked: false,
+            error: None,
+        };
+        if !status.probe.ready() {
+            status.error = Some("driver is not ready".to_string());
+            return Ok(status);
+        }
+        status.applied_rules = driver.list_rules().map_or(0, |rules| rules.len());
+        status.uid_count = driver.list_uids().map_or(0, |uids| uids.len());
+        status.isolated_blocked = driver.isolated_state().unwrap_or(false);
+        Ok(status)
+    }
+
+    /// # Errors
+    /// Returns an error when writing to stdout fails.
+    pub fn print(&self, json: bool) -> Result<()> {
+        let stdout = std::io::stdout();
+        let mut out = stdout.lock();
+        if json {
+            let payload = serde_json::json!({
+                "schema_version": 1,
+                "driver_state": self.probe.state.as_str(),
+                "driver_version": self.probe.version,
+                "api_ok": self.probe.ready(),
+                "rules_expected": self.expected_rules,
+                "rules_applied": self.applied_rules,
+                "uid_count": self.uid_count,
+                "isolated_blocked": self.isolated_blocked,
+                "error": self.error,
+            });
+            writeln!(out, "{payload}").context("failed to write nomount status")?;
+        } else {
+            writeln!(out, "schema_version=1").context("failed to write nomount status")?;
+            writeln!(out, "driver_state={}", self.probe.state.as_str())
+                .context("failed to write nomount status")?;
+            writeln!(
+                out,
+                "driver_version={}",
+                self.probe.version.as_deref().unwrap_or("")
+            )
+            .context("failed to write nomount status")?;
+            writeln!(out, "api_ok={}", self.probe.ready())
+                .context("failed to write nomount status")?;
+            writeln!(out, "rules_expected={}", self.expected_rules)
+                .context("failed to write nomount status")?;
+            writeln!(out, "rules_applied={}", self.applied_rules)
+                .context("failed to write nomount status")?;
+            writeln!(out, "uid_count={}", self.uid_count)
+                .context("failed to write nomount status")?;
+            writeln!(out, "isolated_blocked={}", self.isolated_blocked)
+                .context("failed to write nomount status")?;
+            writeln!(out, "error={}", self.error.as_deref().unwrap_or(""))
+                .context("failed to write nomount status")?;
+        }
+        out.flush().context("failed to flush nomount status")?;
+        Ok(())
+    }
+}
+
+/// Apply the current module rules, optionally without touching the kernel.
+///
+/// A dry run reports what the modules ask for; the real run reconciles the
+/// kernel state and only reports success when the rules landed.
+///
+/// # Errors
+/// Returns an error when the plan cannot be built or the driver refuses the
+/// rules; a refused injection is never reported as success.
+#[cfg(target_os = "android")]
+pub fn inject(dry_run: bool, json: bool) -> Result<()> {
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    if dry_run {
+        let plan = collect_plan()?;
+        if json {
+            let payload = serde_json::json!({
+                "schema_version": 1,
+                "dry_run": true,
+                "rules": plan.rules.len(),
+                "skipped": plan.skipped.len(),
+            });
+            writeln!(out, "{payload}").context("failed to write dry run")?;
+        } else {
+            writeln!(out, "rules={}", plan.rules.len()).context("failed to write dry run")?;
+            for (id, reason) in &plan.skipped {
+                writeln!(out, "skipped={id} ({reason})").context("failed to write dry run")?;
+            }
+        }
+        return out.flush().context("failed to flush dry run");
+    }
+
+    let result = apply_current_plan()?;
+    if json {
+        let payload = serde_json::json!({
+            "schema_version": 1,
+            "driver_state": result.driver_state,
+            "driver_version": result.driver_version,
+            "rules_applied": result.applied,
+            "rules_removed": result.removed,
+            "skipped": result.skipped,
+            "uid_count": result.uid_count,
+            "isolated_blocked": result.isolated_blocked,
+            "warnings": result.warnings,
+        });
+        writeln!(out, "{payload}").context("failed to write injection result")?;
+    } else {
+        writeln!(
+            out,
+            "rules_applied={} rules_removed={} uid_count={}",
+            result.applied, result.removed, result.uid_count
+        )
+        .context("failed to write injection result")?;
+        for warning in &result.warnings {
+            writeln!(out, "warning={warning}").context("failed to write injection result")?;
+        }
+    }
+    out.flush().context("failed to flush injection result")
+}
+
+/// Drop every rule but keep UID exclusions.
+///
+/// # Errors
+/// Returns an error when the kernel refuses the command.
+pub fn clear_rules() -> Result<()> {
+    Driver::kernel().clear_rules()
+}
+
+/// Print the rules the kernel currently holds.
+///
+/// # Errors
+/// Returns an error when the kernel refuses the command or writing fails.
+pub fn print_rules(json: bool) -> Result<()> {
+    let rules = Driver::kernel().list_rules()?;
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    if json {
+        let payload = serde_json::json!({
+            "schema_version": 1,
+            "rules": rules
+                .iter()
+                .map(|rule| serde_json::json!({
+                    "virtual": rule.virtual_path,
+                    "real": rule.real_path,
+                    "whiteout": rule.whiteout,
+                    "uid": rule.uid,
+                }))
+                .collect::<Vec<_>>(),
+        });
+        writeln!(out, "{payload}").context("failed to write rules")?;
+    } else {
+        for rule in &rules {
+            if rule.whiteout {
+                writeln!(out, "{} (whiteout)", rule.virtual_path)
+            } else {
+                writeln!(
+                    out,
+                    "{} -> {}",
+                    rule.virtual_path,
+                    rule.real_path.as_deref().unwrap_or("-")
+                )
+            }
+            .context("failed to write rules")?;
+        }
+    }
+    out.flush().context("failed to flush rules")
+}
+
+/// Make the kernel's UID exclusions match the stored list.
+///
+/// # Errors
+/// Returns an error when the list cannot be read or the kernel refuses a change.
+#[cfg(target_os = "android")]
+pub fn apply_stored_uids() -> Result<(usize, usize)> {
+    let wanted = read_uid_config(std::path::Path::new(crate::defs::NOMOUNT_UIDS))?;
+    sync_uids(&Driver::kernel(), &wanted)
+}
+
+/// Load the embedded NoMount module for the running KMI.
+///
+/// The loader rewrites vermagic and relocates symbols, so a successful load is
+/// not proof of a working driver: callers must probe afterwards.
+///
+/// # Errors
+/// Returns an error when the KMI cannot be determined, this build carries no
+/// module for it, or the loader refuses the module.
+#[cfg(target_os = "android")]
+pub fn load_embedded_driver() -> Result<String> {
+    if module_loaded(&std::fs::read_to_string("/proc/modules").unwrap_or_default()) {
+        return Ok("already loaded".to_string());
+    }
+    let kmi = crate::boot_patch::get_current_kmi()
+        .context("nomount: cannot determine the running KMI")?;
+    let name = format!("{kmi}{ASSET_SUFFIX}");
+    let data = crate::assets::get_asset_data(&name)
+        .with_context(|| format!("nomount: this build has no module for {kmi}"))?;
+    let params = std::ffi::CString::new("").context("nomount: empty module parameters")?;
+    ksuinit::load_module(&data, &params)
+        .with_context(|| format!("nomount: loading {name} failed"))?;
+    log::info!("nomount: loaded {name}");
+    Ok(name)
+}
+
+/// Probe the driver, loading the embedded module first when there is none.
+///
+/// # Errors
+/// Returns an error when a load is needed and fails, or when the driver answers
+/// with an unusable API.
+#[cfg(target_os = "android")]
+pub fn probe_or_load() -> Result<(DriverProbe, Option<String>)> {
+    let driver = Driver::kernel();
+    let first = driver.probe();
+    if first.ready() {
+        return Ok((first, None));
+    }
+    let loaded = load_embedded_driver()?;
+    let second = driver.probe();
+    ensure_usable(&second)?;
+    Ok((second, Some(loaded)))
+}
+
+/// How a `ksud nomount uid` subcommand edits the stored list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UidEdit {
+    Set,
+    Add,
+    Del,
+    Isolated(bool),
+}
+
+/// Edit the stored UID list and apply it to the kernel.
+///
+/// # Errors
+/// Returns an error when the stored list cannot be read or written, or when the
+/// kernel refuses a change.
+#[cfg(target_os = "android")]
+pub fn uid_edit(mode: Option<UidEdit>, uids: &[u32], json: bool) -> Result<()> {
+    let driver = Driver::kernel();
+    let stdout = std::io::stdout();
+    let mut out = stdout.lock();
+    let Some(edit) = mode else {
+        return print_uid_state(&driver, json, &mut out);
+    };
+
+    let path = std::path::Path::new(crate::defs::NOMOUNT_UIDS);
+    let mut config = read_uid_config(path)?;
+    match edit {
+        UidEdit::Set => config.uids = uids.to_vec(),
+        UidEdit::Add => config.uids.extend_from_slice(uids),
+        UidEdit::Del => config.uids.retain(|uid| !uids.contains(uid)),
+        UidEdit::Isolated(state) => config.block_isolated = state,
+    }
+    config.uids.sort_unstable();
+    config.uids.dedup();
+    write_uid_config(path, &config)?;
+    let (added, removed) = sync_uids(&driver, &config)?;
+    if json {
+        let payload = serde_json::json!({
+            "schema_version": 1,
+            "stored": config.uids,
+            "isolated_blocked": config.block_isolated,
+            "added": added,
+            "removed": removed,
+        });
+        writeln!(out, "{payload}").context("failed to write uid result")?;
+    } else {
+        writeln!(
+            out,
+            "stored={} isolated_blocked={} added={added} removed={removed}",
+            config.uids.len(),
+            config.block_isolated
+        )
+        .context("failed to write uid result")?;
+    }
+    out.flush().context("failed to flush uid result")
+}
+
+#[cfg(target_os = "android")]
+fn print_uid_state(
+    driver: &Driver<KernelTransport>,
+    json: bool,
+    out: &mut impl Write,
+) -> Result<()> {
+    let active = driver.list_uids()?;
+    let stored = read_uid_config(std::path::Path::new(crate::defs::NOMOUNT_UIDS))?;
+    if json {
+        let payload = serde_json::json!({
+            "schema_version": 1,
+            "active": active,
+            "stored": stored.uids,
+            "isolated_blocked": driver.isolated_state().unwrap_or(false),
+        });
+        writeln!(out, "{payload}").context("failed to write uid list")?;
+    } else {
+        writeln!(out, "active={}", join_uids(&active)).context("failed to write uid list")?;
+        writeln!(out, "stored={}", join_uids(&stored.uids)).context("failed to write uid list")?;
+    }
+    out.flush().context("failed to flush uid list")
+}
+
+fn join_uids(uids: &[u32]) -> String {
+    uids.iter()
+        .map(u32::to_string)
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+#[cfg(test)]
+#[path = "nomount_tests.rs"]
+mod tests;
