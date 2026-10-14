@@ -48,6 +48,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.screen.nomount.nomountUnavailableReason
 import me.weishu.kernelsu.ui.component.profile.dialogs.SingleSelectDialog
 import me.weishu.kernelsu.ui.util.LauncherIconUtils
 
@@ -518,7 +519,8 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         uiState.isNomountLoading -> stringResource(R.string.nomount_loading)
                         uiState.nomountReadError -> stringResource(R.string.nomount_read_error)
                         nomount == null -> stringResource(R.string.nomount_loading)
-                        !nomount.apiOk -> stringResource(
+                        // Say why it is unusable and what to do, not just that it is.
+                        !nomount.apiOk -> nomountUnavailableReason(nomount) ?: stringResource(
                             id = R.string.nomount_driver_unavailable,
                             stringResource(
                                 id = when (nomount.driverState) {

@@ -49,6 +49,10 @@ data class NomountStatus(
     val ownsInjection: Boolean,
     /** `builtin` when the kernel carries the driver, `module` for an LKM. */
     val driverKind: String?,
+    /** Machine-readable reason the driver is unusable; see the manager strings. */
+    val unavailableCode: String?,
+    /** The KMI or version [unavailableCode] refers to. */
+    val unavailableDetail: String?,
     val uidCount: Int,
     val isolatedBlocked: Boolean,
     val error: String?,
@@ -96,6 +100,8 @@ data class NomountStatus(
                 deferredTo = json.optStringOrNull("deferred_to"),
                 ownsInjection = json.optBoolean("owns_injection", false),
                 driverKind = json.optStringOrNull("driver_kind"),
+                unavailableCode = json.optStringOrNull("unavailable_code"),
+                unavailableDetail = json.optStringOrNull("unavailable_detail"),
                 uidCount = json.optInt("uid_count", 0),
                 isolatedBlocked = json.optBoolean("isolated_blocked", false),
                 error = json.optStringOrNull("error"),

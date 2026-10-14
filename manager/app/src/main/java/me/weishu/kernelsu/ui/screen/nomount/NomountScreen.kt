@@ -147,11 +147,26 @@ private fun driverSummary(state: NomountUiState): String {
         "module" -> stringResource(R.string.nomount_driver_kind_module)
         else -> null
     }
+    val reason = nomountUnavailableReason(status)
     return listOfNotNull(
         label,
         version?.takeIf { it.isNotEmpty() }?.let { "($it)" },
         kind,
+        reason,
     ).joinToString(" ")
+}
+
+/** Localized "why is it not usable", so the user gets an actionable sentence. */
+@Composable
+internal fun nomountUnavailableReason(status: NomountStatus): String? {
+    val detail = status.unavailableDetail.orEmpty()
+    return when (status.unavailableCode) {
+        "no_asset_for_kmi" -> stringResource(R.string.nomount_unavailable_no_asset, detail)
+        "outdated" -> stringResource(R.string.nomount_unavailable_outdated, detail)
+        "not_loaded" -> stringResource(R.string.nomount_unavailable_not_loaded)
+        "unknown_kmi" -> stringResource(R.string.nomount_unavailable_unknown_kmi)
+        else -> null
+    }
 }
 
 @Composable

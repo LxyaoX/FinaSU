@@ -1104,6 +1104,11 @@ pub struct Status {
     pub driver_kind: Option<DriverKind>,
     /// Last action that changed kernel state, e.g. `clear` or `hot-unload <id>`.
     pub last_action: Option<String>,
+    /// Machine-readable reason the driver is unusable, for the manager to
+    /// translate: `no_asset_for_kmi`, `outdated`, `not_loaded` or `unknown_kmi`.
+    pub unavailable_code: Option<&'static str>,
+    /// The KMI or version the code refers to.
+    pub unavailable_detail: Option<String>,
     pub uid_count: usize,
     pub isolated_blocked: bool,
     pub error: Option<String>,
@@ -1130,19 +1135,26 @@ impl Status {
             owns_injection: false,
             driver_kind: None,
             last_action: read_last_action(std::path::Path::new(crate::defs::NOMOUNT_LAST_ACTION)),
+            unavailable_code: None,
+            unavailable_detail: None,
             uid_count: 0,
             isolated_blocked: false,
             error: None,
         };
-        if !status.probe.ready() {
-            status.error = Some("driver is not ready".to_string());
-            return Ok(status);
-        }
         status.owns_injection = matches!(
             crate::magic_mount::read_mount_mode().unwrap_or(crate::magic_mount::MountMode::Auto),
             crate::magic_mount::MountMode::Nomount
         ) && status.deferred_to.is_none()
             && status.probe.ready();
+        if !status.probe.ready() {
+            status.error = Some("driver is not ready".to_string());
+            if status.deferred_to.is_none() {
+                let (code, detail) = unavailable_reason(&status.probe);
+                status.unavailable_code = Some(code);
+                status.unavailable_detail = detail;
+            }
+            return Ok(status);
+        }
         status.driver_kind = status.probe.ready().then(|| {
             if module_loaded(&std::fs::read_to_string("/proc/modules").unwrap_or_default()) {
                 DriverKind::Module
@@ -1189,6 +1201,8 @@ impl Status {
                 "owns_injection": self.owns_injection,
                 "driver_kind": self.driver_kind.map(DriverKind::as_str),
                 "last_action": self.last_action,
+                "unavailable_code": self.unavailable_code,
+                "unavailable_detail": self.unavailable_detail,
                 "uid_count": self.uid_count,
                 "isolated_blocked": self.isolated_blocked,
                 "error": self.error,
@@ -1238,6 +1252,18 @@ impl Status {
                 out,
                 "last_action={}",
                 self.last_action.as_deref().unwrap_or("")
+            )
+            .context("failed to write nomount status")?;
+            writeln!(
+                out,
+                "unavailable_code={}",
+                self.unavailable_code.unwrap_or("")
+            )
+            .context("failed to write nomount status")?;
+            writeln!(
+                out,
+                "unavailable_detail={}",
+                self.unavailable_detail.as_deref().unwrap_or("")
             )
             .context("failed to write nomount status")?;
             writeln!(out, "uid_count={}", self.uid_count)
@@ -1403,6 +1429,30 @@ pub fn print_rules(json: bool) -> Result<()> {
 pub fn apply_stored_uids() -> Result<(usize, usize)> {
     let wanted = read_uid_config(std::path::Path::new(crate::defs::NOMOUNT_UIDS))?;
     sync_uids(&Driver::kernel(), &wanted)
+}
+
+/// Why the driver cannot be used, as a code the manager can translate.
+///
+/// The reason matters most on kernels this build does not ship a module for
+/// (legacy or custom kernels): falling back to the built-in engine is correct,
+/// but the user has to be told which of the cases they are in.
+#[cfg(target_os = "android")]
+fn unavailable_reason(probe: &DriverProbe) -> (&'static str, Option<String>) {
+    match probe.state {
+        DriverState::Ready => ("ready", None),
+        DriverState::Outdated => ("outdated", probe.version.clone()),
+        DriverState::Absent => crate::boot_patch::get_current_kmi().map_or_else(
+            |_| ("unknown_kmi", None),
+            |kmi| {
+                let name = format!("{kmi}{ASSET_SUFFIX}");
+                if crate::assets::get_asset_data(&name).is_ok() {
+                    ("not_loaded", Some(kmi))
+                } else {
+                    ("no_asset_for_kmi", Some(kmi))
+                }
+            },
+        ),
+    }
 }
 
 /// An installed module that drives NoMount itself, if there is one.
