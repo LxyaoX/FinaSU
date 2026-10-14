@@ -49,7 +49,7 @@ Standard KernelSU modules are managed from the manager. A single active metamodu
 
 ### FolkZygisk
 
-FolkZygisk is a built-in Zygisk engine. The manager exposes its installation and activation controls, and `ksud` handles provider registration without conflicting with an existing Zygisk provider.
+FolkZygisk is a built-in Zygisk engine. The manager exposes its installation and activation controls, and `ksud` steps the built-in engine aside whenever an external Zygisk provider is active, so provider modules install normally.
 
 ### SUSFS
 

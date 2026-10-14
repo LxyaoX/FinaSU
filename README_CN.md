@@ -49,7 +49,7 @@ FinaSU 提供：
 
 ### FolkZygisk
 
-FolkZygisk 是内置的 Zygisk 引擎。管理器提供安装与激活控制，`ksud` 负责注册 provider，并与已有的 Zygisk provider 互不冲突。
+FolkZygisk 是内置的 Zygisk 引擎。管理器提供安装与激活控制；已有外置 Zygisk provider 时 `ksud` 会让内置引擎自动让位，因此 provider 模块可正常安装。
 
 ### SUSFS
 

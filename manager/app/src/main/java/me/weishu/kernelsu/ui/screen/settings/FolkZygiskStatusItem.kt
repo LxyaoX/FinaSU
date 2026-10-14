@@ -5,18 +5,10 @@ import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalResources
-import kotlinx.coroutines.launch
-import me.weishu.kernelsu.ui.component.dialog.ConfirmResult
-import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 
 @Composable
 internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScreenActions) {
-    val resources = LocalResources.current
-    val scope = rememberCoroutineScope()
-    val dialog = rememberConfirmDialog()
     val status = state.folkZygiskStatus
     val summary = when {
         state.isFolkZygiskLoading -> stringResource(R.string.folkzygisk_loading)
@@ -29,6 +21,7 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
                 "failed" -> R.string.folkzygisk_failed
                 else -> R.string.folkzygisk_unverified
             })
+            val external = status.externalProviders
             val selection = stringResource(if (status.enabled) R.string.folkzygisk_next_enabled
                 else R.string.folkzygisk_next_disabled)
             val blockers = status.enableBlockers.map { reason ->
@@ -36,7 +29,6 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
                     "license_review_required" -> R.string.folkzygisk_license_gate
                     "device_acceptance_required" -> R.string.folkzygisk_device_gate
                     "engine_missing" -> R.string.folkzygisk_engine_missing
-                    "external_provider_conflict" -> R.string.folkzygisk_external_conflict
                     "startup_protection" -> R.string.folkzygisk_startup_protection
                     else -> R.string.folkzygisk_unknown_gate
                 })
@@ -44,10 +36,16 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
             buildList {
                 add(stringResource(R.string.folkzygisk_current, injection))
                 add(selection)
-                if (status.rebootRequired == true || state.folkZygiskRebootPending) add(stringResource(R.string.folkzygisk_reboot_required))
-                if (status.externalProviders.isNotEmpty()) {
-                    add(stringResource(R.string.folkzygisk_external, status.externalProviders.joinToString(", ")))
+                if (external.isNotEmpty()) {
+                    val names = external.joinToString(", ")
+                    // The built-in engine only yields to a provider at boot, so until a reboot the
+                    // injection state above is still current; this line states next-boot precedence.
+                    add(
+                        if (status.enabled) stringResource(R.string.folkzygisk_external_precedence, names)
+                        else stringResource(R.string.folkzygisk_external, names)
+                    )
                 }
+                if (status.rebootRequired == true || state.folkZygiskRebootPending) add(stringResource(R.string.folkzygisk_reboot_required))
                 if (blockers.isNotEmpty()) add(stringResource(R.string.folkzygisk_blockers, blockers.joinToString("; ")))
             }.joinToString("\n")
         }
@@ -58,15 +56,6 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
         summary = summary,
         checked = status?.enabled == true,
         enabled = status != null && !state.folkZygiskReadError && !state.isFolkZygiskLoading && !state.isFolkZygiskWriting,
-        onCheckedChange = { enabled ->
-            if (enabled && status != null && status.externalProviders.isNotEmpty()) {
-                if (!dialog.isShown) scope.launch {
-                    if (dialog.awaitConfirm(
-                        title = resources.getString(R.string.folkzygisk_switch_title),
-                        content = resources.getString(R.string.folkzygisk_builtin_switch_message, status.externalProviders.joinToString(", ")),
-                    ) == ConfirmResult.Confirmed) actions.onSetFolkZygiskEnabled(true, true, status.externalProviders)
-                }
-            } else actions.onSetFolkZygiskEnabled(enabled, false, emptyList())
-        },
+        onCheckedChange = { actions.onSetFolkZygiskEnabled(it) },
     )
 }

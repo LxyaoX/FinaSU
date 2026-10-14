@@ -48,6 +48,9 @@ mod metamodule;
 mod module;
 #[cfg(target_os = "android")]
 mod module_config;
+#[cfg(any(target_os = "android", test))]
+#[cfg_attr(not(target_os = "android"), allow(dead_code))]
+mod module_markers;
 mod mount_plan;
 #[cfg(any(target_os = "android", test))]
 mod plugin;

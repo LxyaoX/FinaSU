@@ -197,8 +197,6 @@ fun ModulePagerMaterial(
             when (val request = confirmDialogState?.request) {
                 is ModuleConfirmRequest.Uninstall -> actions.onUninstallModule(request.module)
                 is ModuleConfirmRequest.Update -> actions.onConfirmUpdate(request)
-                is ModuleConfirmRequest.SwitchExternal -> actions.onConfirmSwitchExternal(request)
-                ModuleConfirmRequest.ExternalConflict -> actions.onDismissConfirmRequest()
                 null -> Unit
             }
         },

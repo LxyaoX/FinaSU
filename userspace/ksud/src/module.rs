@@ -2,6 +2,7 @@
 use crate::utils::*;
 use crate::{
     assets, defs, ksucalls, metamodule,
+    module_markers::clear_activation_markers,
     restorecon::{restore_syscon, setsyscon},
     sepolicy,
 };
@@ -685,8 +686,6 @@ fn install_module_to_system(zip: &str) -> Result<()> {
     validate_module_id(module_id)
         .with_context(|| format!("Invalid module ID in module.prop: '{module_id}'"))?;
 
-    crate::zygisk::check_activation(module_id)?;
-
     // Check if this module is a metamodule
     let is_metamodule = metamodule::is_metamodule(&module_prop);
 
@@ -798,14 +797,6 @@ fn install_module_to_system(zip: &str) -> Result<()> {
 
 pub fn install_module(zip: &str) -> Result<()> {
     ksucalls::ensure_uapi_version_matched()?;
-    let _zygisk_lock = crate::zygisk::lock()?;
-
-    install_module_locked(zip)
-}
-
-/// Caller holds the shared provider/configuration lock.
-pub fn install_module_locked(zip: &str) -> Result<()> {
-    ksucalls::ensure_uapi_version_matched()?;
 
     let result = install_module_to_system(zip);
     if let Err(ref e) = result {
@@ -818,23 +809,20 @@ pub fn install_module_locked(zip: &str) -> Result<()> {
 
 pub fn undo_uninstall_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
-    let _zygisk_lock = crate::zygisk::lock()?;
-    crate::zygisk::check_activation(id)?;
 
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
 
-    crate::zygisk::clear_activation_markers(
+    clear_activation_markers(
         &module_path,
         &Path::new(defs::MODULE_UPDATE_DIR).join(id),
-        true,
+        defs::REMOVE_FILE_NAME,
         regenerate_preinit_rc,
     )
 }
 
 pub fn uninstall_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
-    let _zygisk_lock = crate::zygisk::lock()?;
 
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
@@ -862,41 +850,20 @@ pub fn run_action(id: &str) -> Result<()> {
 
 pub fn enable_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
-    let _zygisk_lock = crate::zygisk::lock()?;
-    crate::zygisk::check_activation(id)?;
 
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
 
-    crate::zygisk::clear_activation_markers(
+    clear_activation_markers(
         &module_path,
         &Path::new(defs::MODULE_UPDATE_DIR).join(id),
-        false,
+        defs::DISABLE_FILE_NAME,
         regenerate_preinit_rc,
     )
 }
 
-/// Only called with the Zygisk operation lock held and selection already disabled.
-pub fn activate_external_provider_locked(id: &str, undo_uninstall: bool) -> Result<()> {
-    validate_module_id(id)?;
-    let path = Path::new(defs::MODULE_DIR).join(id);
-    ensure!(path.is_dir(), "Module {id} not found");
-    let pending = Path::new(defs::MODULE_UPDATE_DIR).join(id);
-    let other = if undo_uninstall {
-        defs::DISABLE_FILE_NAME
-    } else {
-        defs::REMOVE_FILE_NAME
-    };
-    ensure!(
-        !path.join(other).exists() && !pending.join(other).exists(),
-        "Module {id} is still disabled or marked for removal"
-    );
-    crate::zygisk::clear_activation_markers(&path, &pending, undo_uninstall, regenerate_preinit_rc)
-}
-
 pub fn disable_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
-    let _zygisk_lock = crate::zygisk::lock()?;
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
 

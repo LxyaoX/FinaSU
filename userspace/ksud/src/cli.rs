@@ -617,7 +617,7 @@ pub fn run() -> Result<()> {
     let result = match cli.command {
         Commands::Anykernel3 { zip } => crate::anykernel3::flash(&zip),
         Commands::Susfs { command } => crate::susfs::run(command),
-        Commands::Zygisk { command } => crate::zygisk::run(command),
+        Commands::Zygisk { command } => crate::zygisk::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();
