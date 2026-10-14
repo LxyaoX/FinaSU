@@ -254,6 +254,26 @@ fn api_version_parses_the_leading_integer() {
 }
 
 #[test]
+fn only_an_absent_driver_is_worth_loading() {
+    // A registered key type cannot be registered twice, so a ready or outdated
+    // driver (kernel built-in included) must never be followed by a load.
+    assert!(should_load(&DriverProbe {
+        state: DriverState::Absent,
+        version: None,
+    }));
+    assert!(!should_load(&DriverProbe {
+        state: DriverState::Outdated,
+        version: Some("20".to_string()),
+    }));
+    assert!(!should_load(&DriverProbe {
+        state: DriverState::Ready,
+        version: Some("21".to_string()),
+    }));
+    assert_eq!(DriverKind::Builtin.as_str(), "builtin");
+    assert_eq!(DriverKind::Module.as_str(), "module");
+}
+
+#[test]
 fn module_loaded_matches_proc_modules() {
     assert!(module_loaded(
         "nomount 123456 0 - Live 0x0\nother 1 0 - Live\n"

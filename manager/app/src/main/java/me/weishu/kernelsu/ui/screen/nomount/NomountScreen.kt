@@ -142,7 +142,16 @@ private fun driverSummary(state: NomountUiState): String {
         }
     )
     val version = status.driverVersion
-    return if (version.isNullOrEmpty()) label else "$label ($version)"
+    val kind = when (status.driverKind) {
+        "builtin" -> stringResource(R.string.nomount_driver_kind_builtin)
+        "module" -> stringResource(R.string.nomount_driver_kind_module)
+        else -> null
+    }
+    return listOfNotNull(
+        label,
+        version?.takeIf { it.isNotEmpty() }?.let { "($it)" },
+        kind,
+    ).joinToString(" ")
 }
 
 @Composable

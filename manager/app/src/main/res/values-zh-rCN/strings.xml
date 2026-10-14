@@ -508,6 +508,8 @@
     <string name="nomount_driver_absent">不可用</string>
     <string name="nomount_driver_outdated">版本不匹配</string>
     <string name="nomount_driver_ready">就绪</string>
+    <string name="nomount_driver_kind_builtin">内核内建</string>
+    <string name="nomount_driver_kind_module">内核模块</string>
     <string name="nomount_driver_unavailable">驱动不可用（%1$s）</string>
     <string name="nomount_rules">重定向规则</string>
     <string name="nomount_rules_value">已生效 %1$d / %2$d 条规则</string>

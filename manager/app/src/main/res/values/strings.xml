@@ -320,6 +320,8 @@
     <string name="nomount_driver_absent">Not available</string>
     <string name="nomount_driver_outdated">Version mismatch</string>
     <string name="nomount_driver_ready">Ready</string>
+    <string name="nomount_driver_kind_builtin">kernel built-in</string>
+    <string name="nomount_driver_kind_module">kernel module</string>
     <string name="nomount_driver_unavailable">Driver unavailable (%1$s)</string>
     <string name="nomount_rules">Redirection rules</string>
     <string name="nomount_rules_value">%1$d of %2$d rules active</string>

@@ -69,6 +69,8 @@ mod android {
     /// UIDs that must see the stock filesystem, one per line. Written by the
     /// manager from the app profiles and replayed into the kernel on boot.
     pub const NOMOUNT_UIDS: &str = concatcp!(WORKING_DIR, "nomount_uids");
+    /// Last action that changed NoMount kernel state, for diagnostics.
+    pub const NOMOUNT_LAST_ACTION: &str = concatcp!(WORKING_DIR, "nomount_last_action");
 
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";

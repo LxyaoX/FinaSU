@@ -47,6 +47,8 @@ data class NomountStatus(
     val deferredTo: String?,
     /** True when the built-in backend is the one injecting right now. */
     val ownsInjection: Boolean,
+    /** `builtin` when the kernel carries the driver, `module` for an LKM. */
+    val driverKind: String?,
     val uidCount: Int,
     val isolatedBlocked: Boolean,
     val error: String?,
@@ -93,6 +95,7 @@ data class NomountStatus(
                 uidsActive = json.optIntList("uids_active"),
                 deferredTo = json.optStringOrNull("deferred_to"),
                 ownsInjection = json.optBoolean("owns_injection", false),
+                driverKind = json.optStringOrNull("driver_kind"),
                 uidCount = json.optInt("uid_count", 0),
                 isolatedBlocked = json.optBoolean("isolated_blocked", false),
                 error = json.optStringOrNull("error"),

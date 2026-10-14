@@ -788,8 +788,8 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         warning: None,
     })?;
 
-    // NoMount is opt-in, so a driver that cannot be made usable must not leave
-    // the modules unmounted: fall back to the built-in engine and say so.
+    // A driver that cannot be made usable must not leave the modules
+    // unmounted: fall back to the built-in engine and say why.
     let (provider, run, fallback) = match run_provider(provider) {
         ProviderRun::Failed { error, .. } if provider == Provider::Nomount => {
             warn!("nomount: {error:#}; falling back to the built-in engine");

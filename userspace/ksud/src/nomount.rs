@@ -62,6 +62,39 @@ impl DriverState {
     }
 }
 
+/// How the driver got into the kernel.
+///
+/// Both work identically from here on: everything below talks to the key API,
+/// so a kernel with `CONFIG_NOMOUNT=y` needs no load and no special case.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DriverKind {
+    /// Built into the kernel; nothing to load or unload.
+    Builtin,
+    /// A loadable module is present in `/proc/modules`.
+    Module,
+}
+
+impl DriverKind {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Builtin => "builtin",
+            Self::Module => "module",
+        }
+    }
+}
+
+/// Whether loading the embedded module can help.
+///
+/// Only when the API is absent: a registered key type means something already
+/// provides it (built into the kernel, or a module another loader put there),
+/// and registering it again fails. That also means an outdated built-in driver
+/// cannot be fixed from userspace, so callers must say so instead of trying.
+#[must_use]
+pub const fn should_load(probe: &DriverProbe) -> bool {
+    matches!(probe.state, DriverState::Absent)
+}
+
 /// A probe result: the driver state plus the version string when one was read.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DriverProbe {
@@ -753,7 +786,9 @@ pub fn hot_load(id: &str) -> Result<usize> {
     {
         bail!("nomount: module {id} is {reason}");
     }
-    driver.apply_rules(&plan.rules)
+    let applied = driver.apply_rules(&plan.rules);
+    log_action(&format!("hot-load {id}"));
+    applied
 }
 
 /// Remove one module's rules from the running kernel.
@@ -782,6 +817,7 @@ pub fn hot_unload(id: &str) -> Result<usize> {
         .collect();
     let count = paths.len();
     Driver::kernel().delete_rules(&paths)?;
+    log_action(&format!("hot-unload {id}"));
     Ok(count)
 }
 
@@ -889,6 +925,38 @@ pub fn sync_uids<T: Transport>(driver: &Driver<T>, wanted: &UidConfig) -> Result
         driver.block_isolated(wanted.block_isolated)?;
     }
     Ok((added.len(), removed.len()))
+}
+
+/// Remember the last action that changed kernel state.
+///
+/// Rules live in RAM and can be dropped by an explicit clear or a per-module
+/// unload, so "why is the kernel injecting nothing" needs an answer that
+/// survives the kernel log rotating out.
+///
+/// # Errors
+/// Returns an error when the record cannot be written.
+pub fn record_action(path: &std::path::Path, action: &str) -> Result<()> {
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |since| since.as_secs());
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+    }
+    std::fs::write(
+        path,
+        format!("time={stamp}\naction={}\n", action.replace('\n', " ")),
+    )
+    .with_context(|| format!("write {}", path.display()))
+}
+
+/// The last recorded state change, for `nomount status`.
+#[must_use]
+pub fn read_last_action(path: &std::path::Path) -> Option<String> {
+    let content = std::fs::read_to_string(path).ok()?;
+    content.lines().find_map(|line| {
+        let (key, value) = line.split_once('=')?;
+        (key == "action").then(|| value.to_string())
+    })
 }
 
 /// Per-boot NoMount record, read back by `ksud nomount status` and the manager.
@@ -1032,6 +1100,10 @@ pub struct Status {
     pub deferred_to: Option<String>,
     /// True when this backend is the one injecting right now.
     pub owns_injection: bool,
+    /// Built-in support or a loadable module; `None` while the API is silent.
+    pub driver_kind: Option<DriverKind>,
+    /// Last action that changed kernel state, e.g. `clear` or `hot-unload <id>`.
+    pub last_action: Option<String>,
     pub uid_count: usize,
     pub isolated_blocked: bool,
     pub error: Option<String>,
@@ -1056,6 +1128,8 @@ impl Status {
             uids_active: Vec::new(),
             deferred_to: installed_driver_module(),
             owns_injection: false,
+            driver_kind: None,
+            last_action: read_last_action(std::path::Path::new(crate::defs::NOMOUNT_LAST_ACTION)),
             uid_count: 0,
             isolated_blocked: false,
             error: None,
@@ -1069,6 +1143,13 @@ impl Status {
             crate::magic_mount::MountMode::Nomount
         ) && status.deferred_to.is_none()
             && status.probe.ready();
+        status.driver_kind = status.probe.ready().then(|| {
+            if module_loaded(&std::fs::read_to_string("/proc/modules").unwrap_or_default()) {
+                DriverKind::Module
+            } else {
+                DriverKind::Builtin
+            }
+        });
         if let Ok(rules) = driver.list_rules() {
             // Report the rules we published separately from the directories the
             // kernel made up for them, so the two never contradict each other.
@@ -1106,6 +1187,8 @@ impl Status {
                 "uids_active": self.uids_active,
                 "deferred_to": self.deferred_to,
                 "owns_injection": self.owns_injection,
+                "driver_kind": self.driver_kind.map(DriverKind::as_str),
+                "last_action": self.last_action,
                 "uid_count": self.uid_count,
                 "isolated_blocked": self.isolated_blocked,
                 "error": self.error,
@@ -1145,6 +1228,18 @@ impl Status {
             .context("failed to write nomount status")?;
             writeln!(out, "owns_injection={}", self.owns_injection)
                 .context("failed to write nomount status")?;
+            writeln!(
+                out,
+                "driver_kind={}",
+                self.driver_kind.map_or("", DriverKind::as_str)
+            )
+            .context("failed to write nomount status")?;
+            writeln!(
+                out,
+                "last_action={}",
+                self.last_action.as_deref().unwrap_or("")
+            )
+            .context("failed to write nomount status")?;
             writeln!(out, "uid_count={}", self.uid_count)
                 .context("failed to write nomount status")?;
             writeln!(out, "isolated_blocked={}", self.isolated_blocked)
@@ -1204,6 +1299,7 @@ pub fn inject(dry_run: bool, json: bool, verbose: bool) -> Result<()> {
     }
 
     let result = apply_current_plan()?;
+    log_action("inject");
     if json {
         let payload = serde_json::json!({
             "schema_version": 1,
@@ -1236,7 +1332,24 @@ pub fn inject(dry_run: bool, json: bool, verbose: bool) -> Result<()> {
 /// # Errors
 /// Returns an error when the kernel refuses the command.
 pub fn clear_rules() -> Result<()> {
-    Driver::kernel().clear_rules()
+    let result = Driver::kernel().clear_rules();
+    log_action("clear");
+    result
+}
+
+/// Record a state change next to the runtime record; failures only warn.
+fn log_action(action: &str) {
+    // Only the Android build has a persistent workspace to write to; host tests
+    // exercise the codec and the planner instead.
+    #[cfg(target_os = "android")]
+    {
+        let path = std::path::Path::new(crate::defs::NOMOUNT_LAST_ACTION);
+        if let Err(error) = record_action(path, action) {
+            log::warn!("nomount: could not record action {action}: {error:#}");
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    let _ = action;
 }
 
 /// Print the rules the kernel currently holds.
@@ -1384,6 +1497,16 @@ pub fn probe_or_load() -> Result<(DriverProbe, Option<String>)> {
     let first = driver.probe();
     if first.ready() {
         return Ok((first, None));
+    }
+    if !should_load(&first) {
+        // A registered key type means something already provides the API, and a
+        // second registration always fails: report the real reason instead of a
+        // confusing load error.
+        bail!(
+            "nomount: the kernel already provides NoMount (version {}) but this build needs API >= {MIN_API_VERSION}; \
+             a built-in driver cannot be replaced at runtime",
+            first.version.as_deref().unwrap_or("unknown")
+        );
     }
     let loaded = load_embedded_driver()?;
     let second = driver.probe();
