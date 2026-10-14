@@ -225,18 +225,71 @@ fn is_remapped(name: &str) -> bool {
 /// Returns an error when the modules directory or a reachable module subtree
 /// cannot be read.
 pub fn collect_rules(fs: &impl PlanFs, cfg: &PlanConfig<'_>) -> Result<Plan> {
-    let mut plan = Plan::default();
+    collect_rules_filtered(fs, cfg, None, true)
+}
+
+/// Build the rule list for one module, for the per-module hot load/unload path.
+///
+/// # Errors
+/// Returns an error when the modules directory or the module subtree cannot be
+/// read. An unknown id yields an empty plan.
+pub fn collect_rules_for(fs: &impl PlanFs, cfg: &PlanConfig<'_>, id: &str) -> Result<Plan> {
+    collect_rules_filtered(fs, cfg, Some(id), true)
+}
+
+/// Every rule a module would contribute, ignoring its `disable`/`skip_mount`
+/// marks: the paths a hot unload has to remove even though the module is off.
+///
+/// # Errors
+/// Returns an error when the module subtree cannot be read.
+pub fn collect_rules_ignoring_marks(
+    fs: &impl PlanFs,
+    cfg: &PlanConfig<'_>,
+    id: &str,
+) -> Result<Plan> {
+    collect_rules_filtered(fs, cfg, Some(id), false)
+}
+
+/// Rule count for every module that contributes rules, in plan order.
+///
+/// # Errors
+/// Returns an error when the modules directory or a module subtree cannot be
+/// read.
+pub fn rule_counts(fs: &impl PlanFs, cfg: &PlanConfig<'_>) -> Result<Vec<(String, usize)>> {
+    let mut counts = Vec::new();
+    for id in module_ids(fs, cfg)? {
+        let plan = collect_rules_filtered(fs, cfg, Some(&id), true)?;
+        if !plan.rules.is_empty() {
+            counts.push((id, plan.rules.len()));
+        }
+    }
+    Ok(counts)
+}
+
+fn module_ids(fs: &impl PlanFs, cfg: &PlanConfig<'_>) -> Result<Vec<String>> {
     let mut modules = fs.read_dir(cfg.modules_dir)?;
     modules.sort_unstable();
+    modules.retain(|id| matches!(fs.kind(&cfg.modules_dir.join(id)), Ok(EntryKind::Dir)));
+    Ok(modules)
+}
 
-    for id in modules {
-        let module = cfg.modules_dir.join(&id);
-        if fs.kind(&module)? != EntryKind::Dir {
+fn collect_rules_filtered(
+    fs: &impl PlanFs,
+    cfg: &PlanConfig<'_>,
+    only: Option<&str>,
+    honor_marks: bool,
+) -> Result<Plan> {
+    let mut plan = Plan::default();
+
+    for id in module_ids(fs, cfg)? {
+        if only.is_some_and(|only| only != id) {
             continue;
         }
-        if let Some(mark) = SKIP_MARKS
-            .iter()
-            .find(|mark| fs.exists(&module.join(mark)).unwrap_or(false))
+        let module = cfg.modules_dir.join(&id);
+        if honor_marks
+            && let Some(mark) = SKIP_MARKS
+                .iter()
+                .find(|mark| fs.exists(&module.join(mark)).unwrap_or(false))
         {
             plan.skipped.push((id.clone(), (*mark).to_string()));
             continue;

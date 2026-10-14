@@ -688,6 +688,20 @@ pub fn log_probe(probe: &DriverProbe) {
 /// Returns an error when the module tree cannot be walked.
 #[cfg(target_os = "android")]
 pub fn collect_plan() -> Result<crate::nomount_plan::Plan> {
+    collect_plan_filtered(None)
+}
+
+/// Rules one module currently asks for; an empty plan when it is off.
+///
+/// # Errors
+/// Returns an error when the module tree cannot be walked.
+#[cfg(target_os = "android")]
+pub fn collect_plan_for(id: &str) -> Result<crate::nomount_plan::Plan> {
+    collect_plan_filtered(Some(id))
+}
+
+#[cfg(target_os = "android")]
+fn collect_plan_filtered(only: Option<&str>) -> Result<crate::nomount_plan::Plan> {
     let cfg = crate::nomount_plan::PlanConfig::new(
         std::path::Path::new(crate::defs::MODULE_DIR),
         std::path::Path::new("/"),
@@ -696,7 +710,76 @@ pub fn collect_plan() -> Result<crate::nomount_plan::Plan> {
     let fs = crate::nomount_plan::StdFs::new(
         crate::magic_mount::read_opaque as fn(&std::path::Path) -> Result<bool>,
     );
-    crate::nomount_plan::collect_rules(&fs, &cfg)
+    only.map_or_else(
+        || crate::nomount_plan::collect_rules(&fs, &cfg),
+        |id| crate::nomount_plan::collect_rules_for(&fs, &cfg, id),
+    )
+}
+
+/// Rule counts per module, for the per-module list in the manager.
+///
+/// # Errors
+/// Returns an error when the module tree cannot be walked.
+#[cfg(target_os = "android")]
+pub fn collect_rule_counts() -> Result<Vec<(String, usize)>> {
+    let cfg = crate::nomount_plan::PlanConfig::new(
+        std::path::Path::new(crate::defs::MODULE_DIR),
+        std::path::Path::new("/"),
+        std::path::Path::new("/system"),
+    );
+    let fs = crate::nomount_plan::StdFs::new(
+        crate::magic_mount::read_opaque as fn(&std::path::Path) -> Result<bool>,
+    );
+    crate::nomount_plan::rule_counts(&fs, &cfg)
+}
+
+/// Generate one module's rules and add them to the running kernel.
+///
+/// The module keeps its place in the boot-time plan; a disabled or skipped
+/// module contributes nothing and says so.
+///
+/// # Errors
+/// Returns an error when the driver is not usable or the kernel refuses a rule.
+#[cfg(target_os = "android")]
+pub fn hot_load(id: &str) -> Result<usize> {
+    let driver = Driver::kernel();
+    ensure_usable(&driver.probe())?;
+    let plan = collect_plan_for(id)?;
+    if plan.rules.is_empty()
+        && let Some((_, reason)) = plan.skipped.first()
+    {
+        bail!("nomount: module {id} is {reason}");
+    }
+    driver.apply_rules(&plan.rules)
+}
+
+/// Remove one module's rules from the running kernel.
+///
+/// The module's own marks are ignored on purpose: a module that was just
+/// disabled still has the paths it injected, and those are the ones to drop.
+///
+/// # Errors
+/// Returns an error when the module tree cannot be walked or the kernel
+/// refuses a deletion.
+#[cfg(target_os = "android")]
+pub fn hot_unload(id: &str) -> Result<usize> {
+    let cfg = crate::nomount_plan::PlanConfig::new(
+        std::path::Path::new(crate::defs::MODULE_DIR),
+        std::path::Path::new("/"),
+        std::path::Path::new("/system"),
+    );
+    let fs = crate::nomount_plan::StdFs::new(
+        crate::magic_mount::read_opaque as fn(&std::path::Path) -> Result<bool>,
+    );
+    let plan = crate::nomount_plan::collect_rules_ignoring_marks(&fs, &cfg, id)?;
+    let paths: Vec<String> = plan
+        .rules
+        .iter()
+        .map(|rule| rule.virtual_path.clone())
+        .collect();
+    let count = paths.len();
+    Driver::kernel().delete_rules(&paths)?;
+    Ok(count)
 }
 
 /// What the manager wants the visibility policy to be.
@@ -933,6 +1016,12 @@ pub struct Status {
     pub applied_rules: usize,
     /// Everything the kernel holds, including directories it created itself.
     pub kernel_rules: usize,
+    /// Rule count per module that contributes rules.
+    pub modules: Vec<(String, usize)>,
+    /// UIDs the stored policy wants excluded from redirection.
+    pub uids: Vec<u32>,
+    /// UIDs the kernel is excluding right now.
+    pub uids_active: Vec<u32>,
     pub uid_count: usize,
     pub isolated_blocked: bool,
     pub error: Option<String>,
@@ -951,6 +1040,10 @@ impl Status {
             expected_rules: plan.rules.len(),
             applied_rules: 0,
             kernel_rules: 0,
+            modules: collect_rule_counts().unwrap_or_default(),
+            uids: read_uid_config(std::path::Path::new(crate::defs::NOMOUNT_UIDS))
+                .map_or_else(|_| Vec::new(), |config| config.uids),
+            uids_active: Vec::new(),
             uid_count: 0,
             isolated_blocked: false,
             error: None,
@@ -965,7 +1058,10 @@ impl Status {
             status.applied_rules = rules.iter().filter(|rule| !rule.virtual_dir).count();
             status.kernel_rules = rules.len();
         }
-        status.uid_count = driver.list_uids().map_or(0, |uids| uids.len());
+        if let Ok(uids) = driver.list_uids() {
+            status.uid_count = uids.len();
+            status.uids_active = uids;
+        }
         status.isolated_blocked = driver.isolated_state().unwrap_or(false);
         Ok(status)
     }
@@ -977,20 +1073,27 @@ impl Status {
         let mut out = stdout.lock();
         if json {
             let payload = serde_json::json!({
-                "schema_version": 1,
+                "schema_version": 2,
                 "driver_state": self.probe.state.as_str(),
                 "driver_version": self.probe.version,
                 "api_ok": self.probe.ready(),
                 "rules_expected": self.expected_rules,
                 "rules_applied": self.applied_rules,
                 "kernel_rules": self.kernel_rules,
+                "modules": self
+                    .modules
+                    .iter()
+                    .map(|(id, rules)| serde_json::json!({ "id": id, "rules": rules }))
+                    .collect::<Vec<_>>(),
+                "uids": self.uids,
+                "uids_active": self.uids_active,
                 "uid_count": self.uid_count,
                 "isolated_blocked": self.isolated_blocked,
                 "error": self.error,
             });
             writeln!(out, "{payload}").context("failed to write nomount status")?;
         } else {
-            writeln!(out, "schema_version=1").context("failed to write nomount status")?;
+            writeln!(out, "schema_version=2").context("failed to write nomount status")?;
             writeln!(out, "driver_state={}", self.probe.state.as_str())
                 .context("failed to write nomount status")?;
             writeln!(
@@ -1006,6 +1109,14 @@ impl Status {
             writeln!(out, "rules_applied={}", self.applied_rules)
                 .context("failed to write nomount status")?;
             writeln!(out, "kernel_rules={}", self.kernel_rules)
+                .context("failed to write nomount status")?;
+            for (id, rules) in &self.modules {
+                writeln!(out, "module={id} rules={rules}")
+                    .context("failed to write nomount status")?;
+            }
+            writeln!(out, "uids={}", join_uids(&self.uids))
+                .context("failed to write nomount status")?;
+            writeln!(out, "uids_active={}", join_uids(&self.uids_active))
                 .context("failed to write nomount status")?;
             writeln!(out, "uid_count={}", self.uid_count)
                 .context("failed to write nomount status")?;

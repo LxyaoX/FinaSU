@@ -848,6 +848,26 @@ pub fn run_action(id: &str) -> Result<()> {
     exec_script(&action_script_path, ScriptWait::Forever)
 }
 
+/// Mark or unmark a module as `skip_mount`: it keeps running, but the mount
+/// backends stop injecting its files.
+///
+/// # Errors
+/// Returns an error for an invalid id, a missing module, or a failed write.
+pub fn set_skip_mount(id: &str, skip: bool) -> Result<()> {
+    validate_module_id(id)?;
+    let module_path = Path::new(defs::MODULE_DIR).join(id);
+    ensure!(module_path.exists(), "Module {id} not found");
+    let marker = module_path.join(defs::SKIP_MOUNT_FILE_NAME);
+    if skip {
+        ensure_file_exists(&marker)?;
+    } else if let Err(e) = std::fs::remove_file(&marker)
+        && e.kind() != std::io::ErrorKind::NotFound
+    {
+        return Err(e).with_context(|| format!("remove {}", marker.display()));
+    }
+    Ok(())
+}
+
 pub fn enable_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
 

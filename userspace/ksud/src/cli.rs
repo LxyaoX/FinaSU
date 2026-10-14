@@ -351,6 +351,15 @@ enum Module {
         id: String,
     },
 
+    /// keep a module enabled but stop injecting its files
+    Skip {
+        /// module id
+        id: String,
+        /// remove the skip mark instead of setting it
+        #[arg(long)]
+        off: bool,
+    },
+
     /// run action for module <id>
     Action {
         // module id
@@ -573,6 +582,18 @@ enum Nomount {
     /// Drop every redirection rule; UID exclusions are kept
     Clear,
 
+    /// Add one module's rules to the running kernel without a reboot
+    HotLoad {
+        /// module id
+        id: String,
+    },
+
+    /// Remove one module's rules from the running kernel without a reboot
+    HotUnload {
+        /// module id
+        id: String,
+    },
+
     /// Manage the UID exclusions (apps that see the stock filesystem)
     Uid {
         #[command(subcommand)]
@@ -591,7 +612,7 @@ enum NomountUid {
 
     /// Replace the stored list with these UIDs, then apply it
     Set {
-        #[arg(required = true)]
+        /// UIDs to keep; omit to clear the list
         uids: Vec<u32>,
     },
 
@@ -717,6 +738,7 @@ pub fn run() -> Result<()> {
                 Module::Uninstall { id } => module::uninstall_module(&id),
                 Module::Enable { id } => module::enable_module(&id),
                 Module::Disable { id } => module::disable_module(&id),
+                Module::Skip { id, off } => module::set_skip_mount(&id, !off),
                 Module::Action { id } => module::run_action(&id),
                 Module::List => module::list_modules(),
                 Module::Config { internal, command } => {
@@ -1010,6 +1032,16 @@ pub fn run() -> Result<()> {
             Nomount::Inject { dry_run, json } => crate::nomount::inject(dry_run, json),
             Nomount::List { json } => crate::nomount::print_rules(json),
             Nomount::Clear => crate::nomount::clear_rules(),
+            Nomount::HotLoad { id } => {
+                let applied = crate::nomount::hot_load(&id)?;
+                println!("rules_applied={applied}");
+                Ok(())
+            }
+            Nomount::HotUnload { id } => {
+                let removed = crate::nomount::hot_unload(&id)?;
+                println!("rules_removed={removed}");
+                Ok(())
+            }
             Nomount::Uid { command } => match command {
                 NomountUid::List { json } => crate::nomount::uid_edit(None, &[], json),
                 NomountUid::Set { uids } => {
