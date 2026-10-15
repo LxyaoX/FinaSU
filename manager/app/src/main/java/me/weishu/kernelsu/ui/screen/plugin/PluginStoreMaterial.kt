@@ -46,8 +46,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -69,7 +69,7 @@ fun PluginStoreMaterial(
     uiState: PluginStoreUiState,
     actions: PluginStoreActions,
 ) {
-    val context = LocalContext.current
+    val resources = LocalResources.current
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
@@ -86,7 +86,7 @@ fun PluginStoreMaterial(
     LaunchedEffect(uiState.notice, uiState.noticeArg) {
         val notice = uiState.notice ?: return@LaunchedEffect
         val arg = uiState.noticeArg
-        val message = if (arg == null) context.getString(notice) else context.getString(notice, arg)
+        val message = if (arg == null) resources.getString(notice) else resources.getString(notice, arg)
         snackbarHostState.showSnackbar(message)
         actions.onNoticeShown()
     }
