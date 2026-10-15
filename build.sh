@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# ANDROID_NDK_HOME is exported inside a subshell on purpose: every build stage
+# gets it for its own cargo invocation and the parent shell keeps none of it, so
+# ShellCheck's subshell-scope notes (SC2030/SC2031) do not apply here.
+# shellcheck disable=SC2030,SC2031
 #
 # FolkSU build driver - a local mirror of the GitHub Actions pipeline.
 #
@@ -55,8 +59,12 @@ have() { command -v "$1" >/dev/null 2>&1; }
 
 read_keystore_cfg() {
     [[ -f "$KEYSTORE_PROPS" ]] || die "missing $KEYSTORE_PROPS (copy sign.example.properties and fill it in)"
+    set -a
+    # The keystore file is a user-provided path, so its content cannot be
+    # analysed up front.
     # shellcheck disable=SC1090
-    set -a; source "$KEYSTORE_PROPS"; set +a
+    source "$KEYSTORE_PROPS"
+    set +a
     : "${KEYSTORE_FILE:?KEYSTORE_FILE not set in $KEYSTORE_PROPS}"
     : "${KEYSTORE_PASSWORD:?KEYSTORE_PASSWORD not set in $KEYSTORE_PROPS}"
     : "${KEY_ALIAS:?KEY_ALIAS not set in $KEYSTORE_PROPS}"
