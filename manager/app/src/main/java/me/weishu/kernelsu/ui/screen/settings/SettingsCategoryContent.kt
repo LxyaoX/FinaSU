@@ -255,6 +255,8 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
         }
     )
 
+    AdvancedTitleSettings()
+
     if (showLauncherIconDialog) {
         SingleSelectDialog(
             title = stringResource(id = R.string.settings_launcher_icon),
@@ -271,7 +273,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
     }
 
     DisplayDensitySection(uiState, actions)
-    VisualMediaSettings()
 }
 
 @Composable

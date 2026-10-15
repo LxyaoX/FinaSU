@@ -47,7 +47,7 @@ fun MaterialKernelSUTheme(
     val dynamicColor = appSettings.useSystemDynamicColor
 
     val wallpaperPage = LocalWallpaperPage.current
-    val videoActive = me.weishu.kernelsu.media.VisualMediaConfig.let {
+    val videoActive = WallpaperConfig.enabled && me.weishu.kernelsu.media.VisualMediaConfig.let {
         it.videoEnabled && it.file(context, true) != null
     }
     val wallpaperActive = WallpaperConfig.isPageActive(wallpaperPage, videoActive)

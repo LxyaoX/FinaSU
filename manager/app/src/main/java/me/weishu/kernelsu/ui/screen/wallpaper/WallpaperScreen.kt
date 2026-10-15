@@ -6,6 +6,7 @@ import me.weishu.kernelsu.wallpaper.ThemeMetadata
 import me.weishu.kernelsu.wallpaper.ThemeExportService
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
@@ -66,6 +68,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.component.ImageCropPickerHost
 import me.weishu.kernelsu.ui.component.SurfaceImagePickerHost
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
@@ -77,6 +80,9 @@ import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
+import me.weishu.kernelsu.ui.screen.settings.ClearMediaRow
+import me.weishu.kernelsu.ui.screen.settings.MediaFileRow
+import me.weishu.kernelsu.ui.screen.settings.MediaSlider
 import me.weishu.kernelsu.wallpaper.FolkThemeIO
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
 import me.weishu.kernelsu.wallpaper.WallpaperManager
@@ -110,6 +116,9 @@ data class WallpaperUiState(
     val superuserBackgroundSelected: Boolean,
     val moduleBackgroundSelected: Boolean,
     val settingsBackgroundSelected: Boolean,
+    val videoEnabled: Boolean,
+    val videoFilename: String?,
+    val videoVolume: Float,
     val isSaving: Boolean,
 ) {
     /** The config of the surface [id], or null when no surface uses it. */
@@ -136,6 +145,10 @@ data class WallpaperScreenActions(
     val onPickSuperuserBackground: () -> Unit,
     val onPickModuleBackground: () -> Unit,
     val onPickSettingsBackground: () -> Unit,
+    val onToggleVideo: (Boolean) -> Unit,
+    val onPickVideo: () -> Unit,
+    val onClearVideo: () -> Unit,
+    val onSetVideoVolume: (Float) -> Unit,
     val onSetSurfaceToggle: (SurfaceId, SurfaceField, Boolean) -> Unit,
     val onSetSurfaceFlag: (SurfaceId, SurfaceFlag, Boolean) -> Unit,
     val onSetSurfaceScalar: (SurfaceId, SurfaceField, Float) -> Unit,
@@ -171,6 +184,18 @@ fun WallpaperScreen() {
             snackbarHost.showSnackbar(
                 resources.getString(if (ok) R.string.wallpaper_saved else R.string.wallpaper_save_failed)
             )
+        }
+    }
+
+    // The video is background media too, so it shares the wallpaper page's save/feedback flow.
+    val persistVideo: (Uri) -> Unit = { picked ->
+        scope.launch {
+            isSaving = true
+            val ok = VisualMediaConfig.select(context, picked, true)
+            isSaving = false
+            if (!ok) {
+                Toast.makeText(context, R.string.media_import_failed, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -263,6 +288,9 @@ fun WallpaperScreen() {
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let(requestImport)
     }
+    val videoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let(persistVideo)
+    }
     if (showExportDialog) {
         ThemeMetadataEditor(
             initial = ThemeMetadata.current(context).let { if (it.name.isBlank()) it.copy(name = "FinaSU") else it },
@@ -333,6 +361,9 @@ fun WallpaperScreen() {
         superuserBackgroundSelected = !WallpaperConfig.superuserBackgroundUri.isNullOrEmpty(),
         moduleBackgroundSelected = !WallpaperConfig.moduleBackgroundUri.isNullOrEmpty(),
         settingsBackgroundSelected = !WallpaperConfig.settingsBackgroundUri.isNullOrEmpty(),
+        videoEnabled = VisualMediaConfig.videoEnabled,
+        videoFilename = VisualMediaConfig.videoFilename,
+        videoVolume = VisualMediaConfig.videoVolume,
         isSaving = isSaving,
     )
 
@@ -401,6 +432,16 @@ fun WallpaperScreen() {
         onPickSettingsBackground = {
             pendingPage = WallpaperConfig.PAGE_SETTINGS
             pagePickToken += 1
+        },
+        onToggleVideo = { enabled ->
+            VisualMediaConfig.videoEnabled = enabled
+            VisualMediaConfig.save(context)
+        },
+        onPickVideo = { videoLauncher.launch("video/*") },
+        onClearVideo = { scope.launch { VisualMediaConfig.clear(context, true) } },
+        onSetVideoVolume = {
+            VisualMediaConfig.videoVolume = it
+            VisualMediaConfig.save(context)
         },
         onSetSurfaceToggle = { id, field, value ->
             SurfaceStore.update(id) { it.withToggle(field, value) }
@@ -474,9 +515,31 @@ fun WallpaperScreenMaterial(
                             onCheckedChange = actions.onToggleEnabled,
                         )
                     }
-                    // The master switch gates every mode, so the single/multi choice and its pickers
-                    // stay hidden until the background is on.
+                    // The master switch gates every mode, so the video/image choice and its pickers
+                    // stay hidden until the background is on. Video takes the slot over entirely —
+                    // it replaces the image, matching the render priority (video > image).
                     if (state.enabled) {
+                        add {
+                            SegmentedSwitchItem(
+                                icon = Icons.Filled.Movie,
+                                title = stringResource(R.string.media_video),
+                                checked = state.videoEnabled,
+                                onCheckedChange = actions.onToggleVideo,
+                            )
+                        }
+                        if (state.videoEnabled) {
+                            add { MediaFileRow(state.videoFilename) { actions.onPickVideo() } }
+                            add {
+                                MediaSlider(stringResource(R.string.media_volume), state.videoVolume) {
+                                    actions.onSetVideoVolume(it)
+                                }
+                            }
+                            if (state.videoFilename != null) {
+                                add { ClearMediaRow { actions.onClearVideo() } }
+                            }
+                        }
+                    }
+                    if (state.enabled && !state.videoEnabled) {
                         add {
                             SegmentedSwitchItem(
                                 icon = Icons.Filled.GridView,
@@ -556,8 +619,10 @@ fun WallpaperScreenMaterial(
             )
 
             // The appearance controls apply to every page, so they must stay reachable in multi mode
-            // even though the single wallpaper is unused there.
-            if (state.enabled && (state.hasImage || state.multiBackgroundEnabled)) {
+            // even though the single wallpaper is unused there. Video keeps the dim control (its
+            // layer honors it) but drops opacity/blur, which only apply to a still image.
+            val mediaVisible = state.videoEnabled || state.hasImage || state.multiBackgroundEnabled
+            if (state.enabled && mediaVisible) {
                 FolkWallpaperSurface(
                     role = WallpaperSurfaceRole.Group,
                     modifier = Modifier
@@ -575,23 +640,25 @@ fun WallpaperScreenMaterial(
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.primary,
                         )
-                        SliderSetting(
-                            icon = Icons.Filled.Opacity,
-                            title = stringResource(R.string.wallpaper_opacity),
-                            summary = stringResource(R.string.wallpaper_opacity_summary),
-                            value = state.opacity,
-                            range = 0f..1f,
-                            onValueChange = actions.onSetOpacity,
-                        )
-                        SliderSetting(
-                            icon = Icons.Filled.BlurOn,
-                            title = stringResource(R.string.wallpaper_blur),
-                            summary = stringResource(R.string.wallpaper_blur_summary),
-                            value = state.blur,
-                            range = 0f..50f,
-                            onValueChange = actions.onSetBlur,
-                            format = { "${it.roundToInt()} dp" },
-                        )
+                        if (!state.videoEnabled) {
+                            SliderSetting(
+                                icon = Icons.Filled.Opacity,
+                                title = stringResource(R.string.wallpaper_opacity),
+                                summary = stringResource(R.string.wallpaper_opacity_summary),
+                                value = state.opacity,
+                                range = 0f..1f,
+                                onValueChange = actions.onSetOpacity,
+                            )
+                            SliderSetting(
+                                icon = Icons.Filled.BlurOn,
+                                title = stringResource(R.string.wallpaper_blur),
+                                summary = stringResource(R.string.wallpaper_blur_summary),
+                                value = state.blur,
+                                range = 0f..50f,
+                                onValueChange = actions.onSetBlur,
+                                format = { "${it.roundToInt()} dp" },
+                            )
+                        }
                         if (state.dualDimEnabled) {
                             SliderSetting(
                                 icon = Icons.Filled.Contrast,
@@ -623,14 +690,18 @@ fun WallpaperScreenMaterial(
                 SegmentedColumn(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
                     content = buildList {
-                        add {
-                            SegmentedSwitchItem(
-                                icon = Icons.Filled.Palette,
-                                title = stringResource(R.string.wallpaper_use_color),
-                                summary = stringResource(R.string.wallpaper_use_color_summary),
-                                checked = state.useWallpaperColor,
-                                onCheckedChange = actions.onToggleUseWallpaperColor,
-                            )
+                        // The accent colour comes from the image, so it means nothing while video
+                        // owns the background.
+                        if (!state.videoEnabled) {
+                            add {
+                                SegmentedSwitchItem(
+                                    icon = Icons.Filled.Palette,
+                                    title = stringResource(R.string.wallpaper_use_color),
+                                    summary = stringResource(R.string.wallpaper_use_color_summary),
+                                    checked = state.useWallpaperColor,
+                                    onCheckedChange = actions.onToggleUseWallpaperColor,
+                                )
+                            }
                         }
                         add {
                             SegmentedSwitchItem(

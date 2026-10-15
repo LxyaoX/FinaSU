@@ -172,17 +172,18 @@ object WallpaperConfig {
     val activeUri: String? get() = if (enabled) uri else null
 
     /**
-     * Whether any image slot or the independently controlled video is enabled app-wide.
-     * Used for the stable global accent; page surface materials must use [isPageActive] instead.
+     * Whether the master switch is on and an image slot or the video is ready. The switch gates
+     * every mode, so video only counts while it is enabled. Used for the stable global accent; page
+     * surface materials must use [isPageActive] instead.
      */
     val isActive: Boolean
-        get() = (me.weishu.kernelsu.media.VisualMediaConfig.videoEnabled &&
-            me.weishu.kernelsu.media.VisualMediaConfig.videoFilename != null) || enabled && if (multiBackgroundEnabled) {
+        get() = enabled && ((me.weishu.kernelsu.media.VisualMediaConfig.videoEnabled &&
+            me.weishu.kernelsu.media.VisualMediaConfig.videoFilename != null) || if (multiBackgroundEnabled) {
             listOf(homeBackgroundUri, pluginBackgroundUri, superuserBackgroundUri, moduleBackgroundUri, settingsBackgroundUri)
                 .any { !it.isNullOrEmpty() }
         } else {
             !uri.isNullOrEmpty()
-        }
+        })
 
     /**
      * Background URI to paint for [page] (0..4), or null when the master switch is off. In multi
