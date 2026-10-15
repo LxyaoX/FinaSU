@@ -881,4 +881,9 @@
     <string name="settings_disclaimer">Descargo de responsabilidad</string>
     <string name="settings_disclaimer_message">Después de rootear el dispositivo, las actualizaciones del sistema, los módulos de terceros u otros factores externos pueden causar riesgos y pérdidas imprevistas. Debes asumirlos por tu cuenta. Asegúrate de entenderlos antes de continuar.</string>
     <string name="settings_bug_feedback">Informar de un error</string>
+    <string name="developer_and_maintainer">Desarrollador | Mantenedor</string>
+    <string name="developer_profile_picture">Foto de perfil del desarrollador</string>
+    <string name="support_or_donate">Apoyar / Donar</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>

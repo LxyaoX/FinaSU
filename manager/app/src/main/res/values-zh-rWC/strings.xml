@@ -891,4 +891,9 @@
     <string name="settings_disclaimer">免责天劫</string>
     <string name="settings_disclaimer_message">对法器 Root 之后，天机更新、外道模块或诸般外劫皆可能招致不测之祸与损，需由你自行承担。待你参悟风险，方可续行。</string>
     <string name="settings_bug_feedback">缺陷禀报</string>
+    <string name="developer_and_maintainer">道门尊长 | 护道者</string>
+    <string name="developer_profile_picture">开发者仙容</string>
+    <string name="support_or_donate">道力支持 / 仙石捐赠</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>

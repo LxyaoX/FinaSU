@@ -881,4 +881,9 @@
     <string name="settings_disclaimer">면책 조항</string>
     <string name="settings_disclaimer_message">기기를 루팅하면 시스템 업데이트, 서드파티 모듈 또는 기타 외부 요인으로 인해 예상치 못한 위험과 손실이 발생할 수 있으며, 이는 사용자 본인이 감수해야 합니다. 충분히 이해한 후 계속 사용하세요.</string>
     <string name="settings_bug_feedback">버그 신고</string>
+    <string name="developer_and_maintainer">개발자 | 유지보수자</string>
+    <string name="developer_profile_picture">개발자 프로필 사진</string>
+    <string name="support_or_donate">지원 / 후원</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">텔레그램</string>
 </resources>

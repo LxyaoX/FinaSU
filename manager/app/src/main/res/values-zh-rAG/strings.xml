@@ -891,4 +891,9 @@
     <string name="settings_disclaimer">免责声明喵</string>
     <string name="settings_disclaimer_message">给设备 Root 之后喵，系统更新、第三方模块或者其它外部因素可能会造成想不到的风险和损失喵，要你自己承担喵。充分了解风险之后再继续喵。</string>
     <string name="settings_bug_feedback">Bug 反馈喵</string>
+    <string name="developer_and_maintainer">开发者喵 | 维护者喵</string>
+    <string name="developer_profile_picture">开发者喵像</string>
+    <string name="support_or_donate">支持喵 / 捐赠喵</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>

@@ -891,4 +891,9 @@
     <string name="settings_disclaimer">Disclaimer</string>
     <string name="settings_disclaimer_message">Rooting your device may carry risks from system updates, third-party modules, or other external causes. You are responsible for any resulting damage or loss. Please continue only if you understand the risks.</string>
     <string name="settings_bug_feedback">Bug report</string>
+    <string name="developer_and_maintainer">Developer | Maintainer</string>
+    <string name="developer_profile_picture">Developer profile picture</string>
+    <string name="support_or_donate">Support / Donate</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>

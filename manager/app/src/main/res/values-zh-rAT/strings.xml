@@ -891,4 +891,9 @@
     <string name="settings_disclaimer">免责神谕</string>
     <string name="settings_disclaimer_message">对设备施以 Root 之后，系统更新、第三方模块或其它外缘皆可能降下不可预知之险与损，须由你自负。待你明晓其险，方可续行。</string>
     <string name="settings_bug_feedback">缺陷奏报</string>
+    <string name="developer_and_maintainer">圣光使者 | 圣域守护者</string>
+    <string name="developer_profile_picture">开发者圣像</string>
+    <string name="support_or_donate">神力支持 / 圣光捐赠</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>

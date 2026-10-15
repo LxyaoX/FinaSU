@@ -20,7 +20,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -70,6 +72,7 @@ fun SettingPagerMaterial(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showProfileEditor by remember { mutableStateOf(false) }
     val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
+    val showDeveloperInfo = rememberSaveable { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
 
     UninstallDialog(
@@ -83,7 +86,7 @@ fun SettingPagerMaterial(
 
     ExpressiveScaffold(
         topBar = {
-            TopBar()
+            TopBar(onOpenDeveloperInfo = { showDeveloperInfo.value = true })
         },
         snackbarHost = { SnackBarHost(hostState = snackBarHost, modifier = Modifier.padding(bottom = bottomInnerPadding)) },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
@@ -211,12 +214,19 @@ fun SettingPagerMaterial(
     if (showDisclaimerDialog.value) {
         SettingsDisclaimerDialog(showDisclaimerDialog)
     }
+
+    SettingsDeveloperInfo(showDeveloperInfo)
 }
 
 @Composable
-private fun TopBar() {
+private fun TopBar(onOpenDeveloperInfo: () -> Unit) {
     TopAppBar(
         title = { Text(stringResource(R.string.settings)) },
+        actions = {
+            IconButton(onClick = onOpenDeveloperInfo) {
+                Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about))
+            }
+        },
         colors = expressiveTopAppBarColors(),
         windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
     )

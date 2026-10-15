@@ -891,4 +891,9 @@
     <string name="settings_disclaimer">免責聲明</string>
     <string name="settings_disclaimer_message">在裝置上進行 Root 後，系統更新、第三方模組或其它外部因素可能造成無法預期的風險與損失，需由你自行承擔。請在充分了解風險後再繼續使用。</string>
     <string name="settings_bug_feedback">Bug 回報</string>
+    <string name="developer_and_maintainer">開發者 | 維護者</string>
+    <string name="developer_profile_picture">開發者頭像</string>
+    <string name="support_or_donate">支持 / 捐贈</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>

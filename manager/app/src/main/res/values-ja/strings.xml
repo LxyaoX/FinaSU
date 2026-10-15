@@ -881,4 +881,9 @@
     <string name="settings_disclaimer">免責事項</string>
     <string name="settings_disclaimer_message">端末を Root 化すると、システム更新やサードパーティ製モジュールなど外部要因により予期しないリスクや損害が生じる可能性があります。それらはご自身の責任で負担していただく必要があります。十分に理解した上でご利用ください。</string>
     <string name="settings_bug_feedback">バグ報告</string>
+    <string name="developer_and_maintainer">開発者 | メンテナ</string>
+    <string name="developer_profile_picture">開発者のプロフィール画像</string>
+    <string name="support_or_donate">サポート / 寄付</string>
+    <string name="github">GitHub</string>
+    <string name="telegram">Telegram</string>
 </resources>
