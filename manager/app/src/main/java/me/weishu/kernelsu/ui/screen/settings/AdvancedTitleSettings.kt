@@ -3,14 +3,17 @@ package me.weishu.kernelsu.ui.screen.settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Contrast
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,9 +29,12 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
  * It is an independent layout feature (the header of the home screen), so it sits next to the other
  * layout entries in the appearance category, not with the background media. The video background,
  * which *is* part of the background, lives on the wallpaper page instead.
+ *
+ * The section title lives on the surrounding layout column, so this renders as a second card under
+ * it and takes its spacing from [modifier].
  */
 @Composable
-fun AdvancedTitleSettings() {
+fun AdvancedTitleSettings(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -40,34 +46,58 @@ fun AdvancedTitleSettings() {
     val enabled = VisualMediaConfig.titleEnabled
     val title = stringResource(R.string.media_title_image)
     val filename = VisualMediaConfig.titleFilename
-    SegmentedColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), title = title) {
+    SegmentedColumn(modifier = modifier) {
         item {
-            SegmentedSwitchItem(title = title, checked = enabled) {
-                VisualMediaConfig.titleEnabled = it
-                VisualMediaConfig.save(context)
-            }
+            SegmentedSwitchItem(
+                icon = Icons.Rounded.Image,
+                title = title,
+                summary = stringResource(R.string.media_title_image_summary),
+                checked = enabled,
+                onCheckedChange = {
+                    VisualMediaConfig.titleEnabled = it
+                    VisualMediaConfig.save(context)
+                },
+            )
         }
         item { MediaFileRow(filename) { picker.launch("image/*") } }
         item(visible = enabled) {
-            MediaSlider(stringResource(R.string.media_day_opacity), VisualMediaConfig.titleDayOpacity) {
+            MediaSlider(
+                stringResource(R.string.media_day_opacity),
+                VisualMediaConfig.titleDayOpacity,
+                Icons.Rounded.LightMode,
+            ) {
                 VisualMediaConfig.titleDayOpacity = it; VisualMediaConfig.save(context)
             }
         }
         item(visible = enabled) {
-            MediaSlider(stringResource(R.string.media_night_opacity), VisualMediaConfig.titleNightOpacity) {
+            MediaSlider(
+                stringResource(R.string.media_night_opacity),
+                VisualMediaConfig.titleNightOpacity,
+                Icons.Rounded.DarkMode,
+            ) {
                 VisualMediaConfig.titleNightOpacity = it; VisualMediaConfig.save(context)
             }
         }
         item(visible = enabled) {
-            MediaSlider(stringResource(R.string.media_dim), VisualMediaConfig.titleDim) {
+            MediaSlider(
+                stringResource(R.string.media_dim),
+                VisualMediaConfig.titleDim,
+                Icons.Rounded.Contrast,
+            ) {
                 VisualMediaConfig.titleDim = it; VisualMediaConfig.save(context)
             }
         }
         item(visible = enabled) {
-            SegmentedSliderItem(title = stringResource(R.string.media_title_offset), value = VisualMediaConfig.titleOffsetX,
-                valueRange = -2f..2f, valueText = { "${(it * 100).toInt()} dp" }, onValueChangeFinished = {
+            SegmentedSliderItem(
+                icon = Icons.Rounded.SwapHoriz,
+                title = stringResource(R.string.media_title_offset),
+                value = VisualMediaConfig.titleOffsetX,
+                valueRange = -2f..2f,
+                valueText = { "${(it * 100).toInt()} dp" },
+                onValueChangeFinished = {
                     VisualMediaConfig.titleOffsetX = it; VisualMediaConfig.save(context)
-                })
+                },
+            )
         }
         item(visible = filename != null) { ClearMediaRow { scope.launch { VisualMediaConfig.clear(context, false) } } }
     }

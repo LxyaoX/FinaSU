@@ -156,6 +156,18 @@ class SettingsRepositoryImpl : SettingsRepository {
         )
         set(value) = prefs.edit { putString("support_links_style", SupportLinksStyle.fromValue(value)) }
 
+    override var supportLinksCustomTitle: String
+        get() = prefs.getString("support_links_custom_title", "") ?: ""
+        set(value) = prefs.edit { putString("support_links_custom_title", value) }
+
+    override var supportLinksCustomSubtitle: String
+        get() = prefs.getString("support_links_custom_subtitle", "") ?: ""
+        set(value) = prefs.edit { putString("support_links_custom_subtitle", value) }
+
+    override var supportLinksCustomUrl: String
+        get() = prefs.getString("support_links_custom_url", "") ?: ""
+        set(value) = prefs.edit { putString("support_links_custom_url", value) }
+
     override var themeStoreMode: String
         get() = prefs.getString("theme_store_mode", ThemeStoreMode.UNSET) ?: ThemeStoreMode.UNSET
         set(value) = prefs.edit { putString("theme_store_mode", value) }

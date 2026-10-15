@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -210,8 +211,8 @@ internal fun ClearMediaRow(onClick: () -> Unit) {
 }
 
 @Composable
-internal fun MediaSlider(title: String, value: Float, onChange: (Float) -> Unit) {
-    SegmentedSliderItem(title = title, value = value, valueRange = 0f..1f,
+internal fun MediaSlider(title: String, value: Float, icon: ImageVector? = null, onChange: (Float) -> Unit) {
+    SegmentedSliderItem(icon = icon, title = title, value = value, valueRange = 0f..1f,
         valueText = { "${(it * 100).toInt()}%" }, onValueChangeFinished = onChange)
 }
 

@@ -14,5 +14,8 @@ data class MainActivityUiState(
     val moduleDescriptionMaxLines: Int = 4,
     val homeLayoutStyle: String = HomeLayoutStyle.DEFAULT,
     val supportLinksStyle: String = SupportLinksStyle.DEFAULT,
+    val supportLinksCustomTitle: String = "",
+    val supportLinksCustomSubtitle: String = "",
+    val supportLinksCustomUrl: String = "",
     val layoutVariant: String = LayoutVariant.DEFAULT,
 )

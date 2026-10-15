@@ -34,9 +34,10 @@ import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkType
 
 /**
- * The bottom card of the home screen. [LocalSupportLinksStyle] selects one of three shapes: an
- * introduction to FinaSU, the upstream KernelSU pair, or nothing at all. Each shape is its own
- * composable so adding a new one touches this dispatcher and [SupportLinksStyle] only.
+ * The bottom card of the home screen. [LocalSupportLinksStyle] selects one of several shapes: an
+ * introduction to FinaSU, the upstream KernelSU pair, a user-authored card, or nothing at all. Each
+ * shape is its own composable so adding a new one touches this dispatcher and [SupportLinksStyle]
+ * only.
  */
 @Composable
 internal fun SupportLinks(
@@ -46,7 +47,32 @@ internal fun SupportLinks(
     when (LocalSupportLinksStyle.current) {
         SupportLinksStyle.HIDDEN -> Unit
         SupportLinksStyle.LEGACY -> LegacySupportLinks(onOpenUrl = onOpenUrl, modifier = modifier)
+        SupportLinksStyle.CUSTOM -> CustomSupportLinks(onOpenUrl = onOpenUrl, modifier = modifier)
         else -> LearnFinaSuCard(onOpenUrl = onOpenUrl, modifier = modifier)
+    }
+}
+
+/**
+ * The user-authored card. It draws nothing while any of the three fields is blank, so an
+ * unfinished configuration degrades to [SupportLinksStyle.HIDDEN] rather than a broken row.
+ */
+@Composable
+private fun CustomSupportLinks(
+    onOpenUrl: (String) -> Unit,
+    modifier: Modifier,
+) {
+    val custom = LocalSupportLinksCustom.current
+    if (!custom.isRenderable) return
+
+    HomeCard(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SupportLinkRow(
+                icon = Icons.Outlined.Info,
+                title = custom.title,
+                subtitle = custom.subtitle,
+                onClick = { onOpenUrl(custom.url) },
+            )
+        }
     }
 }
 

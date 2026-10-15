@@ -32,6 +32,11 @@ interface SettingsRepository {
     var homeLayoutStyle: String
     var supportLinksStyle: String
 
+    /** Text of the `SupportLinksStyle.CUSTOM` home card. Empty values hide the card. */
+    var supportLinksCustomTitle: String
+    var supportLinksCustomSubtitle: String
+    var supportLinksCustomUrl: String
+
     /** Theme store transfer mode; see `ThemeStoreMode`. Empty means no choice has been made yet. */
     var themeStoreMode: String
     var layoutVariant: String

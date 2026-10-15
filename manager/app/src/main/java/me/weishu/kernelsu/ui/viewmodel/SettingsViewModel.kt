@@ -54,6 +54,9 @@ class SettingsViewModel(
             val enableWebDebugging = repo.enableWebDebugging
             val homeLayoutStyle = repo.homeLayoutStyle
             val supportLinksStyle = repo.supportLinksStyle
+            val supportLinksCustomTitle = repo.supportLinksCustomTitle
+            val supportLinksCustomSubtitle = repo.supportLinksCustomSubtitle
+            val supportLinksCustomUrl = repo.supportLinksCustomUrl
             val themeStoreMode = repo.themeStoreMode
             val layoutVariant = repo.layoutVariant
             val colorStyle = repo.colorStyle
@@ -131,6 +134,9 @@ class SettingsViewModel(
                     enableWebDebugging = enableWebDebugging,
                     homeLayoutStyle = homeLayoutStyle,
                     supportLinksStyle = supportLinksStyle,
+                    supportLinksCustomTitle = supportLinksCustomTitle,
+                    supportLinksCustomSubtitle = supportLinksCustomSubtitle,
+                    supportLinksCustomUrl = supportLinksCustomUrl,
                     themeStoreMode = themeStoreMode,
                     layoutVariant = layoutVariant,
                     hideHomeFingerprint = repo.hideHomeFingerprint,
@@ -329,6 +335,21 @@ class SettingsViewModel(
         val normalized = SupportLinksStyle.fromValue(style)
         repo.supportLinksStyle = normalized
         _uiState.update { it.copy(supportLinksStyle = normalized) }
+    }
+
+    fun setSupportLinksCustomTitle(title: String) {
+        repo.supportLinksCustomTitle = title
+        _uiState.update { it.copy(supportLinksCustomTitle = title) }
+    }
+
+    fun setSupportLinksCustomSubtitle(subtitle: String) {
+        repo.supportLinksCustomSubtitle = subtitle
+        _uiState.update { it.copy(supportLinksCustomSubtitle = subtitle) }
+    }
+
+    fun setSupportLinksCustomUrl(url: String) {
+        repo.supportLinksCustomUrl = url
+        _uiState.update { it.copy(supportLinksCustomUrl = url) }
     }
 
     fun setThemeStoreMode(mode: String) {

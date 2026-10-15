@@ -49,6 +49,9 @@ class MainActivityViewModel(
             moduleDescriptionMaxLines = settingRepo.moduleDescriptionMaxLines,
             homeLayoutStyle = settingRepo.homeLayoutStyle,
             supportLinksStyle = settingRepo.supportLinksStyle,
+            supportLinksCustomTitle = settingRepo.supportLinksCustomTitle,
+            supportLinksCustomSubtitle = settingRepo.supportLinksCustomSubtitle,
+            supportLinksCustomUrl = settingRepo.supportLinksCustomUrl,
             layoutVariant = settingRepo.layoutVariant,
         )
     }
@@ -69,6 +72,9 @@ class MainActivityViewModel(
             "enable_navigation_badge",
             "home_layout_style",
             "support_links_style",
+            "support_links_custom_title",
+            "support_links_custom_subtitle",
+            "support_links_custom_url",
             "layout_variant",
         )
     }
