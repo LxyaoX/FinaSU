@@ -60,7 +60,7 @@ skips startup; services only inspects health; boot completion clears the counter
 only with validated injection. The monitor holds a lifetime flock and does not
 inherit it across exec. Daemons no longer implicitly disable kernel_umount.
 Public activation is available following maintainer release approval and Android
-16/arm64 device acceptance. Missing engine, external provider conflicts and the
+16/arm64 device acceptance. Missing engine and the
 startup failure latch remain operational blockers. There is no development-only
 enable feature. Changes affect the next boot, never restart zygote automatically.
 Startup clears stale runtime artifacts while preserving and checking the monitor
@@ -106,25 +106,35 @@ is refused while a validated monitor is alive or startup was attempted this
 boot, since running daemons resolve libraries through the engine path. It does
 not change provider selection or launch injection.
 
-## Provider confirmation and installation
+## External provider precedence
 
-The Manager stages an entire ZIP batch once and uses schema-2 preflight before
-running installers. A built-in/external conflict offers switch-and-install or
-cancel; multiple external providers are blocked. `zygisk install-batch` checks
-the confirmed selection token under the shared operation lock and keeps that
-lock across all installers. Ordinary modules run first, the single provider
-archive last. Duplicate provider archives are rejected, including shared IDs.
-Failed provider installs are quarantined in both module trees before restoring
-built-in selection; failed quarantine leaves built-in selection disabled. Other
-successful modules and arbitrary installer side effects are not rolled back.
-These transactions recover ordinary errors, not process death or power loss.
+Provider recognition drives the display and the built-in engine's boot
+step-aside: the Manager names a known external implementation (`zygisksu`,
+`zygisknext`, `rezygisk`, `neozygisk`, `shirokozygisk`, `onyxzygisk`) in the
+home row and the FolkZygisk settings summary, and `post_fs_data` lets it win.
+Recognition never blocks installation, activation or uninstallation of any
+module. Module operations run the same commands as upstream KernelSU and take no
+Zygisk lock, so a module archive installs whether or not it registers the Zygisk
+API.
 
-Enabling the built-in provider with `--disable-external` requires one
-`--expected-external <id>` per provider shown in the confirmation. A changed
-provider set is rejected before marker changes. Enable/undo-removal clears the
-corresponding marker in installed and pending copies, restoring markers if rc
-regeneration fails. All recognized provider installation/activation paths refuse
-other active external IDs; plugin modules are not provider conflicts.
+An active external provider wins. `post_fs_data` reads the provider set before
+touching the boot guard and returns early, so yielding consumes no startup
+attempt and cannot latch startup protection. `services` returns early in the
+same case and reports no built-in health; the settings summary then shows the
+step-aside line rather than an injection state. The next-boot configuration is
+left untouched, so removing or disabling the external provider lets the built-in
+engine resume on the following boot without re-enabling anything. Only a module
+ID from the recognized list is treated as a provider, so a provider built under
+another ID would not be detected and both engines would inject.
+
+`ksud zygisk enable` writes `enabled: true` and nothing else. It never creates
+`disable` markers on provider modules; when a provider is present it reports
+that the provider takes precedence and the built-in engine will step aside. The
+only module-tree writes on enable and undo-removal are the marker clears in
+`module_markers.rs`: the `disable` (or `remove`) marker is cleared in the
+installed and pending copies together, and both are restored if rc regeneration
+fails. Clearing only the installed copy would let a bare `enable` or
+`undo uninstall` silently revert on boot promotion.
 
 ## Kernel unmount coordination
 

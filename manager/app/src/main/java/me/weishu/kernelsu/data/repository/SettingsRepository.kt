@@ -3,6 +3,7 @@ package me.weishu.kernelsu.data.repository
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
+import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 
@@ -82,8 +83,17 @@ interface SettingsRepository {
 
     suspend fun getFolkMountStatus(): Result<FolkMountStatus>
     suspend fun getFolkZygiskStatus(): Result<FolkZygiskStatus>
-    suspend fun setFolkZygiskEnabled(enabled: Boolean, disableExternal: Boolean, expectedExternal: List<String>): Result<Unit>
+    suspend fun setFolkZygiskEnabled(enabled: Boolean): Result<Unit>
     suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit>
+    suspend fun getNomountStatus(): Result<NomountStatus>
+    suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>
+    suspend fun injectNomountRules(): Result<Unit>
+    suspend fun clearNomountRules(): Result<Unit>
+    suspend fun clearNomountEverything(): Result<Unit>
+    suspend fun setNomountUids(uids: List<Int>): Result<Unit>
+    suspend fun hotLoadNomountModule(id: String): Result<Unit>
+    suspend fun hotUnloadNomountModule(id: String): Result<Unit>
+    suspend fun setModuleSkip(id: String, skip: Boolean): Result<Unit>
 
     suspend fun getAdbRootStatus(): String
     suspend fun getAdbRootPersistValue(): Long?

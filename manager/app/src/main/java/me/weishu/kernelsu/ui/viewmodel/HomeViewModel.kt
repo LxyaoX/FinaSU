@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.BuildConfig
 import me.weishu.kernelsu.Natives
+import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.HomeMetrics
 import me.weishu.kernelsu.data.MetricsHistory
 import me.weishu.kernelsu.data.SystemMetricsCollector
@@ -168,8 +169,9 @@ class HomeViewModel(
     }
 
     /**
-     * Resolves the active Zygisk implementation for the home card: the built-in engine when it is
-     * enabled, otherwise the first active external provider (by its module name). Null hides the row.
+     * Resolves the active Zygisk implementation for the home card: any active external provider
+     * wins and is named by its module name; otherwise the built-in engine when it is enabled and
+     * installed. Null hides the row.
      */
     fun refreshZygisk() {
         val request = ++zygiskToken
@@ -187,9 +189,15 @@ class HomeViewModel(
 
     private suspend fun resolveZygiskProvider(): String? {
         val status = settingsRepo.getFolkZygiskStatus().getOrNull() ?: return null
-        if (status.enabled && status.engineAvailable) return "Built-In"
-        val external = status.externalProviders.firstOrNull() ?: return null
-        return getModuleDisplayName(external) ?: external
+        val injecting = status.injectionState == "injected" ||
+            status.injectionState == "partial" ||
+            status.injectionState == "starting"
+        // The built-in engine only steps aside at boot, so while it is the one injecting it stays
+        // the effective implementation even after an external provider module is installed.
+        if (status.enabled && injecting) return ksuApp.getString(R.string.folkzygisk_builtin_active)
+        status.externalProviders.firstOrNull()?.let { return getModuleDisplayName(it) ?: it }
+        if (status.enabled && status.engineAvailable) return ksuApp.getString(R.string.folkzygisk_builtin_active)
+        return null
     }
 
     private fun buildState(): HomeUiState {

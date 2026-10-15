@@ -28,6 +28,9 @@ pub enum MountMode {
     Auto,
     Builtin,
     Metamodule,
+    Nomount,
+    /// Inject nothing: modules stay inert until a provider is chosen.
+    Off,
 }
 
 impl MountMode {
@@ -37,6 +40,8 @@ impl MountMode {
             Self::Auto => "auto",
             Self::Builtin => "builtin",
             Self::Metamodule => "metamodule",
+            Self::Nomount => "nomount",
+            Self::Off => "off",
         }
     }
 
@@ -47,6 +52,8 @@ impl MountMode {
             "auto" => Some(Self::Auto),
             "builtin" => Some(Self::Builtin),
             "metamodule" => Some(Self::Metamodule),
+            "nomount" => Some(Self::Nomount),
+            "off" => Some(Self::Off),
             _ => None,
         }
     }
@@ -57,6 +64,9 @@ impl MountMode {
 pub enum Provider {
     Builtin,
     Metamodule,
+    Nomount,
+    /// No provider runs this boot.
+    None,
 }
 
 impl Provider {
@@ -65,6 +75,8 @@ impl Provider {
         match self {
             Self::Builtin => "builtin",
             Self::Metamodule => "metamodule",
+            Self::Nomount => "nomount",
+            Self::None => "none",
         }
     }
 }
@@ -84,6 +96,8 @@ pub struct MountOutcome {
     pub residue: Vec<PathBuf>,
     /// True when the provider ran but published nothing (or had no script).
     pub noop: bool,
+    /// Provider-specific degradations that did not stop the injection.
+    pub warnings: Vec<String>,
 }
 
 impl MountOutcome {
@@ -95,6 +109,7 @@ impl MountOutcome {
             partial: false,
             residue: Vec::new(),
             noop: true,
+            warnings: Vec::new(),
         }
     }
 
@@ -133,13 +148,18 @@ struct RuntimeRecord {
     result: String,
     target_count: Option<usize>,
     error: Option<String>,
+    /// Provider-specific degradation that did not stop the injection.
+    warning: Option<String>,
 }
 
 /// Read the configured mount mode from [`defs::FOLK_MOUNT_CONFIG`].
 ///
-/// A missing file or an unrecognised value falls back to [`MountMode::Auto`]
-/// (the latter with a warning). Other I/O errors are returned so an unreadable
-/// configuration never silently selects a provider.
+/// A missing file selects [`MountMode::Nomount`] for a fresh install and
+/// [`MountMode::Auto`] for a device that already mounted modules with an
+/// earlier version, so upgrading never silently stops injecting them. An
+/// unrecognised value falls back to [`MountMode::Auto`] with a warning. Other
+/// I/O errors are returned so an unreadable configuration never silently
+/// selects a provider.
 ///
 /// # Errors
 /// Returns an error when the configuration file exists but cannot be read.
@@ -154,7 +174,23 @@ pub fn read_mount_mode() -> Result<MountMode> {
             );
             MountMode::Auto
         })),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(MountMode::Auto),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            // An earlier boot left a runtime record, so this device already had
+            // modules injected: keep the previous behaviour instead of switching
+            // the backend behind the user's back.
+            let upgraded = Path::new(defs::FOLK_MOUNT_RUNTIME).exists();
+            let mode = if upgraded {
+                warn!("folk mount: no mode recorded but modules were mounted before; keeping auto");
+                MountMode::Auto
+            } else {
+                MountMode::Nomount
+            };
+            // Record the decision so the default only applies once.
+            if let Err(e) = write_mount_mode(mode) {
+                warn!("folk mount: could not persist the default mode: {e:#}");
+            }
+            Ok(mode)
+        }
         Err(e) => Err(e).with_context(|| format!("failed to read {}", defs::FOLK_MOUNT_CONFIG)),
     }
 }
@@ -218,7 +254,9 @@ fn metamodule_state() -> (Option<String>, bool) {
 
 const fn provider_for(mode: MountMode, metamodule_enabled: bool) -> Provider {
     match mode {
+        MountMode::Off => Provider::None,
         MountMode::Metamodule => Provider::Metamodule,
+        MountMode::Nomount => Provider::Nomount,
         MountMode::Auto if metamodule_enabled => Provider::Metamodule,
         MountMode::Builtin | MountMode::Auto => Provider::Builtin,
     }
@@ -256,7 +294,7 @@ fn sanitize(value: &str) -> String {
 
 fn write_runtime(record: &RuntimeRecord) -> Result<()> {
     let contents = format!(
-        "boot_id={}\nprovider={}\nresult={}\ntarget_count={}\nerror={}\n",
+        "boot_id={}\nprovider={}\nresult={}\ntarget_count={}\nerror={}\nwarning={}\n",
         record.boot_id,
         record.provider.as_deref().unwrap_or(""),
         record.result,
@@ -264,6 +302,7 @@ fn write_runtime(record: &RuntimeRecord) -> Result<()> {
             .target_count
             .map_or_else(String::new, |count| count.to_string()),
         record.error.as_deref().map_or_else(String::new, sanitize),
+        record.warning.as_deref().map_or_else(String::new, sanitize),
     );
     write_atomic(Path::new(defs::FOLK_MOUNT_RUNTIME), contents.as_bytes())
 }
@@ -281,6 +320,7 @@ fn read_runtime() -> Option<RuntimeRecord> {
             "result" => record.result = value.to_string(),
             "target_count" => record.target_count = value.parse().ok(),
             "error" => record.error = (!value.is_empty()).then(|| value.to_string()),
+            "warning" => record.warning = (!value.is_empty()).then(|| value.to_string()),
             _ => {}
         }
     }
@@ -296,6 +336,7 @@ fn record_skipped() {
         result: "skipped".to_string(),
         target_count: None,
         error: None,
+        warning: None,
     };
     if let Err(e) = write_runtime(&record) {
         warn!("folk mount: failed to record skipped state: {e:#}");
@@ -352,7 +393,7 @@ impl MountLock {
 /// Executor primitives backed by std/std::fs, rustix, extattr and ksucalls.
 struct AndroidOps;
 
-fn read_opaque(path: &Path) -> Result<bool> {
+pub fn read_opaque(path: &Path) -> Result<bool> {
     const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
     match extattr::lgetxattr(path, REPLACE_DIR_XATTR) {
         Ok(value) => Ok(String::from_utf8_lossy(&value) == "y"),
@@ -599,6 +640,7 @@ fn run_builtin() -> (MountOutcome, Option<anyhow::Error>) {
         partial: report.outcome.partial,
         residue: report.outcome.residue,
         noop: report.error.is_none() && report.outcome.target_count == 0,
+        warnings: Vec::new(),
     };
     (outcome, report.error)
 }
@@ -612,6 +654,38 @@ fn run_metamodule() -> Result<MountOutcome> {
     let mut outcome = MountOutcome::empty(Provider::Metamodule);
     outcome.noop = !has_script;
     Ok(outcome)
+}
+
+/// Run the built-in NoMount backend.
+///
+/// The driver is probed first and loaded from the embedded assets when the
+/// kernel has no support. A load is never treated as success on its own: the
+/// API has to answer afterwards, because the loader rewrites vermagic and
+/// relocates symbols and can therefore install a module that does not work.
+fn run_nomount() -> Result<MountOutcome> {
+    // An installed module that drives NoMount itself owns injection: running our
+    // own rules as well would make the two writers race on the same paths.
+    if let Some(owner) = crate::nomount::installed_driver_module() {
+        warn!("nomount: module {owner} owns NoMount injection; deferring to it");
+        let mut outcome = run_metamodule()?;
+        outcome.warnings.push(format!(
+            "Deferred to the installed NoMount module {owner} (it drives the same driver)"
+        ));
+        return Ok(outcome);
+    }
+    let result = crate::nomount::apply_current_plan()?;
+    for warning in &result.warnings {
+        warn!("nomount: {warning}");
+    }
+    Ok(MountOutcome {
+        provider: Provider::Nomount,
+        target_count: result.applied,
+        skipped_count: result.skipped,
+        partial: false,
+        residue: Vec::new(),
+        noop: result.applied == 0,
+        warnings: result.warnings,
+    })
 }
 
 /// Android built-in executor entry point.
@@ -654,6 +728,15 @@ fn run_provider(provider: Provider) -> ProviderRun {
                 ProviderRun::Failed { outcome, error }
             }
         },
+        Provider::Nomount => match run_nomount() {
+            Ok(outcome) => ProviderRun::Ok(outcome),
+            Err(error) => ProviderRun::Failed {
+                outcome: MountOutcome::failed(Provider::Nomount),
+                error,
+            },
+        },
+        // Handled before this point: mounting is disabled for this boot.
+        Provider::None => ProviderRun::Ok(MountOutcome::empty(Provider::None)),
     }
 }
 
@@ -684,6 +767,12 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     }
 
     let provider = resolve_provider()?;
+    if provider == Provider::None {
+        info!("folk mount: mounting is disabled (mode=off)");
+        let boot_id = current_boot_id().unwrap_or_default();
+        finish_runtime(&boot_id, provider, "disabled", false, 0, None, None);
+        return Ok(MountOutcome::empty(Provider::None));
+    }
     ensure_init_mnt_ns()?;
 
     let boot_id = current_boot_id().unwrap_or_default();
@@ -696,9 +785,25 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         result: "mounting".to_string(),
         target_count: None,
         error: None,
+        warning: None,
     })?;
 
-    match run_provider(provider) {
+    // A driver that cannot be made usable must not leave the modules
+    // unmounted: fall back to the built-in engine and say why.
+    let (provider, run, fallback) = match run_provider(provider) {
+        ProviderRun::Failed { error, .. } if provider == Provider::Nomount => {
+            warn!("nomount: {error:#}; falling back to the built-in engine");
+            let note = format!("NoMount unavailable ({error:#}); mounted with the built-in engine");
+            (
+                Provider::Builtin,
+                run_provider(Provider::Builtin),
+                Some(note),
+            )
+        }
+        run => (provider, run, None),
+    };
+
+    match run {
         ProviderRun::Ok(outcome) => {
             let result = if outcome.noop { "noop" } else { "mounted" };
             log::debug!(
@@ -707,13 +812,17 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 outcome.target_count,
                 outcome.skipped_count
             );
+            let warning = fallback.or_else(|| outcome.warnings.first().cloned());
             finish_runtime(
                 &boot_id,
                 provider,
                 result,
-                provider == Provider::Builtin,
+                // The metamodule is a black box; the built-in engine and the
+                // NoMount backend both know how many targets they published.
+                provider != Provider::Metamodule,
                 outcome.target_count,
                 None,
+                warning,
             );
             Ok(outcome)
         }
@@ -731,9 +840,10 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 &boot_id,
                 provider,
                 result,
-                provider == Provider::Builtin,
+                provider != Provider::Metamodule,
                 outcome.target_count,
                 Some(format!("{error:#}")),
+                fallback,
             );
             Err(error)
         }
@@ -747,6 +857,7 @@ fn finish_runtime(
     known_count: bool,
     target_count: usize,
     error: Option<String>,
+    warning: Option<String>,
 ) {
     let record = RuntimeRecord {
         boot_id: boot_id.to_string(),
@@ -754,6 +865,7 @@ fn finish_runtime(
         result: result.to_string(),
         target_count: known_count.then_some(target_count),
         error,
+        warning,
     };
     if let Err(e) = write_runtime(&record) {
         warn!("folk mount: failed to record runtime state: {e:#}");
@@ -782,7 +894,7 @@ pub fn print_status(json: bool) -> Result<()> {
 
     let boot_id = current_boot_id();
     let runtime = read_runtime();
-    let (boot_id, boot_provider, boot_result, target_count, runtime_error) =
+    let (boot_id, boot_provider, boot_result, target_count, runtime_error, boot_warning) =
         match (&runtime, &boot_id) {
             (Some(record), Some(current)) if &record.boot_id == current => (
                 Some(record.boot_id.clone()),
@@ -794,8 +906,9 @@ pub fn print_status(json: bool) -> Result<()> {
                 },
                 record.target_count,
                 record.error.clone(),
+                record.warning.clone(),
             ),
-            _ => (None, None, "unknown".to_string(), None, None),
+            _ => (None, None, "unknown".to_string(), None, None, None),
         };
     let error = config_error.or(runtime_error);
 
@@ -806,7 +919,7 @@ pub fn print_status(json: bool) -> Result<()> {
             out,
             "{}",
             json!({
-                "schema_version": 1,
+                "schema_version": 2,
                 "configured_mode": configured_mode.map(MountMode::as_str),
                 "next_provider": next_provider.map(Provider::as_str),
                 "metamodule_id": metamodule_id,
@@ -815,12 +928,13 @@ pub fn print_status(json: bool) -> Result<()> {
                 "boot_provider": boot_provider,
                 "boot_result": boot_result,
                 "target_count": target_count,
+                "boot_warning": boot_warning,
                 "error": error,
             })
         )
         .context("failed to write mount status")?;
     } else {
-        writeln!(out, "schema_version=1").context("failed to write mount status")?;
+        writeln!(out, "schema_version=2").context("failed to write mount status")?;
         writeln!(
             out,
             "configured_mode={}",
@@ -854,6 +968,12 @@ pub fn print_status(json: bool) -> Result<()> {
             out,
             "target_count={}",
             target_count.map_or_else(String::new, |count| count.to_string())
+        )
+        .context("failed to write mount status")?;
+        writeln!(
+            out,
+            "boot_warning={}",
+            boot_warning.as_deref().unwrap_or("")
         )
         .context("failed to write mount status")?;
         writeln!(out, "error={}", error.as_deref().unwrap_or(""))

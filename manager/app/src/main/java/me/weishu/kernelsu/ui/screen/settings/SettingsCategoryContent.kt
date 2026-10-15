@@ -41,12 +41,14 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
+import me.weishu.kernelsu.data.model.NomountDriverState
 import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.ui.component.KsuIsValid
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.screen.nomount.nomountUnavailableReason
 import me.weishu.kernelsu.ui.component.profile.dialogs.SingleSelectDialog
 import me.weishu.kernelsu.ui.util.LauncherIconUtils
 
@@ -437,6 +439,8 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         stringResource(id = R.string.settings_folk_mount_mode_auto),
                         stringResource(id = R.string.settings_folk_mount_mode_builtin),
                         stringResource(id = R.string.settings_folk_mount_mode_metamodule),
+                        stringResource(id = R.string.settings_folk_mount_mode_nomount),
+                        stringResource(id = R.string.settings_folk_mount_mode_off),
                     )
                     val summary = when {
                         uiState.isFolkMountLoading ->
@@ -451,6 +455,8 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                                     FolkMountMode.AUTO -> R.string.settings_folk_mount_mode_auto_summary
                                     FolkMountMode.BUILTIN -> R.string.settings_folk_mount_mode_builtin_summary
                                     FolkMountMode.METAMODULE -> R.string.settings_folk_mount_mode_metamodule_summary
+                                    FolkMountMode.NOMOUNT -> R.string.settings_folk_mount_mode_nomount_summary
+                                    FolkMountMode.OFF -> R.string.settings_folk_mount_mode_off_summary
                                     null -> R.string.settings_folk_mount_summary
                                 }
                             )
@@ -465,14 +471,25 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                                     stringResource(id = R.string.settings_folk_mount_provider_metamodule)
                                 )
 
+                                FolkMountProvider.NOMOUNT -> stringResource(
+                                    id = R.string.settings_folk_mount_boot_provider,
+                                    stringResource(id = R.string.settings_folk_mount_provider_nomount)
+                                )
+
+                                FolkMountProvider.NONE -> stringResource(
+                                    id = R.string.settings_folk_mount_provider_none
+                                )
+
                                 null -> stringResource(id = R.string.settings_folk_mount_boot_provider_unknown)
                             }
-                            val compatHint = if (
-                                mode == FolkMountMode.BUILTIN && folkMountStatus.metamoduleEnabled
-                            ) {
-                                stringResource(id = R.string.settings_folk_mount_metamodule_compat_hint)
-                            } else {
-                                null
+                            val compatHint = when {
+                                mode == FolkMountMode.BUILTIN && folkMountStatus.metamoduleEnabled ->
+                                    stringResource(id = R.string.settings_folk_mount_metamodule_compat_hint)
+
+                                mode == FolkMountMode.NOMOUNT && uiState.nomountStatus?.apiOk == false ->
+                                    stringResource(id = R.string.settings_folk_mount_nomount_unavailable_hint)
+
+                                else -> null
                             }
                             listOfNotNull(
                                 base,
@@ -492,6 +509,41 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         onItemSelected = { index ->
                             FolkMountMode.entries.getOrNull(index)?.let(actions.onSetFolkMountMode)
                         }
+                    )
+                },
+                {
+                    // NoMount is its own page: the row only reports the driver
+                    // and injection state, never a success it did not observe.
+                    val nomount = uiState.nomountStatus
+                    val nomountSummary = when {
+                        uiState.isNomountLoading -> stringResource(R.string.nomount_loading)
+                        uiState.nomountReadError -> stringResource(R.string.nomount_read_error)
+                        nomount == null -> stringResource(R.string.nomount_loading)
+                        // Say why it is unusable and what to do, not just that it is.
+                        !nomount.apiOk -> nomountUnavailableReason(nomount) ?: stringResource(
+                            id = R.string.nomount_driver_unavailable,
+                            stringResource(
+                                id = when (nomount.driverState) {
+                                    NomountDriverState.ABSENT -> R.string.nomount_driver_absent
+                                    NomountDriverState.OUTDATED -> R.string.nomount_driver_outdated
+                                    NomountDriverState.READY -> R.string.nomount_driver_ready
+                                }
+                            )
+                        )
+                        else -> stringResource(
+                            id = R.string.nomount_rules_value,
+                            nomount.rulesApplied,
+                            nomount.rulesExpected,
+                        )
+                    }
+                    SegmentedListItem(
+                        headlineContent = { Text(stringResource(id = R.string.settings_nomount)) },
+                        supportingContent = { Text(nomountSummary) },
+                        leadingContent = { Icon(Icons.Filled.Layers, null) },
+                        onClick = actions.onOpenNomount,
+                        trailingContent = {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                        },
                     )
                 }
             )

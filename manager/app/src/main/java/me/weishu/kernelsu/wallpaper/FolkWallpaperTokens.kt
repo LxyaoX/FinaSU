@@ -62,6 +62,16 @@ val LocalFolkWallpaperTokens = compositionLocalOf<FolkWallpaperTokens?> { null }
 private const val CHROME_ALPHA_FLOOR = 0.10f
 
 /**
+ * How much of the pair's content colour a supporting line keeps.
+ *
+ * The semantic `onSurfaceVariant`/`outline` greys are tuned against an opaque panel. Once the fill
+ * is translucent the wallpaper shows through, and those greys lose the contrast they were chosen
+ * for. Deriving the supporting colour from the content colour keeps the pair's own contrast, and the
+ * small alpha drop preserves the hierarchy between a card's main line and its supporting line.
+ */
+private const val SUPPORTING_CONTENT_ALPHA = 0.8f
+
+/**
  * Maps the user-facing opacity preference (0..1) onto the role alphas.
  *
  * The preference *is* the surface alpha: 0 lets the wallpaper show through completely and 1 is
@@ -76,11 +86,13 @@ fun resolveFolkWallpaperTokens(colorScheme: ColorScheme, opacity: Float): FolkWa
         tint = colorScheme.surface,
         alpha = alpha,
         contentColor = colorScheme.onSurface,
-        supportingColor = colorScheme.onSurfaceVariant,
+        supportingColor = colorScheme.onSurface.copy(alpha = SUPPORTING_CONTENT_ALPHA),
     )
     return FolkWallpaperTokens(
         group = panel,
         raised = panel.copy(alpha = (alpha + 0.12f).coerceAtMost(1f)),
+        // The overlay stays near-opaque, so its supporting grey still sits on a panel of its own and
+        // keeps the semantic variant colour.
         overlay = WallpaperMaterial(
             tint = colorScheme.surfaceContainerHigh,
             alpha = 0.96f,

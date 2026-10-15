@@ -49,7 +49,7 @@ Standard KernelSU modules are managed from the manager. A single active metamodu
 
 ### FolkZygisk
 
-FolkZygisk is a built-in Zygisk engine. The manager exposes its installation and activation controls, and `ksud` handles provider registration without conflicting with an existing Zygisk provider.
+FolkZygisk is a built-in Zygisk engine. The manager exposes its installation and activation controls, and `ksud` steps the built-in engine aside whenever an external Zygisk provider is active, so provider modules install normally.
 
 ### SUSFS
 
@@ -58,6 +58,12 @@ SUSFS management is capability-gated. The controls appear only on kernels that s
 ### Folk-Mount
 
 Folk-Mount is the built-in module mount engine. It can run in auto, built-in, or metamodule mode.
+
+### NoMount
+
+NoMount is the built-in VFS redirection backend: instead of mounting anything it takes over path resolution and directory iteration in a kernel module, so `/proc/mounts` stays clean. The module ships inside ksud (embedded per KMI, built by this repository); the backend needs neither a metamodule nor the `nm` binary.
+
+The manager exposes the driver state, the number of active rules, visibility exclusions and a "mounting off" mode; the backend can be set to automatic, built-in Folk Mount, metamodule only, NoMount or off. Choosing NoMount falls back to the built-in engine when the driver is unavailable and says so on the settings page. Visibility is an exception list kept by ksud: every app sees the injected files until it is added, and the NoMount page copies each app profile's "unmount modules" verdict into that list on demand, so later profile changes need another copy.
 
 ## Security
 

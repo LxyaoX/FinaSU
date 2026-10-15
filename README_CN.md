@@ -49,7 +49,7 @@ FinaSU 提供：
 
 ### FolkZygisk
 
-FolkZygisk 是内置的 Zygisk 引擎。管理器提供安装与激活控制，`ksud` 负责注册 provider，并与已有的 Zygisk provider 互不冲突。
+FolkZygisk 是内置的 Zygisk 引擎。管理器提供安装与激活控制；已有外置 Zygisk provider 时 `ksud` 会让内置引擎自动让位，因此 provider 模块可正常安装。
 
 ### SUSFS
 
@@ -58,6 +58,12 @@ SUSFS 管理按能力开关。仅在支持的内核上显示相关控件，每�
 ### Folk-Mount
 
 Folk-Mount 是内置的模块挂载引擎，可在自动、内置或 metamodule 模式间切换。
+
+### NoMount
+
+NoMount 是内建的 VFS 路径重定向后端：不产生任何挂载，而是由内核模块直接接管路径解析与目录遍历，因此不会污染 `/proc/mounts`。内核模块随 ksud 一起分发（按 KMI 内嵌，由本仓库自行编译），后端本身不依赖模块或 `nm` 二进制。
+
+管理器提供驱动状态、注入规则数、可见性例外与「关闭挂载」；挂载模式可选 `自动 / 内建 Folk Mount / 仅 metamodule / NoMount / 关闭`。选择 NoMount 时若驱动不可用会自动回退到内建引擎，并在设置页说明原因。可见性是一份由 ksud 保存的例外名单：名单内的应用看到原厂文件系统，其余应用都能看到注入的文件；NoMount 页可以按需把各应用 Profile 的「卸载模块」判定复制进这份名单，改动 Profile 后需要再复制一次。
 
 ## 安全提示
 

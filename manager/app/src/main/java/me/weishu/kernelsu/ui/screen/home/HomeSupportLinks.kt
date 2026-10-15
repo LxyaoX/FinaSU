@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.SupportLinksStyle
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkType
 
@@ -104,6 +105,9 @@ private fun SupportLinkRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val haptic = LocalHapticFeedback.current
+    // On wallpaper the card material carries its own supporting colour, tuned against the
+    // translucent fill; off it we keep the semantic greys.
+    val supportingColor = LocalWallpaperSupportingColor.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,7 +127,7 @@ private fun SupportLinkRow(
             imageVector = icon,
             contentDescription = title,
             modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -132,7 +136,7 @@ private fun SupportLinkRow(
             Text(
                 text = subtitle,
                 style = FolkType.Caption,
-                color = MaterialTheme.colorScheme.outline
+                color = supportingColor ?: MaterialTheme.colorScheme.outline
             )
         }
         Spacer(Modifier.width(12.dp))
@@ -140,7 +144,7 @@ private fun SupportLinkRow(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

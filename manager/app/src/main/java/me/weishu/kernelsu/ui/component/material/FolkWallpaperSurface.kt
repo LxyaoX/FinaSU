@@ -19,6 +19,18 @@ import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 val LocalWallpaperMaterialRole = staticCompositionLocalOf<WallpaperSurfaceRole?> { null }
 
 /**
+ * The supporting content colour for a secondary line inside a wallpaper material.
+ *
+ * It is the material's own content colour at a reduced alpha (see [WallpaperMaterial.supportingColor]),
+ * so the pair keeps its contrast over the translucent fill instead of falling back to the semantic
+ * greys that were tuned against an opaque panel.
+ *
+ * Null outside wallpaper mode, and outside any wallpaper surface while it is on, so callers keep
+ * their `onSurfaceVariant`/`outline` fallback and non-wallpaper rendering stays byte-identical.
+ */
+val LocalWallpaperSupportingColor = staticCompositionLocalOf<Color?> { null }
+
+/**
  * The unified transparency layering controller.
  *
  * Every on-screen container that wants to sit on the wallpaper should draw its fill through this
@@ -79,7 +91,10 @@ fun FolkWallpaperSurface(
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
     ) {
-        CompositionLocalProvider(LocalWallpaperMaterialRole provides role) {
+        CompositionLocalProvider(
+            LocalWallpaperMaterialRole provides role,
+            LocalWallpaperSupportingColor provides material.supportingColor,
+        ) {
             content()
         }
     }

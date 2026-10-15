@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.theme.FolkType
 
 /** A single live metric drawn as a wavy ring with its value in the middle. */
@@ -68,6 +69,7 @@ internal fun StatusCircle(
             text = label,
             style = MaterialTheme.typography.bodyMediumEmphasized,
             color = LocalHomeTileCardContentColor.current?.copy(alpha = 0.8f)
+                ?: LocalWallpaperSupportingColor.current
                 ?: MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -122,6 +124,7 @@ internal fun MetricBar(
                 text = value,
                 style = FolkType.Summary,
                 color = LocalHomeTileCardContentColor.current?.copy(alpha = 0.8f)
+                    ?: LocalWallpaperSupportingColor.current
                     ?: MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.FolkButton
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.theme.FolkType
 
@@ -189,7 +190,8 @@ internal fun StatusCard(
                         text = statusSummary,
                         modifier = Modifier.weight(1f, fill = false),
                         style = FolkType.Summary,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = LocalWallpaperSupportingColor.current
+                            ?: MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (state.showCustomLkmBadge) {
                         Spacer(Modifier.width(8.dp))

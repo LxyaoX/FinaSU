@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.SurfaceOptionsDialog
+import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.ui.theme.isInDarkTheme
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
@@ -114,7 +115,9 @@ private fun DashboardHeroCard(
     // Once the bitmap is decoded, drop to the photo palette; before that keep the opaque card.
     val overImage = backgroundUri != null && photo.ready
     val photoContentColor = if (overImage) photo.contentColor(surface, isInDarkTheme()) else null
-    val subColor = photoContentColor?.copy(alpha = 0.8f) ?: MaterialTheme.colorScheme.onSurfaceVariant
+    val subColor = photoContentColor?.copy(alpha = 0.8f)
+        ?: LocalWallpaperSupportingColor.current
+        ?: MaterialTheme.colorScheme.onSurfaceVariant
     var showOptions by remember { mutableStateOf(false) }
 
     HomeCard(
@@ -225,6 +228,7 @@ private fun HeroFact(
             text = label,
             style = FolkType.Caption,
             color = LocalHomeTileCardContentColor.current?.copy(alpha = 0.8f)
+                ?: LocalWallpaperSupportingColor.current
                 ?: MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

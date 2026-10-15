@@ -284,6 +284,12 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.About> { AboutScreen() }
                                 entry<Route.Sulog> { SulogScreen() }
                                 entry<Route.Susfs> { me.weishu.kernelsu.ui.screen.SusfsScreen() }
+                                entry<Route.Nomount> {
+                                    me.weishu.kernelsu.ui.screen.nomount.NomountScreen()
+                                }
+                                entry<Route.NomountExclusions> {
+                                    me.weishu.kernelsu.ui.screen.nomount.NomountExclusionsScreen()
+                                }
                                 entry<Route.ColorPalette> { ColorPaletteScreen() }
                                 entry<Route.AppProfileTemplate> { AppProfileTemplateScreen() }
                                 entry<Route.TemplateEditor> { key -> TemplateEditorScreen(key.template, key.readOnly) }

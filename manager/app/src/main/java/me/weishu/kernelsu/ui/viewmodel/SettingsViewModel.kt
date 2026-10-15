@@ -93,6 +93,7 @@ class SettingsViewModel(
             val isLateLoadMode = Natives.isLateLoadMode
 
             val folkMountResult = repo.getFolkMountStatus()
+            val nomountResult = repo.getNomountStatus()
             val folkZygiskResult = repo.getFolkZygiskStatus()
 
             if (generation != refreshGeneration) return@launch
@@ -137,6 +138,9 @@ class SettingsViewModel(
                     folkMountStatus = folkMountResult.getOrNull(),
                     folkMountReadError = folkMountResult.isFailure,
                     isFolkMountLoading = false,
+                    nomountStatus = nomountResult.getOrNull(),
+                    nomountReadError = nomountResult.isFailure,
+                    isNomountLoading = false,
                     folkZygiskStatus = folkZygiskResult.getOrNull(),
                     folkZygiskReadError = folkZygiskResult.isFailure,
                     isFolkZygiskLoading = false,
@@ -145,12 +149,12 @@ class SettingsViewModel(
         }
     }
 
-    fun setFolkZygiskEnabled(enabled: Boolean, disableExternal: Boolean, expectedExternal: List<String>) {
+    fun setFolkZygiskEnabled(enabled: Boolean) {
         if (_uiState.value.isFolkZygiskWriting || _uiState.value.isFolkZygiskLoading) return
         ++refreshGeneration
         _uiState.update { it.copy(isFolkZygiskWriting = true) }
         viewModelScope.launch {
-            val result = repo.setFolkZygiskEnabled(enabled, disableExternal, expectedExternal)
+            val result = repo.setFolkZygiskEnabled(enabled)
             val status = repo.getFolkZygiskStatus()
             _uiState.update {
                 it.copy(isFolkZygiskWriting = false, folkZygiskStatus = status.getOrNull(),

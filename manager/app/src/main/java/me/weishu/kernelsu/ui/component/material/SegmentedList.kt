@@ -126,6 +126,7 @@ private fun WallpaperGroupBackground(
         CompositionLocalProvider(
             LocalWallpaperGroupActive provides true,
             LocalWallpaperMaterialRole provides WallpaperSurfaceRole.Group,
+            LocalWallpaperSupportingColor provides tokens.group.supportingColor,
         ) {
             content()
         }

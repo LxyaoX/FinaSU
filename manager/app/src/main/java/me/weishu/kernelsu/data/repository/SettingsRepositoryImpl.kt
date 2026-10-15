@@ -15,6 +15,7 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
+import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.ModuleSortPriorityStore
@@ -39,6 +40,14 @@ private const val KEY_USE_SOFT_REBOOT = "soft_reboot"
 val DEFAULT_BACKUP_PARTITIONS = setOf("boot", "init_boot", "vendor_boot")
 
 /** Prefer soft reboot: always in jailbreak mode, or when the setting is enabled. */
+/**
+ * Single-quote a value for the root shell.
+ *
+ * Module ids are already validated by ksud; this keeps the command line
+ * unambiguous even if a caller passes something unexpected.
+ */
+private fun shellQuote(value: String): String = "'" + value.replace("'", "'\"'\"'") + "'"
+
 fun isSoftRebootPreferred(): Boolean =
     Natives.isLateLoadMode || ksuApp.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
         .getBoolean(KEY_USE_SOFT_REBOOT, false)
@@ -313,7 +322,7 @@ class SettingsRepositoryImpl : SettingsRepository {
             }
         }
 
-    override suspend fun setFolkZygiskEnabled(enabled: Boolean, disableExternal: Boolean, expectedExternal: List<String>): Result<Unit> =
+    override suspend fun setFolkZygiskEnabled(enabled: Boolean): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
                 if (enabled) {
@@ -322,15 +331,7 @@ class SettingsRepositoryImpl : SettingsRepository {
                         check(execKsudResult("zygisk install-engine").isSuccess) { "Engine installation failed" }
                     }
                 }
-                val command = if (!enabled) {
-                    "disable"
-                } else {
-                    "enable" + if (disableExternal) {
-                        " --disable-external" + expectedExternal.joinToString("") {
-                            " --expected-external '" + it.replace("'", "'\"'\"'") + "'"
-                        }
-                    } else ""
-                }
+                val command = if (enabled) "enable" else "disable"
                 check(execKsudResult("zygisk $command").isSuccess) { "FolkZygisk configuration failed" }
             }
         }
@@ -340,6 +341,81 @@ class SettingsRepositoryImpl : SettingsRepository {
             // `mode.token` is a fixed enum value; never interpolate arbitrary input.
             check(execKsud("mount set-mode ${mode.token}", true)) {
                 "ksud mount set-mode ${mode.token} failed"
+            }
+        }
+    }
+
+    override suspend fun getNomountStatus(): Result<NomountStatus> = withContext(Dispatchers.IO) {
+        runCatching {
+            val result = execKsudResult("nomount status --json")
+            check(result.isSuccess) { "ksud nomount status failed (exit ${result.code})" }
+            val payload = result.out.firstOrNull { it.isNotBlank() }
+                ?: error("ksud nomount status returned no payload")
+            NomountStatus.fromJson(JSONObject(payload))
+        }
+    }
+
+    override suspend fun setNomountIsolated(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val state = if (enabled) "on" else "off"
+            check(execKsud("nomount uid isolated $state", true)) {
+                "ksud nomount uid isolated $state failed"
+            }
+        }
+    }
+
+    override suspend fun injectNomountRules(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount inject", true)) { "ksud nomount inject failed" }
+        }
+    }
+
+    override suspend fun clearNomountRules(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount clear", true)) { "ksud nomount clear failed" }
+        }
+    }
+
+    override suspend fun clearNomountEverything(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            // Rules first, then the exclusions: if a step fails, the failure is
+            // reported instead of leaving a half-cleared state looking done.
+            check(execKsud("nomount clear", true)) { "ksud nomount clear failed" }
+            check(execKsud("nomount uid set", true)) { "ksud nomount uid set failed" }
+        }
+    }
+
+    override suspend fun setNomountUids(uids: List<Int>): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            // UIDs are integers from the app list; nothing user-typed reaches the shell.
+            val list = uids.distinct().sorted().joinToString(" ")
+            // An empty list clears every exclusion.
+            val command = if (list.isEmpty()) "nomount uid set" else "nomount uid set $list"
+            check(execKsud(command, true)) { "ksud nomount uid set failed" }
+        }
+    }
+
+    override suspend fun hotLoadNomountModule(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount hot-load ${shellQuote(id)}", true)) {
+                "ksud nomount hot-load failed"
+            }
+        }
+    }
+
+    override suspend fun hotUnloadNomountModule(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            check(execKsud("nomount hot-unload ${shellQuote(id)}", true)) {
+                "ksud nomount hot-unload failed"
+            }
+        }
+    }
+
+    override suspend fun setModuleSkip(id: String, skip: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val flag = if (skip) "" else " --off"
+            check(execKsud("module skip ${shellQuote(id)}$flag", true)) {
+                "ksud module skip failed"
             }
         }
     }

@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.topjohnwu.superuser.CallbackList
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -24,7 +25,6 @@ import me.weishu.kernelsu.core.tasks.BootKernelVersion
 import me.weishu.kernelsu.core.tasks.ExtractImage
 import me.weishu.kernelsu.core.tasks.ProbeResult
 import me.weishu.kernelsu.core.utils.DataSourceChannel
-import me.weishu.kernelsu.data.model.ModuleMutationResult
 import me.weishu.kernelsu.ksuApp
 import okhttp3.OkHttpClient
 import org.json.JSONArray
@@ -266,21 +266,13 @@ fun mutateModuleActivation(
     id: String,
     undoUninstall: Boolean = false,
     enable: Boolean = true,
-    switchExternal: Boolean = false,
-): ModuleMutationResult {
+): Boolean {
     val action = if (undoUninstall) "undo-uninstall" else if (enable) "enable" else "disable"
     val quotedId = "'" + id.replace("'", "'\"'\"'") + "'"
-    val output = ArrayList<String>()
-    val errors = ArrayList<String>()
-    val result = withNewRootShell {
-        val command = if (switchExternal) {
-            "zygisk switch-external $quotedId" + if (undoUninstall) " --undo-uninstall" else ""
-        } else {
-            "module $action $quotedId"
-        }
-        newJob().add("${getKsuDaemonPath()} $command").to(output, errors).exec()
-    }
-    return ModuleMutationResult.fromOutput(result.isSuccess, output + errors)
+    val cmd = "module $action $quotedId"
+    val result = execKsud(cmd, true)
+    Log.i(TAG, "$cmd result: $result")
+    return result
 }
 
 fun undoUninstallModule(id: String): Boolean {
@@ -345,65 +337,35 @@ suspend fun flashModule(
     return flashModuleBatch(listOf(uri), onStdout, onStderr)
 }
 
-/** Stage the entire batch before preflight; install the exact staged archives. */
+/** Install every selected archive in order, stopping at the first failure. */
 suspend fun flashModuleBatch(
     uris: List<Uri>,
     onStdout: (String) -> Unit,
     onStderr: (String) -> Unit,
-    confirmExternal: suspend (List<String>, Boolean) -> Boolean = { _, _ -> false },
 ): FlashResult {
     val files = mutableListOf<File>()
-    var installed = false
     fun quote(value: String) = "'" + value.replace("'", "'\"'\"'") + "'"
+    var installed = false
     return try {
         require(uris.isNotEmpty()) { "No module archives selected" }
         for (uri in uris) {
-            val file = File.createTempFile("module-batch-", ".zip", ksuApp.cacheDir)
+            val file = File.createTempFile("module-", ".zip", ksuApp.cacheDir)
             files.add(file)
             requireNotNull(ksuApp.contentResolver.openInputStream(uri)) { "Cannot read module archive" }
                 .use { source -> file.outputStream().use { source.copyTo(it) } }
-        }
-        val result = flashWithIO(
-            "${quote(getKsuDaemonPath())} zygisk preflight ${files.joinToString(" ") { quote(it.absolutePath) }}",
-            {}, onStderr,
-        )
-        check(result.isSuccess) { ksuApp.getString(R.string.folkzygisk_preflight_failed) }
-        val lines = result.out.filter { it.isNotBlank() }
-        check(lines.size == 1) { ksuApp.getString(R.string.folkzygisk_preflight_failed) }
-        val status = me.weishu.kernelsu.data.model.FolkZygiskPreflight.fromJson(JSONObject(lines.single()))
-        if (status.blocked) {
-            val message = ksuApp.getString(R.string.folkzygisk_multiple_external, (status.providerIds + status.externalProviders).distinct().joinToString(", "))
-            confirmExternal((status.providerIds + status.externalProviders).distinct(), true)
-            onStdout(message)
-            FlashResult(-1, message, false)
-        } else if (status.conflict && !confirmExternal(status.providerIds, false)) {
-            val message = ksuApp.getString(R.string.folkzygisk_install_canceled)
-            onStdout(message)
-            FlashResult(-1, message, false)
-        } else {
-            val install = flashWithIO(
-                "${quote(getKsuDaemonPath())} zygisk install-batch --expected-state ${quote(status.stateToken)}" +
-                    (if (status.conflict) " --switch-external" else "") +
-                    " ${files.joinToString(" ") { quote(it.absolutePath) }}",
-                { line ->
-                    if (line != "FOLKZYGISK_BATCH_CHANGED") onStdout(line)
-                }, onStderr,
+            val result = flashWithIO(
+                "${quote(getKsuDaemonPath())} module install ${quote(file.absolutePath)}",
+                onStdout, onStderr,
             )
-            installed = install.out.any { it == "FOLKZYGISK_BATCH_CHANGED" }
-            val stateChanged = install.err.any {
-                it.trimStart().removePrefix("Error: ").startsWith("FOLKZYGISK_STATE_CHANGED:")
-            }
-            if (stateChanged) {
-                val message = ksuApp.getString(R.string.folkzygisk_state_changed)
-                onStdout(message)
-                FlashResult(install.code, message, installed)
-            } else FlashResult(install, installed)
+            if (!result.isSuccess) return FlashResult(result, installed)
+            installed = true
         }
-    } catch (error: Exception) {
-        if (error is kotlinx.coroutines.CancellationException) throw error
-        val message = ksuApp.getString(R.string.folkzygisk_preflight_failed)
-        onStderr(error.toString())
-        FlashResult(-1, message, installed)
+        FlashResult(0, "", true)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        onStderr(e.toString())
+        FlashResult(-1, e.message ?: e.toString(), installed)
     } finally {
         files.forEach { it.delete() }
     }

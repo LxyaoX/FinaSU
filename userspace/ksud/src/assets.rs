@@ -81,3 +81,19 @@ pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
     }
     list
 }
+
+/// KMI names that carry a vendored NoMount module (`<kmi>_nomount.ko`).
+///
+/// This is a subset of [`list_supported_kmi`]: a KMI can ship `kernelsu.ko`
+/// without a matching NoMount module, in which case the built-in NoMount
+/// backend must report the driver as unavailable instead of guessing.
+// Kept alongside the KMI asset discovery so the built-in NoMount backend lands
+// on one source of truth; wired up by the `ksud nomount` commands.
+#[allow(dead_code)]
+pub fn list_supported_nomount_kmi() -> std::vec::Vec<std::string::String> {
+    let mut list: Vec<String> = Asset::iter()
+        .filter_map(|file| file.strip_suffix("_nomount.ko").map(ToString::to_string))
+        .collect();
+    list.sort();
+    list
+}
