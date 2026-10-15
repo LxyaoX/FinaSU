@@ -21,6 +21,7 @@ FinaSU provides:
 - A Magisk-like module system based on overlayfs and metamodules
 - App Profile, to confine root power to a per-app policy
 - The built-in FolkZygisk engine, with manager controls
+- The built-in Sui extension, which serves the Shizuku API to supported apps
 - SUSFS support, gated by kernel capability
 - Kernel-level hiding: mount hiding, SELinux hiding, AVC log spoofing, and unmount policy
 - `.fpt` themes with FolkPatch-compatible exchange, plus an online theme store
@@ -50,6 +51,12 @@ Standard KernelSU modules are managed from the manager. A single active metamodu
 ### FolkZygisk
 
 FolkZygisk is a built-in Zygisk engine. The manager exposes its installation and activation controls, and `ksud` steps the built-in engine aside whenever an external Zygisk provider is active, so provider modules install normally.
+
+### Sui
+
+Sui is the built-in Shizuku API backend, for the apps that talk to Shizuku: they reach this extension instead of a separate Shizuku installation. The payload is built by this repository and embedded in ksud, so installation, enable and disable, and repair belong to FinaSU rather than to Sui's own installer, and `ksud` supervises the injected root and shell servers.
+
+The manager hosts the whole interface: the per-app Shizuku permission list, the default permission, the apps hidden from Sui, diagnostics, and the prompt for a real permission request, which is answered over the management channel. Sui's own management UI is not shipped.
 
 ### SUSFS
 
@@ -100,6 +107,8 @@ See [AGENTS.md](./AGENTS.md) for the per-component build and check commands.
 - [BakaSU](https://github.com/Baka-SU/BakaSU) - AnyKernel3 flashing and smaller-feature reference
 - [Magisk](https://github.com/topjohnwu/Magisk) - `magiskpolicy` and module concepts
 - [SUSFS](https://gitlab.com/simonpunk/susfs4ksu) - kernel-level hiding
+- [Sui](https://github.com/XiaoTong6666/Sui) - the built-in Shizuku API backend
+- [Shizuku-API](https://github.com/RikkaApps/Shizuku-API) - the Shizuku client API library
 - [FolkPatch](https://github.com/LyraVoid/FolkPatch) - theme format and design reference
 - [MMRL](https://github.com/MMRLApp/MMRL) - module repository format reference
 
