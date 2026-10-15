@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material3.Icon
@@ -31,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,8 @@ import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.component.uninstalldialog.UninstallDialog
 import me.weishu.kernelsu.ui.util.resolveDeviceName
 
+private const val BUG_FEEDBACK_URL = "https://github.com/LyraVoid/FinaSU/issues/new/choose"
+
 /**
  * @author weishu
  * @date 2023/1/1.
@@ -66,6 +70,7 @@ fun SettingPagerMaterial(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showProfileEditor by remember { mutableStateOf(false) }
     val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
 
     UninstallDialog(
         show = showUninstallDialog.value,
@@ -125,6 +130,18 @@ fun SettingPagerMaterial(
                     },
                     {
                         SegmentedListItem(
+                            onClick = { uriHandler.openUri(BUG_FEEDBACK_URL) },
+                            headlineContent = { Text(stringResource(id = R.string.settings_bug_feedback)) },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.BugReport,
+                                    stringResource(id = R.string.settings_bug_feedback)
+                                )
+                            },
+                        )
+                    },
+                    {
+                        SegmentedListItem(
                             onClick = { showDisclaimerDialog.value = true },
                             headlineContent = { Text(stringResource(id = R.string.settings_disclaimer)) },
                             leadingContent = {
@@ -141,7 +158,7 @@ fun SettingPagerMaterial(
                             headlineContent = { Text(stringResource(id = R.string.send_log)) },
                             leadingContent = {
                                 Icon(
-                                    Icons.Filled.BugReport,
+                                    Icons.Filled.Description,
                                     stringResource(id = R.string.send_log)
                                 )
                             },

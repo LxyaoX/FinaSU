@@ -880,4 +880,5 @@
     <string name="wallpaper_gallery_cancel">取消</string>
     <string name="settings_disclaimer">免责声明</string>
     <string name="settings_disclaimer_message">给设备上 Root 之后，系统更新、第三方模块或别的外在因素都可能带来没准儿的风险和损失，得你自己承担。弄明白风险了再接着用。</string>
+    <string name="settings_bug_feedback">Bug 反馈</string>
 </resources>

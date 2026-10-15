@@ -880,4 +880,5 @@
     <string name="wallpaper_gallery_cancel">作罷</string>
     <string name="settings_disclaimer">免责天劫</string>
     <string name="settings_disclaimer_message">对法器 Root 之后，天机更新、外道模块或诸般外劫皆可能招致不测之祸与损，需由你自行承担。待你参悟风险，方可续行。</string>
+    <string name="settings_bug_feedback">缺陷禀报</string>
 </resources>

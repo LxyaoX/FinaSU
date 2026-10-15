@@ -882,4 +882,5 @@
     <string name="wallpaper_gallery_cancel">Отмена</string>
     <string name="settings_disclaimer">Отказ от ответственности</string>
     <string name="settings_disclaimer_message">После получения root-прав обновления системы, сторонние модули и другие внешние факторы могут привести к непредвиденным рискам и потерям. Вы принимаете эти риски на себя. Пожалуйста, продолжайте только после того, как полностью их осознаете.</string>
+    <string name="settings_bug_feedback">Сообщить об ошибке</string>
 </resources>

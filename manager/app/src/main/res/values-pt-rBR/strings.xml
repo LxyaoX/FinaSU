@@ -882,4 +882,5 @@
     <string name="wallpaper_gallery_cancel">Cancelar</string>
     <string name="settings_disclaimer">Isenção de responsabilidade</string>
     <string name="settings_disclaimer_message">Após obter root no dispositivo, atualizações do sistema, módulos de terceiros ou outros fatores externos podem causar riscos e perdas imprevistas, que você assume por conta própria. Continue apenas depois de entender bem os riscos.</string>
+    <string name="settings_bug_feedback">Relatar bug</string>
 </resources>

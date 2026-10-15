@@ -882,4 +882,5 @@
     <string name="wallpaper_gallery_cancel">İptal</string>
     <string name="settings_disclaimer">Sorumluluk reddi</string>
     <string name="settings_disclaimer_message">Cihazı root ettikten sonra sistem güncellemeleri, üçüncü taraf modüller veya diğer dış etkenler öngörülemeyen risk ve kayıplara yol açabilir; bunları kendiniz üstlenmeniz gerekir. Lütfen riskleri tam olarak anladıktan sonra devam edin.</string>
+    <string name="settings_bug_feedback">Hata bildir</string>
 </resources>

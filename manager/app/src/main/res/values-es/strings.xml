@@ -880,4 +880,5 @@
     <string name="wallpaper_gallery_cancel">Cancelar</string>
     <string name="settings_disclaimer">Descargo de responsabilidad</string>
     <string name="settings_disclaimer_message">Después de rootear el dispositivo, las actualizaciones del sistema, los módulos de terceros u otros factores externos pueden causar riesgos y pérdidas imprevistas. Debes asumirlos por tu cuenta. Asegúrate de entenderlos antes de continuar.</string>
+    <string name="settings_bug_feedback">Informar de un error</string>
 </resources>

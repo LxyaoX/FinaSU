@@ -884,4 +884,5 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="wallpaper_gallery_cancel">Anuluj</string>
     <string name="settings_disclaimer">Wyłączenie odpowiedzialności</string>
     <string name="settings_disclaimer_message">Po uzyskaniu uprawnień root aktualizacje systemu, moduły firm trzecich lub inne czynniki zewnętrzne mogą powodować nieprzewidziane ryzyko i straty, które ponosisz na własną odpowiedzialność. Kontynuuj dopiero po pełnym zrozumieniu ryzyka.</string>
+    <string name="settings_bug_feedback">Zgłoś błąd</string>
 </resources>
