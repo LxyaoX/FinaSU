@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.data.model.Module
 import me.weishu.kernelsu.data.model.ModuleUpdateInfo
+import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.ui.util.isNetworkAvailable
 import me.weishu.kernelsu.ui.util.listModules
@@ -42,7 +43,10 @@ class ModuleRepositoryImpl : ModuleRepository {
                         actionIconPath = obj.optString("actionIcon").takeIf { it.isNotBlank() },
                         webUiIconPath = obj.optString("webuiIcon").takeIf { it.isNotBlank() }
                     )
-                }.toList()
+                }
+                // The Sui payload is a module on disk but is owned by the settings entry.
+                .filterNot { it.id == SuiStatus.MODULE_ID }
+                .toList()
         }
     }
 

@@ -190,6 +190,12 @@ android {
         warning += "MissingTranslation"
     }
 
+    testOptions {
+        // The Sui permission view model logs through android.util.Log, which the local unit tests
+        // run against a stubbed framework jar; stubbed calls must return defaults, not throw.
+        unitTests.isReturnDefaultValues = true
+    }
+
     compileOptions {
         sourceCompatibility = androidSourceCompatibility
         targetCompatibility = androidTargetCompatibility

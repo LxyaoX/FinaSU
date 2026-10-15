@@ -13,3 +13,4 @@ __pycache__
 /design
 /userspace/ksud/bin/*/mkbootfs
 /userspace/ksud/bin/*/folkzygisk/
+/userspace/ksud/bin/*/sui/

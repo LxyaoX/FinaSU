@@ -432,6 +432,9 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     FolkZygiskStatusItem(uiState, actions)
                 },
                 {
+                    SuiStatusItem(uiState, actions)
+                },
+                {
                     val folkMountStatus = uiState.folkMountStatus
                     val available = folkMountStatus != null && !uiState.folkMountReadError
                     val mode = folkMountStatus?.configuredMode

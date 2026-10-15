@@ -1,6 +1,7 @@
 package me.weishu.kernelsu.ui.viewmodel
 
 import android.system.OsConstants
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
+import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
@@ -95,8 +97,14 @@ class SettingsViewModel(
             val folkMountResult = repo.getFolkMountStatus()
             val nomountResult = repo.getNomountStatus()
             val folkZygiskResult = repo.getFolkZygiskStatus()
+            val suiResult = repo.getSuiStatus()
 
             if (generation != refreshGeneration) return@launch
+            val suiManagement = if (suiResult.getOrNull()?.state == SuiStatus.STATE_ENABLED) {
+                refreshSuiManagement()
+            } else {
+                null
+            }
             _uiState.update {
                 it.copy(
                     checkUpdate = checkUpdate,
@@ -144,6 +152,10 @@ class SettingsViewModel(
                     folkZygiskStatus = folkZygiskResult.getOrNull(),
                     folkZygiskReadError = folkZygiskResult.isFailure,
                     isFolkZygiskLoading = false,
+                    suiStatus = suiResult.getOrNull(),
+                    suiReadError = suiResult.isFailure,
+                    isSuiLoading = false,
+                    suiManagementAvailable = suiManagement,
                 )
             }
         }
@@ -163,6 +175,65 @@ class SettingsViewModel(
             }
             Toast.makeText(ksuApp, if (result.isSuccess) R.string.folkzygisk_reboot_required
                 else R.string.folkzygisk_write_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun setSuiEnabled(enabled: Boolean) {
+        if (_uiState.value.isSuiWriting || _uiState.value.isSuiLoading) return
+        ++refreshGeneration
+        _uiState.update { it.copy(isSuiWriting = true) }
+        viewModelScope.launch {
+            val result = repo.setSuiEnabled(enabled)
+            val status = repo.getSuiStatus()
+            _uiState.update {
+                it.copy(
+                    isSuiWriting = false,
+                    suiStatus = status.getOrNull(),
+                    suiReadError = status.isFailure,
+                )
+            }
+            val message = when {
+                result.isFailure -> R.string.sui_write_failed
+                enabled -> R.string.sui_reboot_required
+                else -> R.string.sui_disable_done
+            }
+            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun probeSuiManagement() {
+        viewModelScope.launch {
+            val message = repo.suiProbeManagement().getOrElse { it.message ?: "probe failed" }
+            Log.i("SuiManagement", message)
+            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private suspend fun refreshSuiManagement(): Boolean {
+        val result = repo.suiProbeManagement()
+        Log.i("SuiManagement", result.getOrElse { "unavailable: ${it.message}" })
+        return result.isSuccess
+    }
+
+    fun repairSui() {
+        if (_uiState.value.isSuiWriting) return
+        ++refreshGeneration
+        _uiState.update { it.copy(isSuiWriting = true) }
+        viewModelScope.launch {
+            val result = repo.repairSui()
+            val status = repo.getSuiStatus()
+            _uiState.update {
+                it.copy(
+                    isSuiWriting = false,
+                    suiStatus = status.getOrNull(),
+                    suiReadError = status.isFailure,
+                )
+            }
+            Toast.makeText(
+                ksuApp,
+                if (result.isSuccess) R.string.sui_repair_done else R.string.sui_repair_failed,
+                Toast.LENGTH_LONG,
+            ).show()
         }
     }
 

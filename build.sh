@@ -194,6 +194,36 @@ abi_to_triple() {
     esac
 }
 
+# Sui is vendored at userspace/sui (GPL-3.0, see userspace/sui/UPSTREAM.md). Its
+# Gradle build produces the upstream release zip; package.py maps that archive
+# into per-ABI ksud assets. Nothing here flashes a module or runs Sui's own
+# installer/lifecycle scripts.
+build_sui() {
+    have java || die "a JDK is required to build the Sui payload"
+
+    log "building the Sui payload (gradle zipRelease)"
+    ( cd userspace/sui && "./gradlew" zipRelease --console=plain )
+
+    local abi bindir target zip version version_code
+    zip="$(ls -t userspace/sui/out/*.zip 2>/dev/null | head -1 || true)"
+    [[ -f "$zip" ]] || die "the Sui payload zip was not produced"
+    version="$(sed -n 's/^version=//p' userspace/sui/payload-version.txt)"
+    version_code="$(sed -n 's/^version_code=//p' userspace/sui/payload-version.txt)"
+    [[ -n "$version" ]] || die "userspace/sui/payload-version.txt has no version"
+    [[ -n "$version_code" ]] || die "userspace/sui/payload-version.txt has no version_code"
+
+    for abi in $ABIS; do
+        case "$abi" in
+            riscv64) warn "Sui has no riscv64 payload; skipping $abi"; continue ;;
+        esac
+        bindir="$(abi_to_bindir "$abi")"
+        log "packaging the Sui payload for $abi"
+        python3 userspace/sui/package.py --zip "$zip" --target "$bindir" \
+            --assets "userspace/ksud/bin/$bindir" --version "$version" \
+            --version-code "$version_code" --force
+    done
+}
+
 abi_to_bindir() {
     case "$1" in
         arm64-v8a)   echo aarch64 ;;
@@ -300,11 +330,13 @@ steps:
            into userspace/ksud/bin/aarch64/ so ksud embeds them
   nomount  build the vendored NoMount module(s) the same way, stage them as
            userspace/ksud/bin/aarch64/<kmi>_nomount.ko for ksud to embed
+  sui      build the vendored Sui payload and stage it as
+           userspace/ksud/bin/<bindir>/sui/ for ksud to embed
   ksuinit  cross-compile the ksuinit helper ksud embeds (needed by boot-patch)
   ksud     cross-compile the ksud daemon with cargo-ndk
   apk      gradle assembleRelease (signed with manager/keystore.properties)
   repack   inject the freshly built ksud into the APK and re-sign it
-  all      lkm -> nomount -> ksuinit -> ksud -> apk -> repack
+  all      lkm -> nomount -> sui -> ksuinit -> ksud -> apk -> repack
 
 environment overrides:
   KMIS=android15-6.6        kernel modules to build
@@ -325,11 +357,12 @@ main() {
         case "$step" in
             lkm)     build_lkm ;;
             nomount) build_nomount ;;
+            sui)     build_sui ;;
             ksuinit) build_ksuinit ;;
             ksud)    build_ksud ;;
             apk)     build_apk ;;
             repack)  build_repack ;;
-            all)     build_lkm; build_nomount; build_ksuinit; build_ksud; build_apk; build_repack ;;
+            all)     build_lkm; build_nomount; build_sui; build_ksuinit; build_ksud; build_apk; build_repack ;;
             -h|--help|help) usage ;;
             *) die "unknown step: $step (try --help)" ;;
         esac

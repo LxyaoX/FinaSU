@@ -826,8 +826,19 @@ pub fn install_module(zip: &str) -> Result<()> {
     result
 }
 
+/// Sui's module entry belongs to the built-in extension: it owns the payload, the dependency
+/// check and the daemon, so plain module mutations have to go through `ksud sui`.
+fn ensure_not_managed(id: &str) -> Result<()> {
+    ensure!(
+        id != crate::sui::MODULE_ID,
+        "{id} is managed by the built-in Sui extension; use `ksud sui enable|disable|uninstall`"
+    );
+    Ok(())
+}
+
 pub fn undo_uninstall_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
+    ensure_not_managed(id)?;
 
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
@@ -842,6 +853,7 @@ pub fn undo_uninstall_module(id: &str) -> Result<()> {
 
 pub fn uninstall_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
+    ensure_not_managed(id)?;
 
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
@@ -889,6 +901,7 @@ pub fn set_skip_mount(id: &str, skip: bool) -> Result<()> {
 
 pub fn enable_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
+    ensure_not_managed(id)?;
 
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
@@ -903,6 +916,7 @@ pub fn enable_module(id: &str) -> Result<()> {
 
 pub fn disable_module(id: &str) -> Result<()> {
     validate_module_id(id)?;
+    ensure_not_managed(id)?;
     let module_path = Path::new(defs::MODULE_DIR).join(id);
     ensure!(module_path.exists(), "Module {id} not found");
 

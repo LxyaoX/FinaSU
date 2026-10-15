@@ -4,6 +4,8 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.NomountStatus
+import me.weishu.kernelsu.data.model.SuiStatus
+import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 
@@ -84,6 +86,18 @@ interface SettingsRepository {
     suspend fun getFolkMountStatus(): Result<FolkMountStatus>
     suspend fun getFolkZygiskStatus(): Result<FolkZygiskStatus>
     suspend fun setFolkZygiskEnabled(enabled: Boolean): Result<Unit>
+    suspend fun getSuiStatus(): Result<SuiStatus>
+    suspend fun setSuiEnabled(enabled: Boolean): Result<Unit>
+    suspend fun repairSui(): Result<Unit>
+    suspend fun suiProbeManagement(): Result<String>
+    suspend fun suiAppPermissions(): Result<List<SuiApp>>
+    suspend fun suiLaunchableAppCount(): Result<Int>
+    suspend fun suiDefaultMode(): Result<Int>
+    suspend fun setSuiDefaultMode(mode: Int): Result<Unit>
+    suspend fun suiSettingsFlags(): Result<Int>
+    suspend fun setSuiSettingsFlags(flags: Int): Result<Unit>
+    suspend fun suiHiddenUids(): Result<List<Int>>
+    suspend fun setSuiAppMode(uid: Int, mode: Int): Result<Unit>
     suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit>
     suspend fun getNomountStatus(): Result<NomountStatus>
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>

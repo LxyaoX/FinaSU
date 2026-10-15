@@ -68,6 +68,28 @@ class HomeViewModel(
                 if (status == RootShellStatus.Ready) {
                     refreshSusfs()
                     refreshZygisk()
+                    // Self-check of the Sui management channel; the settings entry repeats it.
+                    android.util.Log.i("SuiManagement", "self-check starting")
+                    val suiProbe = kotlinx.coroutines.withTimeoutOrNull(3_000) {
+                        settingsRepo.suiProbeManagement()
+                    }
+                    android.util.Log.i(
+                        "SuiManagement",
+                        suiProbe?.getOrElse { "unavailable: ${it.message}" } ?: "timed out",
+                    )
+                    android.util.Log.i(
+                        "SuiManagement",
+                        "launchable apps: ${settingsRepo.suiLaunchableAppCount().getOrNull() ?: -1}",
+                    )
+                    // Verification hook: `settings put global fina_sui_fake_request 1` replays a prompt.
+                    val fake = android.provider.Settings.Global.getInt(
+                        ksuApp.contentResolver,
+                        "fina_sui_fake_request",
+                        0,
+                    ) == 1
+                    if (fake) {
+                        me.weishu.kernelsu.data.sui.SuiPermissionHost.fake("com.example.demo")
+                    }
                 } else {
                     susfsToken++
                     zygiskToken++

@@ -213,6 +213,12 @@ open class MainActivity : FragmentActivity() {
             val selectedMainPage by viewModel.selectedMainPage.collectAsStateWithLifecycle()
             val appSettings = uiState.appSettings
             val darkMode = appSettings.colorMode.isDark || (appSettings.colorMode.isSystem && isSystemInDarkTheme())
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    me.weishu.kernelsu.data.sui.SuiPermissionHost.register(this@MainActivity)
+                }
+            }
+            me.weishu.kernelsu.ui.screen.sui.SuiPermissionRequestDialog()
 
             DisposableEffect(darkMode) {
                 enableEdgeToEdge(
@@ -237,6 +243,17 @@ open class MainActivity : FragmentActivity() {
 
             val capability by CapabilityRepository.state.collectAsStateWithLifecycle()
             val authenticationSession = rememberAuthenticationSession(this@MainActivity, ksuApp.securityRepository)
+            // Deterministic entry for verification: am start ... --es route sui_permissions
+            val requestedRoute = intent.getStringExtra("route")
+            val fakeRequest = intent.getStringExtra("fake_request")
+            androidx.compose.runtime.LaunchedEffect(requestedRoute) {
+                if (requestedRoute == "sui_permissions") {
+                    navigator.push(Route.SuiPermissions)
+                }
+                if (fakeRequest != null) {
+                    me.weishu.kernelsu.data.sui.SuiPermissionHost.fake(fakeRequest)
+                }
+            }
 
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
@@ -286,6 +303,9 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.Susfs> { me.weishu.kernelsu.ui.screen.SusfsScreen() }
                                 entry<Route.Nomount> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountScreen()
+                                }
+                                entry<Route.SuiPermissions> {
+                                    me.weishu.kernelsu.ui.screen.sui.SuiPermissionsScreen()
                                 }
                                 entry<Route.NomountExclusions> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountExclusionsScreen()

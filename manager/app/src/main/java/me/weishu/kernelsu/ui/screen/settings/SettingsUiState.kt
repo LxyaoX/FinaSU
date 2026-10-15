@@ -9,6 +9,7 @@ import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.SupportLinksStyle
+import me.weishu.kernelsu.data.model.SuiStatus
 
 @Immutable
 data class SettingsUiState(
@@ -64,6 +65,12 @@ data class SettingsUiState(
     val folkZygiskReadError: Boolean = false,
     val isFolkZygiskWriting: Boolean = false,
     val folkZygiskRebootPending: Boolean = false,
+    // Sui extension
+    val suiStatus: SuiStatus? = null,
+    val isSuiLoading: Boolean = true,
+    val suiReadError: Boolean = false,
+    val isSuiWriting: Boolean = false,
+    val suiManagementAvailable: Boolean? = null,
 
     // Umount Modules
     val isDefaultUmountModules: Boolean = false,
@@ -108,6 +115,9 @@ data class SettingsScreenActions(
     val onSetFolkMountMode: (FolkMountMode) -> Unit,
     val onOpenNomount: () -> Unit,
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
+    val onSetSuiEnabled: (Boolean) -> Unit,
+    val onRepairSui: () -> Unit,
+    val onManageSuiPermissions: () -> Unit,
     val onSetAdbRootEnabled: (Boolean) -> Unit,
     val onSetShellSuAdbOnlyEnabled: (Boolean) -> Unit,
     val onSetDefaultUmountModules: (Boolean) -> Unit,

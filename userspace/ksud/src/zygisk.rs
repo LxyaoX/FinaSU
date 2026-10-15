@@ -91,11 +91,11 @@ fn clear_stale_runtime(runtime_dir: &Path) -> Result<()> {
 }
 
 /// The kernel starts `ksud post-fs-data` as an init exec (oneshot) service. When that service
-/// exits, init SIGKILLs the service's whole cgroup, which would take the monitor down even though
-/// `setsid` already detached it from the service's session and process group. Move the monitor into
+/// exits, init SIGKILLs the service's whole cgroup, which would take a daemon down even though
+/// `setsid` already detached it from the service's session and process group. Move the child into
 /// the root cgroup, which init never tears down, so it survives the post-fs-data teardown.
 #[cfg(target_os = "android")]
-fn detach_monitor_from_service_cgroup() -> std::io::Result<()> {
+pub fn detach_from_service_cgroup() -> std::io::Result<()> {
     // Called after fork: only stack operations and async-signal-safe libc calls.
     unsafe {
         let fd = libc::open(
@@ -228,7 +228,7 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
             if libc::setsid() == -1 {
                 return Err(std::io::Error::last_os_error());
             }
-            detach_monitor_from_service_cgroup()
+            detach_from_service_cgroup()
         });
     }
     let mut child = command.spawn()?;
@@ -329,19 +329,39 @@ struct Config {
 }
 
 #[derive(Serialize)]
-struct Status {
-    schema_version: u32,
-    enabled: bool,
-    engine_available: bool,
-    enable_blockers: Vec<&'static str>,
-    external_providers: Vec<String>,
+pub struct ProviderStatus {
+    pub schema_version: u32,
+    pub enabled: bool,
+    pub engine_available: bool,
+    pub enable_blockers: Vec<&'static str>,
+    pub external_providers: Vec<String>,
     // Injection requires a current-boot acknowledgement and matching processes.
-    injection_state: &'static str,
+    pub injection_state: &'static str,
     // Unknown until boot integration records the effective provider selection.
-    reboot_required: Option<bool>,
-    runtime: Option<RuntimeStatus>,
-    startup_failures: u32,
-    startup_blocked: bool,
+    pub reboot_required: Option<bool>,
+    pub runtime: Option<RuntimeStatus>,
+    pub startup_failures: u32,
+    pub startup_blocked: bool,
+}
+
+pub fn provider_status() -> Result<ProviderStatus> {
+    let runtime = read_runtime(Path::new(RUNTIME), Path::new("/proc"))?;
+    let guard = load_guard(Path::new(BOOT_GUARD))?;
+    let engine = engine_available(Path::new(ENGINE));
+    let external = providers(Path::new(MODULES), Path::new(UPDATES))?;
+    let blocked = guard.latched || guard.failures >= FAILURE_LIMIT;
+    Ok(ProviderStatus {
+        schema_version: 1,
+        enabled: read_config(Path::new(CONFIG))?.enabled,
+        engine_available: engine,
+        enable_blockers: enable_blockers(engine, blocked),
+        external_providers: external,
+        injection_state: injection_state(runtime.as_ref()),
+        reboot_required: None,
+        runtime,
+        startup_failures: guard.failures,
+        startup_blocked: blocked,
+    })
 }
 
 fn enable_blockers(engine: bool, blocked: bool) -> Vec<&'static str> {
@@ -356,7 +376,7 @@ fn enable_blockers(engine: bool, blocked: bool) -> Vec<&'static str> {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct AbiStatus {
+pub struct AbiStatus {
     supported: bool,
     daemon_running: bool,
     daemon_pid: i32,
@@ -368,7 +388,7 @@ struct AbiStatus {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct RuntimeStatus {
+pub struct RuntimeStatus {
     schema_version: u32,
     boot_id: String,
     monitor_pid: i32,
@@ -572,24 +592,7 @@ pub fn run(command: &Command) -> Result<()> {
     let _lock = lock()?;
     match command {
         Command::Status { json } => {
-            let runtime = read_runtime(Path::new(RUNTIME), Path::new("/proc"))?;
-            let guard = load_guard(Path::new(BOOT_GUARD))?;
-            let engine = engine_available(Path::new(ENGINE));
-            let external = providers(Path::new(MODULES), Path::new(UPDATES))?;
-            let blocked = guard.latched || guard.failures >= FAILURE_LIMIT;
-            let blockers = enable_blockers(engine, blocked);
-            let status = Status {
-                schema_version: 1,
-                enabled: read_config(Path::new(CONFIG))?.enabled,
-                engine_available: engine,
-                enable_blockers: blockers,
-                external_providers: external,
-                injection_state: injection_state(runtime.as_ref()),
-                reboot_required: None,
-                runtime,
-                startup_failures: guard.failures,
-                startup_blocked: blocked,
-            };
+            let status = provider_status()?;
             if *json {
                 println!("{}", serde_json::to_string(&status)?);
             } else {
