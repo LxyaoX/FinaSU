@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +63,7 @@ fun rememberSettingsActions(
     viewModel: SettingsViewModel,
 ): SettingsScreenActions {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val activity = LocalActivity.current
     val scope = rememberCoroutineScope()
     val confirm = rememberConfirmDialog()
@@ -71,9 +73,9 @@ fun rememberSettingsActions(
         if (mode == FolkMountMode.NOMOUNT) {
             scope.launch {
                 val result = confirm.awaitConfirm(
-                    title = context.getString(R.string.settings_folk_mount_mode_nomount),
-                    content = context.getString(R.string.settings_folk_mount_nomount_confirm),
-                    confirm = context.getString(R.string.settings_folk_mount_nomount_confirm_ok),
+                    title = resources.getString(R.string.settings_folk_mount_mode_nomount),
+                    content = resources.getString(R.string.settings_folk_mount_nomount_confirm),
+                    confirm = resources.getString(R.string.settings_folk_mount_nomount_confirm_ok),
                 )
                 if (result is ConfirmResult.Confirmed) viewModel.setFolkMountMode(mode)
             }
