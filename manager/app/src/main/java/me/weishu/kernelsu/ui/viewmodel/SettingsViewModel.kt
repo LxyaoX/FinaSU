@@ -320,6 +320,8 @@ class SettingsViewModel(
     fun setThemeStoreMode(mode: String) {
         repo.themeStoreMode = mode
         _uiState.update { it.copy(themeStoreMode = mode) }
+    }
+
     fun setLayoutVariant(variant: String) {
         val normalized = LayoutVariant.fromValue(variant)
         repo.layoutVariant = normalized
