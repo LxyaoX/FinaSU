@@ -883,6 +883,9 @@
     <string name="settings_disclaimer">Sorumluluk reddi</string>
     <string name="settings_disclaimer_message">Cihazı root ettikten sonra sistem güncellemeleri, üçüncü taraf modüller veya diğer dış etkenler öngörülemeyen risk ve kayıplara yol açabilir; bunları kendiniz üstlenmeniz gerekir. Lütfen riskleri tam olarak anladıktan sonra devam edin.</string>
     <string name="settings_bug_feedback">Hata bildir</string>
+    <string name="settings_search_hint">Ayar ara</string>
+    <string name="settings_search_empty">Ayar bulunamadı</string>
+    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="developer_and_maintainer">Geliştirici | Bakımcı</string>
     <string name="developer_profile_picture">Geliştirici profil resmi</string>
     <string name="support_or_donate">Destek / Bağış</string>

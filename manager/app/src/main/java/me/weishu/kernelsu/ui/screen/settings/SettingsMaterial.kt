@@ -1,6 +1,7 @@
 package me.weishu.kernelsu.ui.screen.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -22,10 +23,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,11 +39,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
+import me.weishu.kernelsu.ui.component.material.FolkIconButton
+import me.weishu.kernelsu.ui.component.material.SearchAppBar
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SendLogBottomSheet
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.settings.ProfileConfig
 import me.weishu.kernelsu.ui.component.settings.ProfileEditSheet
 import me.weishu.kernelsu.ui.component.settings.ProfileHeader
@@ -53,6 +53,13 @@ import me.weishu.kernelsu.ui.component.settings.SettingsCategoryEntry
 import me.weishu.kernelsu.ui.component.settings.SettingsCategoryGrid
 import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.component.uninstalldialog.UninstallDialog
+import me.weishu.kernelsu.ui.navigation3.LocalNavigator
+import me.weishu.kernelsu.ui.screen.settings.search.SettingsHubAction
+import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchResults
+import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchShortcuts
+import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchTarget
+import me.weishu.kernelsu.ui.screen.settings.search.rememberSettingsSearchEntries
+import me.weishu.kernelsu.ui.screen.settings.search.settingsSearchGroups
 import me.weishu.kernelsu.ui.util.resolveDeviceName
 
 private const val BUG_FEEDBACK_URL = "https://github.com/LyraVoid/FinaSU/issues/new/choose"
@@ -74,6 +81,25 @@ fun SettingPagerMaterial(
     val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
     val showDeveloperInfo = rememberSaveable { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
+    val navigator = LocalNavigator.current
+    var searchText by rememberSaveable { mutableStateOf("") }
+    val searchEntries = rememberSettingsSearchEntries()
+    val searchGroups = settingsSearchGroups(searchText, uiState, searchEntries)
+
+    // Every row the search can offer knows where it goes; the hub only has to carry out the three
+    // kinds of landing it can perform itself.
+    val onSearchTarget: (SettingsSearchTarget) -> Unit = { target ->
+        when (target) {
+            is SettingsSearchTarget.Category -> actions.onOpenCategory(target.key)
+            is SettingsSearchTarget.Page -> navigator.push(target.route)
+            is SettingsSearchTarget.Hub -> when (target.action) {
+                SettingsHubAction.BUG_FEEDBACK -> uriHandler.openUri(BUG_FEEDBACK_URL)
+                SettingsHubAction.DISCLAIMER -> showDisclaimerDialog.value = true
+                SettingsHubAction.SEND_LOG -> showBottomSheet = true
+                SettingsHubAction.UNINSTALL -> showUninstallDialog.value = true
+            }
+        }
+    }
 
     UninstallDialog(
         show = showUninstallDialog.value,
@@ -86,7 +112,49 @@ fun SettingPagerMaterial(
 
     ExpressiveScaffold(
         topBar = {
-            TopBar(onOpenDeveloperInfo = { showDeveloperInfo.value = true })
+            // The hub keeps its compact bar in both layout variants: the search lives in the full
+            // screen layer, so there is no inline bar here to collapse with the scroll.
+            SearchAppBar(
+                largeTitle = false,
+                topSearch = true,
+                searchPlaceholder = stringResource(R.string.settings_search_hint),
+                title = { Text(stringResource(R.string.settings)) },
+                searchText = searchText,
+                onSearchTextChange = { searchText = it },
+                onClearClick = { searchText = "" },
+                snackbarHostState = snackBarHost,
+                actions = {
+                    FolkIconButton(onClick = { showDeveloperInfo.value = true }) {
+                        Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about))
+                    }
+                },
+                defaultContent = { bottomPadding, closeSearch ->
+                    SettingsSearchShortcuts(
+                        onOpenCategory = { key ->
+                            onSearchTarget(SettingsSearchTarget.Category(key))
+                            closeSearch()
+                        },
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .widthIn(max = SettingsContentMaxWidth),
+                        contentPadding = PaddingValues(bottom = bottomPadding),
+                    )
+                },
+                searchContent = { bottomPadding, closeSearch ->
+                    SettingsSearchResults(
+                        groups = searchGroups,
+                        onSelect = { entry ->
+                            // Landing on the page matters more than the query that got us there.
+                            onSearchTarget(entry.target)
+                            closeSearch()
+                        },
+                        modifier = Modifier
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .widthIn(max = SettingsContentMaxWidth),
+                        contentPadding = PaddingValues(bottom = bottomPadding),
+                    )
+                },
+            )
         },
         snackbarHost = { SnackBarHost(hostState = snackBarHost, modifier = Modifier.padding(bottom = bottomInnerPadding)) },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
@@ -216,18 +284,4 @@ fun SettingPagerMaterial(
     }
 
     SettingsDeveloperInfo(showDeveloperInfo)
-}
-
-@Composable
-private fun TopBar(onOpenDeveloperInfo: () -> Unit) {
-    TopAppBar(
-        title = { Text(stringResource(R.string.settings)) },
-        actions = {
-            IconButton(onClick = onOpenDeveloperInfo) {
-                Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about))
-            }
-        },
-        colors = expressiveTopAppBarColors(),
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-    )
 }

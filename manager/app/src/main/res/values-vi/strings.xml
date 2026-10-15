@@ -881,6 +881,9 @@
     <string name="settings_disclaimer">Tuyên bố miễn trừ trách nhiệm</string>
     <string name="settings_disclaimer_message">Sau khi root thiết bị, các bản cập nhật hệ thống, mô-đun của bên thứ ba hoặc các yếu tố bên ngoài khác có thể gây ra rủi ro và tổn thất không lường trước, bạn phải tự chịu trách nhiệm. Hãy tiếp tục sau khi đã hiểu rõ rủi ro.</string>
     <string name="settings_bug_feedback">Báo lỗi</string>
+    <string name="settings_search_hint">Tìm cài đặt</string>
+    <string name="settings_search_empty">Không tìm thấy cài đặt</string>
+    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="developer_and_maintainer">Nhà phát triển | Người bảo trì</string>
     <string name="developer_profile_picture">Ảnh đại diện của nhà phát triển</string>
     <string name="support_or_donate">Hỗ trợ / Quyên góp</string>

@@ -52,7 +52,7 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
     }
     SegmentedSwitchItem(
         icon = Icons.Filled.Code,
-        title = "FolkZygisk",
+        title = stringResource(R.string.settings_folk_zygisk),
         summary = summary,
         checked = status?.enabled == true,
         enabled = status != null && !state.folkZygiskReadError && !state.isFolkZygiskLoading && !state.isFolkZygiskWriting,

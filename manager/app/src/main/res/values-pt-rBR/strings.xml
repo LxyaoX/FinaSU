@@ -883,6 +883,9 @@
     <string name="settings_disclaimer">Isenção de responsabilidade</string>
     <string name="settings_disclaimer_message">Após obter root no dispositivo, atualizações do sistema, módulos de terceiros ou outros fatores externos podem causar riscos e perdas imprevistas, que você assume por conta própria. Continue apenas depois de entender bem os riscos.</string>
     <string name="settings_bug_feedback">Relatar bug</string>
+    <string name="settings_search_hint">Pesquisar configurações</string>
+    <string name="settings_search_empty">Nenhuma configuração encontrada</string>
+    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="developer_and_maintainer">Desenvolvedor | Mantenedor</string>
     <string name="developer_profile_picture">Foto de perfil do desenvolvedor</string>
     <string name="support_or_donate">Apoiar / Doar</string>

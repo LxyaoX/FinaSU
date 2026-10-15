@@ -883,6 +883,9 @@
     <string name="settings_disclaimer">Отказ от ответственности</string>
     <string name="settings_disclaimer_message">После получения root-прав обновления системы, сторонние модули и другие внешние факторы могут привести к непредвиденным рискам и потерям. Вы принимаете эти риски на себя. Пожалуйста, продолжайте только после того, как полностью их осознаете.</string>
     <string name="settings_bug_feedback">Сообщить об ошибке</string>
+    <string name="settings_search_hint">Поиск настроек</string>
+    <string name="settings_search_empty">Настройки не найдены</string>
+    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="developer_and_maintainer">Разработчик | Сопровождающий</string>
     <string name="developer_profile_picture">Фото профиля разработчика</string>
     <string name="support_or_donate">Поддержка / Пожертвование</string>

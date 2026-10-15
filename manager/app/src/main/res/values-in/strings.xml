@@ -881,6 +881,9 @@
     <string name="settings_disclaimer">Penafian</string>
     <string name="settings_disclaimer_message">Setelah melakukan root pada perangkat, pembaruan sistem, modul pihak ketiga, atau faktor eksternal lain dapat menimbulkan risiko dan kerugian yang tidak terduga, dan Anda harus menanggungnya sendiri. Pastikan Anda memahaminya sebelum melanjutkan.</string>
     <string name="settings_bug_feedback">Laporkan bug</string>
+    <string name="settings_search_hint">Cari pengaturan</string>
+    <string name="settings_search_empty">Tidak ada pengaturan yang cocok</string>
+    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="developer_and_maintainer">Pengembang | Pemelihara</string>
     <string name="developer_profile_picture">Foto profil pengembang</string>
     <string name="support_or_donate">Dukung / Donasi</string>

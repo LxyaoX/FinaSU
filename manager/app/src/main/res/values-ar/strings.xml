@@ -883,6 +883,9 @@
     <string name="settings_disclaimer">إخلاء المسؤولية</string>
     <string name="settings_disclaimer_message">بعد عمل روت للجهاز، قد تتسبب تحديثات النظام أو الوحدات الخارجية أو عوامل خارجية أخرى في مخاطر وخسائر غير متوقعة، ويتعين عليك تحملها بنفسك. يرجى الاستمرار فقط بعد فهم المخاطر جيدًا.</string>
     <string name="settings_bug_feedback">الإبلاغ عن خطأ</string>
+    <string name="settings_search_hint">البحث في الإعدادات</string>
+    <string name="settings_search_empty">لا توجد إعدادات مطابقة</string>
+    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="developer_and_maintainer">المطور | المشرف</string>
     <string name="developer_profile_picture">الصورة الرمزية للمطور</string>
     <string name="support_or_donate">دعم / تبرع</string>
