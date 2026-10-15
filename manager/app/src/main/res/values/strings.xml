@@ -341,7 +341,7 @@
     <string name="nomount_visibility_model_hint">The built-in Folk Mount hides injected files from apps whose profile says "unmount modules" (every non-root app by default). NoMount starts with no exclusions, so those apps see the files until you tick them here.</string>
     <string name="settings_folk_mount_nomount_confirm">NoMount shows the injected files to every app at first; the built-in Folk Mount hides them from apps whose profile says "unmount modules" (every non-root app by default).\n\nSwitching takes effect after a reboot. To keep the old behaviour, tick the apps in NoMount → Excluded apps.</string>
     <string name="settings_folk_mount_nomount_confirm_ok">Switch and reboot later</string>
-    <string name="nomount_uid_source_hint">Follows each app profile\'s \"unmount modules\" setting</string>
+    <string name="nomount_uid_source_hint">Copied from app profiles on demand</string>
     <string name="nomount_block_isolated">Hide from isolated processes</string>
     <string name="nomount_block_isolated_summary">Isolated processes (WebView, SDK sandboxes) also see the stock filesystem.</string>
     <string name="nomount_loading">Reading status…</string>
@@ -361,7 +361,7 @@
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">Save</string>
     <string name="nomount_follow_profiles">Follow app profiles</string>
-    <string name="nomount_follow_profiles_summary">Select the listed apps whose profile hides modules from them. The default profile hides them from every non-root app, so this usually selects almost all of them.</string>
+    <string name="nomount_follow_profiles_summary">Select the listed apps whose profile hides modules from them. The default profile hides them from every non-root app, so this usually selects almost all of them. Profiles are not tracked afterwards: change one and copy again.</string>
     <string name="nomount_clear_everything">Clear everything</string>
     <string name="nomount_clear_everything_summary">Drops every rule and every exclusion until the next reboot.</string>
     <string name="nomount_deferred">Another module owns NoMount</string>

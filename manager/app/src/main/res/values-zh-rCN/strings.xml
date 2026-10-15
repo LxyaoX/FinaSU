@@ -529,7 +529,7 @@
     <string name="nomount_visibility_model_hint">内建 Folk Mount 会按 Profile 的「卸载模块」把注入文件隐藏起来（默认对全部非 root 应用生效）。NoMount 初始没有任何例外，所以在勾选之前这些应用都能看到注入的文件。</string>
     <string name="settings_folk_mount_nomount_confirm">NoMount 初始会让所有应用都看到注入的文件；内建 Folk Mount 则会按 Profile 的「卸载模块」隐藏（默认覆盖全部非 root 应用）。\n\n切换在重启后生效。要保留旧行为，请在「NoMount → 例外应用」里勾选对应应用。</string>
     <string name="settings_folk_mount_nomount_confirm_ok">切换，稍后重启</string>
-    <string name="nomount_uid_source_hint">跟随各应用 Profile 的「卸载模块」设置</string>
+    <string name="nomount_uid_source_hint">按需从应用 Profile 复制</string>
     <string name="nomount_block_isolated">对隔离进程隐藏</string>
     <string name="nomount_block_isolated_summary">隔离进程（WebView、SDK 沙箱等）同样只能看到原厂文件系统。</string>
     <string name="nomount_loading">正在读取状态…</string>
@@ -549,7 +549,7 @@
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">保存</string>
     <string name="nomount_follow_profiles">跟随应用 Profile</string>
-    <string name="nomount_follow_profiles_summary">在列表范围内选中那些 Profile 里"卸载模块"的应用。默认非 root Profile 对所有应用生效，所以通常会选中其中绝大多数。</string>
+    <string name="nomount_follow_profiles_summary">在列表范围内选中那些 Profile 里「卸载模块」的应用。默认非 root Profile 对所有应用生效，所以通常会选中其中绝大多数。之后不会自动跟随 Profile 变化，改动后需要再复制一次。</string>
     <string name="nomount_clear_everything">清空全部</string>
     <string name="nomount_clear_everything_summary">清除全部规则与例外，直到下次重启。</string>
     <string name="nomount_deferred">注入由其它模块接管</string>
