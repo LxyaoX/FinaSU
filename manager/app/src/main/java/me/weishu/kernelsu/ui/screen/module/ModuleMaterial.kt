@@ -278,8 +278,8 @@ fun ModulePagerMaterial(
             SearchAppBar(
                 largeTitle = m3eLayout,
                 topSearch = !m3eLayout,
-                inlineSearch = m3eLayout,
-                inlineSearchHint = stringResource(R.string.module_search_hint),
+                collapsibleSearch = m3eLayout,
+                searchPlaceholder = stringResource(R.string.module_search_hint),
                 scrollBehavior = if (m3eLayout) searchBarScrollBehavior else null,
                 title = { Text(stringResource(R.string.module)) },
                 searchText = uiState.searchStatus.searchText,

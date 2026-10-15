@@ -183,8 +183,8 @@ fun PluginPagerMaterial(
             SearchAppBar(
                 largeTitle = m3eLayout,
                 topSearch = !m3eLayout,
-                inlineSearch = m3eLayout,
-                inlineSearchHint = stringResource(R.string.plugin_search_hint),
+                collapsibleSearch = m3eLayout,
+                searchPlaceholder = stringResource(R.string.plugin_search_hint),
                 scrollBehavior = if (m3eLayout) searchBarScrollBehavior else null,
                 title = { Text(stringResource(R.string.plugin)) },
                 searchText = searchText,

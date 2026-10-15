@@ -16,9 +16,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -31,9 +29,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -73,11 +68,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.layout
@@ -92,11 +84,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
-/** Height reserved for the inline search bar, used as the scroll range of its collapse animation. */
-private val SearchBarExpandedHeight = 77.dp
-
-/** Height of the inline search pill itself. */
-private val SearchBarPillHeight = 45.dp
+/** Height reserved for the large search bar, used as the scroll range of its collapse animation. */
+private val SearchBarExpandedHeight = 69.dp
 
 @Composable
 fun SearchAppBar(
@@ -110,8 +99,8 @@ fun SearchAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     largeTitle: Boolean = true,
     topSearch: Boolean = false,
-    inlineSearch: Boolean = false,
-    inlineSearchHint: String = "",
+    collapsibleSearch: Boolean = false,
+    searchPlaceholder: String = "",
     defaultContent: @Composable BoxScope.(bottomPadding: Dp, closeSearch: () -> Unit) -> Unit = { _, _ -> },
     searchContent: @Composable BoxScope.(bottomPadding: Dp, closeSearch: () -> Unit) -> Unit = { _, _ -> }
 ) {
@@ -126,11 +115,22 @@ fun SearchAppBar(
     val currentQuery = textFieldState.text.toString()
     val latestSearchText by rememberUpdatedState(searchText)
     val isSearchExpanded = searchBarState.currentValue != SearchBarValue.Collapsed || searchBarState.targetValue != SearchBarValue.Collapsed
-    val inlineScrollBehavior = scrollBehavior as? SearchAppBarScrollBehavior
-    val useInlineSearch = inlineSearch && largeTitle && inlineScrollBehavior != null
-    val inlineSearchFraction = if (useInlineSearch) inlineScrollBehavior.searchBarExpandedFraction else 1f
-    val isInlineSearchCollapsed = useInlineSearch && inlineSearchFraction <= 0.01f
-    var requestInlineSearchFocus by remember { mutableStateOf(false) }
+    // A collapsible search bar only makes sense below a large title, and it needs the wrapper
+    // scroll behavior to know how far it has been tucked away.
+    val searchScrollBehavior = (scrollBehavior as? SearchAppBarScrollBehavior)
+        ?.takeIf { collapsibleSearch && largeTitle }
+    val searchBarFraction = searchScrollBehavior?.searchBarExpandedFraction ?: 1f
+    val isSearchBarCollapsed = searchBarFraction <= 0.01f
+    val isSearchBarCollapsing = searchScrollBehavior != null && searchBarFraction < 0.99f
+
+    // Folding the search bar away also gives up the focus and the keyboard, otherwise the text
+    // field would keep them while the bar is scrolled out of sight.
+    LaunchedEffect(isSearchBarCollapsing) {
+        if (isSearchBarCollapsing) {
+            focusManager.clearFocus(force = true)
+            keyboardController?.hide()
+        }
+    }
     val appBarActions: @Composable RowScope.() -> Unit = {
         actions?.invoke()
         if (topSearch) {
@@ -140,14 +140,11 @@ fun SearchAppBar(
                 Icon(Icons.Filled.Search, contentDescription = null)
             }
         }
-        // Once the inline search bar has been tucked away, offer a small icon to bring it back.
-        if (useInlineSearch) {
-            AnimatedVisibility(visible = isInlineSearchCollapsed, enter = fadeIn(), exit = fadeOut()) {
+        // Once the large search bar has been tucked away, offer a small icon to bring it back.
+        if (searchScrollBehavior != null) {
+            AnimatedVisibility(visible = isSearchBarCollapsed, enter = fadeIn(), exit = fadeOut()) {
                 FolkIconButton(
-                    onClick = {
-                        inlineScrollBehavior.expandSearchBar()
-                        requestInlineSearchFocus = true
-                    },
+                    onClick = { searchScrollBehavior.expandSearchBar() },
                 ) {
                     Icon(Icons.Filled.Search, contentDescription = null)
                 }
@@ -227,6 +224,11 @@ fun SearchAppBar(
                     focusManager.clearFocus()
                     keyboardController?.hide()
                 },
+                placeholder = {
+                    if (searchPlaceholder.isNotEmpty()) {
+                        Text(searchPlaceholder)
+                    }
+                },
                 leadingIcon = {
                     if (isSearchExpanded) {
                         FolkIconButton(
@@ -284,36 +286,10 @@ fun SearchAppBar(
                 )
             }
 
-            // Large title plus a large inline search bar: it is part of the app bar area, so it
-            // folds away as the list scrolls and the app bar collapses.
-            if (useInlineSearch) {
-                AnimatedVisibility(
-                    visible = !isInlineSearchCollapsed,
-                    enter = EnterTransition.None,
-                    exit = ExitTransition.None,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .alpha(inlineSearchFraction)
-                        .collapseWithTopAppBar(inlineSearchFraction),
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        InlineSearchPill(
-                            state = textFieldState,
-                            hint = inlineSearchHint,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp),
-                            requestFocus = requestInlineSearchFocus,
-                            onFocusRequestHandled = { requestInlineSearchFocus = false },
-                        )
-                        Spacer(Modifier.height(16.dp))
-                    }
-                }
-            }
-
-            if (!topSearch) {
+            // A large title comes with a large search bar right below it. In the M3E layout the
+            // bar belongs to the app bar area, so it folds away as the list scrolls and the app
+            // bar collapses.
+            val largeSearchBar: @Composable () -> Unit = {
                 SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -329,9 +305,26 @@ fun SearchAppBar(
                     ),
                 )
             }
+            if (searchScrollBehavior != null) {
+                AnimatedVisibility(
+                    visible = !isSearchBarCollapsed,
+                    enter = EnterTransition.None,
+                    exit = ExitTransition.None,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .alpha(searchBarFraction)
+                        .collapseWithTopAppBar(searchBarFraction),
+                ) {
+                    largeSearchBar()
+                }
+            } else if (!topSearch) {
+                largeSearchBar()
+            }
         }
     }
 
+    // Tapping the large search bar opens its full screen search, with the recent items while the
+    // query is empty and the results once something has been typed.
     ExpandedFullScreenContainedSearchBar(
         state = searchBarState,
         inputField = inputField,
@@ -358,65 +351,8 @@ fun SearchAppBar(
     )
 }
 
-/** Large, pill shaped search field living right below the large title. */
-@Composable
-private fun InlineSearchPill(
-    state: TextFieldState,
-    hint: String,
-    modifier: Modifier = Modifier,
-    requestFocus: Boolean = false,
-    onFocusRequestHandled: () -> Unit = {},
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(requestFocus) {
-        if (requestFocus) {
-            focusRequester.requestFocus()
-            onFocusRequestHandled()
-        }
-    }
-
-    Surface(
-        modifier = modifier.height(SearchBarPillHeight),
-        shape = CircleShape,
-        color = colorScheme.surfaceContainerHighest,
-        contentColor = colorScheme.onSurfaceVariant,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(Icons.Filled.Search, contentDescription = null)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
-            ) {
-                if (state.text.isEmpty()) {
-                    Text(
-                        text = hint,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-                BasicTextField(
-                    state = state,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = colorScheme.onSurface),
-                    cursorBrush = SolidColor(colorScheme.primary),
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                )
-            }
-        }
-    }
-}
-
 /**
- * Wraps the app bar scroll behavior so that an inline search bar can be tucked away while the
+ * Wraps the app bar scroll behavior so that a large search bar can be tucked away while the
  * content scrolls down and brought back when it scrolls up, while the app bar itself keeps
  * following [topAppBarScrollBehavior].
  */
@@ -430,7 +366,7 @@ class SearchAppBarScrollBehavior internal constructor(
     private var isUserScrollInProgress = false
     private var ignoreCurrentScroll = false
 
-    /** 1f while the inline search bar is fully visible, 0f once it is completely tucked away. */
+    /** 1f while the large search bar is fully visible, 0f once it is completely tucked away. */
     val searchBarExpandedFraction: Float
         get() = (1f + searchBarHeightOffset / searchBarHeight).coerceIn(0f, 1f)
 
@@ -446,35 +382,40 @@ class SearchAppBarScrollBehavior internal constructor(
     override val flingAnimationSpec: DecayAnimationSpec<Float>?
         get() = topAppBarScrollBehavior.flingAnimationSpec
 
-    /** Reveals the inline search bar. */
+    /** Reveals the large search bar. */
     fun expandSearchBar() {
         ignoreCurrentScroll = isUserScrollInProgress
         lastSearchBarScrollDelta = 0f
         searchBarHeightOffset = 0f
     }
 
-    /** Tucks the inline search bar away. */
+    /** Tucks the large search bar away. */
     fun collapseSearchBar() {
-        ignoreCurrentScroll = isUserScrollInProgress
-        lastSearchBarScrollDelta = 0f
         searchBarHeightOffset = -searchBarHeight
+        lastSearchBarScrollDelta = 0f
+        isUserScrollInProgress = false
+        ignoreCurrentScroll = false
     }
 
     fun reset() {
-        ignoreCurrentScroll = false
-        lastSearchBarScrollDelta = 0f
         searchBarHeightOffset = 0f
+        lastSearchBarScrollDelta = 0f
+        isUserScrollInProgress = false
+        ignoreCurrentScroll = false
     }
 
     private fun consumeSearchBarScroll(delta: Float): Float {
         val previousOffset = searchBarHeightOffset
         searchBarHeightOffset = (previousOffset + delta).coerceIn(-searchBarHeight, 0f)
         val consumed = searchBarHeightOffset - previousOffset
-        lastSearchBarScrollDelta = consumed
+        if (consumed != 0f) {
+            lastSearchBarScrollDelta = consumed
+        }
         return consumed
     }
 
     private suspend fun animateSearchBarTo(targetOffset: Float, initialVelocity: Float = 0f) {
+        if (searchBarHeightOffset == targetOffset) return
         Animatable(searchBarHeightOffset).animateTo(
             targetValue = targetOffset,
             animationSpec = snapAnimationSpec ?: spring(),
@@ -482,6 +423,7 @@ class SearchAppBarScrollBehavior internal constructor(
         ) {
             searchBarHeightOffset = value.coerceIn(-searchBarHeight, 0f)
         }
+        lastSearchBarScrollDelta = 0f
     }
 
     override val nestedScrollConnection: NestedScrollConnection = object : NestedScrollConnection {
@@ -489,51 +431,53 @@ class SearchAppBarScrollBehavior internal constructor(
             if (source == NestedScrollSource.UserInput) {
                 isUserScrollInProgress = true
             }
-            // Scrolling up, or a programmatic scroll: the app bar takes everything.
+            // Scrolling back up, or a programmatic scroll: the app bar takes everything.
             if (ignoreCurrentScroll || available.y >= 0f) {
                 return topAppBarScrollBehavior.nestedScrollConnection.onPreScroll(available, source)
             }
-            val consumedBySearchBar = consumeSearchBarScroll(available.y)
-            return if (consumedBySearchBar != 0f) {
-                available.copy(x = 0f)
-            } else {
-                topAppBarScrollBehavior.nestedScrollConnection.onPreScroll(available, source)
+            // Scrolling down: the search bar folds away before the large title starts collapsing.
+            val previousOffset = searchBarHeightOffset
+            consumeSearchBarScroll(available.y)
+            if (previousOffset != searchBarHeightOffset) {
+                return available.copy(x = 0f)
             }
+            return topAppBarScrollBehavior.nestedScrollConnection.onPreScroll(available, source)
         }
 
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
             val topAppBarConsumed =
                 topAppBarScrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
-            if (available.y >= 0f || ignoreCurrentScroll) {
+            if (ignoreCurrentScroll || available.y <= 0f) {
                 return topAppBarConsumed
             }
+            // Scrolling back up: the app bar re-expands first, then the search bar slides back in
+            // with whatever scroll is left over. Without this the large search bar stays tucked
+            // away for good once it has been collapsed.
             val remaining = available.y - topAppBarConsumed.y
-            if (remaining == 0f) {
-                return topAppBarConsumed
-            }
             return topAppBarConsumed + Offset(0f, consumeSearchBarScroll(remaining))
         }
 
         override suspend fun onPreFling(available: Velocity): Velocity {
-            return if (!ignoreCurrentScroll && available.y < 0f && searchBarHeightOffset > -searchBarHeight) {
-                animateSearchBarTo(-searchBarHeight, available.y)
-                available.copy(x = 0f)
-            } else {
-                topAppBarScrollBehavior.nestedScrollConnection.onPreFling(available)
+            if (ignoreCurrentScroll) {
+                return topAppBarScrollBehavior.nestedScrollConnection.onPreFling(available)
             }
+            if (available.y < 0f && searchBarHeightOffset > -searchBarHeight) {
+                animateSearchBarTo(-searchBarHeight, available.y)
+                return available.copy(x = 0f)
+            }
+            return topAppBarScrollBehavior.nestedScrollConnection.onPreFling(available)
         }
 
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
             isUserScrollInProgress = false
-            if (ignoreCurrentScroll && available.y != 0f) {
+            if (ignoreCurrentScroll) {
                 ignoreCurrentScroll = false
+                return topAppBarScrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
             }
             if (searchBarHeightOffset > -searchBarHeight && searchBarHeightOffset < 0f) {
-                val topAppBarVelocity =
-                    topAppBarScrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
                 val shouldExpand =
                     available.y > 0f || (available.y == 0f && lastSearchBarScrollDelta > 0f)
-                animateSearchBarTo(if (shouldExpand) 0f else -searchBarHeight)
+                animateSearchBarTo(if (shouldExpand) 0f else -searchBarHeight, available.y)
                 return available.copy(x = 0f)
             }
             val topAppBarVelocity =
@@ -543,9 +487,10 @@ class SearchAppBarScrollBehavior internal constructor(
                 topAppBarScrollBehavior.state.collapsedFraction < 0.01f &&
                 searchBarHeightOffset < 0f
             ) {
-                animateSearchBarTo(0f)
+                animateSearchBarTo(0f, remaining)
+                return topAppBarVelocity
             }
-            return available.copy(x = 0f)
+            return topAppBarVelocity
         }
     }
 }
