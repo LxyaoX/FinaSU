@@ -2,6 +2,8 @@ package me.weishu.kernelsu.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.SystemBarStyle
@@ -93,6 +95,7 @@ import me.weishu.kernelsu.ui.component.bottombar.rememberFloatingBarVisibilitySt
 import me.weishu.kernelsu.ui.component.bottombar.rememberMainPagerState
 import me.weishu.kernelsu.ui.component.bottombar.rememberNavBarGlassLiquidState
 import me.weishu.kernelsu.ui.component.bottombar.useNavigationRail
+import me.weishu.kernelsu.ui.navigation3.EXTRA_INCOMING_URIS
 import me.weishu.kernelsu.ui.navigation3.IntentDispatcher
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Navigator
@@ -195,7 +198,7 @@ open class MainActivity : FragmentActivity() {
         if (queuedIntents != null) {
             queuedIntents.forEach { intentChannel.trySend(it) }
         } else if (savedInstanceState == null) {
-            intent?.let { intentChannel.trySend(it) }
+            intent?.let(::queueIntent)
         }
 
         WallpaperConfig.load(this)
@@ -413,7 +416,7 @@ open class MainActivity : FragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        intentChannel.trySend(intent)
+        queueIntent(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -427,6 +430,56 @@ open class MainActivity : FragmentActivity() {
         outState.putParcelableArrayList("authentication_pending_intents", queued)
         super.onSaveInstanceState(outState)
     }
+
+    /** Queue an external intent once, with its file payload flattened for [IntentDispatcher]. */
+    private fun queueIntent(intent: Intent) {
+        intentChannel.trySend(intent.normalizedForDispatch())
+    }
+}
+
+/** Some file managers put the payload of a VIEW intent into this legacy list extra. */
+private const val EXTRA_LEGACY_URIS = "uris"
+
+/** Internal deep-link scheme; its URI is not a file payload and stays out of the flattened list. */
+private const val SCHEME_INTERNAL_DEEP_LINK = "ksu"
+
+/**
+ * Collect the external file URIs an inbound intent carries. Each action delivers its payload
+ * differently: SEND through `EXTRA_STREAM`, SEND_MULTIPLE through the same extra as a list, and
+ * everything else (VIEW from a file manager or the desktop "open with" sheet) through
+ * [Intent.getData], with a legacy `"uris"` list as a fallback.
+ */
+@Suppress("DEPRECATION")
+private fun Intent.externalFileUris(): List<Uri> {
+    val uris: List<Uri> = when (action) {
+        Intent.ACTION_SEND -> listOfNotNull(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            }
+        )
+
+        Intent.ACTION_SEND_MULTIPLE -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)?.toList().orEmpty()
+        } else {
+            getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)?.toList().orEmpty()
+        }
+
+        else -> listOfNotNull(
+            data ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                getParcelableArrayListExtra(EXTRA_LEGACY_URIS, Uri::class.java)?.firstOrNull()
+            } else {
+                getParcelableArrayListExtra<Uri>(EXTRA_LEGACY_URIS)?.firstOrNull()
+            }
+        )
+    }
+    return uris.filterNotNull().filter { it.scheme != SCHEME_INTERNAL_DEEP_LINK }
+}
+
+/** Attach the flattened payload so the dispatcher resolves every entry point through one list. */
+private fun Intent.normalizedForDispatch(): Intent = apply {
+    putParcelableArrayListExtra(EXTRA_INCOMING_URIS, ArrayList(externalFileUris()))
 }
 
 val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> { error("LocalMainPagerState not provided") }

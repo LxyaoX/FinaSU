@@ -20,6 +20,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
+import me.weishu.kernelsu.ui.component.rememberThemeImportRequest
 import me.weishu.kernelsu.ui.screen.flash.FlashIt
 import me.weishu.kernelsu.ui.util.DownloadService
 import me.weishu.kernelsu.ui.util.getFileName
@@ -30,6 +31,13 @@ private const val HOST_ACTION = "action"
 private const val HOST_WEBUI = "webui"
 private const val PARAM_ID = "id"
 private const val PARAM_TOKEN = "token"
+private const val EXTENSION_THEME_PACKAGE = ".fpt"
+
+/**
+ * Normalized file payload key attached by [me.weishu.kernelsu.ui.MainActivity] before an external
+ * intent is queued, so VIEW / SEND / SEND_MULTIPLE all resolve through a single list here.
+ */
+internal const val EXTRA_INCOMING_URIS = "me.weishu.kernelsu.extra.INCOMING_URIS"
 
 /**
  * Resolved intent action to execute after validation.
@@ -69,6 +77,15 @@ private sealed interface PendingAction {
         }
     }
 
+    /** Install several modules at once — a multi-file share is confirmed by the picker itself. */
+    data class InstallModules(val uris: List<Uri>) : PendingAction
+
+    /**
+     * Import a theme package (.fpt). Parsing, applying and rolling back stay owned by
+     * [me.weishu.kernelsu.wallpaper.ThemeImportService]; this action only carries the URI.
+     */
+    data class ImportTheme(val uri: Uri) : PendingAction
+
     /** Execute a module's action script — triggered by shortcut or deep link. */
     data class ExecuteAction(val moduleId: String) : PendingAction
 
@@ -93,6 +110,18 @@ fun getDisplayName(uri: Uri): String {
     return uri.getFileName(ksuApp) ?: uri.lastPathSegment ?: "Unknown"
 }
 
+/** External file payload of a queued intent, empty for deep links and payload-free intents. */
+@Suppress("DEPRECATION")
+private fun Intent.incomingUris(): List<Uri> =
+    getParcelableArrayListExtra<Uri>(EXTRA_INCOMING_URIS)?.filterNotNull().orEmpty()
+
+/**
+ * Theme packages are recognized by their extension. [getDisplayName] also resolves `file://` URIs,
+ * which have no `DISPLAY_NAME` column, through their last path segment.
+ */
+private fun isThemePackage(uri: Uri): Boolean =
+    getDisplayName(uri).endsWith(EXTENSION_THEME_PACKAGE, ignoreCase = true)
+
 /**
  * Resolve an intent snapshot into a [PendingAction].
  * Returns null if the intent carries no recognized action.
@@ -112,14 +141,23 @@ private fun resolveIntent(intent: Intent): PendingAction? {
         )
     }
 
-    // File manager: open ZIP
-    val viewUri = intent.data
-    if (viewUri != null && viewUri.scheme == "content" && intent.type == "application/zip") {
-        return PendingAction.InstallModule(
-            uri = viewUri,
-            displayName = getDisplayName(viewUri),
-            requiresConfirmation = true,
-        )
+    // External files: a multi-file share installs as a batch without per-file prompts, a single
+    // file is routed by extension — .fpt to the theme importer, anything else to module install.
+    val uris = intent.incomingUris()
+    if (uris.size > 1) {
+        return PendingAction.InstallModules(uris)
+    }
+    val uri = uris.firstOrNull()
+    if (uri != null) {
+        return if (isThemePackage(uri)) {
+            PendingAction.ImportTheme(uri)
+        } else {
+            PendingAction.InstallModule(
+                uri = uri,
+                displayName = getDisplayName(uri),
+                requiresConfirmation = true,
+            )
+        }
     }
 
     // Check deep links
@@ -164,6 +202,15 @@ fun IntentDispatcher(intentChannel: ReceiveChannel<Intent>) {
         onDismiss = { pendingZipInstall = null }
     )
 
+    // Theme packages only touch app-local state, so safe mode (which disables modules) does not
+    // gate them; authentication and the confirm dialog come from the shared request helper.
+    val requestThemeImport = rememberThemeImportRequest { result ->
+        val message = resources.getString(
+            if (result.isSuccess) R.string.wallpaper_import_success else R.string.wallpaper_import_failed
+        ) + (result.exceptionOrNull()?.message?.let { ": $it" } ?: "")
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
     CollectIntentChannel(intentChannel) { intent ->
         if (!isManager) return@CollectIntentChannel
         val action = resolveIntent(intent) ?: return@CollectIntentChannel
@@ -191,6 +238,20 @@ fun IntentDispatcher(intentChannel: ReceiveChannel<Intent>) {
                     navigator.push(Route.Flash(FlashIt.FlashModules(listOf(action.uri))))
                 }
             }
+
+            is PendingAction.InstallModules -> {
+                if (isSafeMode) {
+                    Toast.makeText(
+                        context,
+                        resources.getString(R.string.safe_mode_module_disabled),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@CollectIntentChannel
+                }
+                navigator.push(Route.Flash(FlashIt.FlashModules(action.uris)))
+            }
+
+            is PendingAction.ImportTheme -> requestThemeImport(action.uri)
 
             is PendingAction.ExecuteAction -> {
                 navigator.push(Route.ExecuteModuleAction(action.moduleId, fromShortcut = true))
