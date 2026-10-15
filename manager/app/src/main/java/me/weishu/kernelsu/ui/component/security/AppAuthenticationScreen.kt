@@ -77,6 +77,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -119,13 +120,11 @@ fun AppAuthenticationScreen(
 ) {
     val motion = rememberMotionEnabled()
     val busy = state == AuthenticationVisualState.BUSY
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .safeDrawingPadding(),
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
             if (busy) {
                 LinearWavyProgressIndicator(
                     modifier = Modifier
@@ -302,7 +301,12 @@ fun PinPad(
     onComplete: () -> Unit,
 ) {
     val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val summonKeyboard = {
+        runCatching { focus.requestFocus() }
+        keyboard?.show()
+    }
+    LaunchedEffect(enabled) { if (enabled) summonKeyboard() }
     BasicTextField(
         value = value,
         onValueChange = { input -> if (input.length <= length && input.all { it.isDigit() }) onValueChange(input) },
@@ -327,7 +331,7 @@ fun PinPad(
                         focused = value.length == index && enabled,
                         isError = isError,
                         modifier = Modifier.weight(1f),
-                        onClick = { runCatching { focus.requestFocus() } },
+                        onClick = { if (enabled) summonKeyboard() },
                     )
                 }
             }
