@@ -57,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -95,7 +96,10 @@ import me.weishu.kernelsu.ui.component.bottombar.useNavigationRail
 import me.weishu.kernelsu.ui.navigation3.IntentDispatcher
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Navigator
+import me.weishu.kernelsu.ui.navigation3.PredictiveBackConfig
 import me.weishu.kernelsu.ui.navigation3.Route
+import me.weishu.kernelsu.ui.navigation3.rememberPredictiveBackEntryDecorator
+import me.weishu.kernelsu.ui.navigation3.rememberPredictiveBackTransitions
 import me.weishu.kernelsu.ui.navigation3.rememberNavigator
 import me.weishu.kernelsu.ui.screen.about.AboutScreen
 import me.weishu.kernelsu.ui.screen.appprofile.AppProfileScreen
@@ -272,6 +276,47 @@ open class MainActivity : FragmentActivity() {
                     if (LocalAppUnlocked.current) IntentDispatcher(intentChannel = intentChannel)
                     val flashRoute = navigator.current() as? Route.Flash
                     var flashBackEnabled by remember(flashRoute) { mutableStateOf(false) }
+                    // Shared by the display and by the predictive back interceptor, so a gesture
+                    // that is handled outside the display behaves exactly like a system back.
+                    val navigateBack: () -> Unit = {
+                        when (val top = navigator.current()) {
+                            is Route.Flash -> if (flashBackEnabled) navigator.pop()
+                            is Route.TemplateEditor -> {
+                                if (!top.readOnly) {
+                                    navigator.setResult("template_edit", true)
+                                } else {
+                                    navigator.pop()
+                                }
+                            }
+
+                            else -> navigator.pop()
+                        }
+                    }
+                    val predictiveBackRevision by PredictiveBackConfig.revision.collectAsStateWithLifecycle()
+                    val predictiveBackAnimation = remember(predictiveBackRevision) {
+                        PredictiveBackConfig.animation
+                    }
+                    val predictiveBackExitDirection = remember(predictiveBackRevision) {
+                        PredictiveBackConfig.exitDirection
+                    }
+                    val predictiveBackTransitions = rememberPredictiveBackTransitions<NavKey>(
+                        animation = predictiveBackAnimation,
+                        exitDirection = predictiveBackExitDirection,
+                    )
+                    val predictiveBackEntryDecorator = rememberPredictiveBackEntryDecorator<NavKey>(
+                        interceptPredictiveBack = predictiveBackTransitions.interceptsPredictiveBack,
+                        isBackEnabled = { navigator.backStackSize() > 1 },
+                        onBack = navigateBack,
+                    )
+                    // The interceptor is only added for the style that previews nothing, so every
+                    // other style keeps the plain entry decoration it had before.
+                    val saveableStateHolderDecorator =
+                        rememberSaveableStateHolderNavEntryDecorator<NavKey>()
+                    val entryDecorators = if (predictiveBackTransitions.interceptsPredictiveBack) {
+                        listOf(saveableStateHolderDecorator, predictiveBackEntryDecorator)
+                    } else {
+                        listOf(saveableStateHolderDecorator)
+                    }
                     val mainScreenEntry = @Composable {
                         MainScreen(
                             initialPage = selectedMainPage,
@@ -282,20 +327,11 @@ open class MainActivity : FragmentActivity() {
                     val navDisplay = @Composable {
                         NavDisplay(
                             backStack = navigator.backStack,
-                            onBack = {
-                                when (val top = navigator.current()) {
-                                    is Route.Flash -> if (flashBackEnabled) navigator.pop()
-                                    is Route.TemplateEditor -> {
-                                        if (!top.readOnly) {
-                                            navigator.setResult("template_edit", true)
-                                        } else {
-                                            navigator.pop()
-                                        }
-                                    }
-
-                                    else -> navigator.pop()
-                                }
-                            },
+                            onBack = navigateBack,
+                            transitionSpec = predictiveBackTransitions.transitionSpec,
+                            popTransitionSpec = predictiveBackTransitions.popTransitionSpec,
+                            predictivePopTransitionSpec = predictiveBackTransitions.predictivePopTransitionSpec,
+                            entryDecorators = entryDecorators,
                             entryProvider = entryProvider<NavKey> {
                                 entry<Route.Main> { mainScreenEntry() }
                                 entry<Route.About> { AboutScreen() }

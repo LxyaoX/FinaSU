@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
+import androidx.compose.material.icons.rounded.Animation
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.BlurCircular
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.Style
+import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.SwipeUp
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.WbTwilight
@@ -68,6 +70,9 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.TonalCard
+import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation
+import me.weishu.kernelsu.ui.navigation3.PredictiveBackConfig
+import me.weishu.kernelsu.ui.navigation3.PredictiveBackExitDirection
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
 
@@ -111,10 +116,90 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
                 }
             )
         )
+        if (uiState.enablePredictiveBack) {
+            PredictiveBackAnimationSection()
+        }
     }
 
     NavCustomIconsSection()
     NavModeSection()
+}
+
+/**
+ * Chooser for the preview played while the back gesture is dragged, mirroring BakaSU's predictive
+ * back settings. The style is stored through [PredictiveBackConfig], which the navigation display
+ * reads directly, so a change applies to the next gesture without recreating the activity.
+ */
+@Composable
+private fun PredictiveBackAnimationSection() {
+    val revision by PredictiveBackConfig.revision.collectAsState()
+    val animation = remember(revision) { PredictiveBackConfig.animation }
+    val exitDirection = remember(revision) { PredictiveBackConfig.exitDirection }
+    val animations = PredictiveBackAnimation.entries
+    val animationLabels = animations.map { style ->
+        stringResource(
+            id = when (style) {
+                PredictiveBackAnimation.Scale -> R.string.settings_predictive_back_animation_scale
+                PredictiveBackAnimation.Aosp -> R.string.settings_predictive_back_animation_aosp
+                PredictiveBackAnimation.KernelSUClassic ->
+                    R.string.settings_predictive_back_animation_ksu_classic
+
+                PredictiveBackAnimation.Default -> R.string.settings_predictive_back_animation_default
+                PredictiveBackAnimation.None -> R.string.settings_predictive_back_animation_none
+            }
+        )
+    }
+    val directions = PredictiveBackExitDirection.entries
+    val directionLabels = directions.map { direction ->
+        stringResource(
+            id = when (direction) {
+                PredictiveBackExitDirection.FollowGesture ->
+                    R.string.settings_predictive_back_exit_direction_follow_gesture
+
+                PredictiveBackExitDirection.AlwaysRight ->
+                    R.string.settings_predictive_back_exit_direction_always_right
+
+                PredictiveBackExitDirection.AlwaysLeft ->
+                    R.string.settings_predictive_back_exit_direction_always_left
+            }
+        )
+    }
+
+    SegmentedColumn(
+        modifier = SectionModifier,
+        content = buildList<@Composable () -> Unit> {
+            add {
+                SegmentedDropdownItem(
+                    icon = Icons.Rounded.Animation,
+                    title = stringResource(R.string.settings_predictive_back_animation),
+                    summary = stringResource(R.string.settings_predictive_back_animation_summary),
+                    items = animationLabels,
+                    selectedIndex = animations.indexOf(animation).coerceAtLeast(0),
+                    onItemSelected = { index ->
+                        animations.getOrNull(index)?.let { PredictiveBackConfig.animation = it }
+                    },
+                )
+            }
+            if (animation == PredictiveBackAnimation.Scale) {
+                add {
+                    SegmentedDropdownItem(
+                        icon = Icons.Rounded.SwapHoriz,
+                        title = stringResource(R.string.settings_predictive_back_exit_direction),
+                        summary = stringResource(
+                            R.string.settings_predictive_back_exit_direction_summary
+                        ),
+                        items = directionLabels,
+                        selectedIndex = directions.indexOf(exitDirection).coerceAtLeast(0),
+                        onItemSelected = { index ->
+                            directions.getOrNull(index)?.let {
+                                PredictiveBackConfig.exitDirection = it
+                            }
+                        },
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable
