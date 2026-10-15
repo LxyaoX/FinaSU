@@ -409,7 +409,7 @@
     <string name="settings_theme_store_mode">主题商店模式喵</string>
     <string name="settings_theme_store_mode_summary">要在应用里下载主题，还是交给浏览器喵？</string>
     <string name="settings_layout_variant">布局变体喵</string>
-    <string name="settings_layout_variant_summary">主页面用 Material 3 Expressive 大标题喵，插件、超级用户和模块页还有可折叠的内嵌搜索栏哦</string>
+    <string name="settings_layout_variant_summary">插件、超级用户和模块页用 Material 3 Expressive 大标题，还配个能折叠的内嵌搜索栏喵</string>
     <string name="settings_layout_variant_default">默认喵</string>
     <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">搜索插件喵</string>

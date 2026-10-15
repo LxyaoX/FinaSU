@@ -409,7 +409,7 @@
     <string name="settings_theme_store_mode">テーマストアのモード</string>
     <string name="settings_theme_store_mode_summary">テーマをアプリ内でダウンロードするか、ブラウザで行うかを選びます。</string>
     <string name="settings_layout_variant">レイアウトの種類</string>
-    <string name="settings_layout_variant_summary">メインページで Material 3 Expressive の大きなタイトルを使用し、プラグイン、Superuser、モジュールに折りたたみ可能なインライン検索バーを表示します。</string>
+    <string name="settings_layout_variant_summary">プラグイン、Superuser、モジュールで Material 3 Expressive の大きなタイトルと折りたたみ可能なインライン検索バーを使用します。</string>
     <string name="settings_layout_variant_default">デフォルト</string>
     <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">プラグインを検索</string>
