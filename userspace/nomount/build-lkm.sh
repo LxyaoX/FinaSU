@@ -1,3 +1,4 @@
+#!/bin/sh
 # SPDX-License-Identifier: GPL-2.0-only
 #
 # Builds the vendored NoMount module inside an Android DDK container and drops
