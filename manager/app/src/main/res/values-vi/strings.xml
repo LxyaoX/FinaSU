@@ -878,4 +878,6 @@
     <string name="wallpaper_gallery_download_failed">Tải xuống thất bại</string>
     <string name="wallpaper_gallery_download">Tải xuống</string>
     <string name="wallpaper_gallery_cancel">Hủy</string>
+    <string name="settings_disclaimer">Tuyên bố miễn trừ trách nhiệm</string>
+    <string name="settings_disclaimer_message">Sau khi root thiết bị, các bản cập nhật hệ thống, mô-đun của bên thứ ba hoặc các yếu tố bên ngoài khác có thể gây ra rủi ro và tổn thất không lường trước, bạn phải tự chịu trách nhiệm. Hãy tiếp tục sau khi đã hiểu rõ rủi ro.</string>
 </resources>

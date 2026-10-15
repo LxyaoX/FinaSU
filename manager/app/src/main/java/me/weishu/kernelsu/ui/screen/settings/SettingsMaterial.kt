@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -64,6 +65,7 @@ fun SettingPagerMaterial(
     val showUninstallDialog = rememberSaveable { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var showProfileEditor by remember { mutableStateOf(false) }
+    val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
 
     UninstallDialog(
         show = showUninstallDialog.value,
@@ -123,6 +125,18 @@ fun SettingPagerMaterial(
                     },
                     {
                         SegmentedListItem(
+                            onClick = { showDisclaimerDialog.value = true },
+                            headlineContent = { Text(stringResource(id = R.string.settings_disclaimer)) },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Policy,
+                                    stringResource(id = R.string.settings_disclaimer)
+                                )
+                            },
+                        )
+                    },
+                    {
+                        SegmentedListItem(
                             onClick = { showBottomSheet = true },
                             headlineContent = { Text(stringResource(id = R.string.send_log)) },
                             leadingContent = {
@@ -175,6 +189,10 @@ fun SettingPagerMaterial(
             }
             Spacer(modifier = Modifier.height(bottomInnerPadding))
         }
+    }
+
+    if (showDisclaimerDialog.value) {
+        SettingsDisclaimerDialog(showDisclaimerDialog)
     }
 }
 

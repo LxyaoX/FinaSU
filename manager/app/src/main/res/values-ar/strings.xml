@@ -880,4 +880,6 @@
     <string name="wallpaper_gallery_download_failed">فشل التنزيل</string>
     <string name="wallpaper_gallery_download">تنزيل</string>
     <string name="wallpaper_gallery_cancel">إلغاء</string>
+    <string name="settings_disclaimer">إخلاء المسؤولية</string>
+    <string name="settings_disclaimer_message">بعد عمل روت للجهاز، قد تتسبب تحديثات النظام أو الوحدات الخارجية أو عوامل خارجية أخرى في مخاطر وخسائر غير متوقعة، ويتعين عليك تحملها بنفسك. يرجى الاستمرار فقط بعد فهم المخاطر جيدًا.</string>
 </resources>

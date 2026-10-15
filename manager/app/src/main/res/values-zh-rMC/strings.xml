@@ -878,4 +878,6 @@
     <string name="wallpaper_gallery_download_failed">拾取失敗</string>
     <string name="wallpaper_gallery_download">拾取下載</string>
     <string name="wallpaper_gallery_cancel">放棄</string>
+    <string name="settings_disclaimer">免责契约</string>
+    <string name="settings_disclaimer_message">将设备 Root 之后，系统更新、第三方模块或其它外界因素皆可能带来不可预知的危险与损失，须由你自行承担。待你明了风险，方可继续冒险。</string>
 </resources>

@@ -878,4 +878,6 @@
     <string name="wallpaper_gallery_download_failed">Download failed</string>
     <string name="wallpaper_gallery_download">Download</string>
     <string name="wallpaper_gallery_cancel">Cancel</string>
+    <string name="settings_disclaimer">Disclaimer</string>
+    <string name="settings_disclaimer_message">Rooting your device may carry risks from system updates, third-party modules, or other external causes. You are responsible for any resulting damage or loss. Please continue only if you understand the risks.</string>
 </resources>

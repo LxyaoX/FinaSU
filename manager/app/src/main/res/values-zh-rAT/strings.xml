@@ -878,4 +878,6 @@
     <string name="wallpaper_gallery_download_failed">降臨失敗</string>
     <string name="wallpaper_gallery_download">降臨下載</string>
     <string name="wallpaper_gallery_cancel">取消</string>
+    <string name="settings_disclaimer">免责神谕</string>
+    <string name="settings_disclaimer_message">对设备施以 Root 之后，系统更新、第三方模块或其它外缘皆可能降下不可预知之险与损，须由你自负。待你明晓其险，方可续行。</string>
 </resources>

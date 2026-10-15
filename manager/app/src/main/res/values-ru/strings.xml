@@ -880,4 +880,6 @@
     <string name="wallpaper_gallery_download_failed">Ошибка загрузки</string>
     <string name="wallpaper_gallery_download">Скачать</string>
     <string name="wallpaper_gallery_cancel">Отмена</string>
+    <string name="settings_disclaimer">Отказ от ответственности</string>
+    <string name="settings_disclaimer_message">После получения root-прав обновления системы, сторонние модули и другие внешние факторы могут привести к непредвиденным рискам и потерям. Вы принимаете эти риски на себя. Пожалуйста, продолжайте только после того, как полностью их осознаете.</string>
 </resources>
