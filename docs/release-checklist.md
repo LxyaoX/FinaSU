@@ -6,8 +6,10 @@ experience. Keep it in sync with `.github/workflows/release.yml`,
 
 ## 1. How a release reaches a user
 
-1. Pushing a `v*` tag runs the `Release` workflow, which builds the LKM, `ksuinit`, `ksud` and the
-   manager APK, then creates a GitHub Release through `softprops/action-gh-release`.
+1. Pushing a `v*` tag runs the `Release` workflow: the DDK matrix builds `kernelsu.ko` and
+   `nomount.ko` per KMI, `sui.yml` builds the Sui payload, `ksuinit` and `ksud` follow, the manager
+   APK is built and repacked with that `ksud`, and `softprops/action-gh-release` publishes the APK
+   as the only release asset.
 2. The manager calls `GET https://api.github.com/repos/LyraVoid/FinaSU/releases/latest` every time
    the Home screen becomes visible or the app returns to the foreground (`checkNewVersion()`),
    unless the "Check for updates" setting is off.
@@ -26,8 +28,8 @@ experience. Keep it in sync with `.github/workflows/release.yml`,
   otherwise the name becomes `0.1.0-3-gabc1234` and that is the string shown in the update banner.
 - Never release from a commit older than the previous release: a lower version code means nobody is
   offered the update. Backport fixes by merging forward and tagging the new tip.
-- Reference point: `v0.1.0-dev1` shipped version code `32817`, while the tip of `main` is already at
-  `32916`, so any tag placed on the current tip is offered to every existing installation.
+- Reference point: `v0.1.0-dev1` shipped version code `32817` and `v1.0.0` shipped `32932`, so any tag
+  placed on a later commit is offered to every existing installation.
 
 ## 3. Tag convention
 
@@ -47,8 +49,8 @@ release) takes over the update prompt for everyone.
    but tracks `origin/master` with `push.default=upstream`, so publish it with a plain `git push`;
    `git push origin main` would create a second remote branch instead of updating `master`.
 2. Tag and push: `git tag -a v0.1.0 -m "FolkSU v0.1.0" && git push origin v0.1.0`.
-3. Wait for the `Release` workflow (LKM via DDK, ksuinit, ksud for three Android ABIs plus the desktop
-   targets, manager APK, repack and resign, then the GitHub release).
+3. Wait for the `Release` workflow (LKM and NoMount via DDK, the Sui payload, ksuinit, ksud for three
+   Android ABIs plus the desktop targets, manager APK, repack and resign, then the GitHub release).
 4. Write the release notes. The body is the changelog shown in the manager's update dialog; an empty
    body silently skips that dialog. It can be edited after the workflow finishes, or generated with
    `generate_release_notes: true` on the release step.
@@ -68,23 +70,52 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
   code must exceed the previous release. A name that does not match the regex (for example
   `app-release.apk`) makes the update invisible to every user.
 - One APK asset per release: the parser returns the first match it finds.
+- The release job fails early when the asset name does not match
+  `<app>_v<versionName>_<versionCode>-<buildType>.apk`, so a silent update outage is caught in CI.
 - `aapt2 dump badging` on the downloaded APK should report `package: name='me.yuki.fina'` with the
   expected version code and name.
 - The signing key must stay the same across releases, otherwise Android refuses to install the update
   over an existing one. The current releases use `manager/key.jks` (CN=FolkSU, certificate SHA-256
   `2d89b50a...4458`), which is also the `KEYSTORE` secret used by CI.
 
-## 6. Kernel-side delivery
+## 6. What the APK carries
 
-- `ksud.yml` stages the built `*_kernelsu.ko` files into `userspace/ksud/bin/<abi>/`, and `repack_apk.py`
-  injects `ksud` into the APK, so an APK release also carries a matching LKM.
+| Payload | arm64 | x86_64 | riscv64 |
+| --- | --- | --- | --- |
+| `kernelsu.ko` (8 KMIs) | yes | yes | no |
+| `nomount.ko` (8 KMIs) | yes | yes | no |
+| FolkZygisk, 32 and 64 bit | yes | yes | no |
+| Sui (`sui/payload.json` and its files) | yes | yes | no |
+| `ksuinit`, `waitsys`, `bootctl`, `busybox`, `mkbootfs` | yes | yes | yes |
+
+- The modules, the FolkZygisk tree and the Sui tree live under `userspace/ksud/bin/<abi>/`, are
+  gitignored, and are staged by CI before `ksud` is compiled: modules in `ddk-lkm.yml`, FolkZygisk in
+  `ksud.yml`, Sui in `sui.yml` plus `userspace/sui/package.py`. Whatever is not staged is silently
+  absent from the APK.
+- riscv64 has no LKM, NoMount, FolkZygisk or Sui payload upstream. The manager reports the missing
+  module or driver instead of failing, and NoMount falls back to the built-in Folk Mount engine.
+- Only the APK is a release asset. `lkm-*.ko`, `ksud-*`, `ksuinit-*` and the FolkZygisk source tarball
+  stay on the run page as workflow artifacts, and GitHub attaches the tag's source archives, which
+  also keeps the source available for the licenses bundled into the payload.
 - Users in LKM mode see "A newer bundled LKM is available. Tap to update." on Home whenever the
   running module version differs from the APK version code; they install it from the Install page and
   reboot, with no PC and no boot image flashing.
-- Users running a built-in kernel must rebuild and reflash the boot image themselves. The release
-  assets cover that path (`lkm-*_kernelsu.ko` per KMI, `ksud-*`, `ksuinit-*`, zygisk sources).
+- Users running a built-in kernel must rebuild and reflash the boot image themselves from the tag.
 
-## 7. Pitfalls
+## 7. Verify the packaged payloads
+
+```bash
+unzip -p FinaSU_vX.Y.Z_<code>-release.apk lib/arm64-v8a/libksud.so > /tmp/libksud.so
+for p in 'android1[2-7]-[0-9]+\.[0-9]+_kernelsu\.ko' 'android1[2-7]-[0-9]+\.[0-9]+_nomount\.ko' \
+         'folkzygisk/AGPL-3\.0\.txt' 'sui/payload\.json'; do
+  printf '%-46s %s\n' "$p" "$(grep -a -o -E -- "$p" /tmp/libksud.so | wc -l)"
+done
+```
+
+Expect `8`, `8`, `1`, `1` on arm64 and x86_64 and `0` for all of them on riscv64. A zero where the
+table above says yes means a staging step was skipped and the APK shipped without that payload.
+
+## 8. Pitfalls
 
 - Do not set `draft: true` on the release step: `action-gh-release` then uploads the assets and never
   publishes the draft.
@@ -95,3 +126,8 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
   resolve and the manager silently reports no update.
 - Every test build published before this convention existed (`v0.1.0-pre4` through `v0.1.0-dev1`) is
   a full release. They stay eligible for `releases/latest` until a newer full release supersedes them.
+- A payload that a local `build.sh all` stages but CI does not ships as an APK that looks complete and
+  silently lacks it. `v1.0.0` shipped without the Sui payload exactly that way; run the check in
+  section 7 on every release build.
+- The vendored Sui tree is excluded from ShellCheck (`ignore_paths` in `shellcheck.yml`) because its
+  upstream scripts are device-side content that has to stay byte for byte identical.
