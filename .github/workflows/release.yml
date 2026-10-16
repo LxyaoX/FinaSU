@@ -66,6 +66,11 @@ jobs:
       - name: release
         uses: softprops/action-gh-release@v3
         with:
+          # A tag carrying a suffix (v0.1.0-beta1, v0.1.0-dev1, v0.1.0-rc1, ...) is published as a
+          # GitHub pre-release, which `/releases/latest` skips, so the manager's update check never
+          # offers test builds to users on a release build. A bare tag (v0.1.0) is published as a
+          # full release and becomes `/releases/latest` on its own, which is what users receive.
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             manager/*.apk
             lkm/lkm-*_kernelsu.ko
