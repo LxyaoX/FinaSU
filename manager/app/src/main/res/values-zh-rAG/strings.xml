@@ -789,6 +789,12 @@
     <string name="backup_modules_summary">刷写前会从选中的安装包留一份喵</string>
     <string name="backup_allowlist">超级用户名单喵</string>
     <string name="backup_no_partitions">没找到能备份的分区喵</string>
+    <string name="backup_partition_boot">boot 镜像</string>
+    <string name="backup_partition_boot_summary">boot · 内核，Android 13 之前还有 ramdisk 喵</string>
+    <string name="backup_partition_init_boot">init_boot 镜像</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 只有通用 ramdisk 喵（Android 13 及以上）</string>
+    <string name="backup_partition_vendor_boot">vendor_boot 镜像</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · 厂商内核模块和设备树喵</string>
     <string name="backup_webdav_url">服务器地址喵</string>
     <string name="backup_webdav_username">用户名喵</string>
     <string name="backup_webdav_password">密码喵</string>

@@ -780,6 +780,12 @@
     <string name="backup_modules_summary">フラッシュ前に選択したインストーラーからアーカイブされます</string>
     <string name="backup_allowlist">スーパーユーザーリスト</string>
     <string name="backup_no_partitions">バックアップ可能なパーティションが見つかりません</string>
+    <string name="backup_partition_boot">boot イメージ</string>
+    <string name="backup_partition_boot_summary">boot · カーネル（Android 13 より前は ramdisk も）</string>
+    <string name="backup_partition_init_boot">init_boot イメージ</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 汎用 ramdisk のみ（Android 13 以降）</string>
+    <string name="backup_partition_vendor_boot">vendor_boot イメージ</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · ベンダーカーネルモジュールとデバイスツリー</string>
     <string name="backup_webdav_url">サーバー URL</string>
     <string name="backup_webdav_username">ユーザー名</string>
     <string name="backup_webdav_password">パスワード</string>

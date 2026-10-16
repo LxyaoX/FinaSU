@@ -789,6 +789,12 @@
     <string name="backup_modules_summary">灌注之前，将所选凭匣封存入册</string>
     <string name="backup_allowlist">圣光使者名册</string>
     <string name="backup_no_partitions">未寻得可珍藏之圣域</string>
+    <string name="backup_partition_boot">boot 镜像</string>
+    <string name="backup_partition_boot_summary">boot · 内核，Android 13 之前犹含通用 ramdisk</string>
+    <string name="backup_partition_init_boot">init_boot 镜像</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 唯载通用 ramdisk（Android 13 及后）</string>
+    <string name="backup_partition_vendor_boot">vendor_boot 镜像</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · 匠作内核之阵与器脉图谱</string>
     <string name="backup_webdav_url">圣门地址</string>
     <string name="backup_webdav_username">使者之名</string>
     <string name="backup_webdav_password">圣言密语</string>

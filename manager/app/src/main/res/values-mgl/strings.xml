@@ -780,6 +780,12 @@
     <string name="backup_modules_summary">注入之前，将所选凭依封存归档</string>
     <string name="backup_allowlist">契约者名录</string>
     <string name="backup_no_partitions">未探得可封印之星域</string>
+    <string name="backup_partition_boot">boot 镜像</string>
+    <string name="backup_partition_boot_summary">boot · 本源法则，Android 13 之前尚含通用 ramdisk</string>
+    <string name="backup_partition_init_boot">init_boot 镜像</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 仅含通用 ramdisk（Android 13 及以后）</string>
+    <string name="backup_partition_vendor_boot">vendor_boot 镜像</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · 匠造法则结晶与器脉图谱</string>
     <string name="backup_webdav_url">星门地址</string>
     <string name="backup_webdav_username">契约者之名</string>
     <string name="backup_webdav_password">咒语</string>

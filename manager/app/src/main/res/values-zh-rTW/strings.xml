@@ -789,6 +789,12 @@
     <string name="backup_modules_summary">刷寫前從所選安裝包封存</string>
     <string name="backup_allowlist">超級使用者清單</string>
     <string name="backup_no_partitions">未偵測到可備份的分割區</string>
+    <string name="backup_partition_boot">boot 映像</string>
+    <string name="backup_partition_boot_summary">boot · 核心，Android 13 之前還含 ramdisk</string>
+    <string name="backup_partition_init_boot">init_boot 映像</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 僅含通用 ramdisk（Android 13 及以上）</string>
+    <string name="backup_partition_vendor_boot">vendor_boot 映像</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · 廠商核心模組與裝置樹</string>
     <string name="backup_webdav_url">伺服器網址</string>
     <string name="backup_webdav_username">使用者名稱</string>
     <string name="backup_webdav_password">密碼</string>

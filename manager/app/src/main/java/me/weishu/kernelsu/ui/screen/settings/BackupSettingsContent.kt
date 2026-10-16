@@ -124,20 +124,35 @@ fun BackupSettingsContent() {
                 onCheckedChange = viewModel::setAllowlistEnabled,
             )
         }
-        item(visible = state.availablePartitions.isEmpty()) {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.backup_no_partitions)) },
-            )
-        }
-        state.availablePartitions.forEach { partition ->
-            item(key = partition) {
-                SegmentedCheckboxItem(
-                    title = partition,
-                    checked = partition in state.selectedPartitions,
-                    onCheckedChange = { viewModel.setPartitionEnabled(partition, it) },
-                )
+    }
+
+    if (state.partitionsLoaded) {
+        SegmentedColumn(
+            modifier = BackupGroupModifier,
+            title = stringResource(R.string.backup_partitions),
+        ) {
+            if (state.availablePartitions.isEmpty()) {
+                item {
+                    SegmentedListItem(
+                        headlineContent = { Text(stringResource(R.string.backup_no_partitions)) },
+                    )
+                }
+            }
+            state.availablePartitions.forEach { partition ->
+                item(key = partition) {
+                    val (title, summary) = partitionLabels(partition)
+                    SegmentedCheckboxItem(
+                        title = title,
+                        summary = summary,
+                        checked = partition in state.selectedPartitions,
+                        onCheckedChange = { viewModel.setPartitionEnabled(partition, it) },
+                    )
+                }
             }
         }
+    }
+
+    SegmentedColumn(modifier = BackupGroupModifier) {
         item {
             SegmentedListItem(
                 onClick = viewModel::backupNow,
@@ -230,6 +245,17 @@ private fun WebDavSettingsSection(
             )
         }
     }
+}
+
+@Composable
+private fun partitionLabels(partition: String): Pair<String, String?> = when (partition) {
+    "boot" -> stringResource(R.string.backup_partition_boot) to
+        stringResource(R.string.backup_partition_boot_summary)
+    "init_boot" -> stringResource(R.string.backup_partition_init_boot) to
+        stringResource(R.string.backup_partition_init_boot_summary)
+    "vendor_boot" -> stringResource(R.string.backup_partition_vendor_boot) to
+        stringResource(R.string.backup_partition_vendor_boot_summary)
+    else -> partition to null
 }
 
 private fun openDownloads(context: Context) {

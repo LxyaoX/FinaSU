@@ -780,6 +780,12 @@
     <string name="backup_modules_summary">Se archiva antes de un flasheo desde los instaladores que elijas</string>
     <string name="backup_allowlist">Lista de superusuario</string>
     <string name="backup_no_partitions">No se detectaron particiones copiables</string>
+    <string name="backup_partition_boot">Imagen de arranque</string>
+    <string name="backup_partition_boot_summary">boot · kernel, y ramdisk antes de Android 13</string>
+    <string name="backup_partition_init_boot">Imagen de arranque inicial</string>
+    <string name="backup_partition_init_boot_summary">init_boot · solo ramdisk genérico (Android 13 y posteriores)</string>
+    <string name="backup_partition_vendor_boot">Imagen de arranque del fabricante</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · módulos de kernel del fabricante y árbol de dispositivos</string>
     <string name="backup_webdav_url">URL del servidor</string>
     <string name="backup_webdav_username">Nombre de usuario</string>
     <string name="backup_webdav_password">Contraseña</string>

@@ -780,6 +780,12 @@
     <string name="backup_modules_summary">Diarsipkan sebelum flash dari installer yang kamu pilih</string>
     <string name="backup_allowlist">Daftar superuser</string>
     <string name="backup_no_partitions">Tidak ada partisi yang bisa dicadangkan</string>
+    <string name="backup_partition_boot">Citra boot</string>
+    <string name="backup_partition_boot_summary">boot · kernel, plus ramdisk sebelum Android 13</string>
+    <string name="backup_partition_init_boot">Citra init boot</string>
+    <string name="backup_partition_init_boot_summary">init_boot · hanya ramdisk umum (Android 13 ke atas)</string>
+    <string name="backup_partition_vendor_boot">Citra boot vendor</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · modul kernel vendor dan device tree</string>
     <string name="backup_webdav_url">URL server</string>
     <string name="backup_webdav_username">Nama pengguna</string>
     <string name="backup_webdav_password">Kata sandi</string>

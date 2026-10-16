@@ -782,6 +782,12 @@
     <string name="backup_modules_summary">Flaş öncesi seçtiğin kurulum paketlerinden arşivlenir</string>
     <string name="backup_allowlist">Süper kullanıcı listesi</string>
     <string name="backup_no_partitions">Yedeklenebilir bölüm bulunamadı</string>
+    <string name="backup_partition_boot">boot imajı</string>
+    <string name="backup_partition_boot_summary">boot · çekirdek, Android 13 öncesinde ramdisk de var</string>
+    <string name="backup_partition_init_boot">init_boot imajı</string>
+    <string name="backup_partition_init_boot_summary">init_boot · yalnızca genel ramdisk (Android 13 ve sonrası)</string>
+    <string name="backup_partition_vendor_boot">vendor_boot imajı</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · üretici çekirdek modülleri ve cihaz ağacı</string>
     <string name="backup_webdav_url">Sunucu URL\'si</string>
     <string name="backup_webdav_username">Kullanıcı adı</string>
     <string name="backup_webdav_password">Parola</string>

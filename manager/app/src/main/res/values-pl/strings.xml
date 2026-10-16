@@ -784,6 +784,12 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="backup_modules_summary">Archiwizowane przed flashem z wybranych instalatorów</string>
     <string name="backup_allowlist">Lista superużytkownika</string>
     <string name="backup_no_partitions">Nie wykryto partycji do kopiowania</string>
+    <string name="backup_partition_boot">Obraz boot</string>
+    <string name="backup_partition_boot_summary">boot · jądro, a przed Android 13 także ramdisk</string>
+    <string name="backup_partition_init_boot">Obraz init_boot</string>
+    <string name="backup_partition_init_boot_summary">init_boot · tylko ogólny ramdisk (Android 13 i nowsze)</string>
+    <string name="backup_partition_vendor_boot">Obraz vendor_boot</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · moduły jądra producenta i drzewo urządzeń</string>
     <string name="backup_webdav_url">Adres serwera</string>
     <string name="backup_webdav_username">Nazwa użytkownika</string>
     <string name="backup_webdav_password">Hasło</string>

@@ -782,6 +782,12 @@
     <string name="backup_modules_summary">Архивируется перед прошивкой из выбранных установщиков</string>
     <string name="backup_allowlist">Список суперпользователей</string>
     <string name="backup_no_partitions">Не найдены разделы для резервного копирования</string>
+    <string name="backup_partition_boot">Образ boot</string>
+    <string name="backup_partition_boot_summary">boot · ядро, а до Android 13 и ramdisk</string>
+    <string name="backup_partition_init_boot">Образ init_boot</string>
+    <string name="backup_partition_init_boot_summary">init_boot · только общий ramdisk (Android 13 и новее)</string>
+    <string name="backup_partition_vendor_boot">Образ vendor_boot</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · модули ядра производителя и дерево устройств</string>
     <string name="backup_webdav_url">URL сервера</string>
     <string name="backup_webdav_username">Имя пользователя</string>
     <string name="backup_webdav_password">Пароль</string>

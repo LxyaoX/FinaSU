@@ -780,6 +780,12 @@
     <string name="backup_modules_summary">플래시 전에 선택한 설치 파일에서 보관됩니다</string>
     <string name="backup_allowlist">슈퍼유저 목록</string>
     <string name="backup_no_partitions">백업 가능한 파티션을 찾을 수 없습니다</string>
+    <string name="backup_partition_boot">boot 이미지</string>
+    <string name="backup_partition_boot_summary">boot · 커널 (Android 13 이전에는 ramdisk 포함)</string>
+    <string name="backup_partition_init_boot">init_boot 이미지</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 일반 ramdisk만 포함 (Android 13 이상)</string>
+    <string name="backup_partition_vendor_boot">vendor_boot 이미지</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · 벤더 커널 모듈과 디바이스 트리</string>
     <string name="backup_webdav_url">서버 URL</string>
     <string name="backup_webdav_username">사용자 이름</string>
     <string name="backup_webdav_password">비밀번호</string>

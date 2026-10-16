@@ -789,6 +789,12 @@
     <string name="backup_modules_summary">下锅前会把选中的料包存底</string>
     <string name="backup_allowlist">掌勺名单</string>
     <string name="backup_no_partitions">没找着能存底的分区</string>
+    <string name="backup_partition_boot">boot 镜像</string>
+    <string name="backup_partition_boot_summary">boot · 内核，Android 13 之前还带 ramdisk</string>
+    <string name="backup_partition_init_boot">init_boot 镜像</string>
+    <string name="backup_partition_init_boot_summary">init_boot · 只装着通用 ramdisk（Android 13 及以上）</string>
+    <string name="backup_partition_vendor_boot">vendor_boot 镜像</string>
+    <string name="backup_partition_vendor_boot_summary">vendor_boot · 厂家的内核模块和设备树</string>
     <string name="backup_webdav_url">库房地址</string>
     <string name="backup_webdav_username">厨师名号</string>
     <string name="backup_webdav_password">口令</string>

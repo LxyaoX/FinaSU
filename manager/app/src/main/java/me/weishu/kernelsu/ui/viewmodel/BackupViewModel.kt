@@ -52,6 +52,7 @@ data class BackupUiState(
     val allowlistEnabled: Boolean = true,
     val selectedPartitions: Set<String> = emptySet(),
     val availablePartitions: List<String> = emptyList(),
+    val partitionsLoaded: Boolean = false,
     val backupBeforeFlash: Boolean = false,
     val busy: Boolean = false,
     val testState: WebDavTestState = WebDavTestState.IDLE,
@@ -95,7 +96,7 @@ class BackupViewModel(
             val partitions = withContext(Dispatchers.IO) {
                 partitionAccess.availablePartitions().getOrDefault(emptyList())
             }
-            mutable.update { it.copy(availablePartitions = partitions) }
+            mutable.update { it.copy(availablePartitions = partitions, partitionsLoaded = true) }
         }
     }
 
