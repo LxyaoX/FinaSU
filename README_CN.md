@@ -72,6 +72,10 @@ NoMount 是内建的 VFS 路径重定向后端：不产生任何挂载，而是�
 
 管理器提供驱动状态、注入规则数、可见性例外与「关闭挂载」；挂载模式可选 `自动 / 内建 Folk Mount / 仅 metamodule / NoMount / 关闭`，默认是 `自动`，只有显式选择才会进入 NoMount。选择 NoMount 时若驱动不可用会自动回退到内建引擎，并在设置页说明原因。ksud 还会在装载与注入之前先落一份「进行中」记录：如果某次 NoMount（或 metamodule）注入之后没能走完启动，下次开机会跳过它、改用内建引擎把模块挂上，并把原因写进 `/data/adb/ksu/log/mount.log`；同一份日志（有体积上限、会自动轮转）也会记下每次注入的规则数与命中的顶层目录，方便从 bug 报告里判断注入到底碰了哪些路径。要查"卡住时内核在等什么"，可以先 `ksud mount capture on`（默认卡过 150 秒就取证，`ksud mount capture on 60` 可以改时长，`off` 关掉）：取证结果同样落在 `/data/adb/ksu/log/mount_capture.log`，包含 `sysrq w` 打印的全部阻塞任务栈、内核日志结尾、D 状态任务与 pstore。可见性是一份由 ksud 保存的例外名单：名单内的应用看到原厂文件系统，其余应用都能看到注入的文件；NoMount 页可以按需把各应用 Profile 的「卸载模块」判定复制进这份名单，改动 Profile 后需要再复制一次。
 
+目录型符号链接会被当作目录递归遍历并**逐文件合并**（带环路检测与按模块去重）；`.replace` 标记或 opaque 目录同样默认降级为逐文件合并，只有白名单里的 `/product/fonts`、且其原目录不存在或为空时才允许整目录替换。分区根目录，以及名为 `lib64`、`lib`、`bin`、`etc` 的目录，**永远不会**被整目录替换。降级会写进日志：`mount.log` 里带 `dir_replace=N`，`ksud nomount inject --dry-run --verbose` 也会分别标注文件重定向与目录替换。
+
+内建 NoMount 还会启动一个独立的 UI 就绪观察者（默认 180 秒）：它要求 `sys.boot_completed=1`、SurfaceFlinger 正在运行、开机动画已结束，而不只是收到 boot-completed 回调。观察未能确认时会留下一个独立的持久标记，下一次开机会改用内建挂载引擎并记录一条 warning。这些信号不保证显示真的可用，它也不是内核装载器的超时。把 `/data/adb/ksu/mount_ui_guard` 写成 `delay=300` 可以改观察时长（30–900 秒），写 `off` 则停止新的观察；已存在的 `mount_ui_pending` 标记仍然生效，用内建引擎成功挂载一次后会自动清除，所以重试之前请先把那次失败开机的 `/data/adb/ksu/log/mount.log` 取走。
+
 ## 安全提示
 
 管理器通过 APK 签名验证自身身份：只有受信任的管理器以及用户显式认领的应用才能管理内核。Root 权限基于白名单，只有被授权的应用才能访问 `su`。漏洞上报请参阅 [SECURITY.md](./SECURITY.md)。
