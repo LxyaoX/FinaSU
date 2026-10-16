@@ -33,7 +33,7 @@ fun ModuleRepoScreen() {
         onDismissCustomUrlDialog = viewModel::dismissCustomUrlDialog,
         onConfirmCustomUrl = viewModel::confirmCustomUrl,
         onOpenRepoDetail = { module ->
-            navigator.push(Route.ModuleRepoDetail(module.toArg()))
+            viewModel.openDetail(module) { navigator.push(Route.ModuleRepoDetail(it.toArg())) }
         },
         onInstallModule = { uri ->
             navigator.push(Route.Flash(FlashIt.FlashModules(listOf(uri))))

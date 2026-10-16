@@ -494,6 +494,8 @@ class ModuleViewModel(
                 module = module,
                 downloadUrl = updateInfo.downloadUrl,
                 fileName = "${module.name}-${updateInfo.version}.zip",
+                expectedSize = updateInfo.expectedSize,
+                expectedSha256 = updateInfo.expectedSha256,
             ),
             title = if (changelog.isNotBlank()) res.getString(R.string.module_changelog) else res.getString(R.string.module_update),
             content = changelog.ifBlank { res.getString(R.string.module_start_downloading).format(module.name) },

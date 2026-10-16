@@ -15,6 +15,8 @@ data class StoreReleaseArg(
     val downloadUrl: String,
     val changelog: String,
     val timestamp: Double,
+    val expectedSize: Long? = null,
+    val expectedSha256: String? = null,
 ) : Parcelable
 
 /**
@@ -57,4 +59,6 @@ private fun StoreRelease.toArg(): StoreReleaseArg = StoreReleaseArg(
     downloadUrl = downloadUrl,
     changelog = changelog,
     timestamp = timestamp,
+    expectedSize = expectedSize,
+    expectedSha256 = expectedSha256,
 )

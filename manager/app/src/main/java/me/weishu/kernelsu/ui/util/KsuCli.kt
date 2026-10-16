@@ -26,6 +26,8 @@ import me.weishu.kernelsu.core.tasks.ExtractImage
 import me.weishu.kernelsu.core.tasks.ProbeResult
 import me.weishu.kernelsu.core.utils.DataSourceChannel
 import me.weishu.kernelsu.ksuApp
+import me.weishu.kernelsu.data.modulestore.VerifiedDownloads
+import me.weishu.kernelsu.data.modulestore.copyForInstall
 import okhttp3.OkHttpClient
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,6 +35,7 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipFile
 
 /**
  * @author weishu
@@ -205,6 +208,7 @@ inline fun <T> withNewRootShell(
 }
 
 fun Uri.getFileName(context: Context): String? {
+    if (scheme == "file") return path?.let { File(it).name }
     var fileName: String? = null
     val contentResolver: ContentResolver = context.contentResolver
     val cursor: Cursor? = contentResolver.query(this, null, null, null, null)
@@ -400,30 +404,51 @@ suspend fun flashModuleBatch(
 ): FlashResult {
     val files = mutableListOf<File>()
     fun quote(value: String) = "'" + value.replace("'", "'\"'\"'") + "'"
-    var installed = false
+    var needsReboot = false
     return try {
         require(uris.isNotEmpty()) { "No module archives selected" }
         for (uri in uris) {
             val file = File.createTempFile("module-", ".zip", ksuApp.cacheDir)
             files.add(file)
             requireNotNull(ksuApp.contentResolver.openInputStream(uri)) { "Cannot read module archive" }
-                .use { source -> file.outputStream().use { source.copyTo(it) } }
+                .use { source ->
+                    val expected = if (uri.scheme == "file") {
+                        VerifiedDownloads.expectedFor(File(ksuApp.filesDir, "verified_downloads"), File(requireNotNull(uri.path)))
+                    } else null
+                    copyForInstall(source, file, expected)
+                }
             val result = flashWithIO(
                 "${quote(getKsuDaemonPath())} module install ${quote(file.absolutePath)}",
                 onStdout, onStderr,
             )
-            if (!result.isSuccess) return FlashResult(result, installed)
-            installed = true
+            if (!result.isSuccess) return FlashResult(result, needsReboot)
+            needsReboot = moduleNeedsReboot(file) || needsReboot
         }
-        FlashResult(0, "", true)
+        FlashResult(0, "", needsReboot)
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
         onStderr(e.toString())
-        FlashResult(-1, e.message ?: e.toString(), installed)
+        FlashResult(-1, e.message ?: e.toString(), needsReboot)
     } finally {
         files.forEach { it.delete() }
     }
+}
+
+private fun moduleNeedsReboot(zip: File): Boolean {
+    val id = runCatching {
+        ZipFile(zip).use { archive ->
+            val entry = archive.getEntry("module.prop") ?: return@use null
+            archive.getInputStream(entry).reader(Charsets.UTF_8).use { reader ->
+                java.util.Properties().apply { load(reader) }.getProperty("id")?.trim()
+            }
+        }
+    }.getOrNull()
+    if (id == null || id.length !in 2..64 || !Regex("^[a-zA-Z][a-zA-Z0-9._-]+$").matches(id)) return true
+    val dir = "/data/adb/modules/$id"
+    return runCatching {
+        !ShellUtils.fastCmdResult(getRootShell(), "[ -d $dir ] && [ ! -e $dir/update ]")
+    }.getOrDefault(true)
 }
 
 fun runModuleAction(

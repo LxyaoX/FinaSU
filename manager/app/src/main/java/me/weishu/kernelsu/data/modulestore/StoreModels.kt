@@ -26,6 +26,8 @@ data class StoreRelease(
     val downloadUrl: String,
     val changelog: String = "",
     val timestamp: Double = 0.0,
+    val expectedSize: Long? = null,
+    val expectedSha256: String? = null,
 )
 
 /**
@@ -48,6 +50,7 @@ data class StoreModule(
     val support: String? = null,
     val releases: List<StoreRelease> = emptyList(),
     val parameter: Boolean? = null,
+    val detailPath: String? = null,
 ) {
     /**
      * The release offered for download: the first release whose [StoreRelease.versionCode] equals

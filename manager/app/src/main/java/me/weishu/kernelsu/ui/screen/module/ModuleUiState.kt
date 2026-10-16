@@ -13,6 +13,8 @@ sealed interface ModuleConfirmRequest {
         val module: Module,
         val downloadUrl: String,
         val fileName: String,
+        val expectedSize: Long? = null,
+        val expectedSha256: String? = null,
     ) : ModuleConfirmRequest
 
     data class Uninstall(

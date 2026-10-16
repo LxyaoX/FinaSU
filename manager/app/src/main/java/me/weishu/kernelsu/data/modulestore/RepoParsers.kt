@@ -3,6 +3,7 @@ package me.weishu.kernelsu.data.modulestore
 import java.time.Instant
 import org.json.JSONArray
 import org.json.JSONObject
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 /** Repository used when the cluster index is unavailable or empty. */
 const val DEFAULT_REPOSITORY_URL = "https://gr.dergoogler.com/gmr/"
@@ -95,10 +96,23 @@ fun parseOfficialModules(json: String, language: String): List<StoreModule> {
 /**
  * Resolves the module list document path advertised by the registry index.
  *
- * Falls back to [KERNELSU_MODULES_PATH] when the document carries no `modules` field.
  */
 fun parseKernelSuModulesPath(json: String): String =
-    JSONObject(json).optString("modules", "").trim().ifEmpty { KERNELSU_MODULES_PATH }
+    registryDocument(json).getString("modules").also { require(isRegistryPath(it)) }
+
+internal fun registryDocument(json: String): JSONObject = JSONObject(json).also {
+    require(it.opt("schemaVersion") == 1) { "Unsupported registry schema" }
+    require(Regex("^[0-9a-f]{16,64}$").matches(it.getString("buildId"))) { "Invalid registry build" }
+}
+
+internal fun isRegistryPath(path: String): Boolean =
+    path.startsWith("api/v1/") && path.endsWith(".json") &&
+        path.split('/').all { Regex("^[A-Za-z0-9._-]+$").matches(it) && it != "." && it != ".." }
+
+private fun isRegistryModule(item: JSONObject): Boolean =
+    item.optString("kind", "module") == "module" &&
+        item.optString("id").length in 2..64 &&
+        Regex("^[a-zA-Z][a-zA-Z0-9._-]+$").matches(item.optString("id"))
 
 /**
  * Parses the KernelSU registry module list into [StoreModule]s.
@@ -107,20 +121,22 @@ fun parseKernelSuModulesPath(json: String): String =
  * the per-module detail document holds the downloadable versions.
  */
 fun parseKernelSuModules(json: String): List<StoreModule> {
-    val array = JSONObject(json).optJSONArray("modules") ?: return emptyList()
+    val array = registryDocument(json).getJSONArray("modules")
     val modules = ArrayList<StoreModule>(array.length())
     for (index in 0 until array.length()) {
         val item = array.optJSONObject(index) ?: continue
         val id = item.optString("id", "").trim()
-        if (id.isEmpty()) continue
+        if (!isRegistryModule(item) || !isRegistryPath(item.optString("detail"))) continue
         val stable = item.optJSONObject("stable")
+        if (stable == null || stable.optLong("versionCode") < 1 || modules.any { it.id.equals(id, true) }) continue
         modules += StoreModule(
             id = id,
             name = item.optString("name", "").trim().ifEmpty { id },
-            version = stable?.optString("version", "").orEmpty(),
-            versionCode = stable?.optLong("versionCode", 0L) ?: 0L,
+            version = stable.optString("version", ""),
+            versionCode = stable.optLong("versionCode", 0L),
             author = kernelSuAuthors(item),
             description = item.optString("summary", "").trim(),
+            detailPath = item.getString("detail"),
         )
     }
     return modules
@@ -128,9 +144,9 @@ fun parseKernelSuModules(json: String): List<StoreModule> {
 
 /** Parses a KernelSU module detail document, returning `null` when it carries no id. */
 fun parseKernelSuDetail(json: String): StoreModule? {
-    val item = JSONObject(json)
+    val item = registryDocument(json)
     val id = item.optString("id", "").trim()
-    if (id.isEmpty()) return null
+    if (!isRegistryModule(item)) return null
     val stable = item.optJSONObject("stable")
     val releases = parseKernelSuReleases(item.optJSONArray("releases"))
     return StoreModule(
@@ -153,14 +169,25 @@ private fun parseKernelSuReleases(array: JSONArray?): List<StoreRelease> {
     val releases = ArrayList<StoreRelease>(array.length())
     for (index in 0 until array.length()) {
         val item = array.optJSONObject(index) ?: continue
-        val url = item.optJSONObject("zip")?.optString("url", "")?.trim().orEmpty()
-        if (!url.isHttpUrl()) continue
+        val zip = item.optJSONObject("zip") ?: continue
+        val url = zip.optString("url", "").trim()
+        val size = zip.optLong("size", 0)
+        val hash = zip.optString("sha256", "")
+        val parsedUrl = url.toHttpUrlOrNull()
+        if (parsedUrl == null || parsedUrl.scheme != "https" || parsedUrl.host != "github.com" ||
+            parsedUrl.username.isNotEmpty() || parsedUrl.password.isNotEmpty() || parsedUrl.port != 443 ||
+            !Regex("^/[^/]+/[^/]+/releases/download/[^/]+/[^/]+$").matches(parsedUrl.encodedPath) ||
+            size <= 0 || !Regex("^[0-9a-f]{64}$").matches(hash) || item.opt("immutable") != true ||
+            item.optLong("versionCode") < 1
+        ) continue
         releases += StoreRelease(
             version = item.optString("version", "").trim(),
             versionCode = item.optLong("versionCode", 0L),
             downloadUrl = url,
             changelog = stripHtml(item.optString("changelogHtml", "")),
             timestamp = parseIsoSeconds(item.optString("publishedAt", "")),
+            expectedSize = size,
+            expectedSha256 = hash,
         )
     }
     return releases

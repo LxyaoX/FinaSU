@@ -63,6 +63,19 @@ class ModuleRepoViewModel(
     /** Reloads the current source while keeping the current content visible. */
     fun refresh() = reload(initialLoading = false)
 
+    fun openDetail(module: me.weishu.kernelsu.data.modulestore.StoreModule, onLoaded: (me.weishu.kernelsu.data.modulestore.StoreModule) -> Unit) {
+        if (_uiState.value.sourceKind != StoreSourceKind.KERNELSU) {
+            onLoaded(module)
+            return
+        }
+        viewModelScope.launch {
+            val source = ModuleStoreRegistry.sourceFor(StoreSourceKind.KERNELSU)
+            source.detail(module.id).onSuccess(onLoaded).onFailure {
+                Toast.makeText(ksuApp, R.string.module_repo_error, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun reload(initialLoading: Boolean) {
         val state = _uiState.value
         viewModelScope.launch {

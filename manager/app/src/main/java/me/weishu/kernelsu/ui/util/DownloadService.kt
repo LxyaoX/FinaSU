@@ -31,6 +31,9 @@ import okhttp3.Call
 import okhttp3.Request
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.io.File
+import me.weishu.kernelsu.data.modulestore.ExpectedFile
+import me.weishu.kernelsu.data.modulestore.VerifiedDownloads
 
 class DownloadService : Service() {
 
@@ -80,7 +83,16 @@ class DownloadService : Service() {
                     startForeground(downloadId, notification)
                 }
 
-                startDownload(downloadId, url, fileName)
+                val expected = runCatching {
+                    intent.getStringExtra("expectedSha256")?.let {
+                        ExpectedFile(intent.getLongExtra("expectedSize", 0), it)
+                    }
+                }.getOrElse {
+                    DownloadManager.markFailed(downloadId, "Invalid download metadata")
+                    stopForegroundIfIdle()
+                    return START_NOT_STICKY
+                }
+                startDownload(downloadId, url, fileName, expected)
             }
 
             ACTION_CANCEL -> {
@@ -106,7 +118,7 @@ class DownloadService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun startDownload(id: Int, url: String, fileName: String) {
+    private fun startDownload(id: Int, url: String, fileName: String, expected: ExpectedFile?) {
         val job = serviceScope.launch(start = CoroutineStart.LAZY) {
             var pendingUri: Uri? = null
             var displayName = fileName
@@ -119,6 +131,19 @@ class DownloadService : Service() {
                         if (!resp.isSuccessful) throw IOException("HTTP ${resp.code}")
                         val body = resp.body
                         val total = body.contentLength()
+
+                        if (expected != null) {
+                            val file = VerifiedDownloads.download(
+                                File(filesDir, "verified_downloads"), expected, fileName, body.byteStream(),
+                                checkActive = { ensureActive() },
+                                onProgress = { bytes ->
+                                    DownloadManager.updateProgress(id, (bytes.toDouble() * 100 / expected.size).toInt())
+                                },
+                            )
+                            val verifiedUri = Uri.fromFile(file)
+                            pendingUri = verifiedUri
+                            return@use verifiedUri
+                        }
 
                         ensureActive()
                         val values = ContentValues().apply {
@@ -171,7 +196,7 @@ class DownloadService : Service() {
                 val values = ContentValues().apply {
                     put(MediaStore.Downloads.IS_PENDING, 0)
                 }
-                if (contentResolver.update(uri, values, null, null) != 1) {
+                if (uri.scheme != "file" && contentResolver.update(uri, values, null, null) != 1) {
                     throw IOException("Failed to publish download")
                 }
                 displayName = uri.getFileName(this@DownloadService) ?: displayName
@@ -216,7 +241,10 @@ class DownloadService : Service() {
 
     private fun deleteDownload(uri: Uri) {
         runCatching {
-            contentResolver.delete(uri, null, null)
+            if (uri.scheme == "file") {
+                val file = File(requireNotNull(uri.path))
+                if (VerifiedDownloads.expectedFor(File(filesDir, "verified_downloads"), file) != null) file.delete()
+            } else contentResolver.delete(uri, null, null)
         }.onFailure {
             Log.w("DownloadService", "Failed to delete download: $uri", it)
         }

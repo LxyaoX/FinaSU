@@ -35,11 +35,11 @@ object RepoHttp {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** Fetches [url] as text, serving a fresh cached body when available. */
-    suspend fun get(url: String): Result<String> {
+    suspend fun get(url: String, refresh: Boolean = false): Result<String> {
         if (!url.isHttpUrl()) {
             return Result.failure(RepoHttpException("unsupported url: $url"))
         }
-        cache[url]?.let { entry ->
+        cache[url]?.takeUnless { refresh }?.let { entry ->
             if (System.currentTimeMillis() - entry.timestamp < CACHE_TTL_MS) {
                 return Result.success(entry.body)
             }

@@ -384,6 +384,8 @@ private fun StoreModuleCard(
                     Spacer(Modifier.width(8.dp))
                     ModuleDownloadButton(
                         downloadUrl = release.downloadUrl,
+                        expectedSize = release.expectedSize,
+                        expectedSha256 = release.expectedSha256,
                         fileName = "${module.name}-${release.version}.zip",
                         confirmDialog = confirmDialog,
                         scope = scope,
@@ -431,6 +433,8 @@ private fun StoreModuleCard(
 @Composable
 private fun ModuleDownloadButton(
     downloadUrl: String,
+    expectedSize: Long?,
+    expectedSha256: String?,
     fileName: String,
     confirmDialog: ConfirmDialogHandle,
     scope: CoroutineScope,
@@ -451,6 +455,8 @@ private fun ModuleDownloadButton(
                 download(
                     url = downloadUrl,
                     fileName = fileName,
+                    expected = if (expectedSize != null && expectedSha256 != null)
+                        me.weishu.kernelsu.data.modulestore.ExpectedFile(expectedSize, expectedSha256) else null,
                     onDownloaded = { uri ->
                         isDownloading = false
                         downloadedUri = uri
@@ -891,6 +897,8 @@ private fun ReleasesTab(
                             trailingContent = {
                                 ModuleDownloadButton(
                                     downloadUrl = release.downloadUrl,
+                                    expectedSize = release.expectedSize,
+                                    expectedSha256 = release.expectedSha256,
                                     fileName = "${module.name}-${release.version}.zip",
                                     confirmDialog = confirmDialog,
                                     scope = scope,

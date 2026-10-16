@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import me.weishu.kernelsu.data.modulestore.ExpectedFile
 
 object DownloadManager {
 
@@ -25,6 +26,7 @@ object DownloadManager {
         val status: Status = Status.PENDING,
         val resultUri: Uri? = null,
         val error: String? = null,
+        val expected: ExpectedFile? = null,
     )
 
     private val idCounter = AtomicInteger(0)
@@ -39,14 +41,15 @@ object DownloadManager {
         url: String,
         fileName: String,
         onCompleted: ((Uri) -> Unit)? = null,
+        expected: ExpectedFile? = null,
     ): Int {
         val existing = _downloads.value.values.find {
-            it.url == url && (it.status == Status.PENDING || it.status == Status.DOWNLOADING)
+            it.url == url && it.expected == expected && (it.status == Status.PENDING || it.status == Status.DOWNLOADING)
         }
         if (existing != null) return existing.id
 
         val id = idCounter.incrementAndGet()
-        val state = DownloadState(id = id, fileName = fileName, url = url)
+        val state = DownloadState(id = id, fileName = fileName, url = url, expected = expected)
         _downloads.update { it + (id to state) }
 
         if (onCompleted != null) {
@@ -58,6 +61,10 @@ object DownloadManager {
             putExtra(DownloadService.EXTRA_DOWNLOAD_ID, id)
             putExtra(DownloadService.EXTRA_URL, url)
             putExtra(DownloadService.EXTRA_FILE_NAME, fileName)
+            expected?.let {
+                putExtra("expectedSize", it.size)
+                putExtra("expectedSha256", it.sha256)
+            }
         }
         ContextCompat.startForegroundService(context, intent)
 

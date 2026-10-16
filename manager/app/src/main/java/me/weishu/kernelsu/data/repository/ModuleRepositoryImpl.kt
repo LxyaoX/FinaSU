@@ -11,6 +11,8 @@ import me.weishu.kernelsu.ui.util.listModules
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import me.weishu.kernelsu.data.modulestore.KernelSuStoreSource
 
 class ModuleRepositoryImpl : ModuleRepository {
 
@@ -60,14 +62,19 @@ class ModuleRepositoryImpl : ModuleRepository {
             }
 
             val url = module.updateJson
+            if (url.toHttpUrlOrNull()?.host == "modules.kernelsu.org") {
+                val detail = KernelSuStoreSource().detail(module.id).getOrThrow()
+                val release = detail.latestRelease
+                return@runCatching if (release != null && release.versionCode > module.versionCode) {
+                    ModuleUpdateInfo(release.downloadUrl, sanitizeVersionString(release.version), "", release.expectedSize, release.expectedSha256)
+                } else ModuleUpdateInfo.Empty
+            }
             val response = ksuApp.okhttpClient.newCall(
                 Request.Builder().url(url).build()
             ).execute()
 
-            val result = if (response.isSuccessful) {
-                response.body.string()
-            } else {
-                ""
+            val result = response.use {
+                if (it.isSuccessful) it.body.string() else ""
             }
 
             if (result.isEmpty()) {

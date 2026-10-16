@@ -213,12 +213,13 @@ class RepoParsersTest {
     }
 
     private val kernelSuIndex = """
-        {"schemaVersion":1,"buildId":"abc","modules":"api/v1/modules.json"}
+        {"schemaVersion":1,"buildId":"0123456789abcdef","modules":"api/v1/modules.json"}
     """.trimIndent()
 
     private val kernelSuList = """
         {
           "schemaVersion": 1,
+          "buildId": "0123456789abcdef",
           "modules": [
             {
               "id": "CertBridge",
@@ -240,6 +241,8 @@ class RepoParsersTest {
 
     private val kernelSuDetail = """
         {
+          "schemaVersion": 1,
+          "buildId": "0123456789abcdef",
           "id": "CertBridge",
           "name": "证书桥",
           "summary": "把 Reqable 注入系统信任库",
@@ -252,17 +255,19 @@ class RepoParsersTest {
           "releases": [
             {
               "version": "v5.1.1",
+              "immutable": true,
               "versionCode": 50106,
               "publishedAt": "2026-10-01T00:00:00Z",
               "changelogHtml": "<h2>更新</h2><ul><li>修复</li></ul>",
-              "zip": {"url": "https://github.com/Eikeitsu/CertBridge/releases/download/v5.1.1/CertBridge_v5.1.1_arm64.zip"}
+              "zip": {"size": 10, "sha256": "${"a".repeat(64)}", "url": "https://github.com/Eikeitsu/CertBridge/releases/download/v5.1.1/CertBridge_v5.1.1_arm64.zip"}
             },
             {
               "version": "v5.1.2",
+              "immutable": true,
               "versionCode": 50107,
               "publishedAt": "2026-10-11T16:18:27Z",
               "changelogHtml": "<p>Fine</p>",
-              "zip": {"url": "https://github.com/Eikeitsu/CertBridge/releases/download/v5.1.2/CertBridge_v5.1.2_arm64.zip"}
+              "zip": {"size": 20, "sha256": "${"b".repeat(64)}", "url": "https://github.com/Eikeitsu/CertBridge/releases/download/v5.1.2/CertBridge_v5.1.2_arm64.zip"}
             },
             {
               "version": "v5.2.0-beta",
@@ -275,9 +280,8 @@ class RepoParsersTest {
     """.trimIndent()
 
     @Test
-    fun `kernelSu index advertises the modules path with a fallback`() {
+    fun `kernelSu index advertises the modules path`() {
         assertEquals("api/v1/modules.json", parseKernelSuModulesPath(kernelSuIndex))
-        assertEquals(KERNELSU_MODULES_PATH, parseKernelSuModulesPath("{}"))
     }
 
     @Test
@@ -320,6 +324,30 @@ class RepoParsersTest {
 
     @Test
     fun `kernelSu detail without an id is rejected`() {
-        assertNull(parseKernelSuDetail("""{"name":"nameless"}"""))
+        assertNull(parseKernelSuDetail("""{"schemaVersion":1,"buildId":"0123456789abcdef","name":"nameless"}"""))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `registry rejects unsupported schema`() {
+        parseKernelSuModules(kernelSuList.replace("\"schemaVersion\": 1", "\"schemaVersion\": 2"))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `registry rejects traversal in index path`() {
+        parseKernelSuModulesPath(kernelSuIndex.replace("api/v1/modules.json", "api/v1/../modules.json"))
+    }
+
+    @Test
+    fun `registry hides scripts and unknown kinds in both documents`() {
+        for (kind in listOf("script", "unknown")) {
+            assertTrue(parseKernelSuModules(kernelSuList.replace("\"kind\": \"module\"", "\"kind\": \"$kind\"")).isEmpty())
+            assertNull(parseKernelSuDetail(kernelSuDetail.replace("\"id\": \"CertBridge\"", "\"id\": \"CertBridge\", \"kind\": \"$kind\"")))
+        }
+    }
+
+    @Test
+    fun `registry drops releases without integrity metadata`() {
+        assertTrue(parseKernelSuDetail(kernelSuDetail.replace("\"immutable\": true", "\"immutable\": false"))!!.releases.isEmpty())
+        assertEquals(20L, parseKernelSuDetail(kernelSuDetail)!!.latestRelease!!.expectedSize)
     }
 }

@@ -121,6 +121,8 @@ fun ModulePager(
                 download(
                     url = request.downloadUrl,
                     fileName = request.fileName,
+                    expected = if (request.expectedSize != null && request.expectedSha256 != null)
+                        me.weishu.kernelsu.data.modulestore.ExpectedFile(request.expectedSize, request.expectedSha256) else null,
                     onDownloaded = { uri ->
                         if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                             navigator.push(Route.Flash(FlashIt.FlashModules(listOf(uri))))
