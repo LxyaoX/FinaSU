@@ -34,14 +34,44 @@ jobs:
         cp aarch64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
         cp aarch64-android*-lkm/*_nomount.ko ./userspace/ksud/bin/aarch64/
         cp x86_64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/x86_64/
-    
+        cp x86_64-android*-lkm/*_nomount.ko ./userspace/ksud/bin/x86_64/
+
+        # Every architecture that ships modules needs one of each kind; a missing
+        # artifact otherwise ships silently (see ksud.yml).
+        for bindir in aarch64 x86_64; do
+          kernelsu=$(find "userspace/ksud/bin/$bindir" -name '*_kernelsu.ko' | wc -l)
+          nomount=$(find "userspace/ksud/bin/$bindir" -name '*_nomount.ko' | wc -l)
+          echo "$bindir: $kernelsu kernelsu.ko, $nomount nomount.ko"
+          test "$kernelsu" -gt 0
+          test "$kernelsu" -eq "$nomount"
+        done
+
     - name: Prepare ksuinit
       if: ${{ inputs.pack_ksuinit }}
       run: |
         mv ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
         mv ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/
         mv ksuinit-riscv64/ksuinit ./userspace/ksud/bin/riscv64/
-        
+
+    # The desktop builds embed bin/ as a whole, so they get the Sui payload for
+    # every Android architecture upstream publishes one for.
+    - name: Stage the Sui payload
+      run: |
+        zip=$(ls -t sui-payload/*.zip | head -1)
+        version=$(sed -n 's/^version=//p' userspace/sui/payload-version.txt)
+        version_code=$(sed -n 's/^version_code=//p' userspace/sui/payload-version.txt)
+
+        for bindir in aarch64 x86_64; do
+          python3 userspace/sui/package.py \
+            --zip "$zip" \
+            --target "$bindir" \
+            --assets "userspace/ksud/bin/$bindir" \
+            --version "$version" \
+            --version-code "$version_code" \
+            --force
+          test -f "userspace/ksud/bin/$bindir/sui/payload.json"
+        done
+
     - name: Setup rustup
       run: |
         rustup update stable

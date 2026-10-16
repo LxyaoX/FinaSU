@@ -13,6 +13,8 @@
 # Required environment (provided by the DDK image unless noted):
 #   KDIR          kernel build directory inside the container
 #   NOMOUNT_OUT   absolute path for the produced .ko (host-visible)
+#   NOMOUNT_ARCH  kernel architecture to build for; defaults to arm64. The module
+#                 has no arch-specific code, so x86_64 uses the same sources.
 #
 set -eu
 
@@ -26,6 +28,8 @@ SRC="$SELF_DIR/kernel/src"
 [ -n "${KDIR:-}" ] || { echo "KDIR is not set; run inside the Android DDK image" >&2; exit 1; }
 [ -n "${NOMOUNT_OUT:-}" ] || { echo "NOMOUNT_OUT is not set" >&2; exit 1; }
 
+NOMOUNT_ARCH="${NOMOUNT_ARCH:-arm64}"
+
 # Some KMIs ship DDK headers that reference page-pinner helpers the kernel does
 # not export, which fails the build for a module that never uses them. Disable
 # the include and its single call site in the header copy, as upstream does.
@@ -35,7 +39,8 @@ SRC="$SELF_DIR/kernel/src"
 # continue, so a build that actually needed the patch fails on its own with a
 # readable compiler error instead of an obscure permission failure here.
 patched=0
-for mm in /opt/ddk/src/*/include/linux/mm.h /opt/ddk/kdir/*/include/linux/mm.h; do
+for mm in /opt/ddk/src/*/include/linux/mm.h /opt/ddk/kdir/*/include/linux/mm.h \
+    /opt/ddk/kdir-x64/*/include/linux/mm.h; do
     [ -f "$mm" ] || continue
     grep -q '^#include <linux/page_pinner.h>' "$mm" || continue
     if cp "$mm" "$mm.orig" 2>/dev/null &&
@@ -54,7 +59,8 @@ trap 'rm -rf "$build_dir"' EXIT
 cp -a "$SRC/." "$build_dir/"
 
 echo "-- building NoMount from $build_dir against $KDIR"
-CONFIG_NOMOUNT=m make -C "$KDIR" ARCH=arm64 LLVM=1 LLVM_IAS=1 M="$build_dir" modules
+echo "-- NoMount architecture: $NOMOUNT_ARCH"
+CONFIG_NOMOUNT=m make -C "$KDIR" ARCH="$NOMOUNT_ARCH" LLVM=1 LLVM_IAS=1 M="$build_dir" modules
 
 ko="$build_dir/nomount.ko"
 [ -f "$ko" ] || { echo "nomount.ko was not produced in $build_dir" >&2; exit 1; }
