@@ -313,7 +313,7 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             titleRes = R.string.settings_layout_variant,
             summaryRes = R.string.settings_layout_variant_summary,
             icon = Icons.Rounded.SpaceDashboard,
-            aliases = listOf("m3e", "expressive", "large title", "material 3"),
+            aliases = listOf("m3e", "expressive", "large title", "material 3", "traditional", "classic"),
         )
     )
     add(

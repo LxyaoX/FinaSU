@@ -412,8 +412,8 @@
     <string name="settings_theme_store_mode">Режим магазина тем</string>
     <string name="settings_theme_store_mode_summary">Выберите, скачивать темы в приложении или в браузере.</string>
     <string name="settings_layout_variant">Вариант макета</string>
-    <string name="settings_layout_variant_summary">Использовать крупные заголовки Material 3 Expressive со сворачиваемой встроенной строкой поиска в разделах «Плагин», «Суперюзеры» и «Модули».</string>
-    <string name="settings_layout_variant_default">По умолчанию</string>
+    <string name="settings_layout_variant_summary">Используйте крупные заголовки Material 3 Expressive со сворачиваемой встроенной строкой поиска или оставьте классические компактные верхние панели.</string>
+    <string name="settings_layout_variant_traditional">Традиционный</string>
     <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">Поиск плагинов</string>
     <string name="superuser_search_hint">Поиск приложений</string>

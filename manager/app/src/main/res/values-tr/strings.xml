@@ -412,8 +412,8 @@
     <string name="settings_theme_store_mode">Tema magazasi modu</string>
     <string name="settings_theme_store_mode_summary">Temalarin uygulamada mi yoksa tarayicida mi indirilecegini secin.</string>
     <string name="settings_layout_variant">Düzen varyantı</string>
-    <string name="settings_layout_variant_summary">Eklenti, Süper kullanıcı ve Modül sayfalarında Material 3 Expressive büyük başlıkları daraltılabilir satır içi arama çubuğuyla kullan.</string>
-    <string name="settings_layout_variant_default">Varsayılan</string>
+    <string name="settings_layout_variant_summary">Material 3 Expressive büyük başlıkları daraltılabilir satır içi arama çubuğuyla kullanın ya da klasik kompakt üst çubukları koruyun.</string>
+    <string name="settings_layout_variant_traditional">Geleneksel</string>
     <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">Eklenti ara</string>
     <string name="superuser_search_hint">Uygulama ara</string>

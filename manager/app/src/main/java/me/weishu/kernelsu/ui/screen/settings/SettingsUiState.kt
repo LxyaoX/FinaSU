@@ -32,7 +32,7 @@ data class SettingsUiState(
     val supportLinksCustomSubtitle: String = "",
     val supportLinksCustomUrl: String = "",
     val themeStoreMode: String = ThemeStoreMode.UNSET,
-    val layoutVariant: String = LayoutVariant.DEFAULT,
+    val layoutVariant: String = LayoutVariant.M3E,
     val hideHomeFingerprint: Boolean = false,
     val hideHomeZygisk: Boolean = false,
     val hideHomeSusfs: Boolean = false,

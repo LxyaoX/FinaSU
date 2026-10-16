@@ -173,7 +173,7 @@ class SettingsRepositoryImpl : SettingsRepository {
         set(value) = prefs.edit { putString("theme_store_mode", value) }
     override var layoutVariant: String
         get() = LayoutVariant.fromValue(
-            prefs.getString("layout_variant", LayoutVariant.DEFAULT)
+            prefs.getString("layout_variant", LayoutVariant.M3E)
         )
         set(value) = prefs.edit { putString("layout_variant", LayoutVariant.fromValue(value)) }
 

@@ -289,7 +289,7 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 stringResource(
                     when (variant) {
                         LayoutVariant.M3E -> R.string.settings_layout_variant_m3e
-                        else -> R.string.settings_layout_variant_default
+                        else -> R.string.settings_layout_variant_traditional
                     }
                 )
             }
@@ -303,7 +303,7 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 selectedIndex = selectedLayoutVariant,
                 onItemSelected = { index ->
                     actions.onSetLayoutVariant(
-                        supportedLayoutVariants.getOrElse(index) { LayoutVariant.DEFAULT }
+                        supportedLayoutVariants.getOrElse(index) { LayoutVariant.M3E }
                     )
                 }
             )

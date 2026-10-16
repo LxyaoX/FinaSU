@@ -17,5 +17,5 @@ data class MainActivityUiState(
     val supportLinksCustomTitle: String = "",
     val supportLinksCustomSubtitle: String = "",
     val supportLinksCustomUrl: String = "",
-    val layoutVariant: String = LayoutVariant.DEFAULT,
+    val layoutVariant: String = LayoutVariant.M3E,
 )

@@ -6,4 +6,4 @@ import me.weishu.kernelsu.data.model.LayoutVariant
 /**
  * The layout variant selected by the user, provided by the app root.
  */
-val LocalLayoutVariant = staticCompositionLocalOf { LayoutVariant.DEFAULT }
+val LocalLayoutVariant = staticCompositionLocalOf { LayoutVariant.M3E }
