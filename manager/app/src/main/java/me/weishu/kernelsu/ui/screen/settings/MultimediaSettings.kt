@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.Slider
-import androidx.compose.material3.rememberSliderState
+import androidx.compose.material3.SliderState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -127,7 +128,8 @@ private fun MusicSettingsSection() {
             SegmentedItemContainer {
                 Column(Modifier.padding(16.dp)) {
                     Text("${mediaTime(position)} / ${mediaTime(duration)}")
-                    val slider = rememberSliderState(value = position.toFloat(), trackRange = 0f..duration.toFloat().coerceAtLeast(1f))
+                    val range = 0f..duration.toFloat().coerceAtLeast(1f)
+                    val slider = remember(range) { SliderState(value = position.toFloat(), trackRange = range) }
                     LaunchedEffect(position) { if (!slider.isDragging) slider.value = position.toFloat() }
                     Slider(state = slider, onValueChange = { slider.value = it },
                         onValueChangeFinished = { MusicManager.seekTo(slider.value.toInt()) })
