@@ -72,6 +72,10 @@ uint32_t get_dynamic_managers(struct ksu_dynamic_manager_app *apps, uint32_t max
 // kernel UAPI matches the manager's; on a mismatch, probe KSU_FEATURE_DYNAMIC_MANAGER.
 bool is_dynamic_manager_enabled();
 
+// Probe KSU_FEATURE_DYNAMIC_MANAGER_GRANTS: the kernel then publishes only
+// authorized appids, so DYNAMIC_MANAGER_FLAG_GRANTED is the badge to read.
+bool is_dynamic_manager_grants_enabled();
+
 inline std::pair<int, int> legacy_get_info() {
     int32_t version = -1;
     int32_t flags = 0;

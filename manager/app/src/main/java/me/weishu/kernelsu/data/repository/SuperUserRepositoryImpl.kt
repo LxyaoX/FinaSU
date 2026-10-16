@@ -24,6 +24,7 @@ import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.ui.KsuService
 import me.weishu.kernelsu.ui.util.awaitRootShell
 import me.weishu.kernelsu.ui.util.getRootShell
+import me.weishu.kernelsu.ui.util.normalizeDynamicManagerFlags
 import kotlin.coroutines.resume
 
 class SuperUserRepositoryImpl : SuperUserRepository {
@@ -86,7 +87,7 @@ class SuperUserRepositoryImpl : SuperUserRepository {
                         buildMap {
                             var index = 0
                             while (index + 1 < items.size) {
-                                put(items[index], items[index + 1])
+                                put(items[index], normalizeDynamicManagerFlags(items[index + 1]))
                                 index += 2
                             }
                         }

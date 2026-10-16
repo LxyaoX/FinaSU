@@ -85,9 +85,11 @@ fun AppProfileScreen(uid: Int) {
     LaunchedEffect(uid) {
         val flags = KsuCli.getDynamicManagerFlagsForUid(uid)
         dynamicManagerFlags = flags
-        val trusted = flags and Natives.DYNAMIC_MANAGER_FLAG_TRUSTED != 0
-        dynamicManagerChecked = trusted
-        dynamicManagerSignature = if (trusted) {
+        // Normalized upstream: GRANTED means the kernel honours this app, on
+        // kernels without an authorized-appid list trust maps onto it.
+        val granted = flags and Natives.DYNAMIC_MANAGER_FLAG_GRANTED != 0
+        dynamicManagerChecked = granted
+        dynamicManagerSignature = if (granted) {
             KsuCli.getDynamicManagerSignatureForUid(uid)
         } else {
             null
@@ -169,6 +171,7 @@ fun AppProfileScreen(uid: Int) {
                 dynamicManagerBusy = true
                 try {
                     if (checked) {
+                        // set-uid registers the certificate and authorizes the appid.
                         if (KsuCli.setDynamicManagerUid(uid)) {
                             dynamicManagerSignature = KsuCli.getDynamicManagerSignatureForUid(uid)
                             dynamicManagerChecked = true
@@ -176,7 +179,18 @@ fun AppProfileScreen(uid: Int) {
                         } else {
                             showMessage(failedToSetDynamicManager)
                         }
+                    } else if (KsuCli.dynamicManagerGrantsSupported()) {
+                        // Revoke only: the certificate stays registered, so the app
+                        // keeps being recognized without being honoured.
+                        if (KsuCli.ungrantDynamicManagerUid(uid)) {
+                            dynamicManagerChecked = false
+                            viewModel.loadAppList(force = true)
+                        } else {
+                            showMessage(failedToDelDynamicManager)
+                        }
                     } else {
+                        // Legacy kernel: dropping the signature is the only way to
+                        // stop it from making every app that shares it a manager.
                         val signature = dynamicManagerSignature
                             ?: KsuCli.getDynamicManagerSignatureForUid(uid)
                         if (signature == null) {

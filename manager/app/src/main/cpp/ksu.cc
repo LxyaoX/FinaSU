@@ -324,3 +324,15 @@ bool is_dynamic_manager_enabled() {
     }
     return supported;
 }
+
+// The authorized-appid list is advertised separately from the dynamic-manager
+// capability itself: a kernel that only knows the signature list reports the old
+// feature, and the UI then falls back to "trusted == dynamic manager".
+bool is_dynamic_manager_grants_enabled() {
+    uint64_t value = 0;
+    bool supported = false;
+    if (!get_feature(KSU_FEATURE_DYNAMIC_MANAGER_GRANTS, &value, &supported)) {
+        return false;
+    }
+    return supported;
+}

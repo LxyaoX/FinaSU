@@ -21,7 +21,7 @@ data class GroupedApps(
     val dynamicManagerFlags: Int = 0,
 ) {
     val isDynamicManager: Boolean
-        get() = dynamicManagerFlags and Natives.DYNAMIC_MANAGER_FLAG_TRUSTED != 0
+        get() = dynamicManagerFlags and Natives.DYNAMIC_MANAGER_FLAG_GRANTED != 0
     val isPresetManager: Boolean
         get() = dynamicManagerFlags and Natives.DYNAMIC_MANAGER_FLAG_PRESET != 0
 }

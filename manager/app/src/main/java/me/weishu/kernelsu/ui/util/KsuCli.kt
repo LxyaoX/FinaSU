@@ -44,6 +44,24 @@ private fun getKsuDaemonPath(): String {
     return ksuApp.applicationInfo.nativeLibraryDir + File.separator + "libksud.so"
 }
 
+/**
+ * Adds the granted bit when the kernel cannot know about it.
+ *
+ * A kernel without the authorized-appid list treats every trusted signature as a
+ * dynamic manager, so the UI has to read the trusted bit there. With the list, a
+ * trusted signature only means "recognized" and the granted bit decides.
+ */
+fun normalizeDynamicManagerFlags(flags: Int): Int {
+    if (KsuCli.dynamicManagerGrantsSupported()) {
+        return flags
+    }
+    return if (flags and Natives.DYNAMIC_MANAGER_FLAG_TRUSTED != 0) {
+        flags or Natives.DYNAMIC_MANAGER_FLAG_GRANTED
+    } else {
+        flags
+    }
+}
+
 data class FlashResult(val code: Int, val err: String, val showReboot: Boolean) {
     constructor(result: Shell.Result, showReboot: Boolean) : this(result.code, result.err.joinToString("\n"), showReboot)
     constructor(result: Shell.Result) : this(result, result.isSuccess)
@@ -64,12 +82,23 @@ object KsuCli {
         var index = 0
         while (index + 1 < items.size) {
             if (items[index] == appId) {
-                return items[index + 1]
+                return normalizeDynamicManagerFlags(items[index + 1])
             }
             index += 2
         }
         return 0
     }
+
+    /**
+     * Whether the kernel honours an authorized-appid list. Without it, sharing a
+     * registered certificate is enough and the trusted bit is the manager badge.
+     * The answer cannot change while the process lives, so probe it once.
+     */
+    private val grantsSupported: Boolean by lazy {
+        runCatching { Natives.isDynamicManagerGrantsEnabled() }.getOrDefault(false)
+    }
+
+    fun dynamicManagerGrantsSupported(): Boolean = grantsSupported
 
     suspend fun getDynamicManagerSignatureForUid(uid: Int): DynamicManagerSignature? =
         withContext(Dispatchers.IO) {
@@ -110,6 +139,32 @@ object KsuCli {
             .add("${getKsuDaemonPath()} dynamic set-uid $uid")
             .exec()
         Log.i(TAG, "dynamic set-uid $uid result: ${result.isSuccess}")
+        result.isSuccess
+    }
+
+    /** Authorize an appid that is already registered, without touching its signature. */
+    suspend fun grantDynamicManagerUid(uid: Int): Boolean = withContext(Dispatchers.IO) {
+        if (!CapabilityRepository.currentPrivileged()) {
+            Log.w(TAG, "refusing dynamic grant $uid: no manager identity or ready root")
+            return@withContext false
+        }
+        val result = awaitRootShell().newJob()
+            .add("${getKsuDaemonPath()} dynamic grant $uid")
+            .exec()
+        Log.i(TAG, "dynamic grant $uid result: ${result.isSuccess}")
+        result.isSuccess
+    }
+
+    /** Revoke an appid: it stays recognized, it just stops being a manager. */
+    suspend fun ungrantDynamicManagerUid(uid: Int): Boolean = withContext(Dispatchers.IO) {
+        if (!CapabilityRepository.currentPrivileged()) {
+            Log.w(TAG, "refusing dynamic ungrant $uid: no manager identity or ready root")
+            return@withContext false
+        }
+        val result = awaitRootShell().newJob()
+            .add("${getKsuDaemonPath()} dynamic ungrant $uid")
+            .exec()
+        Log.i(TAG, "dynamic ungrant $uid result: ${result.isSuccess}")
         result.isSuccess
     }
 

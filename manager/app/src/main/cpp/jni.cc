@@ -132,6 +132,12 @@ Java_me_weishu_kernelsu_Natives_isDynamicManagerEnabled(JNIEnv *env, jobject) {
     return is_dynamic_manager_enabled();
 }
 
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_me_weishu_kernelsu_Natives_isDynamicManagerGrantsEnabled(JNIEnv *env, jobject) {
+    return is_dynamic_manager_grants_enabled();
+}
+
 static void fillIntArray(JNIEnv *env, jobject list, int *data, int count) {
     auto cls = env->GetObjectClass(list);
     auto add = env->GetMethodID(cls, "add", "(Ljava/lang/Object;)Z");

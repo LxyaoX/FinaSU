@@ -28,8 +28,13 @@ data class AppInfo(
     val isWebViewZygote: Boolean
         get() = special && uid == WEBVIEW_ZYGOTE_UID
 
+    /**
+     * Whether the kernel actually honours this app as a dynamic manager. Flags
+     * arrive through `normalizeDynamicManagerFlags`, so kernels without an
+     * authorized-appid list report trust as a grant.
+     */
     val isDynamicManager: Boolean
-        get() = dynamicManagerFlags and Natives.DYNAMIC_MANAGER_FLAG_TRUSTED != 0
+        get() = dynamicManagerFlags and Natives.DYNAMIC_MANAGER_FLAG_GRANTED != 0
     val isPresetManager: Boolean
         get() = dynamicManagerFlags and Natives.DYNAMIC_MANAGER_FLAG_PRESET != 0
 
