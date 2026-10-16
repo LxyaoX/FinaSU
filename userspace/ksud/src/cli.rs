@@ -680,8 +680,24 @@ enum Dynamic {
         uid: u32,
     },
 
+    /// Authorize an already registered appid as a dynamic manager
+    Grant {
+        /// target UID
+        uid: u32,
+    },
+
+    /// Revoke an authorized appid (its signature stays registered)
+    Ungrant {
+        /// target UID
+        uid: u32,
+    },
+
     /// List persisted dynamic manager signatures
-    List,
+    List {
+        /// Emit the whole configuration as JSON
+        #[arg(long)]
+        json: bool,
+    },
 
     /// Delete a persisted size/hash signature and apply
     Del {
@@ -1091,7 +1107,9 @@ pub fn run() -> Result<()> {
                 crate::dynamic_manager::set_apk(&apk, version_code)
             }
             Dynamic::SetUid { uid } => crate::dynamic_manager::set_uid(uid),
-            Dynamic::List => crate::dynamic_manager::list(),
+            Dynamic::Grant { uid } => crate::dynamic_manager::grant(uid),
+            Dynamic::Ungrant { uid } => crate::dynamic_manager::ungrant(uid),
+            Dynamic::List { json } => crate::dynamic_manager::list(json),
             Dynamic::Del { size, hash } => crate::dynamic_manager::del(&size, &hash),
             Dynamic::Clear => crate::dynamic_manager::clear(),
         },

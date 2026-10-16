@@ -25,6 +25,9 @@ const PER_USER_RANGE: u32 = 100_000;
 /// Maximum number of signatures the kernel accepts.
 const MAX_SIGNS: usize = ksu_uapi::KSU_DYNAMIC_MANAGER_MAX_SIGNS as usize;
 
+/// Maximum number of authorized appids the kernel accepts.
+const MAX_GRANTS: usize = ksu_uapi::KSU_DYNAMIC_MANAGER_MAX_APPS as usize;
+
 /// A normalized `(size, sha256)` certificate signature, optionally carrying the
 /// version code of the manager APK it was extracted from.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -160,7 +163,59 @@ fn parse_signs(content: &str) -> Result<Vec<Sign>> {
     Ok(signs)
 }
 
-fn signs_to_json(signs: &[Sign]) -> String {
+/// The persisted configuration: the recognized signatures plus the appids the
+/// user authorized as dynamic managers.
+#[derive(Debug, Default)]
+struct Config {
+    signs: Vec<Sign>,
+    uids: Vec<u32>,
+    /// False when the file predates the authorization list, i.e. the list still
+    /// has to be seeded from whatever the kernel currently honours.
+    uids_present: bool,
+}
+
+/// Pull the authorized appid list out of a parsed config, tolerating the same
+/// nesting the signature list accepts so older hand-written files keep working.
+fn parse_uids(value: &serde_json::Value) -> Result<Option<Vec<u32>>> {
+    fn find(value: &serde_json::Value) -> Option<&serde_json::Value> {
+        let map = value.as_object()?;
+        if let Some(entry) = map.get("uids") {
+            return Some(entry);
+        }
+        for key in ["managers", "dynamic_managers", "signs"] {
+            if let Some(inner) = map.get(key)
+                && let Some(found) = find(inner)
+            {
+                return Some(found);
+            }
+        }
+        None
+    }
+
+    let Some(entry) = find(value) else {
+        return Ok(None);
+    };
+    let mut uids = Vec::new();
+    for item in entry.as_array().context("uids must be an array")? {
+        let uid = item
+            .as_u64()
+            .and_then(|value| u32::try_from(value).ok())
+            .context("uids must hold appids")?;
+        ensure!(uid < PER_USER_RANGE, "appid out of range: {uid}");
+        if !uids.contains(&uid) {
+            uids.push(uid);
+        }
+        ensure!(
+            uids.len() <= MAX_GRANTS,
+            "too many authorized appids: {} > {MAX_GRANTS}",
+            uids.len()
+        );
+    }
+    Ok(Some(uids))
+}
+
+fn config_to_json(config: &Config) -> String {
+    let signs = &config.signs;
     let entries = signs
         .iter()
         .map(|sign| {
@@ -171,23 +226,32 @@ fn signs_to_json(signs: &[Sign]) -> String {
             })
         })
         .collect::<Vec<_>>();
-    let value = serde_json::json!({ "signs": entries });
+    let value = serde_json::json!({ "signs": entries, "uids": config.uids });
     let mut text =
         serde_json::to_string_pretty(&value).unwrap_or_else(|_| String::from("{\"signs\":[]}"));
     text.push('\n');
     text
 }
 
-fn load_signs() -> Result<Vec<Sign>> {
+fn load_config() -> Result<Config> {
     let path = Path::new(defs::DYNAMIC_MANAGER_PATH);
-    match std::fs::read_to_string(path) {
-        Ok(content) => parse_signs(&content),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(Vec::new()),
-        Err(e) => Err(e).with_context(|| format!("failed to read {}", path.display())),
-    }
+    let content = match std::fs::read_to_string(path) {
+        Ok(content) => content,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Config::default()),
+        Err(e) => return Err(e).with_context(|| format!("failed to read {}", path.display())),
+    };
+    let value: serde_json::Value =
+        serde_json::from_str(&content).context("failed to parse dynamic manager config")?;
+    let signs = parse_signs(&content)?;
+    let uids = parse_uids(&value)?;
+    Ok(Config {
+        signs,
+        uids_present: uids.is_some(),
+        uids: uids.unwrap_or_default(),
+    })
 }
 
-fn save_signs(signs: &[Sign]) -> Result<()> {
+fn save_config(config: &Config) -> Result<()> {
     let path = Path::new(defs::DYNAMIC_MANAGER_PATH);
     if let Some(parent) = path.parent() {
         utils::ensure_dir_exists(parent)?;
@@ -199,7 +263,7 @@ fn save_signs(signs: &[Sign]) -> Result<()> {
         .mode(0o600)
         .open(path)
         .with_context(|| format!("failed to open {}", path.display()))?;
-    file.write_all(signs_to_json(signs).as_bytes())
+    file.write_all(config_to_json(config).as_bytes())
         .with_context(|| format!("failed to write {}", path.display()))?;
     // `OpenOptionsExt::mode` only applies on creation, so enforce it here too.
     set_permissions(path, Permissions::from_mode(0o600))
@@ -208,7 +272,7 @@ fn save_signs(signs: &[Sign]) -> Result<()> {
 }
 
 /// Push `signs` to the kernel, replacing whatever table is there.
-fn apply(signs: &[Sign]) -> Result<()> {
+fn apply_signs(signs: &[Sign]) -> Result<()> {
     ensure!(
         signs.len() <= MAX_SIGNS,
         "too many dynamic manager signatures: {} > {MAX_SIGNS}",
@@ -218,24 +282,89 @@ fn apply(signs: &[Sign]) -> Result<()> {
     ksucalls::set_dynamic_managers(&raw)
 }
 
+/// Whether the kernel understands the authorized-appid list.
+fn grants_supported() -> Result<bool> {
+    let state = ksucalls::get_feature(ksu_uapi::ksu_feature_id_KSU_FEATURE_DYNAMIC_MANAGER_GRANTS)?;
+    Ok(state.supported)
+}
+
+/// Push `uids` to the kernel, replacing whatever authorization list is there.
+///
+/// The first successful call also switches the kernel from "any trusted
+/// signature is a manager" to "only authorized appids are", so a kernel without
+/// the feature is a hard error rather than a silent no-op.
+fn apply_grants(uids: &[u32]) -> Result<()> {
+    ensure!(
+        grants_supported()?,
+        "this kernel does not support the authorized dynamic-manager list"
+    );
+    ensure!(
+        uids.len() <= MAX_GRANTS,
+        "too many authorized appids: {} > {MAX_GRANTS}",
+        uids.len()
+    );
+    ksucalls::set_dynamic_manager_grants(uids)
+}
+
+/// Authorize one appid, keeping the persisted signature list as it is.
+pub fn grant(uid: u32) -> Result<()> {
+    let appid = uid % PER_USER_RANGE;
+    let mut config = load_config()?;
+    if !config.uids.contains(&appid) {
+        ensure!(
+            config.uids.len() < MAX_GRANTS,
+            "too many authorized appids: {} >= {MAX_GRANTS}",
+            config.uids.len()
+        );
+        config.uids.push(appid);
+    }
+    config.uids_present = true;
+    apply_grants(&config.uids)?;
+    save_config(&config)?;
+    println!("authorized appid: {appid}");
+    Ok(())
+}
+
+/// Revoke one appid. The signature stays registered: it keeps *recognizing* the
+/// app, it just stops honouring it.
+pub fn ungrant(uid: u32) -> Result<()> {
+    let appid = uid % PER_USER_RANGE;
+    let mut config = load_config()?;
+    let before = config.uids.len();
+    config.uids.retain(|existing| *existing != appid);
+    ensure!(
+        config.uids.len() < before,
+        "appid {appid} is not authorized"
+    );
+    config.uids_present = true;
+    apply_grants(&config.uids)?;
+    save_config(&config)?;
+    println!("revoked appid: {appid}");
+    Ok(())
+}
+
 fn add_sign(sign: Sign) -> Result<()> {
-    let mut list = load_signs()?;
+    let mut config = load_config()?;
     let size = sign.size;
     let hash = sign.hash.clone();
-    if let Some(existing) = list.iter_mut().find(|existing| existing.same_cert(&sign)) {
+    if let Some(existing) = config
+        .signs
+        .iter_mut()
+        .find(|existing| existing.same_cert(&sign))
+    {
         if sign.version_code != 0 {
             existing.version_code = sign.version_code;
         }
     } else {
         ensure!(
-            list.len() < MAX_SIGNS,
+            config.signs.len() < MAX_SIGNS,
             "too many dynamic manager signatures: {} >= {MAX_SIGNS}",
-            list.len()
+            config.signs.len()
         );
-        list.push(sign);
+        config.signs.push(sign);
     }
-    apply(&list)?;
-    save_signs(&list)?;
+    apply_signs(&config.signs)?;
+    save_config(&config)?;
     println!("size: {size:#x}");
     println!("hash: {hash}");
     Ok(())
@@ -419,6 +548,9 @@ pub fn set_apk(apk: &str, version_code: Option<u32>) -> Result<()> {
 }
 
 /// `ksud dynamic set-uid <UID>`
+///
+/// Registers the APK's certificate *and* authorizes the appid: this is the
+/// "make this app a dynamic manager" action the manager UI uses.
 pub fn set_uid(uid: u32) -> Result<()> {
     let (package, apk) = apk_from_uid(uid)?;
     let version_code = version_code_for_package(&package);
@@ -426,42 +558,155 @@ pub fn set_uid(uid: u32) -> Result<()> {
     println!("package: {package}");
     println!("apk: {apk}");
     println!("version_code: {version_code}");
-    add_sign(sign)
+    add_sign(sign)?;
+    grant(uid)
 }
 
-/// `ksud dynamic list`
-pub fn list() -> Result<()> {
-    for sign in load_signs()? {
+/// `ksud dynamic list [--json]`
+pub fn list(json: bool) -> Result<()> {
+    let config = load_config()?;
+    if json {
+        print!("{}", config_to_json(&config));
+        return Ok(());
+    }
+    for sign in &config.signs {
         println!("size: {:#x}", sign.size);
         println!("hash: {}", sign.hash);
+    }
+    if !config.uids.is_empty() {
+        println!(
+            "authorized appids: {}",
+            config
+                .uids
+                .iter()
+                .map(u32::to_string)
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
     Ok(())
 }
 
 /// `ksud dynamic del <size> <hash>`
+///
+/// Removes the signature only. The appid keeps its authorization, so
+/// re-registering the same certificate restores the previous managers instead of
+/// silently re-authorizing them.
 pub fn del(size_arg: &str, hash_arg: &str) -> Result<()> {
     let target = parse_sign(size_arg, hash_arg)?;
-    let mut signs = load_signs()?;
-    let before = signs.len();
-    signs.retain(|sign| !sign.same_cert(&target));
-    ensure!(signs.len() < before, "signature not found");
-    apply(&signs)?;
-    save_signs(&signs)
+    let mut config = load_config()?;
+    let before = config.signs.len();
+    config.signs.retain(|sign| !sign.same_cert(&target));
+    ensure!(config.signs.len() < before, "signature not found");
+    apply_signs(&config.signs)?;
+    save_config(&config)
 }
 
 /// `ksud dynamic clear`
 pub fn clear() -> Result<()> {
-    apply(&[])?;
-    save_signs(&[])
+    apply_signs(&[])?;
+    let config = Config {
+        uids_present: true,
+        ..Config::default()
+    };
+    if grants_supported()? {
+        ksucalls::set_dynamic_manager_grants(&[])?;
+    }
+    save_config(&config)
 }
 
-/// Boot-time replay: load the persisted signatures and restore kernel state.
+/// Appids the kernel currently honours, and how many apps it has tracked at all.
+///
+/// A zero tracked count means no scan has produced anything yet, which is the
+/// difference between "the user authorized nobody" and "not known yet".
+fn kernel_trusted_appids() -> Result<(Vec<u32>, usize)> {
+    let apps = ksucalls::get_dynamic_managers()?;
+    let mut trusted = Vec::new();
+    for app in &apps {
+        if app.flags & ksu_uapi::KSU_DYNAMIC_MANAGER_FLAG_TRUSTED != 0
+            && !trusted.contains(&app.appid)
+        {
+            trusted.push(app.appid);
+        }
+    }
+    Ok((trusted, apps.len()))
+}
+
+/// Adopt the set the kernel already honours as the initial authorization list.
+///
+/// A configuration written before the list existed authorized every app its
+/// signatures matched, so seeding with exactly that set is what keeps the user's
+/// own dynamic managers working across the upgrade. Runs once: afterwards the
+/// file carries `uids` and the list is simply replayed.
+fn seed_grants(config: &mut Config) -> Result<bool> {
+    let (mut uids, tracked) = kernel_trusted_appids()?;
+    if !config.signs.is_empty() && tracked == 0 {
+        /*
+         * Nothing has been scored yet, so an empty set here would mean
+         * "authorize nobody" because of a timing artifact rather than because
+         * the user asked for it. Stay on the legacy rule and retry later.
+         */
+        warn!(
+            "dynamic manager: no tracked app to adopt yet, keeping the legacy rule for this boot"
+        );
+        return Ok(false);
+    }
+
+    uids.sort_unstable();
+    uids.dedup();
+    info!(
+        "dynamic manager: adopted {} authorized appid(s)",
+        uids.len()
+    );
+    config.uids = uids;
+    config.uids_present = true;
+    save_config(config)?;
+    apply_grants(&config.uids)?;
+    Ok(true)
+}
+
+/// Boot-time replay: load the persisted configuration and restore kernel state.
 ///
 /// The kernel table is volatile, so this runs on every boot. It is idempotent
 /// and callers are expected to log-and-continue on error.
 pub fn load_and_apply() -> Result<()> {
-    let signs = load_signs()?;
-    apply(&signs)?;
-    info!("dynamic manager: applied {} signature(s)", signs.len());
+    let mut config = load_config()?;
+    apply_signs(&config.signs)?;
+    info!(
+        "dynamic manager: applied {} signature(s)",
+        config.signs.len()
+    );
+
+    if !grants_supported()? {
+        info!("dynamic manager: kernel has no authorized-appid list, keeping the legacy rule");
+        return Ok(());
+    }
+
+    if config.uids_present {
+        apply_grants(&config.uids)?;
+        info!(
+            "dynamic manager: applied {} authorized appid(s)",
+            config.uids.len()
+        );
+        return Ok(());
+    }
+
+    seed_grants(&mut config)?;
+    Ok(())
+}
+
+/// Second chance for the migration, from the boot completed event.
+///
+/// `load_and_apply()` may have found nothing to adopt at post-fs-data; by now the
+/// package scan has certainly run, so the seed is either correct or the
+/// configuration genuinely matches no installed app.
+pub fn finish_migration() -> Result<()> {
+    let mut config = load_config()?;
+    if config.uids_present || !grants_supported()? {
+        return Ok(());
+    }
+    if seed_grants(&mut config)? {
+        info!("dynamic manager: authorization migration finished at boot completed");
+    }
     Ok(())
 }

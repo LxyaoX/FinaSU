@@ -419,11 +419,25 @@ pub fn set_dynamic_managers(signs: &[ksu_uapi::ksu_dynamic_manager_sign]) -> Res
     Ok(())
 }
 
+/// Atomically replace the kernel's authorized dynamic-manager appid list.
+///
+/// An empty slice authorizes nobody. The first successful call also switches the
+/// kernel from the legacy rule (any trusted signature is a manager) to the
+/// strict one, and both the list and that switch are persisted by the kernel.
+pub fn set_dynamic_manager_grants(appids: &[u32]) -> Result<()> {
+    let mut cmd = ksu_uapi::ksu_dynamic_manager_grants_cmd {
+        count: appids.len() as u32,
+        reserved: 0,
+        appids: appids.as_ptr() as u64,
+    };
+    ksuctl(ksu_uapi::KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS, &raw mut cmd)?;
+    Ok(())
+}
+
 /// Query the kernel's tracked dynamic-manager candidates.
 ///
 /// Mirrors the `KSU_IOCTL_GET_DYNAMIC_MANAGERS` query used by the manager UI;
 /// kept here so the userspace wrapper stays complete alongside the setter.
-#[allow(dead_code)]
 pub fn get_dynamic_managers() -> Result<Vec<ksu_uapi::ksu_dynamic_manager_app>> {
     let capacity = ksu_uapi::KSU_DYNAMIC_MANAGER_MAX_APPS as usize;
     let mut apps = vec![ksu_uapi::ksu_dynamic_manager_app { appid: 0, flags: 0 }; capacity];

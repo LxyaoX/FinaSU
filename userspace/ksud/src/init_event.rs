@@ -225,6 +225,11 @@ pub fn on_boot_completed() {
 
     ksucalls::report_boot_complete();
     info!("on_boot_completed triggered!");
+    // A post-fs-data migration may have had nothing to adopt yet (the package
+    // scan had not produced anything); by now it certainly has.
+    if let Err(e) = crate::dynamic_manager::finish_migration() {
+        warn!("finish dynamic manager migration failed: {e:#}");
+    }
     if let Err(e) = crate::zygisk::boot_completed() {
         warn!("FolkZygisk boot receipt failed: {e:#}");
     }
