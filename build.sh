@@ -204,8 +204,13 @@ build_sui() {
     log "building the Sui payload (gradle zipRelease)"
     ( cd userspace/sui && "./gradlew" zipRelease --console=plain )
 
-    local abi bindir target zip version version_code
-    zip="$(ls -t userspace/sui/out/*.zip 2>/dev/null | head -1 || true)"
+    local abi bindir candidate zip="" version version_code
+    for candidate in userspace/sui/out/*.zip; do
+        [[ -f "$candidate" ]] || continue
+        if [[ -z "$zip" || "$candidate" -nt "$zip" ]]; then
+            zip="$candidate"
+        fi
+    done
     [[ -f "$zip" ]] || die "the Sui payload zip was not produced"
     version="$(sed -n 's/^version=//p' userspace/sui/payload-version.txt)"
     version_code="$(sed -n 's/^version_code=//p' userspace/sui/payload-version.txt)"
