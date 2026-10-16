@@ -160,6 +160,27 @@ private fun defaultSegmentedColors(): ListItemColors {
     )
 }
 
+/**
+ * The colours a row with a selection control draws with.
+ *
+ * In wallpaper mode the whole group is one material, so a selected row must not repaint a second
+ * fill over it; the row's own control (checkbox or radio) already shows the state. Folding every
+ * selected colour back onto its resting counterpart keeps the row flush with the group. Outside
+ * wallpaper mode the stock M3 selected treatment is kept, so non-wallpaper rendering is unchanged.
+ */
+@Composable
+private fun selectionRowColors(colors: ListItemColors): ListItemColors {
+    if (LocalFolkWallpaperTokens.current == null) return colors
+    return colors.copy(
+        selectedContainerColor = colors.containerColor,
+        selectedContentColor = colors.contentColor,
+        selectedLeadingContentColor = colors.leadingContentColor,
+        selectedTrailingContentColor = colors.trailingContentColor,
+        selectedOverlineContentColor = colors.overlineContentColor,
+        selectedSupportingContentColor = colors.supportingContentColor,
+    )
+}
+
 @Composable
 private fun defaultSingleSegmentedShape(index: Int, count: Int): ListItemShapes {
     val base = ListItemDefaults.segmentedShapes(index, count)
@@ -832,6 +853,7 @@ fun SegmentedRadioItem(
     onClick: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
+    val rowColors = selectionRowColors(colors)
 
     SegmentedListItem(
         selected = selected,
@@ -840,7 +862,7 @@ fun SegmentedRadioItem(
             onClick()
         },
         enabled = enabled,
-        colors = colors,
+        colors = rowColors,
         headlineContent = { Text(title) },
         leadingContent = {
             RadioButton(
@@ -864,6 +886,7 @@ fun SegmentedCheckboxItem(
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
+    val rowColors = selectionRowColors(colors)
 
     SegmentedListItem(
         checked = checked,
@@ -872,7 +895,7 @@ fun SegmentedCheckboxItem(
             onCheckedChange(it)
         },
         enabled = enabled,
-        colors = colors,
+        colors = rowColors,
         interactionSource = interactionSource,
         headlineContent = { Text(title) },
         leadingContent = {
