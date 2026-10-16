@@ -68,6 +68,9 @@ mod nomount;
 mod nomount_plan;
 #[cfg(any(target_os = "android", test))]
 mod plugin;
+#[cfg(any(target_os = "android", test))]
+#[cfg_attr(not(target_os = "android"), allow(dead_code))]
+mod preinit;
 #[cfg(target_os = "android")]
 mod profile;
 #[cfg(target_os = "android")]

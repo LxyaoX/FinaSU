@@ -43,7 +43,8 @@ class ModuleRepositoryImpl : ModuleRepository {
                         hasActionScript = obj.optBoolean("action"),
                         metamodule = (obj.optInt("metamodule") != 0) || obj.optBoolean("metamodule"),
                         actionIconPath = obj.optString("actionIcon").takeIf { it.isNotBlank() },
-                        webUiIconPath = obj.optString("webuiIcon").takeIf { it.isNotBlank() }
+                        webUiIconPath = obj.optString("webuiIcon").takeIf { it.isNotBlank() },
+                        preinit = obj.optString("preinit"),
                     )
                 }
                 // The Sui payload is a module on disk but is owned by the settings entry.

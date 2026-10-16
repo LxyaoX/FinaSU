@@ -266,6 +266,32 @@ ksud initrc refresh
 - 可以在 ksud 修补镜像的时候传入参数`--no-custom-rc` 禁用模块 RC 注入。
 :::
 
+### 模块 preinit {#module-preinit}
+
+模块可以提供 `preinit/preinit.conf`，在 Android init 加载 SELinux 策略前执行操作。此功能要求内核在早期加载且启用了 preinit；late-load 模式和充电启动不会执行。它独立于 initrc 注入，不改变常规挂载、Zygisk、Sui 和模块脚本的执行顺序。
+
+配置是逐行操作列表，不是 Shell 脚本：
+
+```text
+# 忽略注释和空行。
+# 所需的独立载荷可放在此文件旁。
+```
+
+支持 `insmod <路径> [参数...]`、`exec [-t 毫秒] <路径> [参数...]` 和 `write <路径> <内容>`。参数支持引号，不支持 Shell 展开或管道。在操作名后添加 `?` 可忽略该操作的失败；否则失败会停止当前模块的后续操作，再按模块 ID 字典序处理下一个模块。相对载荷路径以该模块的 preinit 目录为基准。可执行文件须为自包含的静态程序，此时 Android 服务、APEX 库和属性服务尚不可用。`write` 只打开已有路径，不创建文件，也不局限于 procfs 或 sysfs。
+
+runner 总时限为 30 秒，每条 `exec` 默认 5 秒；配置文件上限为 64 KiB。这里只能使用可信模块：超时机制不是沙箱，不能撤销内核中的副作用，也不能保证终止不可中断或已脱离进程组的后代进程。
+
+安装、更新、启用和删除模块时会同步下次启动的配置，热安装同样如此。`ksud initrc refresh` 会同时刷新 RC 注入和 preinit 载荷。载荷暂存于所选 `/metadata` 路径，总预算 4 MiB，并保留 8 MiB 可用空间；拒绝符号链接和特殊文件。同步先完整复制并落盘，再原子替换整个目录。事务失败会保留上一份配置，其中可能仍包含旧版本或刚被禁用的模块，因此必须先处理同步错误再重启。RC 和载荷更新是两个独立事务。
+
+```sh
+ksud module preinit status
+ksud module preinit reset
+```
+
+`ok` 只表示已同步供**下次启动**使用，不代表操作执行成功。连续三次计数启动未完成后，后续启动会跳过 preinit；启动完成只清除 1–3 的计数，大于 3 的停用计数会保留。内容变更会重置共享计数。`reset` 仅删除计数，使用前应先移除或修复故障模块。在 post-fs-data 才检测到的安全模式无法阻止当前启动已经发生的 preinit 操作。
+
+真机测试前请备份 boot/init_boot，并确认恢复环境或备用 root 镜像能够回滚且能访问当前 metadata 路径。修补启动镜像时，`--no-preinit` 会写入模块参数 `preinit=0`，与 `--no-custom-rc` 相互独立。升级和回滚时应配套使用同一构建的内核、ksud、ksuinit 和 Manager。
+
 ## 模块安装包 {#module-installer}
 
 KernelSU 的模块安装包就是一个可以通过 KernelSU 管理器 APP 刷入的 zip 文件，此 zip 文件的格式如下：

@@ -315,6 +315,33 @@ fn replace_module_vermagic(buffer: &mut Vec<u8>, required_vermagic: &str) -> Res
 /// Relocate undefined symbols in an ELF kernel module buffer using /proc/kallsyms,
 /// then load it via init_module syscall.
 pub fn load_module(data: &[u8], params: &CStr) -> Result<()> {
+    load_module_with_resolver(data, params, resolve_kallsyms)
+}
+
+pub fn resolve_kallsyms(names: &[&str]) -> Result<Vec<Option<u64>>> {
+    let mut pending: HashMap<&str, Vec<usize>> = HashMap::new();
+    let mut addrs = vec![None; names.len()];
+    for (i, name) in names.iter().enumerate() {
+        pending.entry(name).or_default().push(i);
+    }
+    if !pending.is_empty() {
+        for_each_kernel_symbols(|(symbol, addr)| {
+            if let Some(indices) = pending.remove(symbol.as_str()) {
+                for i in indices {
+                    addrs[i] = Some(*addr);
+                }
+            }
+            Ok(!pending.is_empty())
+        })
+        .context("Cannot parse kallsyms")?;
+    }
+    Ok(addrs)
+}
+
+pub fn load_module_with_resolver<F>(data: &[u8], params: &CStr, resolve: F) -> Result<()>
+where
+    F: FnOnce(&[&str]) -> Result<Vec<Option<u64>>>,
+{
     let mut buffer = data.to_vec();
     let elf = Elf::parse(&buffer)?;
     let ctx = *elf.syms.ctx();
@@ -338,20 +365,25 @@ pub fn load_module(data: &[u8], params: &CStr) -> Result<()> {
     }
 
     if !unresolved_symbols.is_empty() {
-        for_each_kernel_symbols(|(symbol, addr)| {
-            if let Some((mut sym, offset)) = unresolved_symbols.remove(symbol) {
+        let names: Vec<_> = unresolved_symbols.keys().map(String::as_str).collect();
+        let addrs = resolve(&names).context("Cannot resolve symbols")?;
+        if names.len() != addrs.len() {
+            bail!(
+                "Resolver returned {} addresses for {} symbols",
+                addrs.len(),
+                names.len()
+            );
+        }
+        for (name, addr) in names.iter().zip(addrs) {
+            if let Some(addr) = addr {
+                let (mut sym, offset) = unresolved_symbols[*name];
                 sym.st_shndx = section_header::SHN_ABS as usize;
-                sym.st_value = *addr;
+                sym.st_value = addr;
                 buffer.pwrite_with(sym, offset, ctx)?;
+            } else {
+                log::warn!("Cannot find symbol: {}", name);
             }
-
-            Ok(!unresolved_symbols.is_empty())
-        })
-        .context("Cannot parse kallsyms")?;
-    }
-
-    for name in unresolved_symbols.keys() {
-        log::warn!("Cannot find symbol: {}", name);
+        }
     }
 
     let mut kmsg = match open_kmsg_at_end() {

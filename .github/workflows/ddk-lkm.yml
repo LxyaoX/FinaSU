@@ -74,7 +74,7 @@ jobs:
         if [ -n "$SECOND_SIGNATURE_RELEASE" ]; then
           EXTRA_ARGS="$EXTRA_ARGS KSU_SECOND_SIGNATURE_RELEASE=1"
         fi
-        CONFIG_KSU=m CC=clang make $EXTRA_ARGS
+        CONFIG_KSU=m CC=clang make KSU_REQUIRE_PREINIT=1 $EXTRA_ARGS
         
         echo "=== Build completed ==="
 
@@ -143,6 +143,7 @@ jobs:
             scripts/config --file $KDIR/.config -e CONFIG_CFI_ICALL_NORMALIZE_INTEGERS
         fi
         make O=$KDIR modules_prepare
+        make O=$KDIR headers_install INSTALL_HDR_PATH=$KDIR/usr
         # Generate SELinux headers through Kbuild in this x86 output tree.
         make O=$KDIR security/selinux/built-in.a
         popd
@@ -168,9 +169,9 @@ jobs:
         MDIR=$(realpath .)
 
         if [ "$kmi" == "android17-6.18" ]; then
-          make -C $KDIR M=$MDIR MO=$MDIR compile_commands.json modules CONFIG_KSU=m CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=y $EXTRA_ARGS
+          make -C $KDIR M=$MDIR MO=$MDIR compile_commands.json modules CONFIG_KSU=m CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=y KSU_REQUIRE_PREINIT=1 $EXTRA_ARGS
         else
-          make -C $KDIR M=$MDIR src=$MDIR compile_commands.json modules CONFIG_KSU=m CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=y $EXTRA_ARGS
+          make -C $KDIR M=$MDIR src=$MDIR compile_commands.json modules CONFIG_KSU=m CONFIG_KSU_X86_PATCH_SYSCALL_DISPATCHER=y KSU_REQUIRE_PREINIT=1 $EXTRA_ARGS
         fi
         
         echo "=== Build completed ==="

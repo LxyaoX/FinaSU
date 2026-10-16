@@ -19,7 +19,16 @@
 #include <mutex>
 #include <sys/syscall.h>
 #include <cerrno>
+#include <cstddef>
 #include "ksu.h"
+
+static_assert(sizeof(ksu_lookup_symbols_cmd) == 24);
+static_assert(alignof(ksu_lookup_symbols_cmd) == 8);
+static_assert(offsetof(ksu_lookup_symbols_cmd, names) == 0);
+static_assert(offsetof(ksu_lookup_symbols_cmd, addrs) == 8);
+static_assert(offsetof(ksu_lookup_symbols_cmd, count) == 16);
+static_assert(offsetof(ksu_lookup_symbols_cmd, flags) == 20);
+static_assert(KSU_IOCTL_LOOKUP_SYMBOLS != KSU_IOCTL_SET_DYNAMIC_MANAGERS);
 
 static std::atomic<int> fd{-1};
 static std::mutex g_fd_mutex;

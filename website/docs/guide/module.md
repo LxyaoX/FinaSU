@@ -263,6 +263,32 @@ ksud initrc refresh
 - Module RC injection can be disabled by passing the `--no-custom-rc` parameter when patching the image with ksud.
 :::
 
+### Module preinit {#module-preinit}
+
+A module may provide `preinit/preinit.conf` for actions that run before Android init loads SELinux policy. This requires an early-loaded kernel with preinit support; late-load and charger boots do not run these actions. This stage is separate from initrc injection and does not change the normal mount, Zygisk, Sui or module-script order.
+
+The configuration is a line-oriented action list, not a shell script:
+
+```text
+# Comments and empty lines are ignored.
+# Place any required payloads beside this file.
+```
+
+Supported actions are `insmod <path> [parameters...]`, `exec [-t milliseconds] <path> [arguments...]`, and `write <path> <content>`. Quoted arguments are supported; shell expansions and pipelines are not. Appending `?` to the action name makes its failure optional. Otherwise, failure stops the remaining actions for that module, and processing continues with the next module in lexical order. Relative payload paths resolve inside that module's preinit directory. Executables must be self-contained static programs; Android services, APEX libraries and the property service are not available yet. `write` opens an existing path without creating it and is not restricted to procfs or sysfs.
+
+The runner allows 30 seconds overall and defaults to 5 seconds per `exec`. A configuration is limited to 64 KiB. Only trusted modules belong here: timeouts are not a sandbox, cannot undo kernel effects, and cannot guarantee termination of blocked or escaped descendants.
+
+Installing, updating, enabling or removing modules synchronizes the next-boot configuration, including hot installs. `ksud initrc refresh` refreshes both RC injection and preinit payloads. Payloads are staged under the selected `/metadata` location with a 4 MiB total budget and an 8 MiB free-space reserve. Symlinks and special files are rejected. A complete new tree is copied and synced before atomic promotion; a failed transaction retains the previous configuration, which can include an older or newly disabled module. Correct the synchronization error before rebooting. RC and payload updates are separate transactions.
+
+```sh
+ksud module preinit status
+ksud module preinit reset
+```
+
+`ok` means synchronized for the **next boot**, not that actions executed successfully. After three counted attempts without boot completion, subsequent boots skip preinit. Boot completion clears counts 1–3 but leaves a parked count above 3 unchanged. Content changes reset the shared counter. `reset` only removes the counter: remove or fix the faulty module first. Safe mode detected at post-fs-data is too late to prevent the current boot's preinit actions.
+
+Before device testing, back up boot/init_boot and establish a verified recovery or alternate rooted rollback path with access to the active metadata location. When patching a boot image, `--no-preinit` writes the module option `preinit=0`; this is independent of `--no-custom-rc`. Keep kernel, ksud, ksuinit and Manager from the same build when upgrading or rolling back.
+
 ## Module installer
 
 A KernelSU module installer is a KernelSU module packaged in a ZIP file that can be flashed in the KernelSU manager. The simplest KernelSU module installer is just a KernelSU module packed as a ZIP file.

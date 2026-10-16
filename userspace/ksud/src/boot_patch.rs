@@ -518,6 +518,8 @@ pub struct KsuConfigArgs {
     /// Do not load custom rc
     #[arg(long, default_value = "false")]
     no_custom_rc: bool,
+    #[arg(long, default_value = "false")]
+    no_preinit: bool,
     /// Force a writable feature at boot, e.g. su_compat=0. Can be repeated.
     #[arg(long, value_name = "FEATURE=VALUE", value_parser = parse_force_feature)]
     force_feature: Vec<(FeatureId, u64)>,
@@ -538,6 +540,7 @@ impl KsuConfigArgs {
     pub fn apply(&self, config: &mut Vec<String>) {
         set_config_flag(config, "no custom rc", "norc=1", self.no_custom_rc);
         set_config_flag(config, "allow shell", "allow_shell=1", self.allow_shell);
+        set_config_flag(config, "no preinit", "preinit=0", self.no_preinit);
         config.retain(|v| !v.starts_with("force_feature="));
         if !self.force_feature.is_empty() {
             let entries = self
@@ -595,6 +598,20 @@ fn parse_force_feature(s: &str) -> Result<(FeatureId, u64)> {
 mod config_tests {
     use super::*;
     use clap::Parser;
+
+    #[test]
+    fn preinit_flag_is_idempotent_and_cleared_by_default() {
+        let disabled = ConfigCli::try_parse_from(["test", "--no-preinit"]).unwrap();
+        let mut config = vec!["unrelated=1".to_owned()];
+        disabled.config.apply(&mut config);
+        disabled.config.apply(&mut config);
+        assert_eq!(config, ["unrelated=1", "preinit=0"]);
+        ConfigCli::try_parse_from(["test"])
+            .unwrap()
+            .config
+            .apply(&mut config);
+        assert_eq!(config, ["unrelated=1"]);
+    }
 
     #[derive(Parser)]
     struct ConfigCli {

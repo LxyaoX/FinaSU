@@ -7,7 +7,7 @@ use log::{LevelFilter, error, info};
 
 use crate::boot_patch::{BootPatchArgs, BootRestoreArgs};
 use crate::lkm_image::BootPatchV2Args;
-use crate::module::regenerate_preinit_rc;
+use crate::module::regenerate_preinit;
 use crate::{
     apk_sign, assets, debug, defs, init_event, ksu_uapi, ksucalls, module, module_config, sulog,
     utils,
@@ -374,6 +374,11 @@ enum Module {
     /// list all modules
     List,
 
+    Preinit {
+        #[command(subcommand)]
+        command: PreinitCmd,
+    },
+
     /// manage module configuration
     Config {
         /// target internal module name (resolved as internal.<name>)
@@ -382,6 +387,12 @@ enum Module {
         #[command(subcommand)]
         command: ModuleConfigCmd,
     },
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum PreinitCmd {
+    Status,
+    Reset,
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -775,6 +786,13 @@ pub fn run() -> Result<()> {
                 Module::Skip { id, off } => module::set_skip_mount(&id, !off),
                 Module::Action { id } => module::run_action(&id),
                 Module::List => module::list_modules(),
+                Module::Preinit { command } => match command {
+                    PreinitCmd::Status => {
+                        crate::preinit::print_status();
+                        Ok(())
+                    }
+                    PreinitCmd::Reset => crate::preinit::reset_bootcount(),
+                },
                 Module::Config { internal, command } => {
                     let module_id = match internal {
                         Some(internal_name) => format!("internal.{internal_name}"),
@@ -1051,7 +1069,7 @@ pub fn run() -> Result<()> {
             }
         },
         Commands::Initrc { command } => match command {
-            Initrc::Refresh => regenerate_preinit_rc(),
+            Initrc::Refresh => regenerate_preinit(),
         },
         Commands::Mount { command } => match command {
             Mount::Status { json } => crate::magic_mount::print_status(json),

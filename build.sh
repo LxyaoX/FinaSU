@@ -69,14 +69,17 @@ read_keystore_cfg() {
     : "${KEYSTORE_PASSWORD:?KEYSTORE_PASSWORD not set in $KEYSTORE_PROPS}"
     : "${KEY_ALIAS:?KEY_ALIAS not set in $KEYSTORE_PROPS}"
     : "${KEY_PASSWORD:=$KEYSTORE_PASSWORD}"
-    KEYSTORE_PATH="$REPO_ROOT/manager/$KEYSTORE_FILE"
+    case "$KEYSTORE_FILE" in
+        /*) KEYSTORE_PATH="$KEYSTORE_FILE" ;;
+        *) KEYSTORE_PATH="$(dirname "$(realpath "$KEYSTORE_PROPS")")/$KEYSTORE_FILE" ;;
+    esac
     [[ -f "$KEYSTORE_PATH" ]] || die "keystore not found: $KEYSTORE_PATH"
 }
 
 # Exports the values manager/app/build.gradle.kts reads through the apksign plugin.
 export_signing_env() {
     read_keystore_cfg
-    export ORG_GRADLE_PROJECT_KEYSTORE_FILE="$KEYSTORE_FILE"
+    export ORG_GRADLE_PROJECT_KEYSTORE_FILE="$KEYSTORE_PATH"
     export ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
     export ORG_GRADLE_PROJECT_KEY_ALIAS="$KEY_ALIAS"
     export ORG_GRADLE_PROJECT_KEY_PASSWORD="$KEY_PASSWORD"
@@ -99,8 +102,16 @@ cert_size_and_hash() {
 # (CI runs as root too; this just avoids leaving root-owned files in the tree.)
 ddk_run() {
     local image="$1"; shift
+    local git_common_dir
+    local git_mounts=()
+    git_common_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
+    case "$git_common_dir" in
+        "$REPO_ROOT"/*) ;;
+        *) git_mounts=(-v "$git_common_dir:$git_common_dir:ro") ;;
+    esac
     docker run --rm --privileged \
         -v "$REPO_ROOT":/build -w /build/kernel \
+        "${git_mounts[@]}" \
         -e CONFIG_KSU=m -e CC=clang \
         -e GIT_CONFIG_COUNT=1 \
         -e GIT_CONFIG_KEY_0=safe.directory \
@@ -129,6 +140,7 @@ build_lkm() {
 
         rm -f kernel/kernelsu.ko
         ddk_run "$image" make \
+            "KSU_REQUIRE_PREINIT=1" \
             "KSU_EXPECTED_SIZE2=$CERT_SIZE_HEX" \
             "KSU_EXPECTED_HASH2=$CERT_HASH" \
             "KSU_SECOND_SIGNATURE_RELEASE=1"

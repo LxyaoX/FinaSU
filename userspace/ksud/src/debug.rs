@@ -59,8 +59,17 @@ pub fn insmod(module: &Path, params: &[String]) -> Result<()> {
         fs::read(&module).with_context(|| format!("read module failed: {}", module.display()))?;
     let cparams = CString::new(params.join(" "))?;
 
-    ksuinit::load_module(&module_data, &cparams)
-        .with_context(|| format!("load module failed: {}", module.display()))?;
+    ksuinit::load_module_with_resolver(&module_data, &cparams, |names| {
+        if ksucalls::get_info().uapi_version >= 6 {
+            ksucalls::lookup_symbols(names).or_else(|e| {
+                log::warn!("kernel symbol lookup failed: {e:#}; using /proc/kallsyms");
+                ksuinit::resolve_kallsyms(names)
+            })
+        } else {
+            ksuinit::resolve_kallsyms(names)
+        }
+    })
+    .with_context(|| format!("load module failed: {}", module.display()))?;
 
     println!("Loaded kernel module: {}", module.display());
     Ok(())

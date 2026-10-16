@@ -918,4 +918,8 @@
     <string name="support_or_donate">Support / Donate</string>
     <string name="github">GitHub</string>
     <string name="telegram">Telegram</string>
+    <string name="module_preinit_no_space">Preinit not synchronized: insufficient metadata space</string>
+    <string name="module_preinit_error">Preinit synchronization failed; previous configuration retained</string>
+    <string name="module_preinit_bootloop">Preinit paused after repeated boot attempts</string>
+    <string name="module_preinit_unsupported">Preinit unavailable in this kernel or load mode</string>
 </resources>

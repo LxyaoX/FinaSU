@@ -1,5 +1,10 @@
+#include <linux/bsearch.h>
 #include <linux/kallsyms.h>
 #include <linux/module.h>
+#include <linux/mm.h>
+#include <linux/sched/signal.h>
+#include <linux/slab.h>
+#include <linux/sort.h>
 #include <linux/string.h>
 #include <linux/version.h>
 
@@ -170,6 +175,181 @@ void *ksu_resolve_symbol_for_functable_hook(const char *symbol_name)
 
     return resolve_symbol_variant(symbol_name, symbol_len);
 #endif
+}
+
+struct ksu_batch_entry {
+    const char *name;
+    unsigned long addr;
+    u32 idx;
+};
+
+struct ksu_batch_ctx {
+    struct ksu_batch_entry *entries;
+    u32 count;
+    u32 remaining;
+    char key[KSYM_NAME_LEN];
+};
+
+static int ksu_batch_entry_cmp(const void *a, const void *b)
+{
+    return strcmp(((const struct ksu_batch_entry *)a)->name, ((const struct ksu_batch_entry *)b)->name);
+}
+
+static int ksu_batch_key_cmp(const void *key, const void *elt)
+{
+    return strcmp(key, ((const struct ksu_batch_entry *)elt)->name);
+}
+
+static int ksu_batch_match(struct ksu_batch_ctx *ctx, const char *name, unsigned long addr)
+{
+    struct ksu_batch_entry *e, *end = ctx->entries + ctx->count;
+    const char *cut, *key = name;
+    size_t len;
+
+    if (fatal_signal_pending(current))
+        return -EINTR;
+    if (!name || !addr)
+        return 0;
+
+    cut = strchr(name, '$');
+    if (!cut)
+        cut = strstr(name, ".llvm.");
+    if (cut) {
+        len = cut - name;
+        if (!len || len >= sizeof(ctx->key))
+            return 0;
+        memcpy(ctx->key, name, len);
+        ctx->key[len] = '\0';
+        key = ctx->key;
+    }
+
+    e = bsearch(key, ctx->entries, ctx->count, sizeof(*e), ksu_batch_key_cmp);
+    if (!e)
+        return 0;
+    while (e > ctx->entries && !strcmp(e[-1].name, key))
+        e--;
+    for (; e < end && !strcmp(e->name, key); e++) {
+        if (!e->addr) {
+            e->addr = addr;
+            ctx->remaining--;
+        }
+    }
+    return ctx->remaining ? 0 : 1;
+}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
+static int ksu_batch_cb(void *data, const char *name, unsigned long addr)
+{
+    return ksu_batch_match(data, name, addr);
+}
+#else
+static int ksu_batch_cb(void *data, const char *name, struct module *mod, unsigned long addr)
+{
+    if (mod)
+        return 1;
+    return ksu_batch_match(data, name, addr);
+}
+#endif
+
+#if HAVE_ON_EACH_MATCH_SYMBOL
+static int ksu_first_match_cb(void *data, unsigned long addr)
+{
+    *(unsigned long *)data = addr;
+    return 1;
+}
+
+static __nocfi int ksu_batch_lookup_indexed(struct ksu_batch_ctx *ctx)
+{
+    u32 i;
+
+    if (!kallsyms_on_each_match_symbol_fn)
+        return 0;
+    for (i = 0; i < ctx->count && ctx->remaining; i++) {
+        struct ksu_batch_entry *e = &ctx->entries[i];
+
+        if (fatal_signal_pending(current))
+            return -EINTR;
+        if (e->addr)
+            continue;
+        kallsyms_on_each_match_symbol_fn(ksu_first_match_cb, e->name, &e->addr);
+        if (!e->addr)
+            continue;
+        ctx->remaining--;
+        while (i + 1 < ctx->count && !strcmp(ctx->entries[i + 1].name, e->name)) {
+            ctx->entries[++i].addr = e->addr;
+            ctx->remaining--;
+        }
+    }
+    return 0;
+}
+#endif
+
+int __nocfi ksu_lookup_kernel_symbols(const char *const *names, unsigned long *addrs, u32 count)
+{
+    struct ksu_batch_ctx *ctx;
+    int ret = 0;
+    u32 i, n = 0;
+
+    ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
+    if (!ctx)
+        return -ENOMEM;
+    ctx->entries = kvmalloc_array(count, sizeof(*ctx->entries), GFP_KERNEL);
+    if (!ctx->entries) {
+        kfree(ctx);
+        return -ENOMEM;
+    }
+
+    for (i = 0; i < count; i++) {
+        addrs[i] = 0;
+        if (!names[i])
+            continue;
+        ctx->entries[n].name = names[i];
+        ctx->entries[n].addr = 0;
+        ctx->entries[n].idx = i;
+        n++;
+    }
+    ctx->count = n;
+    ctx->remaining = n;
+    sort(ctx->entries, n, sizeof(*ctx->entries), ksu_batch_entry_cmp, NULL);
+
+#if HAVE_ON_EACH_MATCH_SYMBOL
+    if (n)
+        ret = ksu_batch_lookup_indexed(ctx);
+#endif
+
+    if (ret >= 0 && ctx->remaining) {
+#if !ALWAYS_HAVE_ON_EACH_SYMBOL
+        if (kallsyms_on_each_symbol_fn) {
+            ret = kallsyms_on_each_symbol_fn(ksu_batch_cb, ctx);
+        } else {
+            for (i = 0; i < n; i++) {
+                if (ctx->entries[i].addr)
+                    continue;
+                ctx->entries[i].addr = find_kernel_symbol_exact(ctx->entries[i].name);
+                if (fatal_signal_pending(current)) {
+                    ret = -EINTR;
+                    break;
+                }
+                cond_resched();
+            }
+        }
+#else
+        ret = kallsyms_on_each_symbol(ksu_batch_cb, ctx);
+#endif
+    }
+
+    if (ret >= 0) {
+        ret = 0;
+        for (i = 0; i < n; i++) {
+            addrs[ctx->entries[i].idx] = ctx->entries[i].addr;
+            if (ctx->entries[i].addr)
+                ret++;
+        }
+    }
+
+    kvfree(ctx->entries);
+    kfree(ctx);
+    return ret;
 }
 
 void __init ksu_init_symbol_resolver()

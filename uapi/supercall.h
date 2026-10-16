@@ -10,11 +10,8 @@
 // 3: scoped su-session driver fd
 // 4: add KSU_GET_INFO_FLAG_BUNDLED
 // 5: add EVENT_SERVICES with a start/skip result
-// NB: the dynamic-manager commands are additive and advertised through
-//     KSU_FEATURE_DYNAMIC_MANAGER, so they deliberately do not bump the
-//     UAPI. Keeping this at 5 lets third-party managers built against
-//     uapi 5 treat the kernel as compatible.
-static const __u32 KERNEL_SU_UAPI_VERSION = 5;
+// 6: kernel symbol lookup and preinit; metadata paths may use /metadata/vold/ksu
+static const __u32 KERNEL_SU_UAPI_VERSION = 6;
 
 /* Magic numbers for reboot hook to install fd */
 static const __u32 KSU_INSTALL_MAGIC1 = 0xDEADBEEF;
@@ -34,6 +31,7 @@ static const __u32 KSU_GET_INFO_FLAG_MANAGER = (1U << 1);
 static const __u32 KSU_GET_INFO_FLAG_LATE_LOAD = (1U << 2);
 static const __u32 KSU_GET_INFO_FLAG_PR_BUILD = (1U << 3);
 static const __u32 KSU_GET_INFO_FLAG_BUNDLED = (1U << 4);
+static const __u32 KSU_GET_INFO_FLAG_PREINIT = (1U << 5);
 
 struct ksu_get_info_cmd {
     __u32 version; /* Output: KERNEL_SU_VERSION */
@@ -156,6 +154,15 @@ struct ksu_get_sulog_fd_cmd {
     __u32 flags; /* Input: reserved for future use, must be 0 */
 };
 
+struct ksu_lookup_symbols_cmd {
+    __aligned_u64 names;
+    __aligned_u64 addrs;
+    __u32 count;
+    __u32 flags;
+};
+
+static const __u32 KSU_LOOKUP_SYMBOLS_MAX = 1024;
+
 #define KSU_DYNAMIC_MANAGER_MAX_SIGNS 64
 #define KSU_DYNAMIC_MANAGER_MAX_APPS 64
 
@@ -232,6 +239,7 @@ static const __u32 KSU_IOCTL_ADD_TRY_UMOUNT = _IOC(_IOC_WRITE, 'K', 18, 0);
 static const __u32 KSU_IOCTL_SET_INIT_PGRP = _IO('K', 19);
 static const __u32 KSU_IOCTL_GET_SULOG_FD = _IOW('K', 20, struct ksu_get_sulog_fd_cmd);
 static const __u32 KSU_IOCTL_DISABLE_ESCAPE_TO_ROOT = _IO('K', 21);
+static const __u32 KSU_IOCTL_LOOKUP_SYMBOLS = _IOW('K', 22, struct ksu_lookup_symbols_cmd);
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGERS = _IOC(_IOC_WRITE, 'K', 22, 0);
 static const __u32 KSU_IOCTL_GET_DYNAMIC_MANAGERS = _IOWR('K', 23, struct ksu_get_dynamic_managers_cmd);
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS = _IOC(_IOC_WRITE, 'K', 24, 0);

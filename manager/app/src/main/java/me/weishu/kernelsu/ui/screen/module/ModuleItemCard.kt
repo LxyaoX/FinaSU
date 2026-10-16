@@ -135,6 +135,13 @@ private fun ModuleCardContent(
     val displayDescription = customInfo?.description?.takeIf { it.isNotBlank() } ?: module.description
 
     val hasAnyLabel = showMoreInfo || module.remove || (hasUpdate && !module.update) || module.update
+    val preinitWarning = when (module.preinit) {
+        "no_space" -> R.string.module_preinit_no_space
+        "error" -> R.string.module_preinit_error
+        "bootloop" -> R.string.module_preinit_bootloop
+        "unsupported" -> R.string.module_preinit_unsupported
+        else -> null
+    }
 
     Column(Modifier.fillMaxWidth().padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
@@ -222,6 +229,15 @@ private fun ModuleCardContent(
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onCheckChanged(it)
                 },
+            )
+        }
+
+        if (preinitWarning != null && module.enabled && !module.remove) {
+            Spacer(Modifier.height(8.dp))
+            ModuleLabel(
+                text = stringResource(preinitWarning),
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
             )
         }
 

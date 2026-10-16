@@ -75,11 +75,9 @@ pub fn on_post_fs_data() -> Result<()> {
         warn!("prune modules failed: {e}");
     }
 
-    // Refresh /metadata/watchdog/ksu/modules.rc so the next boot's kernel hook sees the
-    // current module set. Acts as a safety net when state was changed outside
-    // of ksud's normal mutation commands.
-    if let Err(e) = crate::module::regenerate_preinit_rc() {
-        warn!("regenerate preinit rc failed: {e}");
+    // Reconcile next-boot state after changes made outside module commands.
+    if let Err(e) = crate::module::regenerate_preinit() {
+        warn!("regenerate preinit failed: {e}");
     }
 
     if let Err(e) = restorecon::restorecon() {
@@ -227,6 +225,7 @@ pub fn on_boot_completed() {
 
     ksucalls::report_boot_complete();
     info!("on_boot_completed triggered!");
+    crate::preinit::on_boot_completed();
     // The boot reached a usable state, so the step recorded for it finished:
     // dropping that record is what tells the next boot which provider may run
     // again (a record from an earlier boot has to stay, see `mount_guard`).

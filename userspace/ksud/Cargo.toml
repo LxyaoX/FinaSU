@@ -60,6 +60,7 @@ prop-rs-android = { git = "https://github.com/KernelSU2/ksu_props", rev = "ddb6e
 mlua = { version = "=0.12.0", features = ["lua55", "vendored"] }
 
 [dev-dependencies]
+rustix = { version = "1", features = ["all-apis"] }
 zip = { version = "8", features = ["deflate"], default-features = false }
 zip-extensions = { version = "0.14", features = ["deflate", "lzma", "xz"], default-features = false }
 java-properties = { git = "https://github.com/KernelSU2/java-properties.git", branch = "master", default-features = false }

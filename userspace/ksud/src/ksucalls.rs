@@ -185,6 +185,31 @@ pub fn is_lkm() -> bool {
     get_info().flags & ksu_uapi::KSU_GET_INFO_FLAG_LKM != 0
 }
 
+pub fn is_preinit_supported() -> bool {
+    get_info().flags & ksu_uapi::KSU_GET_INFO_FLAG_PREINIT != 0
+}
+
+pub fn lookup_symbols(names: &[&str]) -> Result<Vec<Option<u64>>> {
+    let mut result = Vec::with_capacity(names.len());
+    for chunk in names.chunks(ksu_uapi::KSU_LOOKUP_SYMBOLS_MAX as usize) {
+        let names = chunk
+            .iter()
+            .map(|name| std::ffi::CString::new(*name))
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        let pointers: Vec<u64> = names.iter().map(|name| name.as_ptr() as u64).collect();
+        let mut addrs = vec![0u64; chunk.len()];
+        let mut cmd = ksu_uapi::ksu_lookup_symbols_cmd {
+            names: pointers.as_ptr() as u64,
+            addrs: addrs.as_mut_ptr() as u64,
+            count: chunk.len() as u32,
+            flags: 0,
+        };
+        ksuctl(ksu_uapi::KSU_IOCTL_LOOKUP_SYMBOLS, &raw mut cmd)?;
+        result.extend(addrs.into_iter().map(|addr| (addr != 0).then_some(addr)));
+    }
+    Ok(result)
+}
+
 pub const fn uapi_version() -> u32 {
     ksu_uapi::KERNEL_SU_UAPI_VERSION
 }
