@@ -25,7 +25,14 @@
 
 #define KERNEL_SU_DYNAMIC_MANAGER "/data/adb/ksu/dynamic_manager"
 #define DYNAMIC_MANAGER_FILE_MAGIC 0x4d554b53 /* 'KSUM', u32 */
-#define DYNAMIC_MANAGER_FILE_VERSION 1 /* u32 */
+/*
+ * v1: magic + version + sign records.
+ * v2: adds a flags word and the authorized appid list after the version, so a
+ *     reboot can never reopen the window in which every trusted signature is
+ *     honored without an explicit grant.
+ */
+#define DYNAMIC_MANAGER_FILE_VERSION 2 /* u32 */
+#define DYNAMIC_MANAGER_FILE_FLAG_GRANTS_STRICT (1u << 0)
 
 struct dynamic_manager_sign {
     struct hlist_node node;
@@ -42,6 +49,7 @@ struct dynamic_manager_app {
     char hash[65];
     bool preset;
     bool trusted;
+    bool granted; /* explicitly authorized by the user */
 };
 
 /* Fixed on-disk record shared by the persist and load paths. */
@@ -65,6 +73,14 @@ static DEFINE_HASHTABLE(dynamic_manager_apps, KSU_DYNAMIC_MANAGER_HASH_BITS);
  */
 static uid_t trusted_dynamic_appids[KSU_DYNAMIC_MANAGER_MAX_APPS];
 static u32 trusted_dynamic_count;
+
+/*
+ * Authorized appids. Until userspace pushes its list the kernel keeps the
+ * historical behaviour (every trusted signature is a manager); the first push
+ * switches to the strict rule, and both that fact and the list itself are part
+ * of the persisted file above.
+ */
+static bool grants_strict;
 
 static u32 sign_key(u32 size, const char *hash)
 {
@@ -153,6 +169,13 @@ static void publish_trusted_snapshot_locked(void)
     {
         if (!app->trusted)
             continue;
+        /*
+         * Once userspace has pushed an authorization list, sharing a registered
+         * certificate is only enough to be *recognized*: the appid must also be
+         * on the list to become a dynamic manager.
+         */
+        if (grants_strict && !app->granted)
+            continue;
         if (count >= KSU_DYNAMIC_MANAGER_MAX_APPS)
             break;
         pending[count++] = app->appid;
@@ -183,6 +206,24 @@ static const struct ksu_feature_handler dynamic_manager_feature_handler = {
     .set_handler = NULL,
 };
 
+/*
+ * Advertised separately from KSU_FEATURE_DYNAMIC_MANAGER: a kernel that merely
+ * implements the signature list reports the old feature, so userspace can fall
+ * back to the legacy "trusted == manager" rule instead of locking itself out.
+ */
+static int dynamic_manager_grants_feature_get(u64 *value)
+{
+    *value = 1;
+    return 0;
+}
+
+static const struct ksu_feature_handler dynamic_manager_grants_feature_handler = {
+    .feature_id = KSU_FEATURE_DYNAMIC_MANAGER_GRANTS,
+    .name = "dynamic_manager_grants",
+    .get_handler = dynamic_manager_grants_feature_get,
+    .set_handler = NULL,
+};
+
 void __init ksu_dynamic_manager_init(void)
 {
     hash_init(dynamic_manager_signs);
@@ -191,6 +232,8 @@ void __init ksu_dynamic_manager_init(void)
 
     if (ksu_register_feature_handler(&dynamic_manager_feature_handler))
         pr_warn("dynamic_manager: failed to register feature handler\n");
+    if (ksu_register_feature_handler(&dynamic_manager_grants_feature_handler))
+        pr_warn("dynamic_manager: failed to register grants feature handler\n");
 }
 
 void __exit ksu_dynamic_manager_exit(void)
@@ -211,6 +254,7 @@ void __exit ksu_dynamic_manager_exit(void)
     /* Retire the published snapshot so nothing keeps using this module's table. */
     smp_store_release(&trusted_dynamic_count, 0);
 
+    ksu_unregister_feature_handler(KSU_FEATURE_DYNAMIC_MANAGER_GRANTS);
     ksu_unregister_feature_handler(KSU_FEATURE_DYNAMIC_MANAGER);
 }
 
@@ -264,6 +308,14 @@ u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps,
             flags |= KSU_DYNAMIC_MANAGER_FLAG_PRESET;
         if (app->trusted)
             flags |= KSU_DYNAMIC_MANAGER_FLAG_TRUSTED;
+        /*
+         * GRANTED is only reported for appids the kernel would actually honour.
+         * An appid can be authorized before any scan has seen its signature, and
+         * badging that as an active manager would claim an identity it does not
+         * have (the UI treats GRANTED as "this app is a dynamic manager").
+         */
+        if (app->trusted && app->granted)
+            flags |= KSU_DYNAMIC_MANAGER_FLAG_GRANTED;
         if (!flags)
             continue;
 
@@ -415,6 +467,76 @@ bool ksu_dynamic_manager_is_trusted_sign(u32 size, const char *hash)
     return result;
 }
 
+/*
+ * Replace the authorized appid list. An empty list authorizes nobody, which is
+ * the point of the command: sharing a registered certificate is no longer
+ * enough, and whoever wants a dynamic manager has to name it.
+ */
+int ksu_dynamic_manager_set_grants(const uid_t *appids, u32 count)
+{
+    struct dynamic_manager_app *spare[KSU_DYNAMIC_MANAGER_MAX_APPS];
+    struct dynamic_manager_app *app;
+    u32 i, spare_count = 0;
+    int bucket;
+
+    if (count > KSU_DYNAMIC_MANAGER_MAX_APPS)
+        return -EINVAL;
+
+    for (i = 0; i < count; i++) {
+        if (appids[i] >= KSU_PER_USER_RANGE)
+            return -EINVAL;
+    }
+
+    /*
+     * Preallocate one entry per appid so the swap below cannot fail halfway and
+     * leave the previous list half revoked.
+     */
+    for (i = 0; i < count; i++) {
+        spare[i] = kzalloc(sizeof(*spare[i]), GFP_KERNEL);
+        if (!spare[i])
+            goto nomem;
+        spare[i]->appid = appids[i];
+        spare_count++;
+    }
+
+    mutex_lock(&dynamic_manager_lock);
+
+    hash_for_each(dynamic_manager_apps, bucket, app, node)
+    {
+        app->granted = false;
+    }
+
+    for (i = 0; i < count; i++) {
+        app = find_app_locked(appids[i]);
+        if (!app) {
+            /*
+             * An appid may be authorized before any scan has scored its APK;
+             * keep an entry so the authorization survives until it does.
+             */
+            app = spare[i];
+            spare[i] = NULL;
+            hash_add(dynamic_manager_apps, &app->node, app->appid);
+        }
+        app->granted = true;
+    }
+
+    grants_strict = true;
+    publish_trusted_snapshot_locked();
+    mutex_unlock(&dynamic_manager_lock);
+
+    for (i = 0; i < count; i++)
+        kfree(spare[i]);
+
+    /* The list and the strict flag have to outlive a reboot. */
+    ksu_dynamic_manager_persist();
+    return 0;
+
+nomem:
+    for (i = 0; i < spare_count; i++)
+        kfree(spare[i]);
+    return -ENOMEM;
+}
+
 bool ksu_dynamic_manager_version_code(uid_t appid, u32 *out)
 {
     struct dynamic_manager_app *app;
@@ -438,7 +560,11 @@ static void do_persist_dynamic_manager(struct callback_head *_cb)
 {
     u32 magic = DYNAMIC_MANAGER_FILE_MAGIC;
     u32 version = DYNAMIC_MANAGER_FILE_VERSION;
+    struct dynamic_manager_app *app;
     struct dynamic_manager_sign *sign;
+    u32 flags = 0;
+    u32 grant_count = 0;
+    u32 appid;
     loff_t off = 0;
     int bucket;
 
@@ -460,6 +586,32 @@ static void do_persist_dynamic_manager(struct callback_head *_cb)
     }
 
     mutex_lock(&dynamic_manager_lock);
+
+    if (grants_strict)
+        flags |= DYNAMIC_MANAGER_FILE_FLAG_GRANTS_STRICT;
+
+    hash_for_each (dynamic_manager_apps, bucket, app, node) {
+        if (app->granted)
+            grant_count++;
+    }
+
+    if (kernel_write(fp, &flags, sizeof(flags), &off) != sizeof(flags) ||
+        kernel_write(fp, &grant_count, sizeof(grant_count), &off) != sizeof(grant_count)) {
+        pr_err("dynamic_manager: write grants header failed\n");
+        mutex_unlock(&dynamic_manager_lock);
+        goto close_file;
+    }
+
+    hash_for_each (dynamic_manager_apps, bucket, app, node) {
+        if (!app->granted)
+            continue;
+        appid = app->appid;
+        if (kernel_write(fp, &appid, sizeof(appid), &off) != sizeof(appid)) {
+            pr_err("dynamic_manager: write grant failed\n");
+            break;
+        }
+    }
+
     hash_for_each (dynamic_manager_signs, bucket, sign, node) {
         struct dynamic_manager_disk_sign disk = {
             .size = sign->size,
@@ -510,10 +662,15 @@ put_task:
 void ksu_dynamic_manager_load(void)
 {
     struct dynamic_manager_disk_sign disk;
+    struct dynamic_manager_app *grant_app;
     struct file *fp;
+    uid_t grants[KSU_DYNAMIC_MANAGER_MAX_APPS];
+    u32 grant_count = 0;
+    u32 flags = 0;
     loff_t off = 0;
     u32 magic;
     u32 version;
+    u32 i;
 
     fp = filp_open(KERNEL_SU_DYNAMIC_MANAGER, O_RDONLY, 0);
     if (IS_ERR(fp)) {
@@ -528,13 +685,37 @@ void ksu_dynamic_manager_load(void)
     }
 
     if (kernel_read(fp, &version, sizeof(version), &off) != sizeof(version) ||
-        version != DYNAMIC_MANAGER_FILE_VERSION) {
+        (version != 1 && version != DYNAMIC_MANAGER_FILE_VERSION)) {
         pr_err("dynamic_manager: invalid file version\n");
         goto exit;
     }
 
+    /*
+     * v1 carried no authorization list, so a v1 file leaves the kernel in the
+     * legacy permissive mode until userspace pushes its own list.
+     */
+    if (version >= 2) {
+        if (kernel_read(fp, &flags, sizeof(flags), &off) != sizeof(flags) ||
+            kernel_read(fp, &grant_count, sizeof(grant_count), &off) != sizeof(grant_count)) {
+            pr_err("dynamic_manager: truncated grants header\n");
+            goto exit;
+        }
+        if (grant_count > KSU_DYNAMIC_MANAGER_MAX_APPS) {
+            pr_err("dynamic_manager: too many grants: %u\n", grant_count);
+            goto exit;
+        }
+        for (i = 0; i < grant_count; i++) {
+            if (kernel_read(fp, &grants[i], sizeof(grants[i]), &off) != sizeof(grants[i]) ||
+                grants[i] >= KSU_PER_USER_RANGE) {
+                pr_err("dynamic_manager: invalid grant entry\n");
+                goto exit;
+            }
+        }
+    }
+
     mutex_lock(&dynamic_manager_lock);
     clear_signs_locked();
+    grants_strict = (flags & DYNAMIC_MANAGER_FILE_FLAG_GRANTS_STRICT) != 0;
 
     while (true) {
         struct dynamic_manager_sign *sign;
@@ -571,10 +752,27 @@ void ksu_dynamic_manager_load(void)
                 app->version_code = sign->version_code;
         }
     }
+
+    /* Re-apply the authorized appids, including ones no scan has seen yet. */
+    for (i = 0; i < grant_count; i++) {
+        grant_app = find_app_locked(grants[i]);
+        if (!grant_app) {
+            grant_app = kzalloc(sizeof(*grant_app), GFP_KERNEL);
+            if (!grant_app) {
+                pr_warn("dynamic_manager: cannot restore grant for %u\n", grants[i]);
+                continue;
+            }
+            grant_app->appid = grants[i];
+            hash_add(dynamic_manager_apps, &grant_app->node, grant_app->appid);
+        }
+        grant_app->granted = true;
+    }
+
     publish_trusted_snapshot_locked();
     mutex_unlock(&dynamic_manager_lock);
 
-    pr_info("dynamic_manager: restored persisted list\n");
+    pr_info("dynamic_manager: restored persisted list (grants %u, strict %d)\n", grant_count,
+            grants_strict);
 
 exit:
     filp_close(fp, 0);

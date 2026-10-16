@@ -172,6 +172,12 @@ struct ksu_dynamic_manager_cmd {
 
 #define KSU_DYNAMIC_MANAGER_FLAG_PRESET (1U << 0)
 #define KSU_DYNAMIC_MANAGER_FLAG_TRUSTED (1U << 1)
+/*
+ * The appid is authorized *and* its signature is registered: only such appids
+ * are published as trusted dynamic managers, so an app that merely shares a
+ * registered certificate is recognized without being honoured.
+ */
+#define KSU_DYNAMIC_MANAGER_FLAG_GRANTED (1U << 2)
 
 struct ksu_dynamic_manager_app {
     __u32 appid; /* Output: application id */
@@ -182,6 +188,16 @@ struct ksu_get_dynamic_managers_cmd {
     __u32 count; /* Input: capacity of apps; Output: number written */
     __u32 total_count; /* Output: total number of tracked apps */
     __aligned_u64 apps; /* Input: array of struct ksu_dynamic_manager_app */
+};
+
+/*
+ * Replace the authorized dynamic-manager appids. Additive command: it reuses no
+ * field of the calls above, so a manager built against uapi 5 keeps working.
+ */
+struct ksu_dynamic_manager_grants_cmd {
+    __u32 count; /* Input: number of appids in appids */
+    __u32 reserved; /* Input: must be 0 */
+    __aligned_u64 appids; /* Input: array of __u32 appids */
 };
 
 static const __u8 KSU_UMOUNT_WIPE = 0; /* ignore everything and wipe list */
@@ -218,5 +234,6 @@ static const __u32 KSU_IOCTL_GET_SULOG_FD = _IOW('K', 20, struct ksu_get_sulog_f
 static const __u32 KSU_IOCTL_DISABLE_ESCAPE_TO_ROOT = _IO('K', 21);
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGERS = _IOC(_IOC_WRITE, 'K', 22, 0);
 static const __u32 KSU_IOCTL_GET_DYNAMIC_MANAGERS = _IOWR('K', 23, struct ksu_get_dynamic_managers_cmd);
+static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS = _IOC(_IOC_WRITE, 'K', 24, 0);
 
 #endif

@@ -34,6 +34,13 @@ void ksu_dynamic_manager_note_scanned(uid_t appid,
 int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs,
                             u32 count, bool *need_rescan);
 
+/*
+ * Replace the authorized appid list. Until the first call the kernel keeps the
+ * legacy rule (every trusted signature is a manager); afterwards only
+ * authorized appids are published, and the list plus that fact are persisted.
+ */
+int ksu_dynamic_manager_set_grants(const uid_t *appids, u32 count);
+
 /* Is (size, hash) in the user-managed trusted signature list? */
 bool ksu_dynamic_manager_is_trusted_sign(u32 size, const char *hash);
 

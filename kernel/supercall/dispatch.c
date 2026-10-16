@@ -803,6 +803,36 @@ static int do_get_dynamic_managers(void __user *arg)
 
     return 0;
 }
+
+static int do_set_dynamic_manager_grants(void __user *arg)
+{
+    struct ksu_dynamic_manager_grants_cmd cmd;
+    uid_t *appids = NULL;
+    int ret;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+
+    if (cmd.reserved || cmd.count > KSU_DYNAMIC_MANAGER_MAX_APPS)
+        return -EINVAL;
+
+    if (cmd.count) {
+        size_t size = sizeof(*appids) * cmd.count;
+
+        appids = kzalloc(size, GFP_KERNEL);
+        if (!appids)
+            return -ENOMEM;
+        if (copy_from_user(appids, (void __user *)(unsigned long)cmd.appids, size)) {
+            kfree(appids);
+            return -EFAULT;
+        }
+    }
+
+    ret = ksu_dynamic_manager_set_grants(appids, cmd.count);
+    kfree(appids);
+
+    return ret;
+}
 #endif // CONFIG_KSU_DYNAMIC_MANAGER
 
 // IOCTL handlers mapping table
@@ -966,6 +996,12 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .name = "GET_DYNAMIC_MANAGERS",
         .handler = do_get_dynamic_managers,
         .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS,
+        .name = "SET_DYNAMIC_MANAGER_GRANTS",
+        .handler = do_set_dynamic_manager_grants,
+        .perm_check = only_root
     },
 #endif
     {
