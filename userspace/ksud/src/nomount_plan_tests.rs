@@ -43,6 +43,10 @@ impl FakeFs {
 }
 
 impl PlanFs for FakeFs {
+    fn canonical_dir(&self, path: &Path) -> Result<Option<PathBuf>> {
+        Ok((self.kind(path)? == EntryKind::Dir).then(|| path.to_path_buf()))
+    }
+
     fn read_dir(&self, dir: &Path) -> Result<Vec<String>> {
         Ok(self.dirs.get(dir).cloned().unwrap_or_default())
     }
@@ -144,14 +148,14 @@ fn lifecycle_marks_skip_a_module() {
 #[test]
 fn an_opaque_directory_is_replaced_without_descending() {
     let fs = base()
-        .dir(&format!("{MODULE}/system"), &["etc"])
-        .dir(&format!("{MODULE}/system/etc"), &["app"])
-        .dir(&format!("{MODULE}/system/etc/app"), &["config.xml"])
+        .present("/product")
+        .dir(&format!("{MODULE}/product"), &["fonts"])
+        .dir(&format!("{MODULE}/product/fonts"), &["sample.ttf"])
         .entry(
-            &format!("{MODULE}/system/etc/app/config.xml"),
+            &format!("{MODULE}/product/fonts/sample.ttf"),
             EntryKind::File,
         )
-        .opaque(&format!("{MODULE}/system/etc/app"));
+        .opaque(&format!("{MODULE}/product/fonts"));
 
     let plan = collect_rules(
         &fs,
@@ -161,8 +165,8 @@ fn an_opaque_directory_is_replaced_without_descending() {
     assert_eq!(
         plan.rules,
         vec![Rule::redirect(
-            "/system/etc/app",
-            format!("{MODULE}/system/etc/app")
+            "/product/fonts",
+            format!("{MODULE}/product/fonts")
         )],
         "a replaced directory redirects to the module copy and its children come from that listing"
     );
@@ -171,18 +175,18 @@ fn an_opaque_directory_is_replaced_without_descending() {
 #[test]
 fn a_replace_marker_replaces_its_directory() {
     let fs = base()
-        .dir(&format!("{MODULE}/system"), &["etc"])
-        .dir(&format!("{MODULE}/system/etc"), &["app"])
+        .present("/product")
+        .dir(&format!("{MODULE}/product"), &["fonts"])
         .dir(
-            &format!("{MODULE}/system/etc/app"),
-            &[REPLACE_MARKER, "config.xml"],
+            &format!("{MODULE}/product/fonts"),
+            &[REPLACE_MARKER, "sample.ttf"],
         )
         .entry(
-            &format!("{MODULE}/system/etc/app/{REPLACE_MARKER}"),
+            &format!("{MODULE}/product/fonts/{REPLACE_MARKER}"),
             EntryKind::File,
         )
         .entry(
-            &format!("{MODULE}/system/etc/app/config.xml"),
+            &format!("{MODULE}/product/fonts/sample.ttf"),
             EntryKind::File,
         );
 
@@ -194,8 +198,8 @@ fn a_replace_marker_replaces_its_directory() {
     assert_eq!(
         plan.rules,
         vec![Rule::redirect(
-            "/system/etc/app",
-            format!("{MODULE}/system/etc/app")
+            "/product/fonts",
+            format!("{MODULE}/product/fonts")
         )]
     );
 }
@@ -281,4 +285,184 @@ fn modules_are_processed_in_a_stable_order() {
         .map(|rule| rule.virtual_path.as_str())
         .collect();
     assert_eq!(order, vec!["/system/a", "/system/z"]);
+}
+
+#[test]
+fn protected_replacements_merge_files_and_never_inject_the_marker() {
+    for target in [
+        "system",
+        "vendor",
+        "odm",
+        "product",
+        "system_ext",
+        "system/lib64",
+        "system/lib",
+        "system/bin",
+        "system/etc",
+    ] {
+        for opaque in [false, true] {
+            let partition = target.split('/').next().unwrap();
+            let mut fs = base().present(&format!("/{partition}"));
+            if let Some((parent, child)) = target.rsplit_once('/') {
+                fs = fs.dir(&format!("{MODULE}/{parent}"), &[child]);
+            }
+            let dir = format!("{MODULE}/{target}");
+            fs = fs
+                .dir(
+                    &dir,
+                    if opaque {
+                        &["libsample.so"]
+                    } else {
+                        &[".replace", "libsample.so"]
+                    },
+                )
+                .entry(&format!("{dir}/libsample.so"), EntryKind::File);
+            if opaque {
+                fs = fs.opaque(&dir);
+            } else {
+                fs = fs.entry(&format!("{dir}/.replace"), EntryKind::File);
+            }
+            let plan = collect_rules(
+                &fs,
+                &config(Path::new(MODULES), Path::new("/"), Path::new("/system")),
+            )
+            .unwrap();
+            assert_eq!(plan.rules.len(), 1, "{target}");
+            assert_eq!(
+                plan.rules[0].virtual_path,
+                format!("/{target}/libsample.so")
+            );
+            assert!(plan.directory_replacements.is_empty());
+            assert!(
+                plan.skipped
+                    .iter()
+                    .any(|(_, reason)| reason == &format!("dir-replace-blocked:/{target}"))
+            );
+        }
+    }
+}
+
+#[test]
+fn nonempty_stock_directory_degrades_to_merge() {
+    for opaque in [false, true] {
+        let fs = base()
+            .present("/product")
+            .dir(&format!("{MODULE}/product"), &["fonts"])
+            .dir(&format!("{MODULE}/product/fonts"), &[".replace", "new"])
+            .entry(&format!("{MODULE}/product/fonts/.replace"), EntryKind::File)
+            .entry(&format!("{MODULE}/product/fonts/new"), EntryKind::File)
+            .dir("/product/fonts", &["stock"]);
+        let fs = if opaque {
+            let mut fs = fs.opaque(&format!("{MODULE}/product/fonts"));
+            fs.dirs.insert(
+                PathBuf::from(format!("{MODULE}/product/fonts")),
+                vec!["new".to_string()],
+            );
+            fs
+        } else {
+            fs
+        };
+        let plan = collect_rules(
+            &fs,
+            &config(Path::new(MODULES), Path::new("/"), Path::new("/system")),
+        )
+        .unwrap();
+        assert_eq!(
+            plan.rules,
+            vec![Rule::redirect(
+                "/product/fonts/new",
+                format!("{MODULE}/product/fonts/new")
+            )]
+        );
+        assert!(
+            plan.skipped
+                .iter()
+                .any(|(_, reason)| reason == "dir-replace-nonempty:/product/fonts")
+        );
+    }
+}
+
+#[test]
+fn empty_stock_directory_allows_allowlisted_replacement() {
+    let fs = base()
+        .present("/product")
+        .dir(&format!("{MODULE}/product"), &["fonts"])
+        .dir(&format!("{MODULE}/product/fonts"), &[".replace"])
+        .dir("/product/fonts", &[]);
+    let plan = collect_rules(
+        &fs,
+        &config(Path::new(MODULES), Path::new("/"), Path::new("/system")),
+    )
+    .unwrap();
+    assert_eq!(
+        plan.rules,
+        vec![Rule::redirect(
+            "/product/fonts",
+            format!("{MODULE}/product/fonts")
+        )]
+    );
+    assert!(plan.directory_replacements.contains("/product/fonts"));
+}
+
+#[test]
+fn unlisted_empty_target_still_merges() {
+    let fs = base()
+        .dir(&format!("{MODULE}/system"), &["etc"])
+        .dir(&format!("{MODULE}/system/etc"), &["foo"])
+        .dir(&format!("{MODULE}/system/etc/foo"), &[".replace", "new"])
+        .entry(&format!("{MODULE}/system/etc/foo/new"), EntryKind::File)
+        .dir("/system/etc/foo", &[]);
+    let plan = collect_rules(
+        &fs,
+        &config(Path::new(MODULES), Path::new("/"), Path::new("/system")),
+    )
+    .unwrap();
+    assert_eq!(plan.rules[0].virtual_path, "/system/etc/foo/new");
+    assert!(plan.directory_replacements.is_empty());
+    assert!(
+        plan.skipped
+            .iter()
+            .any(|(_, reason)| reason == "dir-replace-blocked:/system/etc/foo")
+    );
+}
+
+#[test]
+fn directory_aliases_merge_once_and_cycles_are_bounded() {
+    use std::os::unix::fs::symlink;
+    let temp = tempfile::tempdir().unwrap();
+    let modules = temp.path().join("modules");
+    let module = modules.join("m");
+    let root = temp.path().join("root");
+    std::fs::create_dir_all(module.join("odm/lib64")).unwrap();
+    std::fs::create_dir_all(module.join("system")).unwrap();
+    std::fs::create_dir_all(root.join("odm")).unwrap();
+    std::fs::create_dir_all(root.join("system")).unwrap();
+    std::fs::write(module.join("odm/lib64/liboplusvibratoreffect.so"), b"test").unwrap();
+    symlink("../odm", module.join("system/odm")).unwrap();
+    symlink(".", module.join("odm/loop")).unwrap();
+    symlink("self", module.join("odm/self")).unwrap();
+    let fs = StdFs::new(|_| Ok(false));
+    let system = root.join("system");
+    let cfg = config(&modules, &root, &system);
+    let plan = collect_rules(&fs, &cfg).unwrap();
+    assert_eq!(plan.rules.len(), 1);
+    assert_eq!(
+        plan.rules[0].virtual_path,
+        "/odm/lib64/liboplusvibratoreffect.so"
+    );
+    assert_eq!(
+        plan.rules[0].real_path.as_deref(),
+        module.join("odm/lib64/liboplusvibratoreffect.so").to_str()
+    );
+    assert!(
+        plan.skipped
+            .iter()
+            .any(|(_, reason)| reason.starts_with("directory-cycle-or-depth:"))
+    );
+    assert!(
+        plan.skipped
+            .iter()
+            .any(|(_, reason)| reason.starts_with("symlink-unresolved:"))
+    );
+    assert_eq!(plan.rules, collect_rules(&fs, &cfg).unwrap().rules);
 }

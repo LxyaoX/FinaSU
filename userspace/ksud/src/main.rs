@@ -59,6 +59,7 @@ mod mount_capture;
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod mount_guard;
 mod mount_plan;
+mod mount_ui;
 #[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod nomount;

@@ -81,6 +81,8 @@ mod android {
     /// known to have finished. Finding an earlier boot's record means that step
     /// never finished, so the next boot has to skip it.
     pub const MOUNT_INFLIGHT: &str = concatcp!(WORKING_DIR, "mount_inflight");
+    pub const MOUNT_UI_PENDING: &str = concatcp!(WORKING_DIR, "mount_ui_pending");
+    pub const MOUNT_UI_CONFIG: &str = concatcp!(WORKING_DIR, "mount_ui_guard");
     /// Per-boot mount log, kept small enough to ride along in a bug report.
     pub const MOUNT_LOG: &str = concatcp!(LOG_DIR, "mount.log");
     /// Size the mount log may reach before the previous one is rotated aside.

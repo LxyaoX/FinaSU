@@ -1,19 +1,10 @@
 //! NoMount rule generation from the module directory.
 //!
-//! This replaces the upstream metamodule's `metamount.sh` + `rule-paths.sh`
-//! pair. It walks every mountable module once and produces the ordered rule
-//! list the backend applies, reusing the entry classification style of
-//! [`crate::mount_plan`] so the same cases stay host-testable.
-//!
-//! Deliberate deviation from upstream: for a directory that replaces its target
-//! (an opaque directory or one containing `.replace`) upstream adds a *whiteout*
-//! rule without the directory flag, and the kernel then rejects every child rule
-//! under it with `-ENOTDIR` (`kernel/src/nomount.c`, `nomount_generate_virtual_topology`).
-//! This generator instead redirects the directory itself to the module's copy,
-//! which is what "replace" means and which keeps the children reachable, and
-//! stops descending because the module directory listing already provides them.
+//! Directory links are merged recursively. Directory replacement is restricted
+//! to unprotected targets that are absent or empty.
 
-use std::path::Path;
+use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 
@@ -80,6 +71,12 @@ pub enum EntryKind {
 
 /// Filesystem access, injected so tests can drive every case without root.
 pub trait PlanFs {
+    /// Resolve a directory, following symlinks, or return `None` for other kinds.
+    ///
+    /// # Errors
+    /// Returns an error if resolving the path fails.
+    fn canonical_dir(&self, path: &Path) -> Result<Option<PathBuf>>;
+
     /// Entry names inside `dir`, unsorted.
     ///
     /// # Errors
@@ -118,6 +115,15 @@ impl<F: Fn(&Path) -> Result<bool>> StdFs<F> {
 }
 
 impl<F: Fn(&Path) -> Result<bool>> PlanFs for StdFs<F> {
+    fn canonical_dir(&self, path: &Path) -> Result<Option<PathBuf>> {
+        match std::fs::metadata(path) {
+            Ok(meta) if meta.is_dir() => Ok(Some(std::fs::canonicalize(path)?)),
+            Ok(_) => Ok(None),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(error) => Err(error).with_context(|| format!("resolve {}", path.display())),
+        }
+    }
+
     fn read_dir(&self, dir: &Path) -> Result<Vec<String>> {
         let mut names = Vec::new();
         for entry in std::fs::read_dir(dir).with_context(|| format!("read {}", dir.display()))? {
@@ -194,6 +200,7 @@ impl<'a> PlanConfig<'a> {
 #[derive(Debug, Default, Clone)]
 pub struct Plan {
     pub rules: Vec<Rule>,
+    pub directory_replacements: HashSet<String>,
     /// Module ids that were skipped, with the reason.
     pub skipped: Vec<(String, String)>,
 }
@@ -294,10 +301,18 @@ fn collect_rules_filtered(
             plan.skipped.push((id.clone(), (*mark).to_string()));
             continue;
         }
-        let mut contributed = false;
+        let start = plan.rules.len();
+        let mut walker = Walker {
+            fs,
+            cfg,
+            id: &id,
+            plan: &mut plan,
+            ancestors: HashSet::new(),
+            seen: HashMap::new(),
+        };
         for partition in cfg.partitions {
             let dir = module.join(partition);
-            if fs.kind(&dir)? != EntryKind::Dir {
+            if !matches!(fs.kind(&dir)?, EntryKind::Dir | EntryKind::Symlink) {
                 continue;
             }
             let real = cfg.root.join(partition);
@@ -305,56 +320,128 @@ fn collect_rules_filtered(
             if !fs.exists(&real)? && !fs.exists(&nested)? {
                 continue;
             }
-            contributed |= walk(fs, &dir, partition, &mut plan.rules)?;
+            walker.walk(&dir, partition)?;
         }
-        if !contributed {
+        if plan.rules.len() == start {
             plan.skipped.push((id, "no partition content".to_string()));
         }
     }
     Ok(plan)
 }
 
-/// Walk one partition directory, appending rules in a stable order.
-///
-/// Returns whether anything was contributed.
-fn walk(fs: &impl PlanFs, dir: &Path, relative: &str, rules: &mut Vec<Rule>) -> Result<bool> {
-    let mut names = fs.read_dir(dir)?;
-    names.sort_unstable();
+struct Walker<'a, F> {
+    fs: &'a F,
+    cfg: &'a PlanConfig<'a>,
+    id: &'a str,
+    plan: &'a mut Plan,
+    ancestors: HashSet<PathBuf>,
+    seen: HashMap<String, usize>,
+}
 
-    let replace = names.iter().any(|name| name == REPLACE_MARKER) || fs.is_opaque(dir)?;
-    if replace {
-        // Redirect the directory to the module's copy: the module listing then
-        // serves its children, and the real directory's entries are not merged.
-        rules.push(Rule::redirect(
-            virtual_path(relative),
-            dir.to_string_lossy().to_string(),
-        ));
-        return Ok(true);
+fn protected_directory(path: &str) -> bool {
+    TARGET_PARTITIONS
+        .iter()
+        .any(|part| path == format!("/{part}"))
+        || Path::new(path).file_name().is_some_and(|name| {
+            ["lib64", "lib", "bin", "etc"]
+                .iter()
+                .any(|item| name == *item)
+        })
+}
+
+impl<F: PlanFs> Walker<'_, F> {
+    fn note(&mut self, reason: &str, path: &str) {
+        self.plan
+            .skipped
+            .push((self.id.to_string(), format!("{reason}:{path}")));
     }
 
-    let mut contributed = false;
-    for name in names {
-        let child = dir.join(&name);
-        let child_relative = format!("{relative}/{name}");
-        match fs.kind(&child)? {
-            EntryKind::Dir => {
-                contributed |= walk(fs, &child, &child_relative, rules)?;
-            }
-            EntryKind::File | EntryKind::Symlink => {
-                rules.push(Rule::redirect(
-                    virtual_path(&child_relative),
-                    child.to_string_lossy().to_string(),
-                ));
-                contributed = true;
-            }
-            EntryKind::Whiteout => {
-                rules.push(Rule::whiteout(virtual_path(&child_relative)));
-                contributed = true;
-            }
-            EntryKind::Other => {}
+    fn push(&mut self, rule: Rule) {
+        if let Some(index) = self.seen.get(&rule.virtual_path) {
+            self.plan.rules[*index] = rule;
+        } else {
+            self.seen
+                .insert(rule.virtual_path.clone(), self.plan.rules.len());
+            self.plan.rules.push(rule);
         }
     }
-    Ok(contributed)
+
+    fn walk(&mut self, dir: &Path, relative: &str) -> Result<()> {
+        let target = virtual_path(relative);
+        let canonical = match self.fs.canonical_dir(dir) {
+            Ok(Some(path)) => path,
+            Ok(None) => return Ok(()),
+            Err(_) if self.fs.kind(dir)? == EntryKind::Symlink => {
+                self.note("symlink-unresolved", &target);
+                return Ok(());
+            }
+            Err(error) => return Err(error),
+        };
+        if self.ancestors.len() >= 64 || !self.ancestors.insert(canonical.clone()) {
+            self.note("directory-cycle-or-depth", &target);
+            return Ok(());
+        }
+        let result = self.walk_contents(dir, relative, &target);
+        self.ancestors.remove(&canonical);
+        result
+    }
+
+    fn walk_contents(&mut self, dir: &Path, relative: &str, target: &str) -> Result<()> {
+        let mut names = self.fs.read_dir(dir)?;
+        names.sort_unstable();
+        let replace = names.iter().any(|name| name == REPLACE_MARKER) || self.fs.is_opaque(dir)?;
+        if replace {
+            let stock = self.cfg.root.join(target.trim_start_matches('/'));
+            let blocked = if protected_directory(target) || target != "/product/fonts" {
+                Some("dir-replace-blocked")
+            } else if self.fs.exists(&stock)?
+                && (self.fs.canonical_dir(&stock)?.is_none()
+                    || !self.fs.read_dir(&stock)?.is_empty())
+            {
+                Some("dir-replace-nonempty")
+            } else {
+                None
+            };
+            if let Some(reason) = blocked {
+                self.note(reason, target);
+            } else {
+                self.plan.directory_replacements.insert(target.to_string());
+                self.push(Rule::redirect(target, dir.to_string_lossy().to_string()));
+                return Ok(());
+            }
+        }
+        for name in names {
+            if name == REPLACE_MARKER {
+                continue;
+            }
+            let child = dir.join(&name);
+            let child_relative = format!("{relative}/{name}");
+            let kind = self.fs.kind(&child)?;
+            if matches!(kind, EntryKind::Dir | EntryKind::Symlink) {
+                match self.fs.canonical_dir(&child) {
+                    Ok(Some(_)) => {
+                        self.walk(&child, &child_relative)?;
+                        continue;
+                    }
+                    Err(_) if kind == EntryKind::Symlink => {
+                        self.note("symlink-unresolved", &virtual_path(&child_relative));
+                        continue;
+                    }
+                    Err(error) => return Err(error),
+                    Ok(None) => {}
+                }
+            }
+            match kind {
+                EntryKind::File | EntryKind::Symlink => self.push(Rule::redirect(
+                    virtual_path(&child_relative),
+                    child.to_string_lossy().to_string(),
+                )),
+                EntryKind::Whiteout => self.push(Rule::whiteout(virtual_path(&child_relative))),
+                EntryKind::Dir | EntryKind::Other => {}
+            }
+        }
+        Ok(())
+    }
 }
 
 #[cfg(test)]

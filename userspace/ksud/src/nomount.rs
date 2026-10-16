@@ -16,6 +16,7 @@ use std::io::Write;
 
 use anyhow::{Context, Result, bail, ensure};
 
+#[cfg(target_os = "android")]
 use crate::mount_guard;
 
 /// Kernel/userspace payload size; the kernel maps exactly one page.
@@ -1111,7 +1112,36 @@ fn log_injection(plan: &crate::nomount_plan::Plan, record: &RuntimeRecord, warni
         record.isolated_blocked
     );
     for (path, count) in summarize_targets(&plan.rules) {
-        let _ = writeln!(body, "target={path} files={count}");
+        let _ = writeln!(body, "target={path} rules={count}");
+    }
+    let _ = writeln!(
+        body,
+        "dir_replace={}",
+        plan.rules
+            .iter()
+            .filter(
+                |rule| !rule.whiteout && plan.directory_replacements.contains(&rule.virtual_path)
+            )
+            .count()
+    );
+    for (index, rule) in plan.rules.iter().enumerate() {
+        if body.len() >= crate::defs::MOUNT_LOG_MAX_BYTES as usize / 2 {
+            let _ = writeln!(body, "rule_details_omitted={}", plan.rules.len() - index);
+            break;
+        }
+        let kind = if rule.whiteout {
+            "whiteout"
+        } else if plan.directory_replacements.contains(&rule.virtual_path) {
+            "dir-replace"
+        } else {
+            "file"
+        };
+        let _ = writeln!(
+            body,
+            "{kind}={} -> {}",
+            rule.virtual_path,
+            rule.real_path.as_deref().unwrap_or("-")
+        );
     }
     for (id, reason) in &plan.skipped {
         let _ = writeln!(body, "skipped_module={id} reason={reason}");
@@ -1380,7 +1410,12 @@ pub fn inject(dry_run: bool, json: bool, verbose: bool) -> Result<()> {
                     } else {
                         writeln!(
                             out,
-                            "rule={} -> {}",
+                            "{}={} -> {}",
+                            if plan.directory_replacements.contains(&rule.virtual_path) {
+                                "dir-replace"
+                            } else {
+                                "file"
+                            },
                             rule.virtual_path,
                             rule.real_path.as_deref().unwrap_or("-")
                         )

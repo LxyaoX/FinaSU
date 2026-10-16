@@ -9,6 +9,7 @@
 use std::fmt::Write as _;
 use std::fs;
 use std::io::Write;
+use std::os::fd::AsRawFd;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
@@ -368,7 +369,7 @@ fn guard_reentrancy(boot_id: &str, provider: Provider) -> Result<()> {
 /// Hold an exclusive lock on [`defs::FOLK_MOUNT_LOCK`] for the duration of one
 /// mount attempt, preventing concurrent runs.
 struct MountLock {
-    _file: fs::File,
+    file: fs::File,
 }
 
 impl MountLock {
@@ -383,7 +384,7 @@ impl MountLock {
             .with_context(|| format!("failed to open {}", defs::FOLK_MOUNT_LOCK))?;
         flock(&file, FlockOperation::NonBlockingLockExclusive)
             .context("another Folk Mount attempt is already running")?;
-        Ok(Self { _file: file })
+        Ok(Self { file })
     }
 }
 
@@ -785,6 +786,16 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     // recorded failure of the built-in engine itself only gets reported, since
     // there is nothing safer left to fall back to.
     let mut guard_note = None;
+    let ui_fallback = if provider == Provider::Nomount
+        && crate::nomount::installed_driver_module().is_none()
+        && let Some(note) = crate::mount_ui::previous_failure(&boot_id)
+    {
+        guard_note = Some(note);
+        provider = Provider::Builtin;
+        true
+    } else {
+        false
+    };
     if let Some(record) = mount_guard::read(inflight_path())
         && record.boot_id != boot_id
         && record.provider == provider.as_str()
@@ -801,7 +812,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         }
     }
 
-    let _lock = MountLock::acquire()?;
+    let lock = MountLock::acquire()?;
     guard_reentrancy(&boot_id, provider)?;
 
     write_runtime(&RuntimeRecord {
@@ -836,11 +847,15 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     if crate::mount_capture::enabled().is_some() {
         crate::mount_capture::spawn();
     }
+    if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
+        crate::mount_ui::arm(&boot_id, lock.file.as_raw_fd());
+    }
 
     // A driver that cannot be made usable must not leave the modules
     // unmounted: fall back to the built-in engine and say why.
     let (provider, run, fallback) = match run_provider(provider) {
         ProviderRun::Failed { error, .. } if provider == Provider::Nomount => {
+            crate::mount_ui::clear();
             warn!("nomount: {error:#}; falling back to the built-in engine");
             let note = format!("NoMount unavailable ({error:#}); mounted with the built-in engine");
             (
@@ -854,6 +869,9 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
 
     match run {
         ProviderRun::Ok(outcome) => {
+            if ui_fallback {
+                crate::mount_ui::clear();
+            }
             let result = if outcome.noop { "noop" } else { "mounted" };
             log::debug!(
                 "folk mount: provider={} targets={} skipped={}",
@@ -904,6 +922,16 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
 /// Where the in-flight step record lives on a device.
 fn inflight_path() -> &'static Path {
     Path::new(defs::MOUNT_INFLIGHT)
+}
+
+pub fn record_ui_warning(boot_id: &str, message: &str) {
+    if let Some(mut record) = read_runtime()
+        && record.boot_id == boot_id
+        && record.provider.as_deref() == Some("nomount")
+    {
+        record.warning = Some(message.to_string());
+        let _ = write_runtime(&record);
+    }
 }
 
 fn finish_runtime(
