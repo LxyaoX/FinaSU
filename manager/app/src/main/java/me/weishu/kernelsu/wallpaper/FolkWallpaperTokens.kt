@@ -45,6 +45,16 @@ data class FolkWallpaperTokens(
         WallpaperSurfaceRole.Raised -> raised
         WallpaperSurfaceRole.Overlay -> overlay
     }
+
+    /**
+     * Raised fill for a surface drawn on top of the chrome platform, so that it lands on [raised]
+     * instead of compositing with the platform beneath it.
+     */
+    fun raisedOverChrome(): Color {
+        val under = chrome.alpha
+        val alpha = if (under >= 1f) 0f else (raised.alpha - under) / (1f - under)
+        return raised.tint.copy(alpha = alpha.coerceIn(0f, 1f))
+    }
 }
 
 /**

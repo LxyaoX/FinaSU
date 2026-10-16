@@ -300,7 +300,7 @@ fun SearchAppBar(
                     state = searchBarState,
                     inputField = inputField,
                     colors = SearchBarDefaults.colors(
-                        containerColor = wallpaperTokens?.raised?.fill
+                        containerColor = wallpaperTokens?.raisedOverChrome()
                             ?: MaterialTheme.colorScheme.surfaceContainerHighest
                     ),
                 )
