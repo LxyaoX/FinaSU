@@ -830,6 +830,13 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         warn!("folk mount: could not record the injection step: {e:#}");
     }
 
+    // Armed by hand for a device that keeps failing to boot: a helper outlives
+    // this boot stage and dumps what the kernel was blocked on (see
+    // `mount_capture`).
+    if crate::mount_capture::enabled().is_some() {
+        crate::mount_capture::spawn();
+    }
+
     // A driver that cannot be made usable must not leave the modules
     // unmounted: fall back to the built-in engine and say why.
     let (provider, run, fallback) = match run_provider(provider) {

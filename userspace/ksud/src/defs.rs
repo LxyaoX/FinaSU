@@ -85,6 +85,12 @@ mod android {
     pub const MOUNT_LOG: &str = concatcp!(LOG_DIR, "mount.log");
     /// Size the mount log may reach before the previous one is rotated aside.
     pub const MOUNT_LOG_MAX_BYTES: u64 = 256 * 1024;
+    /// Flag file that arms the opt-in capture of a boot that never finished.
+    pub const MOUNT_CAPTURE_FLAG: &str = concatcp!(WORKING_DIR, "mount_capture");
+    /// Where a capture writes what a stuck boot was doing.
+    pub const MOUNT_CAPTURE_LOG: &str = concatcp!(LOG_DIR, "mount_capture.log");
+    /// Size the capture log may reach before the previous one is rotated aside.
+    pub const MOUNT_CAPTURE_LOG_MAX_BYTES: u64 = 512 * 1024;
 
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";

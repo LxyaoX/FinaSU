@@ -556,6 +556,15 @@ enum Mount {
         /// one of: auto, builtin, metamodule, nomount, off
         mode: String,
     },
+
+    /// Arm or disarm the capture of a boot that never finishes (on|off|dump)
+    Capture {
+        /// one of: on, off, dump
+        action: String,
+        /// seconds to wait before dumping, for `on`
+        #[arg(default_value_t = 150)]
+        seconds: u64,
+    },
 }
 
 #[derive(clap::Subcommand, Debug)]
@@ -1047,6 +1056,7 @@ pub fn run() -> Result<()> {
         Commands::Mount { command } => match command {
             Mount::Status { json } => crate::magic_mount::print_status(json),
             Mount::SetMode { mode } => crate::magic_mount::set_mode(&mode),
+            Mount::Capture { action, seconds } => crate::mount_capture::command(&action, seconds),
         },
         Commands::Nomount { command } => match command {
             Nomount::Status { json } => {

@@ -101,3 +101,19 @@ fn the_mount_log_rotates_instead_of_growing() {
         "first block\nsecond block\n"
     );
 }
+
+#[test]
+fn the_capture_flag_defaults_and_stays_bounded() {
+    // Touching the flag by hand is the documented way to arm the capture, so a
+    // file without a delay still arms it with the default.
+    assert_eq!(parse_capture_delay(""), CAPTURE_DELAY_SECS);
+    assert_eq!(parse_capture_delay("arm me\n"), CAPTURE_DELAY_SECS);
+    assert_eq!(parse_capture_delay("delay=60\n"), 60);
+
+    // Junk and absurd values must not park a helper forever.
+    assert_eq!(parse_capture_delay("delay=soon\n"), CAPTURE_DELAY_SECS);
+    assert_eq!(
+        parse_capture_delay(&format!("delay={}\n", CAPTURE_MAX_DELAY_SECS * 10)),
+        CAPTURE_MAX_DELAY_SECS
+    );
+}

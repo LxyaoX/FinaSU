@@ -53,6 +53,8 @@ mod module_config;
 #[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod module_markers;
+#[cfg(target_os = "android")]
+mod mount_capture;
 #[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod mount_guard;

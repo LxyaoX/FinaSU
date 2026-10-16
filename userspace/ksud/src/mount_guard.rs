@@ -23,6 +23,31 @@ pub enum Stage {
     Inject,
 }
 
+/// How long a capture waits for the boot to finish before it dumps.
+///
+/// The kernel reports a task blocked for 120s on its own, so the default sits
+/// just past that: whatever the kernel noticed is already in the log.
+pub const CAPTURE_DELAY_SECS: u64 = 150;
+
+/// Upper bound for a requested delay, so a typo cannot park a helper for hours.
+pub const CAPTURE_MAX_DELAY_SECS: u64 = 900;
+
+/// Read the capture delay out of a flag file.
+///
+/// A file without a `delay=` line still arms the capture; that is the point of
+/// touching the flag by hand, so the caller only has to know whether it exists.
+#[must_use]
+pub fn parse_capture_delay(content: &str) -> u64 {
+    content
+        .lines()
+        .filter_map(|line| line.split_once('='))
+        .filter(|(key, _)| *key == "delay")
+        .filter_map(|(_, value)| value.trim().parse::<u64>().ok())
+        .next_back()
+        .unwrap_or(CAPTURE_DELAY_SECS)
+        .min(CAPTURE_MAX_DELAY_SECS)
+}
+
 impl Stage {
     #[must_use]
     pub const fn as_str(self) -> &'static str {
