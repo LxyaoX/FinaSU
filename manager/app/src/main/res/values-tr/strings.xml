@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">Yerleşik dizin</string>
     <string name="module_repo_source_cluster">Topluluk depoları</string>
     <string name="module_repo_source_custom">Özel depo</string>
+    <string name="module_repo_source_kernelsu">KernelSU deposu</string>
     <string name="module_repo_pick_repository">Depo seç</string>
     <string name="module_repo_manual_url">Adresi elle girin</string>
     <string name="module_repo_custom_url">Özel depo URL\'si</string>

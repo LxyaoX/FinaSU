@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">الفهرس المدمج</string>
     <string name="module_repo_source_cluster">مستودعات المجتمع</string>
     <string name="module_repo_source_custom">مستودع مخصص</string>
+    <string name="module_repo_source_kernelsu">مستودع KernelSU</string>
     <string name="module_repo_pick_repository">اختر المستودع</string>
     <string name="module_repo_manual_url">إدخال العنوان يدويًا</string>
     <string name="module_repo_custom_url">رابط المستودع المخصص</string>

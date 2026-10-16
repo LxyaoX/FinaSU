@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">Chỉ mục tích hợp</string>
     <string name="module_repo_source_cluster">Thư viện cộng đồng</string>
     <string name="module_repo_source_custom">Thư viện tuỳ chỉnh</string>
+    <string name="module_repo_source_kernelsu">Thư viện KernelSU</string>
     <string name="module_repo_pick_repository">Chọn thư viện</string>
     <string name="module_repo_manual_url">Nhập địa chỉ thủ công</string>
     <string name="module_repo_custom_url">URL thư viện tuỳ chỉnh</string>

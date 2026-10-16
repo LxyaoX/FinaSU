@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">内蔵インデックス</string>
     <string name="module_repo_source_cluster">コミュニティリポジトリ</string>
     <string name="module_repo_source_custom">カスタムリポジトリ</string>
+    <string name="module_repo_source_kernelsu">KernelSU リポジトリ</string>
     <string name="module_repo_pick_repository">リポジトリを選択</string>
     <string name="module_repo_manual_url">アドレスを手動で入力</string>
     <string name="module_repo_custom_url">カスタムリポジトリの URL</string>

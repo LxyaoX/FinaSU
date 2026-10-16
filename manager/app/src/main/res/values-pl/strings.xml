@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">Wbudowany indeks</string>
     <string name="module_repo_source_cluster">Repozytoria społeczności</string>
     <string name="module_repo_source_custom">Własne repozytorium</string>
+    <string name="module_repo_source_kernelsu">Repozytorium KernelSU</string>
     <string name="module_repo_pick_repository">Wybierz repozytorium</string>
     <string name="module_repo_manual_url">Wprowadź adres ręcznie</string>
     <string name="module_repo_custom_url">Adres URL własnego repozytorium</string>

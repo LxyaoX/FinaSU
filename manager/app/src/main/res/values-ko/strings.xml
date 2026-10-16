@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">내장 인덱스</string>
     <string name="module_repo_source_cluster">커뮤니티 리포지토리</string>
     <string name="module_repo_source_custom">사용자 지정 리포지토리</string>
+    <string name="module_repo_source_kernelsu">KernelSU 리포지토리</string>
     <string name="module_repo_pick_repository">리포지토리 선택</string>
     <string name="module_repo_manual_url">주소 직접 입력</string>
     <string name="module_repo_custom_url">사용자 지정 리포지토리 URL</string>

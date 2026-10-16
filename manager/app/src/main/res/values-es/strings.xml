@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">Índice integrado</string>
     <string name="module_repo_source_cluster">Repositorios de la comunidad</string>
     <string name="module_repo_source_custom">Repositorio personalizado</string>
+    <string name="module_repo_source_kernelsu">Repositorio de KernelSU</string>
     <string name="module_repo_pick_repository">Seleccionar repositorio</string>
     <string name="module_repo_manual_url">Introducir dirección manualmente</string>
     <string name="module_repo_custom_url">URL del repositorio personalizado</string>

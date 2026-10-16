@@ -9,7 +9,8 @@ package me.weishu.kernelsu.data.modulestore
 enum class StoreSourceKind(val value: String) {
     OFFICIAL("folk"),
     CLUSTER("mmrl"),
-    CUSTOM("custom");
+    CUSTOM("custom"),
+    KERNELSU("kernelsu");
 
     companion object {
         /** Resolves [value] to a kind, falling back to [OFFICIAL] for unrecognised input. */

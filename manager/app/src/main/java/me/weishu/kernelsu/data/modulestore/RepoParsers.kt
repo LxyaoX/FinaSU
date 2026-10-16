@@ -1,5 +1,6 @@
 package me.weishu.kernelsu.data.modulestore
 
+import java.time.Instant
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -11,6 +12,18 @@ val DEFAULT_REPOSITORY = StoreRepository(
     name = "GMR",
     url = DEFAULT_REPOSITORY_URL,
 )
+
+/** Base URL of the built-in KernelSU module registry. */
+const val KERNELSU_REGISTRY_URL = "https://modules.kernelsu.org/"
+
+/** Registry index that advertises the module list document. */
+const val KERNELSU_INDEX_PATH = "api/v1/index.json"
+
+/** Module list document used when the registry index cannot be read. */
+const val KERNELSU_MODULES_PATH = "api/v1/modules.json"
+
+/** Directory holding one detail document per module. */
+const val KERNELSU_MODULE_DETAIL_PREFIX = "api/v1/modules/"
 
 /** Returns `true` when the receiver is an absolute http(s) URL. */
 internal fun String.isHttpUrl(): Boolean =
@@ -78,6 +91,96 @@ fun parseOfficialModules(json: String, language: String): List<StoreModule> {
     }
     return modules
 }
+
+/**
+ * Resolves the module list document path advertised by the registry index.
+ *
+ * Falls back to [KERNELSU_MODULES_PATH] when the document carries no `modules` field.
+ */
+fun parseKernelSuModulesPath(json: String): String =
+    JSONObject(json).optString("modules", "").trim().ifEmpty { KERNELSU_MODULES_PATH }
+
+/**
+ * Parses the KernelSU registry module list into [StoreModule]s.
+ *
+ * The list document carries only catalogue metadata, so every entry is returned without releases;
+ * the per-module detail document holds the downloadable versions.
+ */
+fun parseKernelSuModules(json: String): List<StoreModule> {
+    val array = JSONObject(json).optJSONArray("modules") ?: return emptyList()
+    val modules = ArrayList<StoreModule>(array.length())
+    for (index in 0 until array.length()) {
+        val item = array.optJSONObject(index) ?: continue
+        val id = item.optString("id", "").trim()
+        if (id.isEmpty()) continue
+        val stable = item.optJSONObject("stable")
+        modules += StoreModule(
+            id = id,
+            name = item.optString("name", "").trim().ifEmpty { id },
+            version = stable?.optString("version", "").orEmpty(),
+            versionCode = stable?.optLong("versionCode", 0L) ?: 0L,
+            author = kernelSuAuthors(item),
+            description = item.optString("summary", "").trim(),
+        )
+    }
+    return modules
+}
+
+/** Parses a KernelSU module detail document, returning `null` when it carries no id. */
+fun parseKernelSuDetail(json: String): StoreModule? {
+    val item = JSONObject(json)
+    val id = item.optString("id", "").trim()
+    if (id.isEmpty()) return null
+    val stable = item.optJSONObject("stable")
+    val releases = parseKernelSuReleases(item.optJSONArray("releases"))
+    return StoreModule(
+        id = id,
+        name = item.optString("name", "").trim().ifEmpty { id },
+        version = stable?.optString("version", "").orEmpty().ifEmpty { releases.firstOrNull()?.version.orEmpty() },
+        versionCode = stable?.optLong("versionCode", 0L) ?: 0L,
+        author = kernelSuAuthors(item),
+        description = item.optString("summary", "").trim(),
+        license = item.optString("license", "").trim().ifEmpty { null },
+        homepage = item.optString("homepage", "").trim().ifEmpty { null },
+        source = item.optJSONObject("source")?.optString("url", "")?.trim()?.ifEmpty { null },
+        support = item.optString("support", "").trim().ifEmpty { null },
+        releases = releases,
+    )
+}
+
+private fun parseKernelSuReleases(array: JSONArray?): List<StoreRelease> {
+    if (array == null) return emptyList()
+    val releases = ArrayList<StoreRelease>(array.length())
+    for (index in 0 until array.length()) {
+        val item = array.optJSONObject(index) ?: continue
+        val url = item.optJSONObject("zip")?.optString("url", "")?.trim().orEmpty()
+        if (!url.isHttpUrl()) continue
+        releases += StoreRelease(
+            version = item.optString("version", "").trim(),
+            versionCode = item.optLong("versionCode", 0L),
+            downloadUrl = url,
+            changelog = stripHtml(item.optString("changelogHtml", "")),
+            timestamp = parseIsoSeconds(item.optString("publishedAt", "")),
+        )
+    }
+    return releases
+}
+
+/** Joins the registry's structured author list into a single display string. */
+private fun kernelSuAuthors(item: JSONObject): String {
+    val array = item.optJSONArray("authors") ?: return ""
+    return (0 until array.length())
+        .mapNotNull { array.optJSONObject(it)?.optString("name", "")?.trim()?.takeIf { name -> name.isNotEmpty() } }
+        .joinToString(", ")
+}
+
+/** Converts an ISO-8601 instant into epoch seconds, which is what the store date formatter expects. */
+private fun parseIsoSeconds(value: String): Double =
+    if (value.isBlank()) 0.0 else runCatching { Instant.parse(value).epochSecond.toDouble() }.getOrDefault(0.0)
+
+/** Reduces an HTML changelog to plain text. */
+private fun stripHtml(html: String): String =
+    html.replace(Regex("<[^>]*>"), " ").replace(Regex("\\s+"), " ").trim()
 
 /** Parses the cluster index (a top-level JSON array) into [StoreRepository]s. */
 fun parseRepositories(json: String): List<StoreRepository> {

@@ -114,7 +114,7 @@ class ModuleRepoViewModel(
     /** Handles a selection from the source switcher. */
     fun selectSourceKind(kind: StoreSourceKind) {
         when (kind) {
-            StoreSourceKind.OFFICIAL -> {
+            StoreSourceKind.OFFICIAL, StoreSourceKind.KERNELSU -> {
                 if (_uiState.value.sourceKind == kind) return
                 settingsRepo.repoSourceKind = kind
                 _uiState.update { it.copy(sourceKind = kind) }

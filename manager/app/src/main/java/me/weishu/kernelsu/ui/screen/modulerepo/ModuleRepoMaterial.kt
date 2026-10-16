@@ -165,6 +165,7 @@ fun ModuleRepoScreenMaterial(
                             StoreSourceKind.OFFICIAL to R.string.module_repo_source_official,
                             StoreSourceKind.CLUSTER to R.string.module_repo_source_cluster,
                             StoreSourceKind.CUSTOM to R.string.module_repo_source_custom,
+                            StoreSourceKind.KERNELSU to R.string.module_repo_source_kernelsu,
                         )
                         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
                             options.forEachIndexed { index, (kind, labelRes) ->

@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">内置星图索引</string>
     <string name="module_repo_source_cluster">社群藏馆</string>
     <string name="module_repo_source_custom">自定义藏馆</string>
+    <string name="module_repo_source_kernelsu">KernelSU 藏馆</string>
     <string name="module_repo_pick_repository">选择藏馆</string>
     <string name="module_repo_manual_url">手动输入地址</string>
     <string name="module_repo_custom_url">自定义藏馆地址</string>

@@ -98,6 +98,7 @@
     <string name="module_repo_source_official">内置索引</string>
     <string name="module_repo_source_cluster">仙界群阁</string>
     <string name="module_repo_source_custom">私设藏经阁</string>
+    <string name="module_repo_source_kernelsu">KernelSU 藏经阁</string>
     <string name="module_repo_pick_repository">择一藏经阁</string>
     <string name="module_repo_manual_url">手书玉简地址</string>
     <string name="module_repo_custom_url">私设藏经阁玉简</string>

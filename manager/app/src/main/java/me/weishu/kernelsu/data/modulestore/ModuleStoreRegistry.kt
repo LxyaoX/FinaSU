@@ -22,6 +22,7 @@ object ModuleStoreRegistry {
         StoreSourceKind.OFFICIAL -> OfficialStoreSource(language)
         StoreSourceKind.CLUSTER -> MmrlClusterSource(repositoryUrl.ifBlank { DEFAULT_REPOSITORY_URL })
         StoreSourceKind.CUSTOM -> CustomRepoSource(customUrl)
+        StoreSourceKind.KERNELSU -> KernelSuStoreSource()
     }
 
     /** Builds the cluster source for an explicit repository URL. */
