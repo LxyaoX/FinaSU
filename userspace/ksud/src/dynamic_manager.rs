@@ -551,6 +551,13 @@ fn authorize_appid(config: &mut Config, appid: u32) -> Result<()> {
 
 /// Authorize one appid, keeping the persisted signature list as it is.
 pub fn grant(uid: u32) -> Result<()> {
+    // Without the authorized-appid list the kernel cannot honour this at all, so
+    // recording it would only mislead the manager about what the device does.
+    ensure!(
+        grants_supported()?,
+        "E{:04}: this kernel does not support the authorized dynamic-manager list",
+        ErrorCode::KernelUnsupported as u32
+    );
     let appid = uid % PER_USER_RANGE;
     mutate_config(|config| {
         authorize_appid(config, appid)?;
@@ -563,6 +570,11 @@ pub fn grant(uid: u32) -> Result<()> {
 /// Revoke one appid. The signature stays registered: it keeps *recognizing* the
 /// app, it just stops honouring it.
 pub fn ungrant(uid: u32) -> Result<()> {
+    ensure!(
+        grants_supported()?,
+        "E{:04}: this kernel does not support the authorized dynamic-manager list",
+        ErrorCode::KernelUnsupported as u32
+    );
     let appid = uid % PER_USER_RANGE;
     mutate_config(|config| {
         let before = config.uids.len();
