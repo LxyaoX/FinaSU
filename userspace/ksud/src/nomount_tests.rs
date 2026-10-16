@@ -615,3 +615,46 @@ fn runtime_record_is_key_value_text() {
         assert!(text.contains(expected), "missing {expected} in {text}");
     }
 }
+
+#[test]
+fn a_load_attempt_that_outlived_its_boot_blocks_the_next_load() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("nomount_load_attempt");
+
+    // Nothing recorded: a load is free to run.
+    assert!(!load_attempt_died(&path));
+    assert!(load_attempt_record(&path).is_none());
+
+    // An attempt recorded in this boot is in flight, not a hang.
+    begin_load_attempt(&path, "android15-6.6").unwrap();
+    assert!(!load_attempt_died(&path));
+    assert_eq!(
+        load_attempt_record(&path).unwrap(),
+        (current_boot_id(), "android15-6.6".to_string())
+    );
+
+    // A load that came back clears its own record.
+    clear_load_attempt(&path);
+    assert!(!load_attempt_died(&path));
+    assert!(load_attempt_record(&path).is_none());
+
+    // A record that survived its boot means that load never returned.
+    std::fs::write(
+        &path,
+        "boot_id=00000000-0000-0000-0000-000000000000\nkmi=android12-5.10\ntime=7\n",
+    )
+    .unwrap();
+    assert!(load_attempt_died(&path));
+    assert_eq!(
+        load_attempt_record(&path).unwrap(),
+        (
+            "00000000-0000-0000-0000-000000000000".to_string(),
+            "android12-5.10".to_string()
+        )
+    );
+
+    // Junk without a boot id cannot be told apart from a live attempt, so it
+    // must not disable NoMount.
+    std::fs::write(&path, "kmi=android12-5.10\n").unwrap();
+    assert!(!load_attempt_died(&path));
+}

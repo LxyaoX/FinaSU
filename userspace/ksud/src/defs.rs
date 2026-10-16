@@ -76,6 +76,10 @@ mod android {
     pub const NOMOUNT_UIDS: &str = concatcp!(WORKING_DIR, "nomount_uids");
     /// Last action that changed NoMount kernel state, for diagnostics.
     pub const NOMOUNT_LAST_ACTION: &str = concatcp!(WORKING_DIR, "nomount_last_action");
+    /// Written right before the embedded NoMount module is loaded and removed as
+    /// soon as the load returns: finding it at the next boot means that load
+    /// never came back, so it must not be repeated automatically.
+    pub const NOMOUNT_LOAD_ATTEMPT: &str = concatcp!(WORKING_DIR, "nomount_load_attempt");
 
     pub const KSU_BACKUP_DIR: &str = WORKING_DIR;
     pub const KSU_BACKUP_FILE_PREFIX: &str = "ksu_backup_";

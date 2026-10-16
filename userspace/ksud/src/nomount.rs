@@ -1003,6 +1003,75 @@ pub fn current_boot_id() -> String {
         .map_or_else(|_| String::new(), |value| value.trim().to_string())
 }
 
+/// Record that the embedded module is about to be loaded, durably.
+///
+/// A load runs inside the kernel: if `module_init` wedges, the call never
+/// returns, the boot never finishes and none of our cleanup code runs. The
+/// record is therefore written and synced *before* the call, and it is the only
+/// way the next boot can tell that a load is what stopped the previous one.
+///
+/// # Errors
+/// Returns an error when the record cannot be written or synced.
+pub fn begin_load_attempt(path: &std::path::Path, kmi: &str) -> Result<()> {
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |since| since.as_secs());
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+    }
+    let mut file =
+        std::fs::File::create(path).with_context(|| format!("create {}", path.display()))?;
+    file.write_all(
+        format!(
+            "boot_id={}\nkmi={}\ntime={stamp}\n",
+            current_boot_id(),
+            kmi.replace('\n', " ")
+        )
+        .as_bytes(),
+    )
+    .with_context(|| format!("write {}", path.display()))?;
+    file.sync_all()
+        .with_context(|| format!("sync {}", path.display()))
+}
+
+/// The boot id and KMI of a recorded load attempt, when one is recorded.
+#[must_use]
+pub fn load_attempt_record(path: &std::path::Path) -> Option<(String, String)> {
+    let content = std::fs::read_to_string(path).ok()?;
+    let mut boot_id = None;
+    let mut kmi = None;
+    for line in content.lines() {
+        let Some((key, value)) = line.split_once('=') else {
+            continue;
+        };
+        match key {
+            "boot_id" => boot_id = Some(value.to_string()),
+            "kmi" => kmi = Some(value.to_string()),
+            _ => {}
+        }
+    }
+    Some((boot_id?, kmi.unwrap_or_else(|| "unknown".to_string())))
+}
+
+/// True when a recorded load attempt was made in an earlier boot.
+///
+/// That attempt never returned: the kernel wedged inside the load, or the device
+/// was reset before it finished. A second attempt has to be a deliberate choice
+/// rather than an automatic part of the next boot.
+#[must_use]
+pub fn load_attempt_died(path: &std::path::Path) -> bool {
+    load_attempt_record(path).is_some_and(|(boot_id, _)| boot_id != current_boot_id())
+}
+
+/// Drop a recorded load attempt; failures only warn.
+pub fn clear_load_attempt(path: &std::path::Path) {
+    match std::fs::remove_file(path) {
+        Ok(()) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => log::warn!("nomount: could not clear {}: {error:#}", path.display()),
+    }
+}
+
 /// Outcome of one injection round, mirroring the per-boot record.
 #[derive(Debug, Clone)]
 pub struct InjectionResult {
@@ -1516,13 +1585,31 @@ pub fn owns_injection() -> Result<bool> {
 /// The loader rewrites vermagic and relocates symbols, so a successful load is
 /// not proof of a working driver: callers must probe afterwards.
 ///
+/// A load that never returns cannot be observed from userspace at all — the
+/// kernel is already gone when the call would come back — so the attempt is
+/// recorded first and the next boot refuses to repeat it (see
+/// [`load_attempt_died`]) instead of hanging the same way again.
+///
 /// # Errors
 /// Returns an error when the KMI cannot be determined, this build carries no
-/// module for it, or the loader refuses the module.
+/// module for it, an earlier load is known to have hung, the attempt cannot be
+/// recorded, or the loader refuses the module.
 #[cfg(target_os = "android")]
 pub fn load_embedded_driver() -> Result<String> {
+    let attempt = load_attempt_path();
     if module_loaded(&std::fs::read_to_string("/proc/modules").unwrap_or_default()) {
+        // Something already loaded it, so no load is in flight any more.
+        clear_load_attempt(attempt);
         return Ok("already loaded".to_string());
+    }
+    if load_attempt_died(attempt) {
+        let (boot_id, recorded_kmi) = load_attempt_record(attempt).unwrap_or_default();
+        bail!(
+            "the load of {recorded_kmi} attempted in boot {boot_id} never returned, so this boot keeps \
+             the built-in engine instead of loading the module again; select NoMount again, or delete \
+             {}, to retry",
+            crate::defs::NOMOUNT_LOAD_ATTEMPT
+        );
     }
     let kmi = crate::boot_patch::get_current_kmi()
         .context("nomount: cannot determine the running KMI")?;
@@ -1530,10 +1617,29 @@ pub fn load_embedded_driver() -> Result<String> {
     let data = crate::assets::get_asset_data(&name)
         .with_context(|| format!("nomount: this build has no module for {kmi}"))?;
     let params = std::ffi::CString::new("").context("nomount: empty module parameters")?;
-    ksuinit::load_module(&data, &params)
-        .with_context(|| format!("nomount: loading {name} failed"))?;
+    begin_load_attempt(attempt, &kmi).context("nomount: cannot record the load attempt")?;
+    let loaded = ksuinit::load_module(&data, &params);
+    // The call returned, so the kernel survived it and the record has done its
+    // job: only a load that hangs leaves it behind for the next boot.
+    clear_load_attempt(attempt);
+    loaded.with_context(|| format!("nomount: loading {name} failed"))?;
     log::info!("nomount: loaded {name}");
     Ok(name)
+}
+
+/// Where the in-flight load record lives on a device.
+#[cfg(target_os = "android")]
+fn load_attempt_path() -> &'static std::path::Path {
+    std::path::Path::new(crate::defs::NOMOUNT_LOAD_ATTEMPT)
+}
+
+/// Forget the recorded load attempt.
+///
+/// Selecting NoMount again is the retry the guard is waiting for, so the record
+/// has to go before the next load can run.
+#[cfg(target_os = "android")]
+pub fn forget_load_attempt() {
+    clear_load_attempt(load_attempt_path());
 }
 
 /// Probe the driver, loading the embedded module first when there is none.

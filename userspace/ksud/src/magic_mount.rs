@@ -154,44 +154,41 @@ struct RuntimeRecord {
 
 /// Read the configured mount mode from [`defs::FOLK_MOUNT_CONFIG`].
 ///
-/// A missing file selects [`MountMode::Nomount`] for a fresh install and
-/// [`MountMode::Auto`] for a device that already mounted modules with an
-/// earlier version, so upgrading never silently stops injecting them. An
-/// unrecognised value falls back to [`MountMode::Auto`] with a warning. Other
-/// I/O errors are returned so an unreadable configuration never silently
-/// selects a provider.
+/// A missing file selects [`MountMode::Auto`] for a fresh install and an upgrade
+/// alike: the built-in engine injects the modules unless an enabled metamodule
+/// asks for the mount stage, which is what every device did before NoMount
+/// existed. NoMount is the one provider that has to load an embedded kernel
+/// module, and a load that wedges the kernel cannot be undone from userspace, so
+/// it stays a deliberate choice. An unrecognised value falls back to
+/// [`MountMode::Auto`] with a warning. Other I/O errors are returned so an
+/// unreadable configuration never silently selects a provider.
 ///
 /// # Errors
 /// Returns an error when the configuration file exists but cannot be read.
 pub fn read_mount_mode() -> Result<MountMode> {
-    let path = Path::new(defs::FOLK_MOUNT_CONFIG);
+    read_mount_mode_at(Path::new(defs::FOLK_MOUNT_CONFIG))
+}
+
+/// [`read_mount_mode`], against a path the caller owns.
+fn read_mount_mode_at(path: &Path) -> Result<MountMode> {
     match fs::read_to_string(path) {
         Ok(content) => Ok(MountMode::parse(&content).unwrap_or_else(|| {
             warn!(
                 "invalid mount mode {:?} in {}, falling back to auto",
                 content.trim(),
-                defs::FOLK_MOUNT_CONFIG
+                path.display()
             );
             MountMode::Auto
         })),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            // An earlier boot left a runtime record, so this device already had
-            // modules injected: keep the previous behaviour instead of switching
-            // the backend behind the user's back.
-            let upgraded = Path::new(defs::FOLK_MOUNT_RUNTIME).exists();
-            let mode = if upgraded {
-                warn!("folk mount: no mode recorded but modules were mounted before; keeping auto");
-                MountMode::Auto
-            } else {
-                MountMode::Nomount
-            };
+            let mode = MountMode::Auto;
             // Record the decision so the default only applies once.
-            if let Err(e) = write_mount_mode(mode) {
+            if let Err(e) = write_mount_mode_at(path, mode) {
                 warn!("folk mount: could not persist the default mode: {e:#}");
             }
             Ok(mode)
         }
-        Err(e) => Err(e).with_context(|| format!("failed to read {}", defs::FOLK_MOUNT_CONFIG)),
+        Err(e) => Err(e).with_context(|| format!("failed to read {}", path.display())),
     }
 }
 
@@ -229,10 +226,12 @@ fn write_atomic(path: &Path, contents: &[u8]) -> Result<()> {
 /// Returns an error when the directory cannot be created or the file cannot be
 /// written, synced and renamed.
 pub fn write_mount_mode(mode: MountMode) -> Result<()> {
-    write_atomic(
-        Path::new(defs::FOLK_MOUNT_CONFIG),
-        format!("{}\n", mode.as_str()).as_bytes(),
-    )
+    write_mount_mode_at(Path::new(defs::FOLK_MOUNT_CONFIG), mode)
+}
+
+/// [`write_mount_mode`], against a path the caller owns.
+fn write_mount_mode_at(path: &Path, mode: MountMode) -> Result<()> {
+    write_atomic(path, format!("{}\n", mode.as_str()).as_bytes())
 }
 
 /// Return `(id, enabled)` for the installed metamodule, if any.
@@ -989,7 +988,14 @@ pub fn print_status(json: bool) -> Result<()> {
 /// Returns an error for an unknown mode token or a failed atomic write.
 pub fn set_mode(mode: &str) -> Result<()> {
     let Some(parsed) = MountMode::parse(mode) else {
-        bail!("invalid mount mode {mode:?}; expected one of: auto, builtin, metamodule");
+        bail!(
+            "invalid mount mode {mode:?}; expected one of: auto, builtin, metamodule, nomount, off"
+        );
     };
+    // Asking for NoMount by hand is also the retry that a load which stopped the
+    // previous boot is waiting for, so the guard must not outlive the request.
+    if parsed == MountMode::Nomount {
+        crate::nomount::forget_load_attempt();
+    }
     write_mount_mode(parsed)
 }
