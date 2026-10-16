@@ -10,8 +10,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.DecayAnimationSpec
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -82,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import me.weishu.kernelsu.ui.animation.FolkAnimatedSlot
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 /** Height reserved for the large search bar, used as the scroll range of its collapse animation. */
@@ -147,9 +146,9 @@ fun SearchAppBar(
         if (!searchBeforeActions) searchIcon()
         // Once the large search bar has been tucked away, offer a small icon to bring it back.
         if (searchScrollBehavior != null) {
-            AnimatedVisibility(visible = isSearchBarCollapsed, enter = fadeIn(), exit = fadeOut()) {
+            FolkAnimatedSlot(visible = isSearchBarCollapsed) {
                 FolkIconButton(
-                    onClick = { searchScrollBehavior.expandSearchBar() },
+                    onClick = { scope.launch { searchScrollBehavior.expandSearchBar() } },
                 ) {
                     Icon(Icons.Filled.Search, contentDescription = null)
                 }
@@ -388,10 +387,10 @@ class SearchAppBarScrollBehavior internal constructor(
         get() = topAppBarScrollBehavior.flingAnimationSpec
 
     /** Reveals the large search bar. */
-    fun expandSearchBar() {
+    suspend fun expandSearchBar() {
         ignoreCurrentScroll = isUserScrollInProgress
         lastSearchBarScrollDelta = 0f
-        searchBarHeightOffset = 0f
+        animateSearchBarTo(0f)
     }
 
     /** Tucks the large search bar away. */
