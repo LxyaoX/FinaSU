@@ -200,6 +200,23 @@ jobs:
           sh "$GITHUB_WORKSPACE/userspace/nomount/build-lkm.sh"
         echo "Size: $(du -h "/github/workspace/out/x86_64/${{ inputs.kmi }}_nomount.ko" | cut -f1)"
 
+    - name: Verify module architectures
+      run: |
+        for arch in aarch64 x86_64; do
+          case "$arch" in
+            aarch64) machine=AArch64 ;;
+            x86_64) machine='Advanced Micro Devices X86-64' ;;
+          esac
+          for module in kernelsu nomount; do
+            path="/github/workspace/out/$arch/${{ inputs.kmi }}_$module.ko"
+            header=$(LC_ALL=C readelf -h "$path")
+            echo "=== $path ==="
+            printf '%s\n' "$header"
+            printf '%s\n' "$header" | grep -Eq 'Class:[[:space:]]+ELF64$'
+            printf '%s\n' "$header" | grep -Eq "Machine:[[:space:]]+$machine\$"
+          done
+        done
+
     - name: Upload x64 module artifacts
       uses: actions/upload-artifact@v7
       with:

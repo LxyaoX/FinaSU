@@ -60,7 +60,31 @@ cp -a "$SRC/." "$build_dir/"
 
 echo "-- building NoMount from $build_dir against $KDIR"
 echo "-- NoMount architecture: $NOMOUNT_ARCH"
-CONFIG_NOMOUNT=m make -C "$KDIR" ARCH="$NOMOUNT_ARCH" LLVM=1 LLVM_IAS=1 M="$build_dir" modules
+
+# Each CI step inherits the image environment, not the previous step's exports.
+# Match the x86_64 KernelSU build without the image's arm64 cross compiler.
+case "$NOMOUNT_ARCH" in
+x86_64)
+    unset ARCH CROSS_COMPILE
+    kmi=$(basename "$KDIR")
+    build_root="$KDIR"
+    if [ "$kmi" = android17-6.18 ]; then
+        output_args="MO=$build_dir"
+    else
+        output_args="src=$build_dir"
+    fi
+    toolchain_args=""
+    ;;
+*)
+    build_root="$KDIR"
+    output_args=""
+    toolchain_args="LLVM=1 LLVM_IAS=1"
+    ;;
+esac
+
+echo "-- building against $build_root ${output_args:-in place}"
+# shellcheck disable=SC2086  # the output and toolchain arguments are deliberate word splits
+CONFIG_NOMOUNT=m make -C "$build_root" $output_args ARCH="$NOMOUNT_ARCH" $toolchain_args M="$build_dir" modules
 
 ko="$build_dir/nomount.ko"
 [ -f "$ko" ] || { echo "nomount.ko was not produced in $build_dir" >&2; exit 1; }
