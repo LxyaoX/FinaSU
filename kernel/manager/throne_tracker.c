@@ -90,6 +90,21 @@ static struct list_head apk_path_hash_list = LIST_HEAD_INIT(apk_path_hash_list);
 static bool ksu_force_manager_scan;
 
 /*
+ * Drop every cached APK path hash so the next search_manager() scores all
+ * candidates again instead of silently skipping them. Must be called with
+ * throne_lock held: the list is walked by search_manager() as well.
+ */
+static void clear_apk_path_cache(void)
+{
+    struct apk_path_hash *pos, *n;
+
+    list_for_each_entry_safe (pos, n, &apk_path_hash_list, list) {
+        list_del(&pos->list);
+        kfree(pos);
+    }
+}
+
+/*
  * Serializes every manager scan. The forced path (ioctl/worker) and the
  * packages.list observer both traverse the shared apk_path_hash_list and the
  * force flag, so they must not run concurrently. The lock also makes the
@@ -466,6 +481,18 @@ void track_throne_force(void)
      * observer scan cannot clear a request that just arrived.
      */
     mutex_lock(&throne_lock);
+    /*
+     * Drop the path cache before the scan. search_manager() skips every APK
+     * whose path is already cached, so a signature registered after the first
+     * scan would keep hitting "cached" and stay unevaluated: register-then-
+     * rescan could only take effect after a reboot or a reinstall. The clear
+     * belongs here rather than in do_track_throne()'s force branch because the
+     * forced request also lands in the "no manager crowed yet" branch, which
+     * runs the same cached search. A bail-out further down (unparsable
+     * packages.list) leaves the cache empty, which only costs the next scan one
+     * extra pass.
+     */
+    clear_apk_path_cache();
     ksu_force_manager_scan = true;
     do_track_throne(false);
     mutex_unlock(&throne_lock);
