@@ -41,11 +41,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -76,9 +76,11 @@ import me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.component.material.SliderCommitEffect
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
+import me.weishu.kernelsu.ui.component.material.snapToPercent
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.settings.ClearMediaRow
 import me.weishu.kernelsu.ui.screen.settings.MediaFileRow
@@ -152,6 +154,10 @@ data class WallpaperScreenActions(
     val onSetSurfaceToggle: (SurfaceId, SurfaceField, Boolean) -> Unit,
     val onSetSurfaceFlag: (SurfaceId, SurfaceFlag, Boolean) -> Unit,
     val onSetSurfaceScalar: (SurfaceId, SurfaceField, Float) -> Unit,
+    /** Persists the wallpaper (and its surfaces) after a live drag; the setters above only touch memory. */
+    val onCommitWallpaper: () -> Unit,
+    /** The video volume lives in [VisualMediaConfig], not in the wallpaper store. */
+    val onCommitVideoVolume: () -> Unit,
     val onPickSurfaceImage: (SurfaceId) -> Unit,
     val onClearSurfaceImage: (SurfaceId) -> Unit,
     val onExport: () -> Unit,
@@ -379,28 +385,23 @@ fun WallpaperScreen() {
             scope.launch { snackbarHost.showSnackbar(resources.getString(R.string.wallpaper_removed)) }
         },
         onSetOpacity = {
-            WallpaperConfig.updateOpacity(it)
-            WallpaperConfig.save(context)
+            WallpaperConfig.updateOpacity(snapToPercent(it))
         },
         onSetBlur = {
-            WallpaperConfig.updateBlur(it)
-            WallpaperConfig.save(context)
+            WallpaperConfig.updateBlur(it.roundToInt().toFloat())
         },
         onSetDim = {
-            WallpaperConfig.updateDim(it)
-            WallpaperConfig.save(context)
+            WallpaperConfig.updateDim(snapToPercent(it))
         },
         onToggleDualDim = {
             WallpaperConfig.updateDualDimEnabled(it)
             WallpaperConfig.save(context)
         },
         onSetDayDim = {
-            WallpaperConfig.updateDayDim(it)
-            WallpaperConfig.save(context)
+            WallpaperConfig.updateDayDim(snapToPercent(it))
         },
         onSetNightDim = {
-            WallpaperConfig.updateNightDim(it)
-            WallpaperConfig.save(context)
+            WallpaperConfig.updateNightDim(snapToPercent(it))
         },
         onToggleUseWallpaperColor = { enabled ->
             WallpaperConfig.updateUseWallpaperColor(enabled)
@@ -441,7 +442,6 @@ fun WallpaperScreen() {
         onClearVideo = { scope.launch { VisualMediaConfig.clear(context, true) } },
         onSetVideoVolume = {
             VisualMediaConfig.videoVolume = it
-            VisualMediaConfig.save(context)
         },
         onSetSurfaceToggle = { id, field, value ->
             SurfaceStore.update(id) { it.withToggle(field, value) }
@@ -453,8 +453,9 @@ fun WallpaperScreen() {
         },
         onSetSurfaceScalar = { id, field, value ->
             SurfaceStore.update(id) { it.withScalar(field, value.coerceIn(0f, 1f)) }
-            WallpaperConfig.save(context)
         },
+        onCommitWallpaper = { WallpaperConfig.save(context) },
+        onCommitVideoVolume = { VisualMediaConfig.save(context) },
         onPickSurfaceImage = { id ->
             pendingSurface = id
         },
@@ -530,9 +531,12 @@ fun WallpaperScreenMaterial(
                         if (state.videoEnabled) {
                             add { MediaFileRow(state.videoFilename) { actions.onPickVideo() } }
                             add {
-                                MediaSlider(stringResource(R.string.media_volume), state.videoVolume) {
-                                    actions.onSetVideoVolume(it)
-                                }
+                                MediaSlider(
+                                    title = stringResource(R.string.media_volume),
+                                    value = state.videoVolume,
+                                    onValueChange = { actions.onSetVideoVolume(it) },
+                                    onCommit = actions.onCommitVideoVolume,
+                                )
                             }
                             if (state.videoFilename != null) {
                                 add { ClearMediaRow { actions.onClearVideo() } }
@@ -648,6 +652,7 @@ fun WallpaperScreenMaterial(
                                 value = state.opacity,
                                 range = 0f..1f,
                                 onValueChange = actions.onSetOpacity,
+                                onCommit = actions.onCommitWallpaper,
                             )
                             SliderSetting(
                                 icon = Icons.Filled.BlurOn,
@@ -656,6 +661,7 @@ fun WallpaperScreenMaterial(
                                 value = state.blur,
                                 range = 0f..50f,
                                 onValueChange = actions.onSetBlur,
+                                onCommit = actions.onCommitWallpaper,
                                 format = { "${it.roundToInt()} dp" },
                             )
                         }
@@ -666,6 +672,7 @@ fun WallpaperScreenMaterial(
                                 value = state.dayDim,
                                 range = 0f..1f,
                                 onValueChange = actions.onSetDayDim,
+                                onCommit = actions.onCommitWallpaper,
                             )
                             SliderSetting(
                                 icon = Icons.Filled.Contrast,
@@ -673,6 +680,7 @@ fun WallpaperScreenMaterial(
                                 value = state.nightDim,
                                 range = 0f..1f,
                                 onValueChange = actions.onSetNightDim,
+                                onCommit = actions.onCommitWallpaper,
                             )
                         } else {
                             SliderSetting(
@@ -682,6 +690,7 @@ fun WallpaperScreenMaterial(
                                 value = state.dim,
                                 range = 0f..1f,
                                 onValueChange = actions.onSetDim,
+                                onCommit = actions.onCommitWallpaper,
                             )
                         }
                     }
@@ -754,17 +763,27 @@ fun WallpaperScreenMaterial(
     }
 }
 
+/**
+ * A wallpaper setting driven by a slider.
+ *
+ * The caller owns [value], so a drag updates the setting on every frame and the whole app previews
+ * it live; [onCommit] only persists once the gesture has settled. [format] is what the row shows, so
+ * the value is snapped to the same grid before it is stored.
+ */
 @Composable
 private fun SliderSetting(
     title: String,
     value: Float,
     range: ClosedFloatingPointRange<Float>,
     onValueChange: (Float) -> Unit,
+    onCommit: () -> Unit,
     icon: ImageVector? = null,
     summary: String? = null,
     format: (Float) -> String = { "${(it * 100).roundToInt()}%" },
 ) {
-    val sliderState = rememberSliderState(value = value, trackRange = range)
+    val sliderState = remember(range) { SliderState(value = value, trackRange = range) }
+    if (sliderState.value != value) sliderState.value = value
+    SliderCommitEffect(value, onCommit)
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -785,7 +804,7 @@ private fun SliderSetting(
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = format(sliderState.value),
+                text = format(value),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -799,7 +818,8 @@ private fun SliderSetting(
         }
         Slider(
             state = sliderState,
-            onValueChangeFinished = { onValueChange(sliderState.value) },
+            onValueChange = onValueChange,
+            onValueChangeFinished = { onCommit() },
             modifier = Modifier.fillMaxWidth(),
         )
     }

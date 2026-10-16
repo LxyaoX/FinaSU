@@ -62,30 +62,30 @@ fun AdvancedTitleSettings(modifier: Modifier = Modifier) {
         item { MediaFileRow(filename) { picker.launch("image/*") } }
         item(visible = enabled) {
             MediaSlider(
-                stringResource(R.string.media_day_opacity),
-                VisualMediaConfig.titleDayOpacity,
-                Icons.Rounded.LightMode,
-            ) {
-                VisualMediaConfig.titleDayOpacity = it; VisualMediaConfig.save(context)
-            }
+                title = stringResource(R.string.media_day_opacity),
+                value = VisualMediaConfig.titleDayOpacity,
+                icon = Icons.Rounded.LightMode,
+                onValueChange = { VisualMediaConfig.titleDayOpacity = it },
+                onCommit = { VisualMediaConfig.save(context) },
+            )
         }
         item(visible = enabled) {
             MediaSlider(
-                stringResource(R.string.media_night_opacity),
-                VisualMediaConfig.titleNightOpacity,
-                Icons.Rounded.DarkMode,
-            ) {
-                VisualMediaConfig.titleNightOpacity = it; VisualMediaConfig.save(context)
-            }
+                title = stringResource(R.string.media_night_opacity),
+                value = VisualMediaConfig.titleNightOpacity,
+                icon = Icons.Rounded.DarkMode,
+                onValueChange = { VisualMediaConfig.titleNightOpacity = it },
+                onCommit = { VisualMediaConfig.save(context) },
+            )
         }
         item(visible = enabled) {
             MediaSlider(
-                stringResource(R.string.media_dim),
-                VisualMediaConfig.titleDim,
-                Icons.Rounded.Contrast,
-            ) {
-                VisualMediaConfig.titleDim = it; VisualMediaConfig.save(context)
-            }
+                title = stringResource(R.string.media_dim),
+                value = VisualMediaConfig.titleDim,
+                icon = Icons.Rounded.Contrast,
+                onValueChange = { VisualMediaConfig.titleDim = it },
+                onCommit = { VisualMediaConfig.save(context) },
+            )
         }
         item(visible = enabled) {
             SegmentedSliderItem(
@@ -94,9 +94,8 @@ fun AdvancedTitleSettings(modifier: Modifier = Modifier) {
                 value = VisualMediaConfig.titleOffsetX,
                 valueRange = -2f..2f,
                 valueText = { "${(it * 100).toInt()} dp" },
-                onValueChangeFinished = {
-                    VisualMediaConfig.titleOffsetX = it; VisualMediaConfig.save(context)
-                },
+                onValueChange = { VisualMediaConfig.titleOffsetX = it },
+                onValueChangeFinished = { VisualMediaConfig.save(context) },
             )
         }
         item(visible = filename != null) { ClearMediaRow { scope.launch { VisualMediaConfig.clear(context, false) } } }

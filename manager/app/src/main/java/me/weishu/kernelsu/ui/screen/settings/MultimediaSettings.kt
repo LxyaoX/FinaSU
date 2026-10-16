@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,6 +37,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedItemContainer
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.component.material.snapToPercent
 
 private val MediaGroupModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
 
@@ -56,9 +58,16 @@ fun MultimediaCategoryContent() {
             FeedbackScope(VibrationConfig.scope) { VibrationConfig.setScopeValue(it); VibrationConfig.save(context) }
         }
         item(visible = VibrationConfig.isVibrationEnabled) {
-            MediaSlider(stringResource(R.string.media_intensity), VibrationConfig.vibrationIntensity) {
-                VibrationConfig.setIntensityValue(it); VibrationConfig.save(context); VibrationManager.vibrate(context)
-            }
+            MediaSlider(
+                title = stringResource(R.string.media_intensity),
+                value = VibrationConfig.vibrationIntensity,
+                onValueChange = { VibrationConfig.setIntensityValue(it) },
+                // The tick plays once the thumb settles rather than on every frame of the drag.
+                onCommit = {
+                    VibrationConfig.save(context)
+                    VibrationManager.vibrate(context)
+                },
+            )
         }
     }
 }
@@ -98,9 +107,15 @@ private fun MusicSettingsSection() {
             }
         }
         item(visible = MusicConfig.isMusicEnabled) {
-            MediaSlider(stringResource(R.string.media_volume), MusicConfig.volume) {
-                MusicConfig.setVolumeValue(it); MusicConfig.save(context); MusicManager.updateVolume(it)
-            }
+            MediaSlider(
+                title = stringResource(R.string.media_volume),
+                value = MusicConfig.volume,
+                onValueChange = {
+                    MusicConfig.setVolumeValue(it)
+                    MusicManager.updateVolume(it)
+                },
+                onCommit = { MusicConfig.save(context) },
+            )
         }
         item(visible = MusicConfig.isMusicEnabled && MusicConfig.musicFilename != null) {
             SegmentedListItem(onClick = { MusicManager.toggle() }, headlineContent = {
@@ -210,10 +225,25 @@ internal fun ClearMediaRow(onClick: () -> Unit) {
     )
 }
 
+/**
+ * A media setting driven by a slider.
+ *
+ * A drag updates the setting on every frame, so a volume move is heard while the thumb travels;
+ * [onCommit] only persists — and plays a preview — once the gesture has settled. The value settles
+ * on the whole percent the row shows, so the label always names the value that was stored.
+ */
 @Composable
-internal fun MediaSlider(title: String, value: Float, icon: ImageVector? = null, onChange: (Float) -> Unit) {
+internal fun MediaSlider(
+    title: String,
+    value: Float,
+    icon: ImageVector? = null,
+    onValueChange: (Float) -> Unit,
+    onCommit: () -> Unit,
+) {
     SegmentedSliderItem(icon = icon, title = title, value = value, valueRange = 0f..1f,
-        valueText = { "${(it * 100).toInt()}%" }, onValueChangeFinished = onChange)
+        valueText = { "${(it * 100).roundToInt()}%" },
+        onValueChange = { onValueChange(snapToPercent(it)) },
+        onValueChangeFinished = { onCommit() })
 }
 
 private fun mediaTime(milliseconds: Int): String = "%d:%02d".format(milliseconds / 60000, milliseconds / 1000 % 60)

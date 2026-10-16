@@ -16,8 +16,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import kotlinx.coroutines.delay
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.modulebanner.BannerApiClient
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
@@ -37,13 +34,11 @@ import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.component.material.snapToPercent
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
-
-// The slider edits whole percents so the stored value and the label can never disagree.
-private fun snapToPercent(value: Float): Float = (value * 100f).roundToInt() / 100f
 
 @Composable
 fun ModuleCardSettingsSection() {
@@ -197,16 +192,6 @@ fun ModuleBannerSettingsSection() {
                 onValueChange = { ModuleBannerConfig.editCustomOpacity(snapToPercent(it)) },
                 onValueChangeFinished = { ModuleBannerConfig.persist() },
             )
-            // The surrounding scroll container can take a gesture over mid-drag, in which case the
-            // slider never reports that it finished. A short debounce still writes the value the
-            // user settled on, and leaving the page flushes whatever is left.
-            LaunchedEffect(ModuleBannerConfig.customOpacity) {
-                delay(400)
-                ModuleBannerConfig.persist()
-            }
-            DisposableEffect(Unit) {
-                onDispose { ModuleBannerConfig.persist() }
-            }
         }
     }
 

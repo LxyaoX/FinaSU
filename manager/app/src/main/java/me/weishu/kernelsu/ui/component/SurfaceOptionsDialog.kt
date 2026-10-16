@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
+import me.weishu.kernelsu.ui.component.material.snapToPercent
 import me.weishu.kernelsu.ui.screen.wallpaper.SurfaceCallbacks
 import me.weishu.kernelsu.ui.screen.wallpaper.surfaceRows
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
@@ -79,9 +80,9 @@ fun SurfaceOptionsDialog(
             WallpaperConfig.save(context)
         },
         onSlider = { field, value ->
-            SurfaceStore.update(surfaceId) { it.withScalar(field, value.coerceIn(0f, 1f)) }
-            WallpaperConfig.save(context)
+            SurfaceStore.update(surfaceId) { it.withScalar(field, snapToPercent(value).coerceIn(0f, 1f)) }
         },
+        onSliderCommit = { WallpaperConfig.save(context) },
         onPickImage = { if (!isSaving) request = surfaceId },
         onClearImage = {
             if (!isSaving) scope.launch { WallpaperManager.clearSurfaceImage(context, surfaceId) }

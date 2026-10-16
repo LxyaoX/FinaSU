@@ -7,6 +7,7 @@ import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.component.material.snapToPercent
 import me.weishu.kernelsu.ui.screen.home.LocalHomeLayoutStyle
 import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
 import me.weishu.kernelsu.wallpaper.surface.SurfaceDescriptor
@@ -30,6 +31,7 @@ class SurfaceCallbacks(
     val onToggle: (SurfaceField, Boolean) -> Unit,
     val onFlagChange: (SurfaceFlag, Boolean) -> Unit,
     val onSlider: (SurfaceField, Float) -> Unit,
+    val onSliderCommit: () -> Unit,
     val onPickImage: () -> Unit,
     val onClearImage: () -> Unit,
 )
@@ -98,7 +100,8 @@ fun surfaceRows(
                     value = config.scalar(row.field),
                     valueRange = 0f..1f,
                     valueText = percentText,
-                    onValueChangeFinished = { callbacks.onSlider(row.field, it) },
+                    onValueChange = { callbacks.onSlider(row.field, it) },
+                    onValueChangeFinished = { callbacks.onSliderCommit() },
                 )
             }
 
@@ -111,7 +114,8 @@ fun surfaceRows(
                             value = config.scalar(row.dayField),
                             valueRange = 0f..1f,
                             valueText = percentText,
-                            onValueChangeFinished = { callbacks.onSlider(row.dayField, it) },
+                            onValueChange = { callbacks.onSlider(row.dayField, it) },
+                            onValueChangeFinished = { callbacks.onSliderCommit() },
                         )
                     }
                     add {
@@ -121,7 +125,8 @@ fun surfaceRows(
                             value = config.scalar(row.nightField),
                             valueRange = 0f..1f,
                             valueText = percentText,
-                            onValueChangeFinished = { callbacks.onSlider(row.nightField, it) },
+                            onValueChange = { callbacks.onSlider(row.nightField, it) },
+                            onValueChangeFinished = { callbacks.onSliderCommit() },
                         )
                     }
                 } else {
@@ -132,7 +137,8 @@ fun surfaceRows(
                             value = config.scalar(row.singleField),
                             valueRange = 0f..1f,
                             valueText = percentText,
-                            onValueChangeFinished = { callbacks.onSlider(row.singleField, it) },
+                            onValueChange = { callbacks.onSlider(row.singleField, it) },
+                            onValueChangeFinished = { callbacks.onSliderCommit() },
                         )
                     }
                 }
@@ -170,7 +176,8 @@ fun surfaceRows(
 private fun surfaceCallbacks(id: SurfaceId, actions: WallpaperScreenActions): SurfaceCallbacks = SurfaceCallbacks(
     onToggle = { field, value -> actions.onSetSurfaceToggle(id, field, value) },
     onFlagChange = { flag, value -> actions.onSetSurfaceFlag(id, flag, value) },
-    onSlider = { field, value -> actions.onSetSurfaceScalar(id, field, value) },
+    onSlider = { field, value -> actions.onSetSurfaceScalar(id, field, snapToPercent(value)) },
+    onSliderCommit = { actions.onCommitWallpaper() },
     onPickImage = { actions.onPickSurfaceImage(id) },
     onClearImage = { actions.onClearSurfaceImage(id) },
 )

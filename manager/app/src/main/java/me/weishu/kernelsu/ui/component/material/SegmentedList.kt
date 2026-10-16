@@ -43,6 +43,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -86,6 +88,7 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.zIndex
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
@@ -640,6 +643,38 @@ fun SegmentedSwitchItem(
 }
 
 /**
+ * Rounds [value] to the whole percent a percent slider's label shows, so the stored setting and the
+ * label can never drift apart and a drag never writes float noise.
+ */
+fun snapToPercent(value: Float): Float = (value * 100f).roundToInt() / 100f
+
+/**
+ * Commits a [value] that has stopped changing, and flushes whatever is still pending on the way out.
+ *
+ * A surrounding scroll container can take a gesture over mid-drag, in which case the slider never
+ * reports that it finished. A short debounce still commits the value the user settled on, and
+ * leaving the composition writes a change that never settled at all — the video/image rows that
+ * gate a slider are toggled off or the page is popped mid-gesture. A value that never moved, which
+ * includes the one the row opens with, is never written.
+ */
+@Composable
+fun SliderCommitEffect(value: Float, commit: () -> Unit) {
+    // Both are re-read at call time: the effects below outlive the composition they were started in.
+    val currentCommit by rememberUpdatedState(commit)
+    val currentValue by rememberUpdatedState(value)
+    var committed by remember { mutableStateOf(value) }
+    LaunchedEffect(value) {
+        if (value == committed) return@LaunchedEffect
+        delay(400)
+        currentCommit()
+        committed = value
+    }
+    DisposableEffect(Unit) {
+        onDispose { if (currentValue != committed) currentCommit() }
+    }
+}
+
+/**
  * A settings row with a slider.
  *
  * Pass [onValueChange] when the caller owns the value (FolkPatch's shape): the thumb, the label and
@@ -676,6 +711,8 @@ fun SegmentedSliderItem(
                     // The caller owns both the thumb and label; no saved slider value may override it.
                     val state = remember(valueRange) { SliderState(value = value, trackRange = valueRange) }
                     if (state.value != value) state.value = value
+                    // A release normally reports itself; this covers the gesture the scroll container took over.
+                    SliderCommitEffect(value) { onValueChangeFinished(state.value) }
                     Slider(
                         state = state,
                         onValueChange = onValueChange,
