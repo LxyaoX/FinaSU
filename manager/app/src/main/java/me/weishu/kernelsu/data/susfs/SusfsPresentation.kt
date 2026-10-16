@@ -2,7 +2,7 @@ package me.weishu.kernelsu.data.susfs
 
 import org.json.JSONObject
 
-/** A receipt from FolkSU, not an inventory of kernel or third-party rules. */
+/** A receipt from FinaSU, not an inventory of kernel or third-party rules. */
 data class SusfsApplyReport(
     val status: String,
     val applied: List<String>,

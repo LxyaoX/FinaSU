@@ -33,15 +33,15 @@ typedef struct {
 
 #ifdef CONFIG_KSU_DYNAMIC_MANAGER
 /*
- * Only FolkSU's own release key is trusted by default. Every third-party
+ * Only FinaSU's own release key is trusted by default. Every third-party
  * manager below is recognized but never auto-authorized: the user has to opt
  * each candidate in through the dynamic manager interface.
  */
-#ifndef FOLKSU_TRUSTED_SIZE
-#define FOLKSU_TRUSTED_SIZE EXPECTED_SIZE
+#ifndef FINASU_TRUSTED_SIZE
+#define FINASU_TRUSTED_SIZE EXPECTED_SIZE
 #endif
-#ifndef FOLKSU_TRUSTED_HASH
-#define FOLKSU_TRUSTED_HASH EXPECTED_HASH
+#ifndef FINASU_TRUSTED_HASH
+#define FINASU_TRUSTED_HASH EXPECTED_HASH
 #endif
 
 /* Bit i selects the i-th preset row (0xff keeps all of them). */
@@ -50,7 +50,7 @@ typedef struct {
 #endif
 
 static apk_sign_key_t apk_sign_keys[] = {
-    { FOLKSU_TRUSTED_SIZE, FOLKSU_TRUSTED_HASH, APK_SIGN_FLAG_TRUSTED, "FolkSU" },
+    { FINASU_TRUSTED_SIZE, FINASU_TRUSTED_HASH, APK_SIGN_FLAG_TRUSTED, "FinaSU" },
 #if (KSU_PRESET_MANAGER_MASK & 0x01)
     { 0x033b, "c371061b19d8c7d7d6133c6a9bafe198fa944e50c1b31c9d8daa8d7f1fc2d2d6", 0, "KernelSU" },
 #endif
@@ -81,7 +81,7 @@ static apk_sign_key_t apk_sign_keys[] = {
 static apk_sign_key_t apk_sign_keys[] = {
     { EXPECTED_SIZE, EXPECTED_HASH, APK_SIGN_FLAG_TRUSTED, "KernelSU" },
 #ifdef EXPECTED_SIZE2
-    { EXPECTED_SIZE2, EXPECTED_HASH2, APK_SIGN_FLAG_TRUSTED, "FolkSU" },
+    { EXPECTED_SIZE2, EXPECTED_HASH2, APK_SIGN_FLAG_TRUSTED, "FinaSU" },
 #endif
 };
 #endif

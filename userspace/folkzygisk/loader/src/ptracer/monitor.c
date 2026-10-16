@@ -849,7 +849,7 @@ void sigchld_listener_stop() {
   sigchld_process_count = 0;
 }
 
-/* FolkSU adaptation: boot-scoped atomic state, never mutate module metadata. */
+/* FinaSU adaptation: boot-scoped atomic state, never mutate module metadata. */
 static char boot_id[64];
 static bool monitor_ready;
 
@@ -956,7 +956,7 @@ void init_monitor() {
 
   if (!prepare_environment()) exit(1);
 
-  /* FolkSU: lifetime lock; children must not inherit it across exec. */
+  /* FinaSU: lifetime lock; children must not inherit it across exec. */
   int lock_fd = open(FOLKZYGISK_MONITOR_LOCK, O_CREAT | O_RDWR | O_CLOEXEC | O_NOFOLLOW, 0600);
   if (lock_fd < 0 || flock(lock_fd, LOCK_EX | LOCK_NB) != 0) exit(1);
 

@@ -15,7 +15,7 @@ import java.io.File
 /**
  * How the application renders text.
  *
- * [APP_DEFAULT] uses the font bundled with FolkSU, [SYSTEM_DEFAULT] leaves the platform font in
+ * [APP_DEFAULT] uses the font bundled with FinaSU, [SYSTEM_DEFAULT] leaves the platform font in
  * place and [CUSTOM] uses a font the user imported.
  */
 enum class FontMode {

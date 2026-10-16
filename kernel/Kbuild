@@ -208,21 +208,21 @@ $(info -- KernelSU Manager signature size2: $(KSU_EXPECTED_SIZE2))
 $(info -- KernelSU Manager signature hash2: $(KSU_EXPECTED_HASH2))
 endif
 
-# Trusted FolkSU manager slot: prefer the release slot2 when present, else slot1.
-ifndef FOLKSU_TRUSTED_SIZE
+# Trusted FinaSU manager slot: prefer the release slot2 when present, else slot1.
+ifndef FINASU_TRUSTED_SIZE
 ifeq ($(KSU_SECOND_SIGNATURE_RELEASE),1)
 ifdef KSU_EXPECTED_SIZE2
-FOLKSU_TRUSTED_SIZE := $(KSU_EXPECTED_SIZE2)
-FOLKSU_TRUSTED_HASH := $(KSU_EXPECTED_HASH2)
+FINASU_TRUSTED_SIZE := $(KSU_EXPECTED_SIZE2)
+FINASU_TRUSTED_HASH := $(KSU_EXPECTED_HASH2)
 endif
 endif
 endif
-ifndef FOLKSU_TRUSTED_SIZE
-FOLKSU_TRUSTED_SIZE := $(KSU_EXPECTED_SIZE)
-FOLKSU_TRUSTED_HASH := $(KSU_EXPECTED_HASH)
+ifndef FINASU_TRUSTED_SIZE
+FINASU_TRUSTED_SIZE := $(KSU_EXPECTED_SIZE)
+FINASU_TRUSTED_HASH := $(KSU_EXPECTED_HASH)
 endif
-ccflags-y += -DFOLKSU_TRUSTED_SIZE=$(FOLKSU_TRUSTED_SIZE)
-ccflags-y += -DFOLKSU_TRUSTED_HASH=\"$(FOLKSU_TRUSTED_HASH)\"
+ccflags-y += -DFINASU_TRUSTED_SIZE=$(FINASU_TRUSTED_SIZE)
+ccflags-y += -DFINASU_TRUSTED_HASH=\"$(FINASU_TRUSTED_HASH)\"
 
 # Recognition-only preset managers; bit mask selects which rows are compiled in.
 ifndef KSU_PRESET_MANAGER_MASK

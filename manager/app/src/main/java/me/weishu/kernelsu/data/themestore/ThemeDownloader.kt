@@ -27,7 +27,7 @@ import org.json.JSONObject
  * 30%; the preview failing is not fatal. Downloads can be paused, resumed (HTTP `Range`) and
  * cancelled, and every finished theme writes a `theme_meta.json` so it can be listed offline.
  *
- * Ported from FolkPatch's `ThemeDownloader`, minus its external-storage backup: FolkSU keeps themes
+ * Ported from FolkPatch's `ThemeDownloader`, minus its external-storage backup: FinaSU keeps themes
  * inside its own private storage.
  */
 class ThemeDownloader(private val context: Context) {

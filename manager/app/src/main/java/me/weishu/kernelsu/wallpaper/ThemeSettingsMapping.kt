@@ -39,7 +39,7 @@ internal object ThemeSettingsMapping {
         val mode = ColorMode.fromValue(repo.themeMode)
         val color = colors.entries.firstOrNull { it.value == repo.keyColor }?.key
         json.put("customColor", color ?: "indigo")
-        // Arbitrary FolkSU seeds have no FP catalog token. Keep the exact value in an extension.
+        // Arbitrary FinaSU seeds have no FP catalog token. Keep the exact value in an extension.
         json.put("folksu_keyColor", repo.keyColor)
         json.put("nightModeEnabled", mode.isDark)
         json.put("nightModeFollowSys", mode.isSystem)

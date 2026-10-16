@@ -1,6 +1,6 @@
 //! Dynamic-manager signature persistence and kernel replay.
 //!
-//! FolkSU's dynamic-manager trust model keeps a volatile table of user-claimed
+//! FinaSU's dynamic-manager trust model keeps a volatile table of user-claimed
 //! signatures in the kernel. This module owns the userspace half: it extracts
 //! APK v2 certificate signatures, persists the user's list as JSON at
 //! [`defs::DYNAMIC_MANAGER_PATH`] with mode 0600 and pushes the table back to

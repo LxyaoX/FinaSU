@@ -1,4 +1,4 @@
-# FolkSU engine-only build; upstream component Makefiles retain attribution.
+# FinaSU engine-only build; upstream component Makefiles retain attribution.
 include common.mk
 
 BUILD_DIR := $(abspath $(BUILD_DIR))

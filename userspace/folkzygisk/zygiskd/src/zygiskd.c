@@ -397,7 +397,7 @@ void zygiskd_start(char *restrict argv[]) {
 
     switch (action) {
       case ZygoteInjected: {
-        /* FolkSU: associate acknowledgements with the actual socket peer. */
+        /* FinaSU: associate acknowledgements with the actual socket peer. */
         struct ucred peer;
         socklen_t peer_size = sizeof(peer);
         if (getsockopt(client_fd, SOL_SOCKET, SO_PEERCRED, &peer, &peer_size) != 0

@@ -148,7 +148,7 @@ void ksu_get_existence(struct root_impl_state *state) {
 
   ksu_uses_new_ksuctl = true;
 
-  /* FolkSU: do not silently claim kernel_umount ownership. The built-in
+  /* FinaSU: do not silently claim kernel_umount ownership. The built-in
    * provider queries ownership per specialization instead of changing the
    * user's kernel policy or requiring restoration after daemon failure. */
 

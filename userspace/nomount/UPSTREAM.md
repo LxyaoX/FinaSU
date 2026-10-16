@@ -1,10 +1,10 @@
 # NoMount upstream provenance
 
-NoMount is vendored into FolkSU so that the kernel module is built by this
+NoMount is vendored into FinaSU so that the kernel module is built by this
 repository's own pipeline instead of being downloaded from upstream releases.
 This mirrors how FolkZygisk vendors ReZygisk under `userspace/folkzygisk`.
 
-Only the kernel-side sources are imported here. FolkSU reimplements the
+Only the kernel-side sources are imported here. FinaSU reimplements the
 userspace control path (the `nm` CLI's keyring payload protocol) in Rust inside
 `userspace/ksud`, and generates injection rules from the module directory in
 Rust, so no upstream shell scripts or WebUI are imported.
@@ -25,14 +25,14 @@ Rust, so no upstream shell scripts or WebUI are imported.
   | `LICENSE` | `LICENSE` | `3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986` |
 
 All imported files are byte-identical to upstream. No copyright notice has been
-replaced or added inside them; FolkSU attribution is not applied to upstream
+replaced or added inside them; FinaSU attribution is not applied to upstream
 files.
 
 ## Deliberately not imported
 
 - `module/*.sh` (`customize.sh`, `metainstall.sh`, `metamount.sh`,
   `post-fs-data.sh`, `rule-paths.sh`, `service.sh`, `boot-completed.sh`):
-  FolkSU's built-in backend performs driver loading, rule generation and UID
+  FinaSU's built-in backend performs driver loading, rule generation and UID
   filtering itself.
 - `module/webroot/**`: the built-in backend ships its own manager UI instead of
   a module WebUI.
@@ -40,7 +40,7 @@ files.
   reimplemented in Rust. This also avoids shipping a GPL-3 binary and the
   `/data/adb/ksu/bin/nm` symlink the upstream installer relies on.
 - `kernel/setup.sh`: it patches a full GKI source tree (`fs/Kconfig`,
-  `fs/Makefile`) for in-tree integration. FolkSU builds NoMount as an
+  `fs/Makefile`) for in-tree integration. FinaSU builds NoMount as an
   out-of-tree module, so this script is not vendored.
 
 ## License mapping
@@ -56,10 +56,10 @@ Upstream splits its licenses by directory and carries no SPDX identifiers:
 
 Upstream source files contain no copyright headers, so provenance rests on the
 repository notice and the pinned commit above. Do not advertise the vendored
-part as GPL-3-only. FolkSU releases must keep both license texts and provide
+part as GPL-3-only. FinaSU releases must keep both license texts and provide
 matching source for the exact revision they build.
 
-Files authored by FolkSU in this directory (`UPSTREAM.md`, `NOTICE`,
+Files authored by FinaSU in this directory (`UPSTREAM.md`, `NOTICE`,
 `.gitignore`, `build-lkm.sh`) are not upstream files. `build-lkm.sh` carries
 `SPDX-License-Identifier: GPL-2.0-only` because it mirrors upstream's LKM build
 steps and builds GPL-2.0-only code.
@@ -68,7 +68,7 @@ Release source obligations are already met by the existing per-target source
 tarball (`.github/workflows/ksud.yml` runs `git archive HEAD`, attached by
 `release.yml`), which contains this directory verbatim.
 
-## FolkSU modifications
+## FinaSU modifications
 
 None applied to the imported files as of the pinned revision. Any local change
 must be recorded here with its rationale and kept minimal, so that re-syncing
@@ -92,12 +92,12 @@ The upstream `kernel/src/Makefile` appends a commit count to
 `NOMOUNT_VERSION` only when the source tree's enclosing git repository has an
 origin URL containing `nomount`. Inside this repository that condition is
 false, so the built module reports the plain base version (`21` for v2.1.1).
-FolkSU's driver check therefore compares against the base version, not a commit
+FinaSU's driver check therefore compares against the base version, not a commit
 count.
 
 ## Open items
 
-- `android17-6.18` is in FolkSU's KMI matrix but is not in upstream's test
+- `android17-6.18` is in FinaSU's KMI matrix but is not in upstream's test
   matrix; compiling NoMount for it is unverified.
 - Upstream's LKM workflow strips page-pinner symbols from the DDK headers before
   building; the same workaround is needed here.

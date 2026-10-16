@@ -1,4 +1,4 @@
-//! FolkSU-owned SUSFS management. Never installs ksu_susfs or edits module configs.
+//! FinaSU-owned SUSFS management. Never installs ksu_susfs or edits module configs.
 #![cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod abi;
 mod apply;
@@ -13,9 +13,9 @@ pub use model::Config;
 
 #[derive(Debug, Clone, Copy, clap::Subcommand)]
 pub enum Command {
-    /// Query the root-only control ABI and the FolkSU management state
+    /// Query the root-only control ABI and the FinaSU management state
     Status,
-    /// Export the independent, versioned FolkSU configuration
+    /// Export the independent, versioned FinaSU configuration
     Export,
     /// Validate and atomically save JSON from stdin; does not apply it
     Import,

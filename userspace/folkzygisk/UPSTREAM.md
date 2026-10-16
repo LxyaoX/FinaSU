@@ -1,6 +1,6 @@
 # FolkZygisk upstream provenance
 
-FolkZygisk is FolkSU's built-in adaptation of ReZygisk. Upstream source and
+FolkZygisk is FinaSU's built-in adaptation of ReZygisk. Upstream source and
 contributor notices are retained; this directory does not contain Zygisk Next.
 
 External provider recognition uses module IDs, not display names. Zygisk Next,
@@ -24,19 +24,19 @@ No NyaZygisk code is imported by this integration.
 
 Original authors include The PerformanC Organization and ThePedroo; see
 individual source headers and the upstream repositories for contributions.
-No copyright notices have been replaced with FolkSU attribution.
+No copyright notices have been replaced with FinaSU attribution.
 
 ## Retained license terms
 
 ReZygisk's LICENSE contains GPLv3 while NOTICE says AGPLv3-or-later.
 Both files are preserved verbatim, not silently rewritten. CSOLoader is AGPLv3.
-Do not advertise the combined engine as GPL-only. FolkSU retains both license
+Do not advertise the combined engine as GPL-only. FinaSU retains both license
 texts and all original notices; release approval does not rewrite upstream terms
 or claim that the discrepancy was resolved by upstream. Binary releases must
 provide matching modified source, vendored dependencies and build instructions.
-FolkSU modifications recorded below were made on 2026-10-11.
+FinaSU modifications recorded below were made on 2026-10-11.
 
-## FolkSU modifications
+## FinaSU modifications
 
 - Added standalone engine-only build and staging targets. These do not install
   a module, run its installer or start injection.

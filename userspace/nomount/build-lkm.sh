@@ -3,7 +3,7 @@
 #
 # Builds the vendored NoMount module inside an Android DDK container and drops
 # the stripped module at $NOMOUNT_OUT. Invoked by build.sh and by
-# .github/workflows/ddk-lkm.yml; it is a FolkSU-authored file, not upstream
+# .github/workflows/ddk-lkm.yml; it is a FinaSU-authored file, not upstream
 # (see UPSTREAM.md).
 #
 # The vendored sources are never written to: the module is compiled from a copy

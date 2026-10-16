@@ -4,7 +4,7 @@
 # ShellCheck's subshell-scope notes (SC2030/SC2031) do not apply here.
 # shellcheck disable=SC2030,SC2031
 #
-# FolkSU build driver - a local mirror of the GitHub Actions pipeline.
+# FinaSU build driver - a local mirror of the GitHub Actions pipeline.
 #
 #   .github/workflows/build-lkm.yml       build-lkm       -> ./build.sh lkm
 #   .github/workflows/ksud.yml            build-ksud      -> ./build.sh ksud
@@ -343,7 +343,7 @@ build_repack() {
 
 usage() {
     cat <<'EOF'
-FolkSU build driver
+FinaSU build driver
 
 usage: ./build.sh <step> [step...]
 

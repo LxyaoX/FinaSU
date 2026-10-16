@@ -88,7 +88,7 @@ import me.weishu.kernelsu.ui.viewmodel.ThemeStoreViewModel
  * a top search bar, author/source/type filters, a download flow and a jump to the local themes.
  *
  * Downloaded themes are applied through [ThemeStoreViewModel.applyTheme], which reuses the app's
- * existing `.fpt` importer, so anything shown here is already in FolkSU's own theme format.
+ * existing `.fpt` importer, so anything shown here is already in FinaSU's own theme format.
  */
 @Composable
 fun ThemeStoreScreen() {

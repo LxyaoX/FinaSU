@@ -1,4 +1,4 @@
-/* FolkSU adaptation of ReZygisk: shared built-in engine/runtime paths.
+/* FinaSU adaptation of ReZygisk: shared built-in engine/runtime paths.
  * Upstream copyright and license notices remain in LICENSE/NOTICE.
  */
 #ifndef FOLKZYGISK_PATHS_H

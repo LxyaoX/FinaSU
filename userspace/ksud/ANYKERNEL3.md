@@ -8,7 +8,7 @@ installer output and offers reboot only after successful completion.
 
 - No slot override is applied. The ZIP's scripts determine the partitions and
   slots actually written; this is not a sandbox or a current-slot guarantee.
-- FolkSU does not install or update ksud after flashing.
+- FinaSU does not install or update ksud after flashing.
 - Packages must contain root `anykernel.sh`, `tools/` entries and exactly one
   `META-INF/com/google/android/update-binary`. Module ZIPs, duplicate entries
   and absolute or parent-traversing entry names are rejected.
@@ -27,7 +27,7 @@ installer output and offers reboot only after successful completion.
 ZIP scripts execute with root privileges. Structural validation does not prove
 that a package is safe or device-compatible. A failed installer may already
 have written partitions, and exit status zero does not guarantee bootability.
-FolkSU's existing boot-image backup may not cover all modified partitions.
+FinaSU's existing boot-image backup may not cover all modified partitions.
 Prepare device-specific recovery images before use.
 
 ## Build

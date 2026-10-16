@@ -48,7 +48,7 @@ release) takes over the update prompt for everyone.
 1. Confirm a clean tree and that the release commit is on the remote. The local branch is named `main`
    but tracks `origin/master` with `push.default=upstream`, so publish it with a plain `git push`;
    `git push origin main` would create a second remote branch instead of updating `master`.
-2. Tag and push: `git tag -a v0.1.0 -m "FolkSU v0.1.0" && git push origin v0.1.0`.
+2. Tag and push: `git tag -a v0.1.0 -m "FinaSU v0.1.0" && git push origin v0.1.0`.
 3. Wait for the `Release` workflow (LKM and NoMount via DDK, the Sui payload, ksuinit, ksud for three
    Android ABIs plus the desktop targets, manager APK, repack and resign, then the GitHub release).
 4. Write the release notes. The body is the changelog shown in the manager's update dialog; an empty
