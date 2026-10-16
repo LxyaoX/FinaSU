@@ -78,12 +78,14 @@ import me.weishu.kernelsu.ui.component.security.LocalAppUnlocked
 import me.weishu.kernelsu.ui.component.security.LocalAppAuthenticator
 import me.weishu.kernelsu.ui.component.security.rememberAuthenticationSession
 import me.weishu.kernelsu.ui.component.bottombar.BottomBar
+import me.weishu.kernelsu.ui.component.bottombar.BottomBarDestination
 import me.weishu.kernelsu.ui.component.bottombar.FloatingBar
 import me.weishu.kernelsu.ui.component.bottombar.FloatingBarConfig
 import me.weishu.kernelsu.ui.component.bottombar.LocalFloatingBarReservedHeight
 import me.weishu.kernelsu.ui.component.bottombar.LocalFloatingBarVisible
 import me.weishu.kernelsu.ui.component.bottombar.LocalIsFloatingNavMode
 import me.weishu.kernelsu.ui.component.bottombar.MainPagerState
+import me.weishu.kernelsu.ui.component.bottombar.NavBarVisibilityConfig
 import me.weishu.kernelsu.ui.component.bottombar.NavMode
 import me.weishu.kernelsu.ui.component.bottombar.NavModeConfig
 import me.weishu.kernelsu.ui.component.bottombar.NavigationBadgeState
@@ -502,9 +504,18 @@ fun MainScreen(
 ) {
     val navController = LocalNavigator.current
     val useNavigationRail = useNavigationRail()
-    val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { MainPagerConfig.PAGE_COUNT })
+    val navVisibilityRevision = NavBarVisibilityConfig.revision.collectAsStateWithLifecycle().value
+    val destinations = remember(navVisibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
+    // The persisted page is a destination, not a pager slot: hiding a destination moves the slot of
+    // everything after it, while the destination the user was on has to stay put.
+    val initialDestination = MainPagerConfig.coercePage(initialPage)
+    val pagerState = rememberPagerState(
+        initialPage = destinations.indexOfFirst { it.ordinal == initialDestination }.coerceAtLeast(0),
+        pageCount = { destinations.size },
+    )
     val mainPagerState = rememberMainPagerState(
         pagerState = pagerState,
+        destinations = destinations,
         animatePageChanges = !useNavigationRail,
     )
     val isFullFeatured = useFullFeaturedLayout()
@@ -584,12 +595,18 @@ fun MainScreen(
     // anything scoped to the page (the wallpaper layer) follows the gesture instead of arriving a
     // beat late.
     LaunchedEffect(livePage) {
-        onPageChanged(livePage)
+        destinations.getOrNull(livePage)?.let { onPageChanged(it.ordinal) }
     }
 
     val currentPage = mainPagerState.pagerState.currentPage
     LaunchedEffect(currentPage) {
         mainPagerState.syncPage()
+    }
+
+    // A destination that was hidden releases its slot; the others move up instead of the user
+    // being thrown to another page.
+    LaunchedEffect(destinations) {
+        mainPagerState.syncToDestinations()
     }
 
     MainScreenBackHandler(mainPagerState, navController)
@@ -644,12 +661,13 @@ fun MainScreen(
                     ),
                 ) { page ->
                     val isCurrentPage = page == settledPage
-                    when (page) {
-                        0 -> if (contentReady || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount)
-                        1 -> if (contentReady || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
-                        2 -> if (contentReady || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
-                        3 -> if (contentReady || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
-                        4 -> if (contentReady || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)
+                    when (destinations.getOrNull(page)) {
+                        BottomBarDestination.Home -> if (contentReady || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount)
+                        BottomBarDestination.Plugin -> if (contentReady || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.SuperUser -> if (contentReady || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.Module -> if (contentReady || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.Setting -> if (contentReady || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)
+                        null -> Unit
                     }
                 }
             }
@@ -746,7 +764,8 @@ private fun MainScreenBackHandler(
 ) {
     val isPagerBackHandlerEnabled by remember {
         derivedStateOf {
-            navController.current() is Route.Main && navController.backStackSize() == 1 && mainState.selectedPage != 0
+            navController.current() is Route.Main && navController.backStackSize() == 1 &&
+                mainState.selectedDestination != BottomBarDestination.Home
         }
     }
 
@@ -756,7 +775,7 @@ private fun MainScreenBackHandler(
         state = navEventState,
         isBackEnabled = isPagerBackHandlerEnabled,
         onBackCompleted = {
-            mainState.animateToPage(0)
+            mainState.animateToDestination(BottomBarDestination.Home)
         }
     )
 }

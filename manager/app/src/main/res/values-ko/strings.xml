@@ -602,6 +602,10 @@
     <string name="settings_navigation_badge_summary">탐색 표시줄에 권한이 부여된 앱과 활성화된 모듈 수를 표시합니다</string>
     <string name="settings_nav_custom_icons">사용자 지정 탐색 아이콘</string>
     <string name="settings_nav_custom_icons_summary">하단 탐색 아이콘에 자신의 이미지를 사용합니다</string>
+    <string name="settings_nav_layout_title">탐색 레이아웃</string>
+    <string name="settings_show_plugin">플러그인 표시</string>
+    <string name="settings_show_superuser">슈퍼유저 표시</string>
+    <string name="settings_show_module">모듈 표시</string>
     <string name="settings_floating_bar">플로팅 탐색 표시줄</string>
     <string name="settings_floating_bar_summary">하단 표시줄을 플로팅 알약 형태로 분리합니다</string>
     <string name="settings_floating_bar_style">스타일</string>

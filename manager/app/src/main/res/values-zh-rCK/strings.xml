@@ -611,6 +611,10 @@
     <string name="settings_navigation_badge_summary">在导航栏摆出已授权菜数和开着招牌菜的道数</string>
     <string name="settings_nav_custom_icons">自个儿配底部导航图</string>
     <string name="settings_nav_custom_icons_summary">拿自个儿的图换底部导航标</string>
+    <string name="settings_nav_layout_title">导航栏布局设置</string>
+    <string name="settings_show_plugin">显示配菜</string>
+    <string name="settings_show_superuser">显示首席大厨</string>
+    <string name="settings_show_module">显示招牌菜</string>
     <string name="settings_floating_bar">飘着的导航栏</string>
     <string name="settings_floating_bar_summary">把底栏拆出来变成一颗飘着的胶囊</string>
     <string name="settings_floating_bar_style">样式</string>

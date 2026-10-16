@@ -61,6 +61,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarDestination
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarIconConfig
 import me.weishu.kernelsu.ui.component.bottombar.FloatingBarConfig
+import me.weishu.kernelsu.ui.component.bottombar.NavBarVisibilityConfig
 import me.weishu.kernelsu.ui.component.bottombar.NavMode
 import me.weishu.kernelsu.ui.component.bottombar.NavModeConfig
 import me.weishu.kernelsu.ui.component.material.FolkIconButton
@@ -122,6 +123,7 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
     }
 
     NavCustomIconsSection()
+    NavLayoutSection()
     NavModeSection()
 }
 
@@ -249,6 +251,37 @@ private fun NavCustomIconsSection() {
                             },
                         )
                     }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun NavLayoutSection() {
+    val revision by NavBarVisibilityConfig.revision.collectAsState()
+    val visibility = remember(revision) {
+        NavBarVisibilityConfig.hideable.associateWith { NavBarVisibilityConfig.isVisible(it) }
+    }
+
+    SegmentedColumn(
+        modifier = SectionModifier,
+        title = stringResource(R.string.settings_nav_layout_title),
+        content = buildList<@Composable () -> Unit> {
+            NavBarVisibilityConfig.hideable.forEach { destination ->
+                add {
+                    SegmentedSwitchItem(
+                        icon = destination.iconNotSelected,
+                        title = stringResource(
+                            when (destination) {
+                                BottomBarDestination.Plugin -> R.string.settings_show_plugin
+                                BottomBarDestination.SuperUser -> R.string.settings_show_superuser
+                                else -> R.string.settings_show_module
+                            }
+                        ),
+                        checked = visibility[destination] == true,
+                        onCheckedChange = { NavBarVisibilityConfig.setVisible(destination, it) },
+                    )
                 }
             }
         }

@@ -602,6 +602,10 @@
     <string name="settings_navigation_badge_summary">Hiển thị số lượng ứng dụng được cấp phép và số lượng module được kích hoạt trên thanh điều hướng.</string>
     <string name="settings_nav_custom_icons">Biểu tượng điều hướng tuỳ chỉnh</string>
     <string name="settings_nav_custom_icons_summary">Dùng hình ảnh của riêng bạn cho các biểu tượng điều hướng dưới cùng</string>
+    <string name="settings_nav_layout_title">Bố cục điều hướng</string>
+    <string name="settings_show_plugin">Hiện plugin</string>
+    <string name="settings_show_superuser">Hiện Superuser</string>
+    <string name="settings_show_module">Hiện module</string>
     <string name="settings_floating_bar">Thanh điều hướng nổi</string>
     <string name="settings_floating_bar_summary">Tách thanh dưới cùng thành một viên nổi</string>
     <string name="settings_floating_bar_style">Kiểu</string>

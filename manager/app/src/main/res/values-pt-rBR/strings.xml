@@ -604,6 +604,10 @@
     <string name="settings_navigation_badge_summary">Mostrar a contagem de apps autorizados e módulos ativados na barra de navegação</string>
     <string name="settings_nav_custom_icons">Ícones de navegação personalizados</string>
     <string name="settings_nav_custom_icons_summary">Usar suas próprias imagens para os ícones da barra de navegação inferior</string>
+    <string name="settings_nav_layout_title">Layout da navegação</string>
+    <string name="settings_show_plugin">Mostrar plugin</string>
+    <string name="settings_show_superuser">Mostrar SuperUsuário</string>
+    <string name="settings_show_module">Mostrar módulo</string>
     <string name="settings_floating_bar">Barra de navegação flutuante</string>
     <string name="settings_floating_bar_summary">Destacar a barra inferior como uma pílula flutuante</string>
     <string name="settings_floating_bar_style">Estilo</string>

@@ -602,6 +602,10 @@
     <string name="settings_navigation_badge_summary">許可されたアプリと有効なモジュールの数をナビゲーションバーに表示します</string>
     <string name="settings_nav_custom_icons">カスタムナビゲーションアイコン</string>
     <string name="settings_nav_custom_icons_summary">下部ナビゲーションのアイコンに独自の画像を使用します</string>
+    <string name="settings_nav_layout_title">ナビゲーションのレイアウト</string>
+    <string name="settings_show_plugin">プラグインを表示</string>
+    <string name="settings_show_superuser">Superuser を表示</string>
+    <string name="settings_show_module">モジュールを表示</string>
     <string name="settings_floating_bar">フローティングナビゲーションバー</string>
     <string name="settings_floating_bar_summary">下部バーを分離してフローティングピルにします</string>
     <string name="settings_floating_bar_style">スタイル</string>

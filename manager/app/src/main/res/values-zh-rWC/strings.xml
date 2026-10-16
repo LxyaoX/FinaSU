@@ -611,6 +611,10 @@
     <string name="settings_navigation_badge_summary">于导航仙阵现出已授权凡器与已启仙符之数</string>
     <string name="settings_nav_custom_icons">自定导航道印</string>
     <string name="settings_nav_custom_icons_summary">以自绘之图易导航道印</string>
+    <string name="settings_nav_layout_title">导航仙阵布局</string>
+    <string name="settings_show_plugin">现出法宝</string>
+    <string name="settings_show_superuser">现出登仙至尊</string>
+    <string name="settings_show_module">现出仙符</string>
     <string name="settings_floating_bar">悬浮导航仙阵</string>
     <string name="settings_floating_bar_summary">将底栏化为悬浮仙丸</string>
     <string name="settings_floating_bar_style">样式</string>

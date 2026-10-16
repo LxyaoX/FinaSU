@@ -606,6 +606,10 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="settings_navigation_badge_summary">Pokazuj liczbę aplikacji z przyznanym dostępem i włączonych modułów na pasku nawigacji</string>
     <string name="settings_nav_custom_icons">Własne ikony nawigacji</string>
     <string name="settings_nav_custom_icons_summary">Używaj własnych obrazów jako ikon dolnej nawigacji</string>
+    <string name="settings_nav_layout_title">Układ nawigacji</string>
+    <string name="settings_show_plugin">Pokaż wtyczkę</string>
+    <string name="settings_show_superuser">Pokaż superużytkownika</string>
+    <string name="settings_show_module">Pokaż moduły</string>
     <string name="settings_floating_bar">Pływający pasek nawigacji</string>
     <string name="settings_floating_bar_summary">Oddziel dolny pasek jako pływającą pigułkę</string>
     <string name="settings_floating_bar_style">Styl</string>

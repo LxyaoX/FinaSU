@@ -611,6 +611,10 @@
     <string name="settings_navigation_badge_summary">在導覽列顯示已授權應用程式與已啟用模組的數量</string>
     <string name="settings_nav_custom_icons">自訂導覽圖示</string>
     <string name="settings_nav_custom_icons_summary">使用你自己的圖片作為底部導覽圖示</string>
+    <string name="settings_nav_layout_title">導覽列版面設定</string>
+    <string name="settings_show_plugin">顯示外掛</string>
+    <string name="settings_show_superuser">顯示授權</string>
+    <string name="settings_show_module">顯示模組</string>
     <string name="settings_floating_bar">懸浮導覽列</string>
     <string name="settings_floating_bar_summary">將底部列分離為懸浮膠囊</string>
     <string name="settings_floating_bar_style">樣式</string>

@@ -604,6 +604,10 @@
     <string name="settings_navigation_badge_summary">إظهار عدد التطبيقات الممنوحة والوحدات المفعّلة على شريط التنقل</string>
     <string name="settings_nav_custom_icons">أيقونات تنقل مخصصة</string>
     <string name="settings_nav_custom_icons_summary">استخدم صورًا خاصة بك لأيقونات التنقل السفلية</string>
+    <string name="settings_nav_layout_title">تخطيط التنقل</string>
+    <string name="settings_show_plugin">إظهار الملحق</string>
+    <string name="settings_show_superuser">إظهار المستخدم الخارق</string>
+    <string name="settings_show_module">إظهار الإضافات</string>
     <string name="settings_floating_bar">شريط تنقل عائم</string>
     <string name="settings_floating_bar_summary">افصل الشريط السفلي إلى كبسولة عائمة</string>
     <string name="settings_floating_bar_style">النمط</string>

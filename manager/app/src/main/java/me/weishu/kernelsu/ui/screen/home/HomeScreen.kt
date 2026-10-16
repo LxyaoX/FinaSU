@@ -98,8 +98,8 @@ fun HomePager(
                 }
             }
         },
-        onOpenSuperUser = { mainPagerState.animateToPage(BottomBarDestination.SuperUser.ordinal) },
-        onOpenModule = { mainPagerState.animateToPage(BottomBarDestination.Module.ordinal) },
+        onOpenSuperUser = { mainPagerState.animateToDestination(BottomBarDestination.SuperUser) },
+        onOpenModule = { mainPagerState.animateToDestination(BottomBarDestination.Module) },
         onRetryRoot = { CapabilityRepository.refresh() },
         onSusfs = { navigator.push(Route.Susfs) },
     )

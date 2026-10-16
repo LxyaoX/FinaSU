@@ -14,8 +14,10 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.ui.component.material.ChromeEdge
@@ -27,6 +29,8 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
     if (!fullFeatured) return
 
     val mainPagerState = LocalMainPagerState.current
+    val visibilityRevision = NavBarVisibilityConfig.revision.collectAsStateWithLifecycle().value
+    val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
 
     val barStyle = BottomBarControl.style(BottomBarLayout.Docked)
     WallpaperChromeZone(edge = ChromeEdge.Bottom, material = barStyle.scrim) {
@@ -36,21 +40,21 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
                 WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
             )
         ) {
-            BottomBarDestination.entries.forEachIndexed { index, destination ->
-                val selected = mainPagerState.selectedPage == index
+            destinations.forEach { destination ->
+                val selected = mainPagerState.selectedDestination == destination
                 ShortNavigationBarItem(
                     selected = selected,
                     onClick = {
                         if (!selected) {
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
-                            mainPagerState.animateToPage(index)
+                            mainPagerState.animateToDestination(destination)
                         }
                     },
                     icon = {
                         NavigationIconWithBadge(
                             destination = destination,
                             selected = selected,
-                            badge = badgeFor(index, navigationBadge),
+                            badge = badgeFor(destination, navigationBadge),
                         )
                     },
                     label = {

@@ -16,7 +16,6 @@ import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,21 +35,37 @@ class MainPagerState(
     val pagerState: PagerState,
     private val coroutineScope: CoroutineScope,
     private val animatePageChanges: Boolean,
+    destinations: List<BottomBarDestination>,
 ) {
-    var selectedPage by mutableIntStateOf(pagerState.currentPage)
+    /** The destinations the pager holds right now, in the order the bar shows them. */
+    var destinations by mutableStateOf(destinations)
+        internal set
+
+    /**
+     * The destination the user is on. It is the source of truth rather than the pager index: a
+     * hidden destination shifts the index of every destination after it, so the index alone would
+     * lose the user's place when the visible list changes.
+     */
+    var selectedDestination by mutableStateOf(
+        destinations.getOrElse(pagerState.currentPage) { BottomBarDestination.Home }
+    )
         private set
+
+    /** Position of [selectedDestination] in the visible destinations, for the selection indicator. */
+    val selectedPage: Int get() = destinations.indexOf(selectedDestination).coerceAtLeast(0)
 
     var isNavigating by mutableStateOf(false)
         private set
 
     private var navJob: Job? = null
 
-    fun animateToPage(targetIndex: Int) {
-        if (targetIndex == selectedPage) return
+    fun animateToDestination(destination: BottomBarDestination) {
+        val targetIndex = destinations.indexOf(destination)
+        if (targetIndex < 0 || destination == selectedDestination) return
 
         navJob?.cancel()
 
-        selectedPage = targetIndex
+        selectedDestination = destination
         isNavigating = true
 
         navJob = coroutineScope.launch {
@@ -65,7 +80,7 @@ class MainPagerState(
                 if (navJob == myJob) {
                     isNavigating = false
                     if (pagerState.currentPage != targetIndex) {
-                        selectedPage = pagerState.currentPage
+                        destinations.getOrNull(pagerState.currentPage)?.let { selectedDestination = it }
                     }
                 }
             }
@@ -73,21 +88,38 @@ class MainPagerState(
     }
 
     fun syncPage() {
-        if (!isNavigating && selectedPage != pagerState.currentPage) {
-            selectedPage = pagerState.currentPage
+        if (isNavigating) return
+        val settled = destinations.getOrNull(pagerState.currentPage) ?: return
+        if (settled != selectedDestination) {
+            selectedDestination = settled
         }
+    }
+
+    /**
+     * Follow a change of the visible destinations: the selected destination keeps its place, and
+     * only a destination that was itself hidden falls back to home.
+     */
+    suspend fun syncToDestinations() {
+        val index = destinations.indexOf(selectedDestination).coerceAtLeast(0)
+        if (index != pagerState.currentPage) {
+            pagerState.scrollToPage(index)
+        }
+        selectedDestination = destinations[index]
     }
 }
 
 @Composable
 fun rememberMainPagerState(
     pagerState: PagerState,
+    destinations: List<BottomBarDestination>,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     animatePageChanges: Boolean = true,
 ): MainPagerState {
-    return remember(pagerState, coroutineScope, animatePageChanges) {
-        MainPagerState(pagerState, coroutineScope, animatePageChanges)
+    val state = remember(pagerState, coroutineScope, animatePageChanges) {
+        MainPagerState(pagerState, coroutineScope, animatePageChanges, destinations)
     }
+    state.destinations = destinations
+    return state
 }
 
 @Immutable
@@ -119,11 +151,11 @@ internal enum class BadgeTone { Alert, Accent }
 @Immutable
 internal data class NavBadge(val count: Int, val tone: BadgeTone)
 
-internal fun badgeFor(index: Int, state: NavigationBadgeState): NavBadge? = when (index) {
-    BottomBarDestination.SuperUser.ordinal ->
+internal fun badgeFor(destination: BottomBarDestination, state: NavigationBadgeState): NavBadge? = when (destination) {
+    BottomBarDestination.SuperUser ->
         state.superuserCount.takeIf { it > 0 }?.let { NavBadge(it, BadgeTone.Accent) }
 
-    BottomBarDestination.Module.ordinal -> when {
+    BottomBarDestination.Module -> when {
         state.moduleUpdatableCount > 0 -> NavBadge(state.moduleUpdatableCount, BadgeTone.Alert)
         state.moduleEnabledCount > 0 -> NavBadge(state.moduleEnabledCount, BadgeTone.Accent)
         else -> null

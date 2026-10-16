@@ -602,6 +602,10 @@
     <string name="settings_navigation_badge_summary">Mostrar el número de aplicaciones con permiso y de módulos activados en la barra de navegación</string>
     <string name="settings_nav_custom_icons">Iconos de navegación personalizados</string>
     <string name="settings_nav_custom_icons_summary">Usar tus propias imágenes para los iconos de la barra de navegación inferior</string>
+    <string name="settings_nav_layout_title">Diseño de navegación</string>
+    <string name="settings_show_plugin">Mostrar complemento</string>
+    <string name="settings_show_superuser">Mostrar superusuario</string>
+    <string name="settings_show_module">Mostrar módulo</string>
     <string name="settings_floating_bar">Barra de navegación flotante</string>
     <string name="settings_floating_bar_summary">Separar la barra inferior en una píldora flotante</string>
     <string name="settings_floating_bar_style">Estilo</string>

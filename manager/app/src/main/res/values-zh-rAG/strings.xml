@@ -611,6 +611,10 @@
     <string name="settings_navigation_badge_summary">在导航栏上显示已授权应用和已启用模块的数量喵</string>
     <string name="settings_nav_custom_icons">自定义底部导航图标喵</string>
     <string name="settings_nav_custom_icons_summary">用你自己的图片替换底部导航图标喵</string>
+    <string name="settings_nav_layout_title">导航布局设置喵</string>
+    <string name="settings_show_plugin">显示插件喵</string>
+    <string name="settings_show_superuser">显示超级用户喵</string>
+    <string name="settings_show_module">显示模块喵</string>
     <string name="settings_floating_bar">悬浮导航栏喵</string>
     <string name="settings_floating_bar_summary">把底部栏拆成一颗悬浮胶囊喵</string>
     <string name="settings_floating_bar_style">样式喵</string>

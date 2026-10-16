@@ -602,6 +602,10 @@
     <string name="settings_navigation_badge_summary">Tampilkan jumlah aplikasi yang diberi akses dan modul aktif pada bilah navigasi</string>
     <string name="settings_nav_custom_icons">Ikon navigasi kustom</string>
     <string name="settings_nav_custom_icons_summary">Gunakan gambar Anda sendiri untuk ikon navigasi bawah</string>
+    <string name="settings_nav_layout_title">Tata letak navigasi</string>
+    <string name="settings_show_plugin">Tampilkan plugin</string>
+    <string name="settings_show_superuser">Tampilkan superuser</string>
+    <string name="settings_show_module">Tampilkan modul</string>
     <string name="settings_floating_bar">Bilah navigasi mengambang</string>
     <string name="settings_floating_bar_summary">Pisahkan bilah bawah menjadi pil mengambang</string>
     <string name="settings_floating_bar_style">Gaya</string>

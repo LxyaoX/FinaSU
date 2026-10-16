@@ -604,6 +604,10 @@
     <string name="settings_navigation_badge_summary">Показывать количество приложений с правами и включённых модулей на панели навигации</string>
     <string name="settings_nav_custom_icons">Пользовательские значки навигации</string>
     <string name="settings_nav_custom_icons_summary">Использовать собственные изображения для значков нижней навигации</string>
+    <string name="settings_nav_layout_title">Макет навигации</string>
+    <string name="settings_show_plugin">Показывать плагин</string>
+    <string name="settings_show_superuser">Показывать суперюзера</string>
+    <string name="settings_show_module">Показывать модули</string>
     <string name="settings_floating_bar">Плавающая панель навигации</string>
     <string name="settings_floating_bar_summary">Отделить нижнюю панель в виде плавающей «пилюли»</string>
     <string name="settings_floating_bar_style">Стиль</string>

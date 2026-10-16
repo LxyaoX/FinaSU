@@ -604,6 +604,10 @@
     <string name="settings_navigation_badge_summary">Gezinme çubuğunda izin verilen uygulama ve etkin modül sayılarını göster</string>
     <string name="settings_nav_custom_icons">Özel gezinme simgeleri</string>
     <string name="settings_nav_custom_icons_summary">Alt gezinme simgeleri için kendi görsellerinizi kullanın</string>
+    <string name="settings_nav_layout_title">Gezinme düzeni</string>
+    <string name="settings_show_plugin">Eklentiyi göster</string>
+    <string name="settings_show_superuser">Süper kullanıcıyı göster</string>
+    <string name="settings_show_module">Modülü göster</string>
     <string name="settings_floating_bar">Yüzen gezinme çubuğu</string>
     <string name="settings_floating_bar_summary">Alt çubuğu yüzen bir hap biçimine ayır</string>
     <string name="settings_floating_bar_style">Stil</string>

@@ -98,7 +98,8 @@ internal fun FloatingBar(
     val glassSpecular = remember(revision) { FloatingBarConfig.glassSpecular }
     val glassInnerGlow = remember(revision) { FloatingBarConfig.glassInnerGlow }
     val glassBorder = remember(revision) { FloatingBarConfig.glassBorder }
-    val destinations = BottomBarDestination.entries
+    val visibilityRevision by NavBarVisibilityConfig.revision.collectAsStateWithLifecycle()
+    val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
     val selectedIndex = mainPagerState.selectedPage
     val containerColor = BottomBarControl.style(BottomBarLayout.Floating).containerColor
     // Outside wallpaper mode the pill's fill is derived from the page, so it does not carry the raised
@@ -194,11 +195,11 @@ internal fun FloatingBar(
                     FloatingBarDrawer(
                         destinations = destinations,
                         selectedIndex = selectedIndex,
-                        badge = { badgeFor(it.ordinal, navigationBadge) },
+                        badge = { badgeFor(it, navigationBadge) },
                         onSelect = {
-                            if (it.ordinal == selectedIndex) return@FloatingBarDrawer
+                            if (it == mainPagerState.selectedDestination) return@FloatingBarDrawer
                             onUserInteraction()
-                            mainPagerState.animateToPage(it.ordinal)
+                            mainPagerState.animateToDestination(it)
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
                         liquidIndicator = liquidIndicator,
@@ -207,10 +208,10 @@ internal fun FloatingBar(
                     FloatingBarStandard(
                         destinations = destinations,
                         selectedIndex = selectedIndex,
-                        badge = { badgeFor(it.ordinal, navigationBadge) },
+                        badge = { badgeFor(it, navigationBadge) },
                         onSelect = {
                             onUserInteraction()
-                            mainPagerState.animateToPage(it.ordinal)
+                            mainPagerState.animateToDestination(it)
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
                         liquidIndicator = liquidIndicator,

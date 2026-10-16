@@ -611,6 +611,10 @@
     <string name="settings_navigation_badge_summary">Show granted app and enabled module counts on the navigation bar</string>
     <string name="settings_nav_custom_icons">Custom navigation icons</string>
     <string name="settings_nav_custom_icons_summary">Use your own images for the bottom navigation icons</string>
+    <string name="settings_nav_layout_title">Navigation layout</string>
+    <string name="settings_show_plugin">Show plugin</string>
+    <string name="settings_show_superuser">Show superuser</string>
+    <string name="settings_show_module">Show module</string>
     <string name="settings_floating_bar">Floating navigation bar</string>
     <string name="settings_floating_bar_summary">Detach the bottom bar into a floating pill</string>
     <string name="settings_floating_bar_style">Style</string>

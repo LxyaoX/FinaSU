@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.SystemUpdateAlt
@@ -54,6 +55,7 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.rounded.Animation
 import androidx.compose.material.icons.rounded.Apps
@@ -485,6 +487,33 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_nav_mode_summary,
             icon = Icons.Rounded.SpaceDashboard,
             aliases = listOf("navigation", "bar", "rail", "bottom", "floating"),
+        )
+    )
+    add(
+        SettingsCategory.BEHAVIOR.row(
+            id = "behavior.nav_show_plugin",
+            titleRes = R.string.settings_show_plugin,
+            summaryRes = R.string.settings_nav_layout_title,
+            icon = Icons.Filled.Widgets,
+            aliases = listOf("navigation", "show", "hide", "plugin"),
+        )
+    )
+    add(
+        SettingsCategory.BEHAVIOR.row(
+            id = "behavior.nav_show_superuser",
+            titleRes = R.string.settings_show_superuser,
+            summaryRes = R.string.settings_nav_layout_title,
+            icon = Icons.Filled.Shield,
+            aliases = listOf("navigation", "show", "hide", "superuser", "root"),
+        )
+    )
+    add(
+        SettingsCategory.BEHAVIOR.row(
+            id = "behavior.nav_show_module",
+            titleRes = R.string.settings_show_module,
+            summaryRes = R.string.settings_nav_layout_title,
+            icon = Icons.Filled.Extension,
+            aliases = listOf("navigation", "show", "hide", "module"),
         )
     )
     add(

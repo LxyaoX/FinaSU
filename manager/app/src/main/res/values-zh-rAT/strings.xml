@@ -611,6 +611,10 @@
     <string name="settings_navigation_badge_summary">于圣图导航现出已圣授圣器与已唤醒圣光阵之数</string>
     <string name="settings_nav_custom_icons">自定义底栏导航圣印</string>
     <string name="settings_nav_custom_icons_summary">以己之圣图替换底栏导航圣印</string>
+    <string name="settings_nav_layout_title">圣图布局设置</string>
+    <string name="settings_show_plugin">现出圣符</string>
+    <string name="settings_show_superuser">现出圣光使者</string>
+    <string name="settings_show_module">现出圣光阵</string>
     <string name="settings_floating_bar">悬浮圣图导航</string>
     <string name="settings_floating_bar_summary">将底栏化作悬浮圣囊</string>
     <string name="settings_floating_bar_style">样式</string>
