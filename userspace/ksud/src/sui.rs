@@ -12,7 +12,7 @@ use std::os::fd::AsRawFd;
 use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
-use std::process::{Command as Process, Stdio};
+use std::process::{Child, Command as Process, Stdio};
 use std::time::{Duration, Instant};
 
 pub const MODULE_ID: &str = "finasu-sui";
@@ -26,7 +26,7 @@ const WATCHDOG_LOCK: &str = "/data/adb/ksu/sui/watchdog.lock";
 const MANAGER_IDENTITY: &str = "/data/adb/ksu/sui/manager.json";
 /// Only the FinaSU manager may manage Sui; the signed package is the one the kernel trusts.
 const MANAGER_PACKAGES: [&str; 2] = ["me.yuki.fina", "me.yuki.fina.pr"];
-const DAEMON_READY_TIMEOUT: Duration = Duration::from_secs(3);
+const DAEMON_READY_TIMEOUT: Duration = Duration::from_secs(120);
 /// The zygote may only map and execute libraries labelled this way, and the injected processes
 /// have to read the dex and metadata below the module directory.
 const LIB_CON: &str = "u:object_r:system_lib_file:s0";
@@ -127,7 +127,7 @@ struct Manifest {
     files: Vec<ManifestFile>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 struct ManagerIdentity {
     schema_version: u32,
@@ -135,6 +135,8 @@ struct ManagerIdentity {
     uid: u32,
     cert_size: u32,
     cert_sha256: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    previous_uid: Option<u32>,
 }
 
 #[derive(Deserialize)]
@@ -387,9 +389,34 @@ fn process_ids(name: &str) -> Vec<i32> {
     let mut pids: Vec<i32> = String::from_utf8_lossy(&output.stdout)
         .split_whitespace()
         .filter_map(|value| value.parse().ok())
+        .filter(|pid| live_process(*pid, name))
         .collect();
     pids.sort_unstable();
     pids
+}
+
+fn live_process(pid: i32, name: &str) -> bool {
+    let Ok(stat) = fs::read_to_string(format!("/proc/{pid}/stat")) else {
+        return false;
+    };
+    if !process_running(&stat) {
+        return false;
+    }
+    let Ok(status) = fs::read_to_string(format!("/proc/{pid}/status")) else {
+        return false;
+    };
+    let expected_uid = if name == SHELL_DAEMON { "2000" } else { "0" };
+    status.lines().any(|line| {
+        line.strip_prefix("Uid:")
+            .and_then(|uids| uids.split_whitespace().next())
+            == Some(expected_uid)
+    })
+}
+
+fn process_running(stat: &str) -> bool {
+    stat.rsplit_once(") ")
+        .and_then(|(_, fields)| fields.split_whitespace().next())
+        .is_some_and(|state| !matches!(state, "Z" | "X" | "x"))
 }
 
 fn boot_marker_matches() -> bool {
@@ -439,20 +466,25 @@ fn leave_service_cgroup() -> std::io::Result<()> {
     Ok(())
 }
 
-fn start_daemon() -> Result<()> {
+fn start_daemon() -> Result<Child> {
     let module = Path::new(MODULE_DIR);
     let binary = module.join("bin/sui");
     ensure!(binary.is_file(), "The Sui payload is not installed");
     // The daemon's own output is the only diagnostics available from the boot stage, and a
     // pipeline into logcat would take the daemon down with it if the reader ever exits.
     fs::create_dir_all(STATE_DIR)?;
-    let log = fs::File::create(DAEMON_LOG).context("Create the Sui daemon log")?;
+    let log = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .mode(0o600)
+        .custom_flags(libc::O_NOFOLLOW)
+        .open(DAEMON_LOG)
+        .context("Open the Sui daemon log")?;
     log.set_permissions(fs::Permissions::from_mode(0o600))?;
-    let script = format!("exec '{}' '{}'", binary.display(), module.display());
-    let mut command = Process::new("/system/bin/sh");
+    let mut command = Process::new(&binary);
     command
-        .arg("-c")
-        .arg(script)
+        .arg(module)
+        .env("SUI_FOREGROUND", "1")
         .stdin(Stdio::null())
         .stdout(log.try_clone()?)
         .stderr(log);
@@ -464,8 +496,7 @@ fn start_daemon() -> Result<()> {
             Ok(())
         });
     }
-    command.spawn().context("Start the Sui daemon")?;
-    Ok(())
+    command.spawn().context("Start the Sui daemon")
 }
 
 fn stop_daemon() {
@@ -510,6 +541,42 @@ pub struct Status {
     root_pids: Vec<i32>,
     shell_pids: Vec<i32>,
     daemon_healthy: bool,
+    boot_marker_matches: bool,
+    manager_identity: Option<ManagerIdentity>,
+    manager_diagnostics: serde_json::Value,
+}
+
+fn manager_diagnostics(uid: Option<u32>) -> serde_json::Value {
+    let uid = uid.map_or_else(|| "-1".to_owned(), |uid| uid.to_string());
+    let output = (|| -> Result<std::process::Output> {
+        let mut child = Process::new("/system/bin/app_process")
+            .env("CLASSPATH", format!("{MODULE_DIR}/sui.dex"))
+            .args(["/system/bin", "rikka.sui.server.SuiDiagnostics", &uid])
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()?;
+        let started = Instant::now();
+        while child.try_wait()?.is_none() {
+            if started.elapsed() >= Duration::from_secs(5) {
+                let _ = child.kill();
+                let _ = child.wait();
+                bail!("Sui diagnostics timed out");
+            }
+            std::thread::sleep(Duration::from_millis(50));
+        }
+        Ok(child.wait_with_output()?)
+    })();
+    match output {
+        Ok(output) if output.status.success() => serde_json::from_slice(&output.stdout)
+            .unwrap_or_else(
+                |error| serde_json::json!({"state": "unknown", "error": error.to_string()}),
+            ),
+        Ok(output) => {
+            serde_json::json!({"state": "unknown", "error": String::from_utf8_lossy(&output.stderr)})
+        }
+        Err(error) => serde_json::json!({"state": "unknown", "error": error.to_string()}),
+    }
 }
 
 fn collect() -> Result<Status> {
@@ -526,6 +593,11 @@ fn collect() -> Result<Status> {
     let shell_pids = process_ids(SHELL_DAEMON);
     let daemon_healthy = root_pids.len() == 1 && shell_pids.len() == 1;
     let provider_gate = gate(&provider, &conflicts);
+    let manager_identity: Option<ManagerIdentity> = fs::read(MANAGER_IDENTITY)
+        .ok()
+        .and_then(|raw| serde_json::from_slice(&raw).ok());
+    let manager_diagnostics =
+        manager_diagnostics(manager_identity.as_ref().map(|identity| identity.uid));
 
     let (name, reason): (&'static str, &'static str) = if !conflicts.is_empty() {
         ("error", "conflict_existing_sui")
@@ -569,7 +641,7 @@ fn collect() -> Result<Status> {
         payload_version: state.payload_version,
         payload_current,
         module_disabled,
-        manager_registered: Path::new(MANAGER_IDENTITY).is_file(),
+        manager_registered: manager_identity.is_some(),
         reboot_required: name == "enabled_pending_reboot",
         conflicts,
         zygisk_enabled: provider.enabled,
@@ -579,6 +651,9 @@ fn collect() -> Result<Status> {
         root_pids,
         shell_pids,
         daemon_healthy,
+        boot_marker_matches: boot_marker_matches(),
+        manager_identity,
+        manager_diagnostics,
     })
 }
 
@@ -610,7 +685,7 @@ fn enable() -> Result<()> {
         log::warn!("Sui sepolicy rule failed to apply: {error:#}");
     }
     if boot_completed() {
-        start_daemon()?;
+        spawn_watchdog()?;
     }
     Ok(())
 }
@@ -635,6 +710,9 @@ fn repair() -> Result<()> {
     state.payload_version.clone_from(&payload.manifest.version);
     state.payload_hash = payload.hash();
     state.save()?;
+    if let Err(error) = register_manager() {
+        log::warn!("Sui manager registration failed: {error:#}");
+    }
     Ok(())
 }
 
@@ -731,13 +809,28 @@ fn register_manager() -> Result<()> {
         .to_owned();
     let (cert_size, cert_sha256) =
         crate::apk_sign::get_apk_signature(&apk).context("Read the manager APK signature")?;
+    let previous: Option<ManagerIdentity> = fs::read(MANAGER_IDENTITY)
+        .ok()
+        .and_then(|raw| serde_json::from_slice(&raw).ok());
+    let uid = manager_uid(package)?;
+    let previous_uid = previous.as_ref().and_then(|identity| {
+        if identity.uid == uid {
+            identity.previous_uid
+        } else {
+            Some(identity.uid)
+        }
+    });
     let identity = ManagerIdentity {
         schema_version: 1,
         package: package.to_owned(),
-        uid: manager_uid(package)?,
+        uid,
         cert_size,
         cert_sha256,
+        previous_uid,
     };
+    if previous.as_ref() == Some(&identity) {
+        return Ok(());
+    }
     fs::create_dir_all(STATE_DIR)?;
     let mut file = tempfile::NamedTempFile::new_in(STATE_DIR)?;
     file.as_file()
@@ -795,7 +888,6 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
     if safe_mode || !active()? {
         return Ok(());
     }
-    ensure_daemon()?;
     spawn_watchdog()
 }
 
@@ -803,40 +895,11 @@ pub fn services() -> Result<()> {
     if !active()? {
         return Ok(());
     }
-    if daemon_alive() {
-        // The module was present when the provider injected this boot.
-        write_boot_marker()?;
-        return spawn_watchdog();
-    }
-    stop_daemon();
-    ensure_daemon()?;
     spawn_watchdog()
 }
 
 fn daemon_healthy() -> bool {
     process_ids(DAEMON).len() == 1 && process_ids(SHELL_DAEMON).len() == 1
-}
-
-/// At post-fs-data the starter is still waiting for zygote, so only its liveness is meaningful.
-fn daemon_alive() -> bool {
-    !process_ids(DAEMON).is_empty()
-}
-
-fn ensure_daemon() -> Result<()> {
-    if daemon_healthy() {
-        return write_boot_marker();
-    }
-    stop_daemon();
-    start_daemon()?;
-    // A start that dies immediately is not a start; say so instead of recording a boot.
-    let deadline = Instant::now() + DAEMON_READY_TIMEOUT;
-    while Instant::now() < deadline {
-        if daemon_alive() {
-            return write_boot_marker();
-        }
-        std::thread::sleep(Duration::from_millis(200));
-    }
-    bail!("The Sui daemon did not stay up; see {DAEMON_LOG}")
 }
 
 /// One supervisor per device: it restarts the daemon pair while Sui stays enabled and exits
@@ -854,14 +917,53 @@ fn watchdog() -> Result<()> {
         unsafe { libc::flock(lock.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } == 0,
         "Another Sui watchdog is already running"
     );
+    let mut child: Option<Child> = None;
+    let mut started = Instant::now();
+    let mut refreshed: Option<Instant> = None;
     loop {
         if !active()? {
+            if let Some(mut child) = child {
+                let _ = child.kill();
+                let _ = child.wait();
+            }
             return Ok(());
         }
-        if let Err(error) = ensure_daemon() {
-            log::warn!("Sui watchdog restart failed: {error:#}");
+        if boot_completed()
+            && refreshed.is_none_or(|time| time.elapsed() >= Duration::from_secs(30))
+        {
+            if let Err(error) = register_manager() {
+                log::warn!("Sui manager refresh failed: {error:#}");
+            }
+            refreshed = Some(Instant::now());
         }
-        std::thread::sleep(Duration::from_secs(30));
+        if let Some(process) = child.as_mut()
+            && process.try_wait()?.is_some()
+        {
+            child = None;
+        }
+        if daemon_healthy() {
+            if !boot_marker_matches() {
+                write_boot_marker()?;
+            }
+        } else if (child.is_none()
+            || (boot_completed() && started.elapsed() >= DAEMON_READY_TIMEOUT))
+            && let Ok(_operation) = self::lock()
+            && active()?
+        {
+            stop_daemon();
+            if let Some(mut previous) = child.take() {
+                let _ = previous.kill();
+                let _ = previous.wait();
+            }
+            match start_daemon() {
+                Ok(process) => {
+                    child = Some(process);
+                    started = Instant::now();
+                }
+                Err(error) => log::warn!("Sui watchdog restart failed: {error:#}"),
+            }
+        }
+        std::thread::sleep(Duration::from_secs(1));
     }
 }
 
@@ -879,7 +981,10 @@ fn spawn_watchdog() -> Result<()> {
             Ok(())
         });
     }
-    command.spawn().context("Start the Sui watchdog")?;
+    let mut child = command.spawn().context("Start the Sui watchdog")?;
+    std::thread::spawn(move || {
+        let _ = child.wait();
+    });
     Ok(())
 }
 
@@ -895,6 +1000,17 @@ fn active() -> Result<bool> {
 mod tests {
     use super::*;
     use crate::zygisk::ProviderStatus;
+
+    #[test]
+    fn process_state_rejects_zombies_and_malformed_records() {
+        assert!(process_running("123 (sui) S 1 2 3"));
+        assert!(process_running("123 (name with ) parentheses) R 1 2 3"));
+        assert!(!process_running("123 (sui) Z 1 2 3"));
+        assert!(!process_running("123 (sui) X 1 2 3"));
+        assert!(!process_running("123 (sui) x 1 2 3"));
+        assert!(!process_running("123 (sui) "));
+        assert!(!process_running("invalid"));
+    }
 
     fn provider(enabled: bool, engine: bool, injection: &'static str) -> ProviderStatus {
         ProviderStatus {

@@ -25,3 +25,20 @@ FinaSU attribution.
 
 Sui is GPL-3.0; Shizuku-API is MIT. Both `LICENSE` files are preserved verbatim.
 FinaSU is GPL-3.0, so the combined work is redistributable.
+
+## Local integration changes
+
+- Manager identity is read only by the root server. Root-authenticated UID
+  snapshots carry its package, UID and certificate to system_server; package UID
+  and certificate are checked again before management access is granted.
+- The native bridge prefilter defers the registered UID to Java verification.
+  Other hidden callers retain the existing filtering rules. Shell servers never
+  publish identity or permission snapshots.
+- The root server refreshes the identity snapshot and removes obsolete manager
+  root grants after a UID change. Failed bridge updates keep the one-second retry.
+- `SuiDiagnostics` reads the permission database without recovery or writes and
+  queries a root-only bridge action for actual routing membership and binder state.
+- `SUI_FOREGROUND=1` keeps the starter attached to its supervisor for child reaping.
+  Standalone startup retains the original daemon behavior.
+- The repository build driver accepts `SUI_BUILD_TYPE=debug` to retain Java and
+  native diagnostics; release remains the default with log stripping unchanged.

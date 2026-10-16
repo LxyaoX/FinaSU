@@ -31,6 +31,7 @@ DDK_RELEASE="${DDK_RELEASE:-20260828}"       # .github/workflows/ddk-lkm.yml def
 ANDROID_API_LEVEL="${ANDROID_API_LEVEL:-26}" # same as .github/scripts/setup-rust-build.sh
 KSUD_BUILD_TYPE="${KSUD_BUILD_TYPE:-release}"
 APP_BUILD_TYPE="${APP_BUILD_TYPE:-release}"
+SUI_BUILD_TYPE="${SUI_BUILD_TYPE:-release}"
 OUT_DIR="${OUT_DIR:-dist}"
 KEYSTORE_PROPS="${KEYSTORE_PROPS:-$REPO_ROOT/manager/keystore.properties}"
 
@@ -213,11 +214,15 @@ abi_to_triple() {
 build_sui() {
     have java || die "a JDK is required to build the Sui payload"
 
-    log "building the Sui payload (gradle zipRelease)"
-    ( cd userspace/sui && "./gradlew" zipRelease --console=plain )
+    case "$SUI_BUILD_TYPE" in
+        release|debug) ;;
+        *) die "SUI_BUILD_TYPE must be release or debug" ;;
+    esac
+    log "building the Sui payload (gradle zip${SUI_BUILD_TYPE^})"
+    ( cd userspace/sui && "./gradlew" "zip${SUI_BUILD_TYPE^}" --console=plain )
 
     local abi bindir candidate zip="" version version_code
-    for candidate in userspace/sui/out/*.zip; do
+    for candidate in userspace/sui/out/*-"$SUI_BUILD_TYPE".zip; do
         [[ -f "$candidate" ]] || continue
         if [[ -z "$zip" || "$candidate" -nt "$zip" ]]; then
             zip="$candidate"
@@ -362,6 +367,7 @@ environment overrides:
   ANDROID_API_LEVEL=26      cargo-ndk api level
   KSUD_BUILD_TYPE=release   cargo profile (release/debug)
   APP_BUILD_TYPE=release    gradle build type (release/debug)
+  SUI_BUILD_TYPE=release    Sui payload build type (release/debug; debug retains logs)
   OUT_DIR=dist              repack output directory
   KEYSTORE_PROPS=...        path to the signing properties file
 EOF

@@ -237,7 +237,8 @@ public class BridgeServiceClient {
             int[] deniedUids,
             int[] shellUids,
             int defaultFlags,
-            boolean legacyCompatEnabled) {
+            boolean legacyCompatEnabled,
+            String[] managerIdentity) {
         IBinder bridgeService = ServiceManager.getService(BridgeConstants.SERVICE_NAME);
         if (bridgeService == null) {
             return false;
@@ -254,6 +255,9 @@ public class BridgeServiceClient {
             data.writeInt(defaultFlags);
             data.writeIntArray(deniedUids);
             data.writeInt(legacyCompatEnabled ? 1 : 0);
+            data.writeString(managerIdentity[0]);
+            data.writeInt(Integer.parseInt(managerIdentity[1]));
+            data.writeString(managerIdentity[2]);
             if (!bridgeService.transact(BridgeConstants.TRANSACTION_CODE, data, reply, 0)) {
                 return false;
             }

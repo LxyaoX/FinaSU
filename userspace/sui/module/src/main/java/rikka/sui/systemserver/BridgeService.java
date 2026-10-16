@@ -140,6 +140,18 @@ public class BridgeService {
                 action, Binder.getCallingUid(), Binder.getCallingPid());
 
         switch (action) {
+            case BridgeConstants.ACTION_DIAGNOSTICS: {
+                if (Binder.getCallingUid() != 0 || reply == null) return false;
+                int uid = data.readInt();
+                try {
+                    String status = SystemProcess.diagnostics(uid);
+                    reply.writeNoException();
+                    reply.writeString(status);
+                } catch (org.json.JSONException e) {
+                    reply.writeException(new IllegalStateException(e));
+                }
+                return true;
+            }
             case BridgeConstants.ACTION_SEND_BINDER: {
                 int callingUid = Binder.getCallingUid();
                 if (callingUid == 0 || callingUid == 2000) {
@@ -170,7 +182,8 @@ public class BridgeService {
 
                 int permissionFlags = Bridge.getPermissionFlags(targetUid);
 
-                if (requestedServerUid == null && (permissionFlags & SuiConfig.FLAG_HIDDEN) != 0) {
+                if (requestedServerUid == null && (permissionFlags & SuiConfig.FLAG_HIDDEN) != 0
+                        && !FinasuManagerGate.accepts(targetUid)) {
                     return false;
                 }
 
@@ -239,8 +252,12 @@ public class BridgeService {
                         deniedUids = data.createIntArray();
                     }
                     boolean legacyCompatEnabled = data.dataAvail() >= Integer.BYTES && data.readInt() != 0;
+                    String managerPackage = data.dataAvail() > 0 ? data.readString() : "";
+                    int managerUid = data.dataAvail() >= Integer.BYTES ? data.readInt() : -1;
+                    String managerCertificate = data.dataAvail() > 0 ? data.readString() : "";
                     boolean applied = SystemProcess.updateUids(
-                            hiddenUids, rootUids, deniedUids, shellUids, defaultFlags, legacyCompatEnabled);
+                            hiddenUids, rootUids, deniedUids, shellUids, defaultFlags, legacyCompatEnabled,
+                            managerPackage, managerUid, managerCertificate);
                     if (reply != null) {
                         if (applied) {
                             reply.writeNoException();

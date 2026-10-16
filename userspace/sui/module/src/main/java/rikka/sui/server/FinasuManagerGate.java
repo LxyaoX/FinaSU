@@ -21,6 +21,8 @@ package rikka.sui.server;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
+import android.os.Binder;
+import android.os.Process;
 import android.util.Log;
 
 import org.json.JSONObject;
@@ -50,12 +52,16 @@ public final class FinasuManagerGate {
     private static long loadedAt;
     private static String packageName = "";
     private static int uid = -1;
+    private static int previousUid = -1;
     private static String certSha256 = "";
 
     private FinasuManagerGate() {
     }
 
     private static synchronized void load() {
+        if (Process.myUid() != 0) {
+            return;
+        }
         long now = System.currentTimeMillis();
         if (now - loadedAt < CACHE_MS) {
             return;
@@ -63,6 +69,7 @@ public final class FinasuManagerGate {
         loadedAt = now;
         packageName = "";
         uid = -1;
+        previousUid = -1;
         certSha256 = "";
         try (FileInputStream input = new FileInputStream(new File(PATH))) {
             byte[] raw = new byte[4096];
@@ -76,6 +83,7 @@ public final class FinasuManagerGate {
             }
             packageName = json.optString("package", "");
             uid = json.optInt("uid", -1);
+            previousUid = json.optInt("previous_uid", -1);
             certSha256 = json.optString("cert_sha256", "");
         } catch (Throwable t) {
             Log.w(TAG, "Cannot read " + PATH + ": " + t);
@@ -97,13 +105,37 @@ public final class FinasuManagerGate {
         return !packageName.isEmpty() && packageName.equals(name) && verify(name);
     }
 
+    public static synchronized String[] snapshot() {
+        load();
+        if (uid < 0 || !verify(packageName)) {
+            return new String[] {"", "-1", ""};
+        }
+        return new String[] {packageName, Integer.toString(uid), certSha256};
+    }
+
+    public static synchronized int previousUid() {
+        load();
+        return previousUid;
+    }
+
+    public static synchronized void apply(String name, int registeredUid, String certificate) {
+        if (Process.myUid() != 1000) {
+            throw new SecurityException("Identity snapshots belong to system_server");
+        }
+        packageName = name == null ? "" : name;
+        uid = registeredUid;
+        certSha256 = certificate == null ? "" : certificate;
+    }
+
     private static boolean verify(String name) {
         if (name.isEmpty() || certSha256.isEmpty()) {
             return false;
         }
+        long identity = Binder.clearCallingIdentity();
         try {
             PackageInfo info = PackageManagerApis.getPackageInfoNoThrow(name, GET_SIGNING_CERTIFICATES, 0);
-            if (info == null || info.signingInfo == null) {
+            if (info == null || info.applicationInfo == null || info.applicationInfo.uid != uid
+                    || info.signingInfo == null) {
                 return false;
             }
             Signature[] signers = info.signingInfo.getApkContentsSigners();
@@ -120,6 +152,8 @@ public final class FinasuManagerGate {
         } catch (Throwable t) {
             Log.w(TAG, "Cannot verify " + name + ": " + t);
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 }

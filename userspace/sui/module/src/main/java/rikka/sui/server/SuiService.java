@@ -83,6 +83,17 @@ public class SuiService extends Service<SuiUserServiceManager, SuiClientManager,
     private static boolean shellMode = false;
     private final Object uidSyncLock = new Object();
     private final Runnable retryUidSync = () -> syncUidsToSystemServer();
+    private String[] managerIdentity = new String[] {"", "-1", ""};
+    private final Runnable refreshManager = new Runnable() {
+        @Override
+        public void run() {
+            if (shellMode) return;
+            if (!java.util.Arrays.equals(managerIdentity, FinasuManagerGate.snapshot())) {
+                syncUidsToSystemServer();
+            }
+            mainHandler.postDelayed(this, 2000);
+        }
+    };
     private final java.util.concurrent.ConcurrentHashMap<String, DelegatedPermissionCallback>
             delegatedPermissionCallbacks = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -772,13 +783,24 @@ public class SuiService extends Service<SuiUserServiceManager, SuiClientManager,
     private boolean syncUidsToSystemServer() {
         if (shellMode) return false;
         synchronized (uidSyncLock) {
+            String[] identity = FinasuManagerGate.snapshot();
+            int oldUid = Integer.parseInt(managerIdentity[1]);
+            if (oldUid < 0) oldUid = FinasuManagerGate.previousUid();
+            if (oldUid >= 0 && !managerIdentity[1].equals(identity[1])) {
+                SuiConfig.PackageEntry entry = configManager.findExplicit(oldUid);
+                if (entry != null && (entry.flags & SuiConfig.FLAG_ALLOWED) != 0) {
+                    configManager.update(oldUid, SuiConfig.FLAG_ALLOWED, 0);
+                }
+            }
+            managerIdentity = identity;
             boolean applied = BridgeServiceClient.syncUids(
                     configManager.getHiddenUids(),
                     getRootUidsWithSystem(),
                     configManager.getDeniedUids(),
                     configManager.getShellUids(),
                     configManager.getDefaultPermissionFlags(),
-                    (configManager.getGlobalSettings() & SuiConfigManager.FLAG_LEGACY_SHIZUKU_BINDER_COMPAT) != 0);
+                    (configManager.getGlobalSettings() & SuiConfigManager.FLAG_LEGACY_SHIZUKU_BINDER_COMPAT) != 0,
+                    identity);
             mainHandler.removeCallbacks(retryUidSync);
             if (!applied) {
                 LOGGER.w("permission snapshot sync failed, retrying");
@@ -1071,6 +1093,7 @@ public class SuiService extends Service<SuiUserServiceManager, SuiClientManager,
         }
 
         mainHandler.postDelayed(registerTask, 2000);
+        if (!shellMode) mainHandler.postDelayed(refreshManager, 2000);
     }
 
     @Override

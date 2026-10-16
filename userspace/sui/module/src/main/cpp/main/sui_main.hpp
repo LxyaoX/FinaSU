@@ -335,7 +335,8 @@ static bool build_module_path(char* buffer, size_t buffer_size, const char* root
 static int sui_main(int argc, char** argv) {
     LOGI("Sui starter begin: %s", argv[1]);
 
-    if (daemon(false, false) != 0) {
+    const char* foreground = getenv("SUI_FOREGROUND");
+    if ((!foreground || strcmp(foreground, "1") != 0) && daemon(false, false) != 0) {
         PLOGE("daemon");
         return EXIT_FAILURE;
     }

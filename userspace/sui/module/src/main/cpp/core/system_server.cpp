@@ -69,6 +69,7 @@ static std::unordered_set<uid_t> rootUids;
 static std::unordered_set<uid_t> deniedUids;
 static std::unordered_set<uid_t> shellUids;
 static bool defaultHidden = false;
+static uid_t managerUid = (uid_t)-1;
 static std::shared_mutex hiddenUidsMutex;
 static bool legacyCompatEnabled = false;
 static std::atomic_bool legacyCompatFastEnabled{false};
@@ -92,7 +93,7 @@ static bool readUids(JNIEnv* env, jintArray uids, std::unordered_set<uid_t>& res
 
 static jboolean setPermissionSnapshot(JNIEnv* env, jclass, jintArray hidden, jintArray root,
                                       jintArray denied, jintArray shell, jboolean isDefaultHidden,
-                                      jboolean enabled) {
+                                      jboolean enabled, jint registeredManagerUid) {
     std::unordered_set<uid_t> newHidden, newRoot, newDenied, newShell;
     if (!readUids(env, hidden, newHidden) || !readUids(env, root, newRoot) ||
         !readUids(env, denied, newDenied) || !readUids(env, shell, newShell)) {
@@ -105,6 +106,7 @@ static jboolean setPermissionSnapshot(JNIEnv* env, jclass, jintArray hidden, jin
     deniedUids.swap(newDenied);
     shellUids.swap(newShell);
     defaultHidden = isDefaultHidden == JNI_TRUE;
+    managerUid = (uid_t)registeredManagerUid;
     legacyCompatEnabled = enabled == JNI_TRUE;
     legacyCompatFastEnabled.store(legacyCompatEnabled, std::memory_order_release);
     LOGD("updated %zu hidden uids", hiddenUids.size());
@@ -122,7 +124,7 @@ static bool isUidHiddenLocked(uid_t uid) {
 
 static bool isUidHidden(uid_t uid) {
     std::shared_lock lock(hiddenUidsMutex);
-    return isUidHiddenLocked(uid);
+    return uid != managerUid && isUidHiddenLocked(uid);
 }
 
 static bool shouldSkipLegacy(uid_t uid) {
@@ -190,7 +192,7 @@ static bool installDex(JNIEnv* env, Dex* dexFile) {
     jobjectArray args = nullptr;
     jmethodID mainMethod = nullptr;
     JNINativeMethod methods[] = {
-        {"setPermissionSnapshot", "([I[I[I[IZZ)Z", (void*)setPermissionSnapshot},
+        {"setPermissionSnapshot", "([I[I[I[IZZI)Z", (void*)setPermissionSnapshot},
     };
 
     if (android_get_device_api_level() < 27) {

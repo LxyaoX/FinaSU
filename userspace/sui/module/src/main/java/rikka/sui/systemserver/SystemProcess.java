@@ -28,6 +28,7 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import java.util.Arrays;
 import rikka.sui.server.SuiConfig;
+import rikka.sui.server.FinasuManagerGate;
 import rikka.sui.util.ParcelUtils;
 
 public final class SystemProcess {
@@ -111,7 +112,7 @@ public final class SystemProcess {
             if (service != null) {
                 int[] uids = service.getHiddenUids();
                 LOGGER.d("syncing %d hidden uids to native and Java cache", uids.length);
-                updateUids(uids, new int[0], new int[0], new int[0], 0, false);
+                updateUids(uids, new int[0], new int[0], new int[0], 0, false, "", -1, "");
             } else {
                 LOGGER.w("IShizukuService is null in SystemProcess.main");
             }
@@ -121,7 +122,8 @@ public final class SystemProcess {
     }
 
     public static synchronized boolean updateUids(
-            int[] hidden, int[] root, int[] denied, int[] shell, int defaultFlags, boolean legacyCompatEnabled) {
+            int[] hidden, int[] root, int[] denied, int[] shell, int defaultFlags, boolean legacyCompatEnabled,
+            String managerPackage, int managerUid, String managerCertificate) {
         int[] newHidden = sortedCopy(hidden);
         int[] newRoot = sortedCopy(root);
         int[] newDenied = sortedCopy(denied);
@@ -135,12 +137,14 @@ public final class SystemProcess {
                 newDenied,
                 newShell,
                 (newDefaultFlags & SuiConfig.FLAG_HIDDEN) != 0,
-                legacyCompatEnabled)) {
+                legacyCompatEnabled,
+                managerUid)) {
             LOGGER.w("native permission snapshot update failed");
             return false;
         }
         permissionSnapshot =
                 new PermissionSnapshot(newHidden, newRoot, newDenied, newShell, newDefaultFlags, legacyCompatEnabled);
+        FinasuManagerGate.apply(managerPackage, managerUid, managerCertificate);
         LOGGER.d(
                 "synced %d hidden, %d root, %d denied, %d shell uids, defaultFlags=%d, legacy=%s",
                 newHidden.length,
@@ -186,7 +190,8 @@ public final class SystemProcess {
     }
 
     public static boolean isUidHiddenEffective(int uid) {
-        return (getEffectivePermissionFlags(uid) & SuiConfig.FLAG_HIDDEN) != 0;
+        return !FinasuManagerGate.accepts(uid)
+                && (getEffectivePermissionFlags(uid) & SuiConfig.FLAG_HIDDEN) != 0;
     }
 
     public static boolean isRootAllowed(int uid) {
@@ -205,8 +210,26 @@ public final class SystemProcess {
         return permissionSnapshot.defaultFlags;
     }
 
+    public static String diagnostics(int uid) throws org.json.JSONException {
+        PermissionSnapshot snapshot = permissionSnapshot;
+        return new org.json.JSONObject()
+                .put("uid", uid)
+                .put("manager_identity", new org.json.JSONArray(FinasuManagerGate.snapshot()))
+                .put("hidden_member", contains(snapshot.hidden, uid))
+                .put("root_member", contains(snapshot.root, uid))
+                .put("denied_member", contains(snapshot.denied, uid))
+                .put("shell_member", contains(snapshot.shell, uid))
+                .put("default_flags", snapshot.defaultFlags)
+                .put("effective_flags", getEffectivePermissionFlags(uid))
+                .put("manager_verified", FinasuManagerGate.accepts(uid))
+                .put("root_binder_alive", BridgeService.get() != null && BridgeService.get().asBinder().pingBinder())
+                .put("shell_binder_alive", BridgeService.getShell() != null && BridgeService.getShell().asBinder().pingBinder())
+                .toString();
+    }
+
     @Keep
     @SuppressWarnings("JavaJniMissingFunction")
     private static native boolean setPermissionSnapshot(
-            int[] hidden, int[] root, int[] denied, int[] shell, boolean defaultHidden, boolean legacyCompatEnabled);
+            int[] hidden, int[] root, int[] denied, int[] shell, boolean defaultHidden, boolean legacyCompatEnabled,
+            int managerUid);
 }
