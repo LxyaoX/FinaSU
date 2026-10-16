@@ -610,6 +610,9 @@
     <string name="settings_floating_bar_compact">Esquinas redondeadas compactas</string>
     <string name="settings_floating_bar_glass">Efecto de vidrio</string>
     <string name="settings_floating_bar_glass_summary">Desenfoque en tiempo real detrás de la barra flotante (Android 13+)</string>
+    <string name="settings_floating_glass_style">Estilo del cristal</string>
+    <string name="settings_floating_glass_style_frosted">Esmerilado</string>
+    <string name="settings_floating_glass_style_liquid">Cristal líquido</string>
     <string name="settings_floating_auto_hide">Ocultar automáticamente la barra flotante</string>
     <string name="settings_floating_auto_hide_summary">Ocultar automáticamente la barra flotante tras 3 segundos de inactividad</string>
     <string name="settings_floating_swipe_hide">Deslizar para ocultar la barra flotante</string>

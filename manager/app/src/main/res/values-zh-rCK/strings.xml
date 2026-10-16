@@ -619,6 +619,9 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">毛玻璃效果</string>
     <string name="settings_floating_bar_glass_summary">飘栏背后的实时虚化（Android 13+）</string>
+    <string name="settings_floating_glass_style">玻璃樣式</string>
+    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
+    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">自动收起飘底栏</string>
     <string name="settings_floating_auto_hide_summary">3 秒没动静就把飘底栏收起来</string>
     <string name="settings_floating_swipe_hide">滑动收起飘底栏</string>

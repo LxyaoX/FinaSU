@@ -619,6 +619,9 @@
     <string name="settings_floating_bar_compact">Compact rounded corners</string>
     <string name="settings_floating_bar_glass">Glass effect</string>
     <string name="settings_floating_bar_glass_summary">Real-time blur behind the floating bar (Android 13+)</string>
+    <string name="settings_floating_glass_style">Glass style</string>
+    <string name="settings_floating_glass_style_frosted">Frosted</string>
+    <string name="settings_floating_glass_style_liquid">Liquid glass</string>
     <string name="settings_floating_auto_hide">Auto-hide Floating Bar</string>
     <string name="settings_floating_auto_hide_summary">Automatically hide the floating bar after 3 seconds of inactivity</string>
     <string name="settings_floating_swipe_hide">Swipe to Hide Floating Bar</string>

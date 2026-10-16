@@ -612,6 +612,9 @@
     <string name="settings_floating_bar_compact">Компактные скруглённые углы</string>
     <string name="settings_floating_bar_glass">Эффект стекла</string>
     <string name="settings_floating_bar_glass_summary">Размытие в реальном времени за плавающей панелью (Android 13+)</string>
+    <string name="settings_floating_glass_style">Стиль стекла</string>
+    <string name="settings_floating_glass_style_frosted">Матовое</string>
+    <string name="settings_floating_glass_style_liquid">Жидкое стекло</string>
     <string name="settings_floating_auto_hide">Автоскрытие плавающей панели</string>
     <string name="settings_floating_auto_hide_summary">Автоматически скрывать плавающую панель после 3 секунд бездействия</string>
     <string name="settings_floating_swipe_hide">Скрытие плавающей панели свайпом</string>

@@ -610,6 +610,9 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">幻彩毛玻璃</string>
     <string name="settings_floating_bar_glass_summary">悬浮星栏背后的实时模糊魔法（Android 13+）</string>
+    <string name="settings_floating_glass_style">Шилний загвар</string>
+    <string name="settings_floating_glass_style_frosted">Матлаг шил</string>
+    <string name="settings_floating_glass_style_liquid">Шингэн шил</string>
     <string name="settings_floating_auto_hide">悬浮星栏自动隐遁</string>
     <string name="settings_floating_auto_hide_summary">3 秒无魔法操作后，悬浮星栏自动隐遁</string>
     <string name="settings_floating_swipe_hide">滑动隐遁悬浮星栏</string>

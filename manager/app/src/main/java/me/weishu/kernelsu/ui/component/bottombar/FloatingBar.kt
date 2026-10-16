@@ -22,11 +22,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import me.weishu.kernelsu.ui.theme.isInDarkTheme
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.fletchmckee.liquid.LiquidState
+import androidx.compose.ui.platform.LocalDensity
+import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.blur.blur
+import top.yukonga.miuix.kmp.blur.drawBackdrop
+import me.weishu.kernelsu.ui.component.liquid.InnerShadow
+import me.weishu.kernelsu.ui.component.liquid.innerShadow
+import me.weishu.kernelsu.ui.component.liquid.lens
+import me.weishu.kernelsu.ui.component.liquid.vibrancy
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
@@ -46,6 +56,7 @@ fun floatingBarReservedHeight(compact: Boolean, style: FloatingBarConfig.Style):
 internal fun FloatingBar(
     navigationBadge: NavigationBadgeState,
     liquidState: LiquidState?,
+    backdrop: Backdrop? = null,
     modifier: Modifier = Modifier,
     onUserInteraction: () -> Unit = {},
 ) {
@@ -55,6 +66,32 @@ internal fun FloatingBar(
     val style = remember(revision) { FloatingBarConfig.style }
     val compact = remember(revision) { FloatingBarConfig.compact }
     val useGlass = remember(revision) { FloatingBarConfig.glass } && liquidState != null
+    // Without a backdrop attached the liquid style falls back to the frosted look.
+    val liquidBackdrop = backdrop?.takeIf {
+        remember(revision) { FloatingBarConfig.glassStyle } == FloatingBarConfig.GlassStyle.Liquid
+    }
+    val effectPx = with(LocalDensity.current) { 4.dp.toPx() }
+    val lensPx = with(LocalDensity.current) { 24.dp.toPx() }
+    val liquidHighlight by rememberGravityRotatedHighlight(IosGlassHighlight)
+    // The indicator samples the page, never a backdrop recorded from the row it lives in: that
+    // records itself and crashes the render thread.
+    val liquidIndicator = liquidBackdrop?.let {
+        LiquidIndicatorGlass(
+            backdrop = it,
+            highlight = liquidHighlight,
+            // surfaceBright is the brightest step in either polarity, so the selected item is always a
+            // step up from the bar instead of a hole in it when the page behind it is dark.
+            film = MaterialTheme.colorScheme.surfaceBright.copy(alpha = LIQUID_FILM_ALPHA),
+            contentShadow = Shadow(
+                color = if (isInDarkTheme()) {
+                    Color.Black.copy(alpha = 0.45f)
+                } else {
+                    Color.White.copy(alpha = 0.7f)
+                },
+                blurRadius = 6f,
+            ),
+        )
+    }
     val glassBlurStrength = remember(revision) { FloatingBarConfig.glassBlurStrength }
     val glassTransparency = remember(revision) { FloatingBarConfig.glassTransparency }
     val glassHighlightStrength = remember(revision) { FloatingBarConfig.glassHighlightStrength }
@@ -97,7 +134,27 @@ internal fun FloatingBar(
                     .wrapContentWidth()
                     .clip(barShape)
                     .then(
-                        if (useGlass) {
+                        if (liquidBackdrop != null) {
+                            Modifier
+                                .drawBackdrop(
+                                    backdrop = liquidBackdrop,
+                                    shape = { barShape },
+                                    effects = {
+                                        vibrancy()
+                                        blur(effectPx, effectPx)
+                                        lens(
+                                            refractionHeight = lensPx,
+                                            refractionAmount = lensPx,
+                                            depthEffect = true,
+                                            chromaticAberration = 0.5f,
+                                        )
+                                    },
+                                    highlight = { liquidHighlight.copy(alpha = 0.75f) },
+                                )
+                                .innerShadow(shape = barShape) {
+                                    InnerShadow(radius = 12.dp, color = Color.Black.copy(alpha = 0.15f))
+                                }
+                        } else if (useGlass) {
                             Modifier.navBarGlassEffect(
                                 shape = barShape,
                                 blurStrength = glassBlurStrength,
@@ -113,13 +170,24 @@ internal fun FloatingBar(
                         }
                     ),
                 shape = barShape,
-                color = if (useGlass) Color.Transparent else containerColor,
+                // The liquid look keeps a thin film over the lens; the frosted one draws its material
+                // inside the glass modifier.
+                color = when {
+                    liquidBackdrop != null -> containerColor.copy(alpha = 0.55f)
+                    useGlass -> Color.Transparent
+                    else -> containerColor
+                },
                 tonalElevation = if (useGlass) 0.dp else barTonalElevation,
                 shadowElevation = if (useGlass) 0.dp else 8.dp,
-                border = if (useGlass || wallpaperActive) {
-                    null
-                } else {
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                // A white specular rim is invisible on a bright page, so the liquid pill keeps a
+                // hairline of its own to hold the edge in either polarity.
+                border = when {
+                    liquidBackdrop != null -> BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                    )
+                    useGlass || wallpaperActive -> null
+                    else -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 },
             ) {
                 if (style == FloatingBarConfig.Style.Drawer) {
@@ -133,6 +201,7 @@ internal fun FloatingBar(
                             mainPagerState.animateToPage(it.ordinal)
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
+                        liquidIndicator = liquidIndicator,
                     )
                 } else {
                     FloatingBarStandard(
@@ -144,6 +213,7 @@ internal fun FloatingBar(
                             mainPagerState.animateToPage(it.ordinal)
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
+                        liquidIndicator = liquidIndicator,
                     )
                 }
             }

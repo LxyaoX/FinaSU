@@ -27,12 +27,16 @@ object FloatingBarConfig {
     private const val KEY_GLASS_SPECULAR = "floating_glass_specular"
     private const val KEY_GLASS_INNER_GLOW = "floating_glass_inner_glow"
     private const val KEY_GLASS_BORDER = "floating_glass_border"
+    private const val KEY_GLASS_STYLE = "floating_glass_style"
 
     private const val STYLE_STANDARD = "standard"
     private const val STYLE_DRAWER = "drawer"
 
     /** The two floating forms: a compact capsule, or a drawer whose selected item expands. */
     enum class Style { Standard, Drawer }
+
+    /** The two glass looks: the blur the bar shipped with, or the iOS-style liquid lens. */
+    enum class GlassStyle { Frosted, Liquid }
 
     private val prefs get() = ksuApp.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
@@ -64,6 +68,20 @@ object FloatingBarConfig {
         get() = prefs.getBoolean(KEY_GLASS, false)
         set(value) {
             prefs.edit { putBoolean(KEY_GLASS, value) }
+            notifyChanged()
+        }
+
+    /** Which glass look [glass] draws. Defaults to the frosted one, so nothing changes until picked. */
+    var glassStyle: GlassStyle
+        get() = if (prefs.getString(KEY_GLASS_STYLE, null).equals("liquid", ignoreCase = true)) {
+            GlassStyle.Liquid
+        } else {
+            GlassStyle.Frosted
+        }
+        set(value) {
+            prefs.edit {
+                putString(KEY_GLASS_STYLE, if (value == GlassStyle.Liquid) "liquid" else "frosted")
+            }
             notifyChanged()
         }
 

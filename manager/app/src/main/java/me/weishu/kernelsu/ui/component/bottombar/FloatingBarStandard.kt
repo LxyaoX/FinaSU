@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -43,6 +44,7 @@ internal fun FloatingBarStandard(
     selectedIndex: Int,
     badge: (BottomBarDestination) -> NavBadge?,
     onSelect: (BottomBarDestination) -> Unit,
+    liquidIndicator: LiquidIndicatorGlass? = null,
     modifier: Modifier = Modifier,
 ) {
     if (destinations.isEmpty()) return
@@ -100,7 +102,25 @@ internal fun FloatingBarStandard(
                         .fillMaxHeight()
                         .padding(horizontal = indicatorPadding)
                         .width(itemSize)
-                        .background(color = MaterialTheme.colorScheme.secondaryContainer, shape = itemShape),
+                        .then(
+                            if (liquidIndicator != null) {
+                                Modifier
+                                    .liquidIndicatorGlass(
+                                        glass = liquidIndicator,
+                                        shape = itemShape,
+                                        lensPx = with(density) { 10.dp.toPx() },
+                                    )
+                                    .background(
+                                        color = liquidIndicator.film,
+                                        shape = itemShape,
+                                    )
+                            } else {
+                                Modifier.background(
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    shape = itemShape,
+                                )
+                            }
+                        ),
                 )
             }
             Row(
@@ -112,9 +132,17 @@ internal fun FloatingBarStandard(
                     val selected = index == selectedIndex
                     val navBadge = badge(destination)
                     val tint = if (selected) {
-                        MaterialTheme.colorScheme.onSecondaryContainer
+                        if (liquidIndicator != null) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        }
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        if (liquidIndicator != null) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     }
                     Box(
                         modifier = Modifier

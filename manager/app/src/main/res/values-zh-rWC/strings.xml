@@ -619,6 +619,9 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">琉璃效果</string>
     <string name="settings_floating_bar_glass_summary">悬浮仙阵背后之实时模糊（Android 13+）</string>
+    <string name="settings_floating_glass_style">玻璃樣式</string>
+    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
+    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">悬浮仙阵自动隐遁</string>
     <string name="settings_floating_auto_hide_summary">3 息无操作后自动隐遁悬浮仙阵</string>
     <string name="settings_floating_swipe_hide">滑动以隐遁悬浮仙阵</string>

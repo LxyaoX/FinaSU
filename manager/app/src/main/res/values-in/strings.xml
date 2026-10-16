@@ -610,6 +610,9 @@
     <string name="settings_floating_bar_compact">Sudut membulat ringkas</string>
     <string name="settings_floating_bar_glass">Efek kaca</string>
     <string name="settings_floating_bar_glass_summary">Blur waktu nyata di belakang bilah mengambang (Android 13+)</string>
+    <string name="settings_floating_glass_style">Gaya kaca</string>
+    <string name="settings_floating_glass_style_frosted">Buram</string>
+    <string name="settings_floating_glass_style_liquid">Kaca cair</string>
     <string name="settings_floating_auto_hide">Sembunyikan otomatis bilah mengambang</string>
     <string name="settings_floating_auto_hide_summary">Sembunyikan bilah mengambang secara otomatis setelah 3 detik tanpa aktivitas</string>
     <string name="settings_floating_swipe_hide">Geser untuk menyembunyikan bilah mengambang</string>

@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -43,6 +44,7 @@ internal fun FloatingBarDrawer(
     selectedIndex: Int,
     badge: (BottomBarDestination) -> NavBadge?,
     onSelect: (BottomBarDestination) -> Unit,
+    liquidIndicator: LiquidIndicatorGlass? = null,
     modifier: Modifier = Modifier,
 ) {
     if (destinations.isEmpty()) return
@@ -73,12 +75,25 @@ internal fun FloatingBarDrawer(
                     val expansion by animateFloatAsState(if (selected) 1f else 0f, spatialSpec, label = "drawerExpansion")
                     val iconScale by animateFloatAsState(if (selected) 1f else 0.9f, spatialSpec, label = "drawerIconScale")
                     val background by animateColorAsState(
-                        if (selected) selectedContainer else Color.Transparent,
+                        if (selected) {
+                            if (liquidIndicator != null) {
+                                liquidIndicator.film
+                            } else {
+                                selectedContainer
+                            }
+                        } else {
+                            Color.Transparent
+                        },
                         effectsSpec,
                         label = "drawerSelection",
                     )
                     val tint = when {
-                        !selected -> MaterialTheme.colorScheme.onSurfaceVariant
+                        !selected -> if (liquidIndicator != null) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                        liquidIndicator != null -> MaterialTheme.colorScheme.onSurface
                         wallpaperActive -> MaterialTheme.colorScheme.onSurface
                         else -> MaterialTheme.colorScheme.onSecondaryContainer
                     }
@@ -88,6 +103,17 @@ internal fun FloatingBarDrawer(
                             .weight(1f + (openWeight - 1f) * expansion)
                             .height(44.dp)
                             .clip(CircleShape)
+                            .then(
+                                if (selected && liquidIndicator != null) {
+                                    Modifier.liquidIndicatorGlass(
+                                        glass = liquidIndicator,
+                                        shape = CircleShape,
+                                        lensPx = with(LocalDensity.current) { 10.dp.toPx() },
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            )
                             .background(background)
                             .selectable(selected = selected, role = Role.Tab, onClick = { onSelect(destination) })
                             .padding(horizontal = 12.dp),
@@ -124,7 +150,9 @@ internal fun FloatingBarDrawer(
                                     .padding(start = 8.dp * expansion)
                                     .graphicsLayer { alpha = expansion },
                                 color = tint,
-                                style = MaterialTheme.typography.labelLarge,
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    shadow = liquidIndicator?.contentShadow,
+                                ),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
