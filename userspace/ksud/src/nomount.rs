@@ -16,6 +16,8 @@ use std::io::Write;
 
 use anyhow::{Context, Result, bail, ensure};
 
+use crate::mount_guard;
+
 /// Kernel/userspace payload size; the kernel maps exactly one page.
 pub const PAGE_SIZE: usize = 4096;
 
@@ -1003,75 +1005,6 @@ pub fn current_boot_id() -> String {
         .map_or_else(|_| String::new(), |value| value.trim().to_string())
 }
 
-/// Record that the embedded module is about to be loaded, durably.
-///
-/// A load runs inside the kernel: if `module_init` wedges, the call never
-/// returns, the boot never finishes and none of our cleanup code runs. The
-/// record is therefore written and synced *before* the call, and it is the only
-/// way the next boot can tell that a load is what stopped the previous one.
-///
-/// # Errors
-/// Returns an error when the record cannot be written or synced.
-pub fn begin_load_attempt(path: &std::path::Path, kmi: &str) -> Result<()> {
-    let stamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |since| since.as_secs());
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
-    }
-    let mut file =
-        std::fs::File::create(path).with_context(|| format!("create {}", path.display()))?;
-    file.write_all(
-        format!(
-            "boot_id={}\nkmi={}\ntime={stamp}\n",
-            current_boot_id(),
-            kmi.replace('\n', " ")
-        )
-        .as_bytes(),
-    )
-    .with_context(|| format!("write {}", path.display()))?;
-    file.sync_all()
-        .with_context(|| format!("sync {}", path.display()))
-}
-
-/// The boot id and KMI of a recorded load attempt, when one is recorded.
-#[must_use]
-pub fn load_attempt_record(path: &std::path::Path) -> Option<(String, String)> {
-    let content = std::fs::read_to_string(path).ok()?;
-    let mut boot_id = None;
-    let mut kmi = None;
-    for line in content.lines() {
-        let Some((key, value)) = line.split_once('=') else {
-            continue;
-        };
-        match key {
-            "boot_id" => boot_id = Some(value.to_string()),
-            "kmi" => kmi = Some(value.to_string()),
-            _ => {}
-        }
-    }
-    Some((boot_id?, kmi.unwrap_or_else(|| "unknown".to_string())))
-}
-
-/// True when a recorded load attempt was made in an earlier boot.
-///
-/// That attempt never returned: the kernel wedged inside the load, or the device
-/// was reset before it finished. A second attempt has to be a deliberate choice
-/// rather than an automatic part of the next boot.
-#[must_use]
-pub fn load_attempt_died(path: &std::path::Path) -> bool {
-    load_attempt_record(path).is_some_and(|(boot_id, _)| boot_id != current_boot_id())
-}
-
-/// Drop a recorded load attempt; failures only warn.
-pub fn clear_load_attempt(path: &std::path::Path) {
-    match std::fs::remove_file(path) {
-        Ok(()) => {}
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-        Err(error) => log::warn!("nomount: could not clear {}: {error:#}", path.display()),
-    }
-}
-
 /// Outcome of one injection round, mirroring the per-boot record.
 #[derive(Debug, Clone)]
 pub struct InjectionResult {
@@ -1139,6 +1072,8 @@ pub fn apply_current_plan() -> Result<InjectionResult> {
         warnings.push(format!("runtime record not written: {error:#}"));
     }
 
+    log_injection(&plan, &record, &warnings);
+
     Ok(InjectionResult {
         driver_state: probe.state.as_str().to_string(),
         driver_version: probe.version.unwrap_or_default(),
@@ -1149,6 +1084,70 @@ pub fn apply_current_plan() -> Result<InjectionResult> {
         isolated_blocked,
         warnings,
     })
+}
+
+/// Append what this boot injected to the shared mount log.
+///
+/// The log is what a bug report carries: the runtime record holds the numbers,
+/// but a report has to show *which* paths went into the kernel, because that is
+/// what decides whether an injection can break a vendor kernel's boot.
+#[cfg(target_os = "android")]
+fn log_injection(plan: &crate::nomount_plan::Plan, record: &RuntimeRecord, warnings: &[String]) {
+    let mut body = String::new();
+    let _ = writeln!(
+        body,
+        "--- nomount injection boot={} stage=inject provider=nomount",
+        record.boot_id
+    );
+    let _ = writeln!(
+        body,
+        "driver={} version={} rules_applied={} rules_removed={} rules_planned={} uids={} isolated={}",
+        record.driver_state,
+        record.driver_version,
+        record.rules_applied,
+        record.rules_removed,
+        plan.rules.len(),
+        record.uid_count,
+        record.isolated_blocked
+    );
+    for (path, count) in summarize_targets(&plan.rules) {
+        let _ = writeln!(body, "target={path} files={count}");
+    }
+    for (id, reason) in &plan.skipped {
+        let _ = writeln!(body, "skipped_module={id} reason={reason}");
+    }
+    for warning in warnings {
+        let _ = writeln!(body, "warning={warning}");
+    }
+    if let Err(error) = mount_guard::append_log(
+        std::path::Path::new(crate::defs::MOUNT_LOG),
+        &body,
+        crate::defs::MOUNT_LOG_MAX_BYTES,
+    ) {
+        log::warn!("nomount: could not write the mount log: {error:#}");
+    }
+}
+
+/// The directories an injection touches, largest first.
+///
+/// A rule's virtual path names the file the kernel will redirect, so the parent
+/// directory is the directory whose lookups get hooked: that is the unit a
+/// device's boot either survives or does not.
+#[cfg(target_os = "android")]
+fn summarize_targets(rules: &[Rule]) -> Vec<(String, usize)> {
+    let mut counts: std::collections::BTreeMap<String, usize> = std::collections::BTreeMap::new();
+    for rule in rules {
+        let dir = rule
+            .virtual_path
+            .rsplit_once('/')
+            .map_or("/", |(parent, _)| parent);
+        let dir = if dir.is_empty() { "/" } else { dir };
+        *counts.entry(dir.to_string()).or_default() += 1;
+    }
+    let mut dirs: Vec<(String, usize)> = counts.into_iter().collect();
+    dirs.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+    dirs.truncate(24);
+    dirs
 }
 
 /// Status reported by `ksud nomount status`.
@@ -1596,19 +1595,21 @@ pub fn owns_injection() -> Result<bool> {
 /// recorded, or the loader refuses the module.
 #[cfg(target_os = "android")]
 pub fn load_embedded_driver() -> Result<String> {
-    let attempt = load_attempt_path();
+    let attempt = inflight_path();
     if module_loaded(&std::fs::read_to_string("/proc/modules").unwrap_or_default()) {
         // Something already loaded it, so no load is in flight any more.
-        clear_load_attempt(attempt);
+        mount_guard::clear(attempt);
         return Ok("already loaded".to_string());
     }
-    if load_attempt_died(attempt) {
-        let (boot_id, recorded_kmi) = load_attempt_record(attempt).unwrap_or_default();
+    if mount_guard::died(attempt) {
+        let earlier = mount_guard::read(attempt).map_or_else(
+            || "an earlier load".to_string(),
+            |record| format!("the {}", record.describe()),
+        );
         bail!(
-            "the load of {recorded_kmi} attempted in boot {boot_id} never returned, so this boot keeps \
-             the built-in engine instead of loading the module again; select NoMount again, or delete \
-             {}, to retry",
-            crate::defs::NOMOUNT_LOAD_ATTEMPT
+            "{earlier} never returned, so this boot keeps the built-in engine instead of loading the \
+             module again; select NoMount again, or delete {}, to retry",
+            crate::defs::MOUNT_INFLIGHT
         );
     }
     let kmi = crate::boot_patch::get_current_kmi()
@@ -1617,29 +1618,36 @@ pub fn load_embedded_driver() -> Result<String> {
     let data = crate::assets::get_asset_data(&name)
         .with_context(|| format!("nomount: this build has no module for {kmi}"))?;
     let params = std::ffi::CString::new("").context("nomount: empty module parameters")?;
-    begin_load_attempt(attempt, &kmi).context("nomount: cannot record the load attempt")?;
+    mount_guard::begin(
+        attempt,
+        mount_guard::Stage::Load,
+        "nomount",
+        &kmi,
+        &mount_guard::current_boot_id(),
+    )
+    .context("nomount: cannot record the load attempt")?;
     let loaded = ksuinit::load_module(&data, &params);
     // The call returned, so the kernel survived it and the record has done its
     // job: only a load that hangs leaves it behind for the next boot.
-    clear_load_attempt(attempt);
+    mount_guard::clear(attempt);
     loaded.with_context(|| format!("nomount: loading {name} failed"))?;
     log::info!("nomount: loaded {name}");
     Ok(name)
 }
 
-/// Where the in-flight load record lives on a device.
+/// Where the in-flight step record lives on a device.
 #[cfg(target_os = "android")]
-fn load_attempt_path() -> &'static std::path::Path {
-    std::path::Path::new(crate::defs::NOMOUNT_LOAD_ATTEMPT)
+fn inflight_path() -> &'static std::path::Path {
+    std::path::Path::new(crate::defs::MOUNT_INFLIGHT)
 }
 
-/// Forget the recorded load attempt.
+/// Forget the recorded step.
 ///
-/// Selecting NoMount again is the retry the guard is waiting for, so the record
-/// has to go before the next load can run.
+/// Selecting NoMount again is the retry both guards are waiting for, so the
+/// record has to go before the next load or injection can run.
 #[cfg(target_os = "android")]
-pub fn forget_load_attempt() {
-    clear_load_attempt(load_attempt_path());
+pub fn forget_inflight() {
+    mount_guard::clear(inflight_path());
 }
 
 /// Probe the driver, loading the embedded module first when there is none.

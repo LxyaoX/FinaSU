@@ -6,6 +6,7 @@
 //! `mount_plan`), metadata/SELinux cloning, transaction rollback, unmount
 //! registration and the per-boot runtime record.
 
+use std::fmt::Write as _;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -20,6 +21,7 @@ use rustix::mount::{
 use serde_json::json;
 
 use crate::defs;
+use crate::mount_guard;
 use crate::mount_plan::{self, FileMeta, MountOps, Node, NodeFileType, RealDirEntry};
 
 /// User-visible mount mode stored in [`defs::FOLK_MOUNT_CONFIG`].
@@ -765,16 +767,40 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         return Ok(MountOutcome::empty(Provider::Builtin));
     }
 
-    let provider = resolve_provider()?;
+    let configured = resolve_provider()?;
+    let mut provider = configured;
     if provider == Provider::None {
         info!("folk mount: mounting is disabled (mode=off)");
         let boot_id = current_boot_id().unwrap_or_default();
-        finish_runtime(&boot_id, provider, "disabled", false, 0, None, None);
+        finish_runtime(&boot_id, provider, "disabled", None, None, None, None);
         return Ok(MountOutcome::empty(Provider::None));
     }
     ensure_init_mnt_ns()?;
 
     let boot_id = current_boot_id().unwrap_or_default();
+
+    // A provider that stopped an earlier boot does not get to run again on its
+    // own: the boot would stop the same way. NoMount and the metamodule step
+    // aside for one boot and the built-in engine mounts in their place; a
+    // recorded failure of the built-in engine itself only gets reported, since
+    // there is nothing safer left to fall back to.
+    let mut guard_note = None;
+    if let Some(record) = mount_guard::read(inflight_path())
+        && record.boot_id != boot_id
+        && record.provider == provider.as_str()
+    {
+        guard_note = Some(format!(
+            "the {} never finished, so this boot does not repeat it",
+            record.describe()
+        ));
+        if let Some(note) = &guard_note {
+            warn!("folk mount: {note}");
+        }
+        if provider != Provider::Builtin {
+            provider = Provider::Builtin;
+        }
+    }
+
     let _lock = MountLock::acquire()?;
     guard_reentrancy(&boot_id, provider)?;
 
@@ -786,6 +812,23 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         error: None,
         warning: None,
     })?;
+
+    // Written before the provider runs and cleared when the boot completes: a
+    // provider that breaks path resolution never gets to clear it, and the next
+    // boot reads it back (see `on_boot_completed` in `init_event`).
+    if let Err(e) = mount_guard::begin(
+        inflight_path(),
+        mount_guard::Stage::Inject,
+        provider.as_str(),
+        &format!(
+            "mode={} configured={}",
+            provider.as_str(),
+            configured.as_str()
+        ),
+        &boot_id,
+    ) {
+        warn!("folk mount: could not record the injection step: {e:#}");
+    }
 
     // A driver that cannot be made usable must not leave the modules
     // unmounted: fall back to the built-in engine and say why.
@@ -811,17 +854,19 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 outcome.target_count,
                 outcome.skipped_count
             );
-            let warning = fallback.or_else(|| outcome.warnings.first().cloned());
+            let warning = guard_note
+                .or(fallback)
+                .or_else(|| outcome.warnings.first().cloned());
             finish_runtime(
                 &boot_id,
                 provider,
                 result,
                 // The metamodule is a black box; the built-in engine and the
                 // NoMount backend both know how many targets they published.
-                provider != Provider::Metamodule,
-                outcome.target_count,
+                (provider != Provider::Metamodule).then_some(outcome.target_count),
                 None,
                 warning,
+                Some(configured),
             );
             Ok(outcome)
         }
@@ -839,35 +884,70 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 &boot_id,
                 provider,
                 result,
-                provider != Provider::Metamodule,
-                outcome.target_count,
+                (provider != Provider::Metamodule).then_some(outcome.target_count),
                 Some(format!("{error:#}")),
-                fallback,
+                guard_note.or(fallback),
+                Some(configured),
             );
             Err(error)
         }
     }
 }
 
+/// Where the in-flight step record lives on a device.
+fn inflight_path() -> &'static Path {
+    Path::new(defs::MOUNT_INFLIGHT)
+}
+
 fn finish_runtime(
     boot_id: &str,
     provider: Provider,
     result: &str,
-    known_count: bool,
-    target_count: usize,
+    target_count: Option<usize>,
     error: Option<String>,
     warning: Option<String>,
+    configured: Option<Provider>,
 ) {
     let record = RuntimeRecord {
         boot_id: boot_id.to_string(),
         provider: Some(provider.as_str().to_string()),
         result: result.to_string(),
-        target_count: known_count.then_some(target_count),
+        target_count,
         error,
         warning,
     };
     if let Err(e) = write_runtime(&record) {
         warn!("folk mount: failed to record runtime state: {e:#}");
+    }
+    log_mount(&record, configured);
+}
+
+/// Append one block to the shared mount log, so a bug report shows which
+/// provider ran, what it published and why it degraded.
+fn log_mount(record: &RuntimeRecord, configured: Option<Provider>) {
+    let mut body = format!(
+        "--- folk mount boot={} stage=inject provider={} result={}",
+        record.boot_id,
+        record.provider.as_deref().unwrap_or("none"),
+        record.result
+    );
+    if let Some(configured) = configured {
+        let _ = write!(body, " configured={}", configured.as_str());
+    }
+    let _ = writeln!(body);
+    if let Some(count) = record.target_count {
+        let _ = writeln!(body, "target_count={count}");
+    }
+    if let Some(error) = &record.error {
+        let _ = writeln!(body, "error={error}");
+    }
+    if let Some(warning) = &record.warning {
+        let _ = writeln!(body, "warning={warning}");
+    }
+    if let Err(e) =
+        mount_guard::append_log(Path::new(defs::MOUNT_LOG), &body, defs::MOUNT_LOG_MAX_BYTES)
+    {
+        warn!("folk mount: could not write the mount log: {e:#}");
     }
 }
 
@@ -992,10 +1072,11 @@ pub fn set_mode(mode: &str) -> Result<()> {
             "invalid mount mode {mode:?}; expected one of: auto, builtin, metamodule, nomount, off"
         );
     };
-    // Asking for NoMount by hand is also the retry that a load which stopped the
-    // previous boot is waiting for, so the guard must not outlive the request.
+    // Asking for NoMount by hand is also the retry that the guards are waiting
+    // for, so a record of a step that stopped an earlier boot must not outlive
+    // the request.
     if parsed == MountMode::Nomount {
-        crate::nomount::forget_load_attempt();
+        crate::nomount::forget_inflight();
     }
     write_mount_mode(parsed)
 }

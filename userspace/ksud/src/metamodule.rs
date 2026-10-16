@@ -4,15 +4,16 @@
 //! Metamodules are special modules that manage how regular modules are mounted
 //! and provide hooks for module installation/uninstallation.
 
-use anyhow::{Context, Result, ensure};
+use anyhow::{Context, Result, bail, ensure};
 use log::{info, warn};
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
     process::Command,
+    time::Instant,
 };
 
-use crate::module::{ModuleType::All, ScriptWait};
+use crate::module::{ModuleType::All, ScriptWait, SigchldBlock};
 use crate::{assets, defs};
 
 /// Determine whether the provided module properties mark it as a metamodule
@@ -258,18 +259,35 @@ pub fn exec_mount_script(module_dir: &str) -> Result<()> {
 
     info!("Executing mount script for metamodule");
 
-    let result = Command::new(assets::BUSYBOX_PATH)
+    // The mount script runs inside post-fs-data, so it gets the same stage
+    // deadline as every module script: a metamodule that blocks must not hold
+    // the boot stage open forever waiting for it. The exit status is still
+    // checked, because a mount script that failed quietly would look exactly
+    // like a successful injection.
+    let deadline = Instant::now() + defs::BOOT_STAGE_TIMEOUT;
+    let sigchld = SigchldBlock::block().context("Failed to block SIGCHLD")?;
+    let child = Command::new(assets::BUSYBOX_PATH)
         .args(["sh", mount_script.to_str().unwrap()])
         .envs(crate::module::get_common_script_envs(
             get_metamodule_id().as_deref(),
         ))
         .env("MODULE_DIR", module_dir)
-        .status()?;
-
-    ensure!(
-        result.success(),
-        "Metamodule mount script failed with status: {result:?}"
-    );
+        .spawn()?;
+    match sigchld.wait_status_until(child.id() as libc::pid_t, deadline)? {
+        Some(status) if libc::WIFEXITED(status) && libc::WEXITSTATUS(status) == 0 => {}
+        Some(status) if libc::WIFSIGNALED(status) => bail!(
+            "Metamodule mount script was killed by signal {}",
+            libc::WTERMSIG(status)
+        ),
+        Some(status) => bail!(
+            "Metamodule mount script failed with status {}",
+            libc::WEXITSTATUS(status)
+        ),
+        None => bail!(
+            "Metamodule mount script did not finish within {}s, so the boot stage stops waiting for it",
+            defs::BOOT_STAGE_TIMEOUT.as_secs()
+        ),
+    }
 
     info!("Metamodule mount script executed successfully");
     Ok(())

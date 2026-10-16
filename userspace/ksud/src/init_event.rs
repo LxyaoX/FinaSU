@@ -1,7 +1,7 @@
 use crate::module::{ScriptWait, handle_updated_modules, prune_modules};
 use crate::utils::is_safe_mode;
 use crate::{
-    assets, defs, ksucalls, magic_mount, metamodule, restorecon,
+    assets, defs, ksucalls, magic_mount, metamodule, mount_guard, restorecon,
     utils::{self},
 };
 use anyhow::{Context, Result};
@@ -227,6 +227,10 @@ pub fn on_boot_completed() {
 
     ksucalls::report_boot_complete();
     info!("on_boot_completed triggered!");
+    // The boot reached a usable state, so the step recorded for it finished:
+    // dropping that record is what tells the next boot which provider may run
+    // again (a record from an earlier boot has to stay, see `mount_guard`).
+    mount_guard::clear_if_ours(std::path::Path::new(defs::MOUNT_INFLIGHT));
     // A post-fs-data migration may have had nothing to adopt yet (the package
     // scan had not produced anything); by now it certainly has.
     if let Err(e) = crate::dynamic_manager::finish_migration() {
