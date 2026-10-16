@@ -99,8 +99,7 @@ static struct dynamic_manager_sign *find_sign_locked(u32 size, const char *hash)
 {
     struct dynamic_manager_sign *sign;
 
-    hash_for_each_possible(dynamic_manager_signs, sign, node, sign_key(size, hash))
-    {
+    hash_for_each_possible (dynamic_manager_signs, sign, node, sign_key(size, hash)) {
         if (sign->size == size && strncmp(sign->hash, hash, sizeof(sign->hash)) == 0)
             return sign;
     }
@@ -112,8 +111,7 @@ static struct dynamic_manager_app *find_app_locked(uid_t appid)
 {
     struct dynamic_manager_app *app;
 
-    hash_for_each_possible(dynamic_manager_apps, app, node, appid)
-    {
+    hash_for_each_possible (dynamic_manager_apps, app, node, appid) {
         if (app->appid == appid)
             return app;
     }
@@ -146,8 +144,7 @@ static void clear_signs_locked(void)
     struct hlist_node *tmp;
     int bucket;
 
-    hash_for_each_safe(dynamic_manager_signs, bucket, tmp, sign, node)
-    {
+    hash_for_each_safe (dynamic_manager_signs, bucket, tmp, sign, node) {
         hash_del(&sign->node);
         kfree(sign);
     }
@@ -165,8 +162,7 @@ static void publish_trusted_snapshot_locked(void)
     u32 i;
     int bucket;
 
-    hash_for_each(dynamic_manager_apps, bucket, app, node)
-    {
+    hash_for_each (dynamic_manager_apps, bucket, app, node) {
         if (!app->trusted)
             continue;
         /*
@@ -244,8 +240,7 @@ void __exit ksu_dynamic_manager_exit(void)
 
     mutex_lock(&dynamic_manager_lock);
     clear_signs_locked();
-    hash_for_each_safe(dynamic_manager_apps, bucket, tmp, app, node)
-    {
+    hash_for_each_safe (dynamic_manager_apps, bucket, tmp, app, node) {
         hash_del(&app->node);
         kfree(app);
     }
@@ -291,8 +286,7 @@ bool ksu_has_dynamic_manager(void)
     return smp_load_acquire(&trusted_dynamic_count) > 0;
 }
 
-u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps,
-                                 u32 max_count, u32 *total_count)
+u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps, u32 max_count, u32 *total_count)
 {
     struct dynamic_manager_app *app;
     u32 count = 0;
@@ -300,8 +294,7 @@ u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps,
     int bucket;
 
     mutex_lock(&dynamic_manager_lock);
-    hash_for_each(dynamic_manager_apps, bucket, app, node)
-    {
+    hash_for_each (dynamic_manager_apps, bucket, app, node) {
         u32 flags = 0;
 
         if (app->preset)
@@ -370,8 +363,7 @@ out:
     mutex_unlock(&dynamic_manager_lock);
 }
 
-int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 count,
-                            bool *need_rescan)
+int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 count, bool *need_rescan)
 {
     struct dynamic_manager_sign *pending[KSU_DYNAMIC_MANAGER_MAX_SIGNS];
     u32 i, pending_count = 0;
@@ -411,18 +403,15 @@ int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 co
     clear_signs_locked();
 
     for (i = 0; i < pending_count; i++)
-        hash_add(dynamic_manager_signs, &pending[i]->node,
-                 sign_key(pending[i]->size, pending[i]->hash));
+        hash_add(dynamic_manager_signs, &pending[i]->node, sign_key(pending[i]->size, pending[i]->hash));
     valid_count = pending_count;
 
     {
         int bucket;
         struct dynamic_manager_app *app;
 
-        hash_for_each(dynamic_manager_apps, bucket, app, node)
-        {
-            struct dynamic_manager_sign *sign =
-                find_sign_locked(app->size, app->hash);
+        hash_for_each (dynamic_manager_apps, bucket, app, node) {
+            struct dynamic_manager_sign *sign = find_sign_locked(app->size, app->hash);
 
             app->trusted = false;
             if (sign) {
@@ -501,8 +490,7 @@ int ksu_dynamic_manager_set_grants(const uid_t *appids, u32 count)
 
     mutex_lock(&dynamic_manager_lock);
 
-    hash_for_each(dynamic_manager_apps, bucket, app, node)
-    {
+    hash_for_each (dynamic_manager_apps, bucket, app, node) {
         app->granted = false;
     }
 
@@ -569,8 +557,7 @@ static void do_persist_dynamic_manager(struct callback_head *_cb)
     int bucket;
 
     const struct cred *saved = override_creds(ksu_cred);
-    struct file *fp = filp_open(KERNEL_SU_DYNAMIC_MANAGER,
-                                O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    struct file *fp = filp_open(KERNEL_SU_DYNAMIC_MANAGER, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (IS_ERR(fp)) {
         pr_err("dynamic_manager: create file failed: %ld\n", PTR_ERR(fp));
         goto out;
@@ -678,8 +665,7 @@ void ksu_dynamic_manager_load(void)
         return;
     }
 
-    if (kernel_read(fp, &magic, sizeof(magic), &off) != sizeof(magic) ||
-        magic != DYNAMIC_MANAGER_FILE_MAGIC) {
+    if (kernel_read(fp, &magic, sizeof(magic), &off) != sizeof(magic) || magic != DYNAMIC_MANAGER_FILE_MAGIC) {
         pr_err("dynamic_manager: invalid file magic\n");
         goto exit;
     }
@@ -734,18 +720,15 @@ void ksu_dynamic_manager_load(void)
         sign->size = disk.size;
         sign->version_code = disk.version_code;
         strscpy(sign->hash, normalized_hash, sizeof(sign->hash));
-        hash_add(dynamic_manager_signs, &sign->node,
-                 sign_key(sign->size, sign->hash));
+        hash_add(dynamic_manager_signs, &sign->node, sign_key(sign->size, sign->hash));
     }
 
     {
         int bucket;
         struct dynamic_manager_app *app;
 
-        hash_for_each(dynamic_manager_apps, bucket, app, node)
-        {
-            struct dynamic_manager_sign *sign =
-                find_sign_locked(app->size, app->hash);
+        hash_for_each (dynamic_manager_apps, bucket, app, node) {
+            struct dynamic_manager_sign *sign = find_sign_locked(app->size, app->hash);
 
             app->trusted = sign != NULL;
             if (sign)
@@ -771,8 +754,7 @@ void ksu_dynamic_manager_load(void)
     publish_trusted_snapshot_locked();
     mutex_unlock(&dynamic_manager_lock);
 
-    pr_info("dynamic_manager: restored persisted list (grants %u, strict %d)\n", grant_count,
-            grants_strict);
+    pr_info("dynamic_manager: restored persisted list (grants %u, strict %d)\n", grant_count, grants_strict);
 
 exit:
     filp_close(fp, 0);

@@ -23,16 +23,13 @@ bool ksu_has_dynamic_manager(void);
 bool ksu_is_preset_manager_uid(uid_t uid);
 
 /* Snapshot the tracked apps into apps[0..max_count); returns count written. */
-u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps,
-                                 u32 max_count, u32 *total_count);
+u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps, u32 max_count, u32 *total_count);
 
 /* Record a scanned APK candidate. */
-void ksu_dynamic_manager_note_scanned(uid_t appid,
-                                      const struct apk_sign_match *match);
+void ksu_dynamic_manager_note_scanned(uid_t appid, const struct apk_sign_match *match);
 
 /* Replace the trusted signature list; sets *need_rescan when a rescan helps. */
-int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs,
-                            u32 count, bool *need_rescan);
+int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 count, bool *need_rescan);
 
 /*
  * Replace the authorized appid list. Until the first call the kernel keeps the
