@@ -32,7 +32,6 @@ struct dynamic_manager_sign {
     u32 size;
     u32 version_code;
     char hash[65];
-    bool matched; /* a scanned app already used this sign (run-local) */
 };
 
 struct dynamic_manager_app {
@@ -59,18 +58,13 @@ static DEFINE_HASHTABLE(dynamic_manager_apps, KSU_DYNAMIC_MANAGER_HASH_BITS);
 /*
  * Published snapshot of trusted appids. ksu_is_dynamic_manager_uid() runs from
  * the setuid/umount paths, so readers must not take dynamic_manager_lock and
- * must never observe a half-written table. The writer builds a complete
- * immutable snapshot and swaps it in with RCU; the old one is freed after a
- * grace period. A failed allocation keeps the previous snapshot live instead
- * of silently revoking every dynamic manager.
+ * must never observe a half-written table. The writer retires the previous
+ * snapshot, fills the fixed array and publishes the new count with a
+ * release-store; readers only need an acquire-load. Publishing therefore
+ * neither allocates nor waits for a grace period, and it cannot fail.
  */
-struct dynamic_manager_trusted {
-    u32 count;
-    uid_t appids[KSU_DYNAMIC_MANAGER_MAX_APPS];
-    struct rcu_head rcu;
-};
-
-static struct dynamic_manager_trusted __rcu *trusted_dynamic;
+static uid_t trusted_dynamic_appids[KSU_DYNAMIC_MANAGER_MAX_APPS];
+static u32 trusted_dynamic_count;
 
 static u32 sign_key(u32 size, const char *hash)
 {
@@ -143,15 +137,16 @@ static void clear_signs_locked(void)
     }
 }
 
-static struct dynamic_manager_trusted *alloc_trusted_snapshot(void)
-{
-    return kzalloc(sizeof(struct dynamic_manager_trusted), GFP_KERNEL);
-}
-
-static void fill_trusted_snapshot(struct dynamic_manager_trusted *snap)
+/*
+ * Collect the trusted appids and publish them. Caller holds
+ * dynamic_manager_lock (which keeps the app table stable while we read it).
+ */
+static void publish_trusted_snapshot_locked(void)
 {
     struct dynamic_manager_app *app;
+    uid_t pending[KSU_DYNAMIC_MANAGER_MAX_APPS];
     u32 count = 0;
+    u32 i;
     int bucket;
 
     hash_for_each(dynamic_manager_apps, bucket, app, node)
@@ -160,33 +155,19 @@ static void fill_trusted_snapshot(struct dynamic_manager_trusted *snap)
             continue;
         if (count >= KSU_DYNAMIC_MANAGER_MAX_APPS)
             break;
-        snap->appids[count++] = app->appid;
-    }
-    snap->count = count;
-}
-
-/* Publishes a fully built snapshot and retires the previous one after a grace period. */
-static void publish_trusted_snapshot(struct dynamic_manager_trusted *snap)
-{
-    struct dynamic_manager_trusted *old;
-
-    old = rcu_dereference_protected(trusted_dynamic, true);
-    rcu_assign_pointer(trusted_dynamic, snap);
-    if (old)
-        kfree_rcu(old, rcu);
-}
-
-static void rebuild_trusted_cache_locked(void)
-{
-    struct dynamic_manager_trusted *snap = alloc_trusted_snapshot();
-
-    if (!snap) {
-        pr_warn("dynamic_manager: snapshot alloc failed, keeping previous\n");
-        return;
+        pending[count++] = app->appid;
     }
 
-    fill_trusted_snapshot(snap);
-    publish_trusted_snapshot(snap);
+    /*
+     * Retire the previous snapshot, then fill the array, then publish the new
+     * count. A reader that observes the new count therefore sees entries that
+     * were already written, and a reader racing the rewrite sees the retired
+     * state (count 0) instead of a mix of old and new appids.
+     */
+    smp_store_release(&trusted_dynamic_count, 0);
+    for (i = 0; i < count; i++)
+        WRITE_ONCE(trusted_dynamic_appids[i], pending[i]);
+    smp_store_release(&trusted_dynamic_count, count);
 }
 
 static int dynamic_manager_feature_get(u64 *value)
@@ -206,7 +187,7 @@ void __init ksu_dynamic_manager_init(void)
 {
     hash_init(dynamic_manager_signs);
     hash_init(dynamic_manager_apps);
-    rcu_assign_pointer(trusted_dynamic, NULL);
+    smp_store_release(&trusted_dynamic_count, 0);
 
     if (ksu_register_feature_handler(&dynamic_manager_feature_handler))
         pr_warn("dynamic_manager: failed to register feature handler\n");
@@ -215,7 +196,6 @@ void __init ksu_dynamic_manager_init(void)
 void __exit ksu_dynamic_manager_exit(void)
 {
     struct dynamic_manager_app *app;
-    struct dynamic_manager_trusted *snap;
     struct hlist_node *tmp;
     int bucket;
 
@@ -228,34 +208,24 @@ void __exit ksu_dynamic_manager_exit(void)
     }
     mutex_unlock(&dynamic_manager_lock);
 
-    snap = rcu_dereference_protected(trusted_dynamic, true);
-    rcu_assign_pointer(trusted_dynamic, NULL);
-    synchronize_rcu();
-    kfree(snap);
+    /* Retire the published snapshot so nothing keeps using this module's table. */
+    smp_store_release(&trusted_dynamic_count, 0);
 
     ksu_unregister_feature_handler(KSU_FEATURE_DYNAMIC_MANAGER);
 }
 
 bool ksu_is_dynamic_manager_uid(uid_t uid)
 {
-    struct dynamic_manager_trusted *snap;
     uid_t appid = uid % KSU_PER_USER_RANGE;
-    bool found = false;
+    u32 count = smp_load_acquire(&trusted_dynamic_count);
     u32 i;
 
-    rcu_read_lock();
-    snap = rcu_dereference(trusted_dynamic);
-    if (snap) {
-        for (i = 0; i < snap->count; i++) {
-            if (snap->appids[i] == appid) {
-                found = true;
-                break;
-            }
-        }
+    for (i = 0; i < count; i++) {
+        if (READ_ONCE(trusted_dynamic_appids[i]) == appid)
+            return true;
     }
-    rcu_read_unlock();
 
-    return found;
+    return false;
 }
 
 bool ksu_is_preset_manager_uid(uid_t uid)
@@ -274,15 +244,7 @@ bool ksu_is_preset_manager_uid(uid_t uid)
 
 bool ksu_has_dynamic_manager(void)
 {
-    struct dynamic_manager_trusted *snap;
-    bool has;
-
-    rcu_read_lock();
-    snap = rcu_dereference(trusted_dynamic);
-    has = snap && snap->count > 0;
-    rcu_read_unlock();
-
-    return has;
+    return smp_load_acquire(&trusted_dynamic_count) > 0;
 }
 
 u32 ksu_dynamic_manager_get_apps(struct ksu_dynamic_manager_app *apps,
@@ -351,7 +313,7 @@ void ksu_dynamic_manager_note_scanned(uid_t appid, const struct apk_sign_match *
             app->version_code = sign->version_code;
     }
 
-    rebuild_trusted_cache_locked();
+    publish_trusted_snapshot_locked();
 out:
     mutex_unlock(&dynamic_manager_lock);
 }
@@ -360,9 +322,7 @@ int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 co
                             bool *need_rescan)
 {
     struct dynamic_manager_sign *pending[KSU_DYNAMIC_MANAGER_MAX_SIGNS];
-    struct dynamic_manager_trusted *snapshot = NULL;
     u32 i, pending_count = 0;
-    bool unmatched = false;
     u32 valid_count = 0;
 
     if (need_rescan)
@@ -375,7 +335,8 @@ int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 co
      * Build and validate the whole replacement table before touching live
      * state. If any allocation fails, the previous trusted managers are kept
      * intact instead of being left in a half-cleared state. The final splice
-     * only links preallocated nodes, so it cannot fail midway.
+     * only links preallocated nodes, and the snapshot republish below does not
+     * allocate, so nothing can fail midway.
      */
     for (i = 0; i < count; i++) {
         struct dynamic_manager_sign *sign;
@@ -393,16 +354,6 @@ int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 co
         strscpy(sign->hash, normalized_hash, sizeof(sign->hash));
         pending[pending_count++] = sign;
     }
-
-    /*
-     * Preallocate the replacement trusted snapshot as well, so a failed
-     * allocation can never commit the new sign table while the previous
-     * authorization snapshot stays in effect (a "succeeded but not applied"
-     * state).
-     */
-    snapshot = alloc_trusted_snapshot();
-    if (!snapshot)
-        goto nomem;
 
     mutex_lock(&dynamic_manager_lock);
     clear_signs_locked();
@@ -425,34 +376,20 @@ int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 co
             if (sign) {
                 app->trusted = true;
                 app->version_code = sign->version_code;
-                sign->matched = true;
             }
         }
     }
 
     /*
-     * Trigger a scan when any configured sign has no matching app yet, so a
-     * manager added after another one is still discovered. A single already
-     * matched sign must not suppress scanning for the new ones.
+     * Always ask for a rescan while a signature is configured. The app table
+     * above can only cover APKs that were already scanned, and an APK whose
+     * signature was registered just now has no app entry at all, so the scan is
+     * what turns a freshly registered signature into a trusted manager. A sign
+     * that already matched must not suppress that scan.
      */
-    {
-        int bucket;
-        struct dynamic_manager_sign *sign;
+    publish_trusted_snapshot_locked();
 
-        hash_for_each(dynamic_manager_signs, bucket, sign, node)
-        {
-            if (!sign->matched) {
-                unmatched = true;
-                break;
-            }
-        }
-    }
-
-    fill_trusted_snapshot(snapshot);
-    publish_trusted_snapshot(snapshot);
-    snapshot = NULL;
-
-    if (valid_count && unmatched && need_rescan)
+    if (valid_count && need_rescan)
         *need_rescan = true;
 
     mutex_unlock(&dynamic_manager_lock);
@@ -461,7 +398,6 @@ int ksu_dynamic_manager_set(const struct ksu_dynamic_manager_sign *signs, u32 co
 nomem:
     for (i = 0; i < pending_count; i++)
         kfree(pending[i]);
-    kfree(snapshot);
     return -ENOMEM;
 }
 
@@ -635,7 +571,7 @@ void ksu_dynamic_manager_load(void)
                 app->version_code = sign->version_code;
         }
     }
-    rebuild_trusted_cache_locked();
+    publish_trusted_snapshot_locked();
     mutex_unlock(&dynamic_manager_lock);
 
     pr_info("dynamic_manager: restored persisted list\n");
