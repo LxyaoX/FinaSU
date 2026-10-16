@@ -357,6 +357,15 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
     )
     add(
         SettingsCategory.APPEARANCE.row(
+            id = "appearance.title_text",
+            titleRes = R.string.settings_home_title,
+            summaryRes = R.string.settings_home_title_summary,
+            icon = Icons.Rounded.TextFields,
+            aliases = listOf("title", "text", "name", "header"),
+        )
+    )
+    add(
+        SettingsCategory.APPEARANCE.row(
             id = "appearance.title_image",
             titleRes = R.string.media_title_image,
             summaryRes = R.string.media_title_image_summary,

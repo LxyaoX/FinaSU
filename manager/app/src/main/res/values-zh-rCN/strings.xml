@@ -840,6 +840,10 @@
     <string name="media_night_opacity">夜间不透明度</string>
     <string name="media_dim">暗化程度</string>
     <string name="media_title_offset">水平偏移</string>
+    <string name="settings_home_title">顶栏标题</string>
+    <string name="settings_home_title_summary">未使用标题图片时，顶栏显示的文字。</string>
+    <string name="settings_home_title_custom">自定义</string>
+    <string name="settings_home_title_custom_hint">输入标题</string>
     <string name="media_play_failed">无法播放，请检查音频文件</string>
     <string name="settings_app_language">语言</string>
     <string name="settings_app_language_summary">选择应用使用的语言。</string>

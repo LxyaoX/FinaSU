@@ -10,6 +10,17 @@ import androidx.compose.runtime.setValue
 import org.json.JSONObject
 import java.io.File
 
+/** The text the home top bar falls back to while no title image is shown. */
+enum class TitleTextMode(val key: String) {
+    DEFAULT("default"),
+    KERNELSU("kernelsu"),
+    CUSTOM("custom");
+
+    companion object {
+        fun fromKey(key: String?): TitleTextMode = entries.firstOrNull { it.key == key } ?: DEFAULT
+    }
+}
+
 /** Appearance media owns its storage and settings, independently of image wallpaper slots. */
 object VisualMediaConfig {
     var videoEnabled by mutableStateOf(false)
@@ -23,6 +34,8 @@ object VisualMediaConfig {
     var titleNightOpacity by mutableFloatStateOf(1f)
     var titleDim by mutableFloatStateOf(0f)
     var titleOffsetX by mutableFloatStateOf(0f)
+    var titleTextMode by mutableStateOf(TitleTextMode.DEFAULT)
+    var customTitleText by mutableStateOf("")
     var revision by mutableIntStateOf(0)
         private set
 
@@ -52,6 +65,8 @@ object VisualMediaConfig {
         json.put("titleImageNightOpacity", titleNightOpacity.toDouble())
         json.put("titleImageDim", titleDim.toDouble())
         json.put("titleImageOffsetX", titleOffsetX.toDouble())
+        json.put("titleTextMode", titleTextMode.key)
+        json.put("titleCustomText", customTitleText)
     }
 
     fun applySettings(json: JSONObject) {
@@ -62,6 +77,8 @@ object VisualMediaConfig {
         titleNightOpacity = json.optDouble("titleImageNightOpacity", 1.0).toFloat().coerceIn(0f, 1f)
         titleDim = json.optDouble("titleImageDim", 0.0).toFloat().coerceIn(0f, 1f)
         titleOffsetX = json.optDouble("titleImageOffsetX", 0.0).toFloat().coerceIn(-2f, 2f)
+        titleTextMode = TitleTextMode.fromKey(json.optString("titleTextMode"))
+        customTitleText = json.optString("titleCustomText")
     }
 
     suspend fun replace(context: Context, video: Boolean, source: File?) {

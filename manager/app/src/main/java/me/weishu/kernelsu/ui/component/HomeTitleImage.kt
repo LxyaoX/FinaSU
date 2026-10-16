@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.media.TitleTextMode
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.theme.isInDarkTheme
 import me.weishu.kernelsu.wallpaper.AnimatedFileImage
@@ -21,7 +22,7 @@ import me.weishu.kernelsu.wallpaper.AnimatedFileImage
 fun HomeTitleImage() {
     val file = VisualMediaConfig.file(LocalContext.current, false)
     if (!VisualMediaConfig.titleEnabled || file == null) {
-        Text(stringResource(R.string.app_name))
+        Text(homeTitleText())
         return
     }
     val opacity = if (isInDarkTheme()) VisualMediaConfig.titleNightOpacity else VisualMediaConfig.titleDayOpacity
@@ -35,4 +36,12 @@ fun HomeTitleImage() {
             modifier = Modifier.width(180.dp).height(40.dp),
         )
     }
+}
+
+/** The text the home top bar shows while no title image is in use. */
+@Composable
+fun homeTitleText(): String = when (VisualMediaConfig.titleTextMode) {
+    TitleTextMode.DEFAULT -> stringResource(R.string.app_name)
+    TitleTextMode.KERNELSU -> stringResource(R.string.home_title_kernelsu)
+    TitleTextMode.CUSTOM -> VisualMediaConfig.customTitleText.ifBlank { stringResource(R.string.app_name) }
 }

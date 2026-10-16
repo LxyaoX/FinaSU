@@ -854,6 +854,11 @@
     <string name="media_night_opacity">Night opacity</string>
     <string name="media_dim">Dimming</string>
     <string name="media_title_offset">Horizontal offset</string>
+    <string name="settings_home_title">Top bar title</string>
+    <string name="settings_home_title_summary">Text shown in the top bar while no title image is used.</string>
+    <string name="settings_home_title_custom">Custom</string>
+    <string name="settings_home_title_custom_hint">Enter a title</string>
+    <string name="home_title_kernelsu" translatable="false">KernelSU</string>
     <string name="settings_app_language">Language</string>
     <string name="settings_app_language_summary">Choose the language used by the app.</string>
     <string name="system_default">System default</string>

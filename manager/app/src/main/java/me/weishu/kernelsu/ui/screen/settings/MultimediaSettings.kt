@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.Slider
 import androidx.compose.material3.rememberSliderState
@@ -207,8 +208,9 @@ private fun FeedbackScope(value: String, onChange: (String) -> Unit) {
 }
 
 @Composable
-internal fun MediaFileRow(filename: String?, onClick: () -> Unit) {
-    SegmentedListItem(onClick = onClick, headlineContent = { Text(stringResource(R.string.media_select_file)) },
+internal fun MediaFileRow(filename: String?, icon: ImageVector? = null, onClick: () -> Unit) {
+    SegmentedListItem(onClick = onClick, leadingContent = icon?.let { { Icon(it, null) } },
+        headlineContent = { Text(stringResource(R.string.media_select_file)) },
         supportingContent = { Text(filename ?: stringResource(R.string.media_no_file)) })
 }
 
