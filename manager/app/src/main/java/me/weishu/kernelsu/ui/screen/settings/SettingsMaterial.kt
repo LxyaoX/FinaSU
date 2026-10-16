@@ -117,6 +117,7 @@ fun SettingPagerMaterial(
             SearchAppBar(
                 largeTitle = false,
                 topSearch = true,
+                searchBeforeActions = true,
                 searchPlaceholder = stringResource(R.string.settings_search_hint),
                 title = { Text(stringResource(R.string.settings)) },
                 searchText = searchText,

@@ -99,6 +99,7 @@ fun SearchAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     largeTitle: Boolean = true,
     topSearch: Boolean = false,
+    searchBeforeActions: Boolean = false,
     collapsibleSearch: Boolean = false,
     searchPlaceholder: String = "",
     defaultContent: @Composable BoxScope.(bottomPadding: Dp, closeSearch: () -> Unit) -> Unit = { _, _ -> },
@@ -131,8 +132,7 @@ fun SearchAppBar(
             keyboardController?.hide()
         }
     }
-    val appBarActions: @Composable RowScope.() -> Unit = {
-        actions?.invoke()
+    val searchIcon: @Composable () -> Unit = {
         if (topSearch) {
             FolkIconButton(
                 onClick = { scope.launch { searchBarState.animateToExpanded() } },
@@ -140,6 +140,11 @@ fun SearchAppBar(
                 Icon(Icons.Filled.Search, contentDescription = null)
             }
         }
+    }
+    val appBarActions: @Composable RowScope.() -> Unit = {
+        if (searchBeforeActions) searchIcon()
+        actions?.invoke()
+        if (!searchBeforeActions) searchIcon()
         // Once the large search bar has been tucked away, offer a small icon to bring it back.
         if (searchScrollBehavior != null) {
             AnimatedVisibility(visible = isSearchBarCollapsed, enter = fadeIn(), exit = fadeOut()) {
