@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Preview played while the back gesture is dragged.</string>
     <string name="settings_predictive_back_animation_scale">Scale</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU classic</string>
     <string name="settings_predictive_back_animation_default">Default</string>
     <string name="settings_predictive_back_animation_none">None</string>

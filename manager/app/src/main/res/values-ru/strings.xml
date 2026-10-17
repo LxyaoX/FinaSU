@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Предпросмотр, воспроизводимый при перетаскивании жеста «назад».</string>
     <string name="settings_predictive_back_animation_scale">Масштаб</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">Классический KernelSU</string>
     <string name="settings_predictive_back_animation_default">По умолчанию</string>
     <string name="settings_predictive_back_animation_none">Нет</string>

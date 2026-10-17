@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Geri hareketi sürüklenirken oynatılan önizleme.</string>
     <string name="settings_predictive_back_animation_scale">Ölçek</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU klasik</string>
     <string name="settings_predictive_back_animation_default">Varsayılan</string>
     <string name="settings_predictive_back_animation_none">Yok</string>

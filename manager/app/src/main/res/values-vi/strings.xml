@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Bản xem trước phát khi kéo cử chỉ quay lại.</string>
     <string name="settings_predictive_back_animation_scale">Tỷ lệ</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU cổ điển</string>
     <string name="settings_predictive_back_animation_default">Mặc định</string>
     <string name="settings_predictive_back_animation_none">Không có</string>

@@ -23,6 +23,12 @@ enum class PredictiveBackAnimation(val storageValue: String) {
     /** Cross-activity style: both pages hint at a scale change while the page drifts away. */
     Aosp("aosp"),
 
+    /**
+     * miuix's own cover motion: the page slides its whole width away while the page below drifts a
+     * quarter of the width and lifts the dimming it carries while it is covered.
+     */
+    Miuix("miuix"),
+
     /** KernelSU classic: the leaving page scales down and fades, the revealed page slides in. */
     KernelSUClassic("ksu_classic"),
 

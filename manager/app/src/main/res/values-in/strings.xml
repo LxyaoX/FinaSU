@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Pratinjau yang diputar saat gestur kembali diseret.</string>
     <string name="settings_predictive_back_animation_scale">Skala</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU klasik</string>
     <string name="settings_predictive_back_animation_default">Bawaan</string>
     <string name="settings_predictive_back_animation_none">Tidak ada</string>

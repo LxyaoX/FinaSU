@@ -4,6 +4,7 @@ import androidx.navigationevent.NavigationEvent
 import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation.Aosp
 import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation.Default
 import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation.KernelSUClassic
+import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation.Miuix
 import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation.None
 import me.weishu.kernelsu.ui.navigation3.PredictiveBackAnimation.Scale
 import org.junit.Assert.assertEquals
@@ -19,6 +20,14 @@ class PredictiveBackConfigTest {
         PredictiveBackAnimation.entries.forEach { animation ->
             assertEquals(animation, PredictiveBackAnimation.fromValue(animation.storageValue))
         }
+    }
+
+    @Test
+    fun `style tokens are stable`() {
+        assertEquals(
+            listOf("scale", "aosp", "miuix", "ksu_classic", "default", "none"),
+            PredictiveBackAnimation.entries.map { it.storageValue },
+        )
     }
 
     @Test
@@ -42,7 +51,7 @@ class PredictiveBackConfigTest {
     @Test
     fun `only none previews nothing`() {
         assertTrue(None.previewsNothing)
-        listOf(Scale, Aosp, KernelSUClassic, Default).forEach { animation ->
+        listOf(Scale, Aosp, Miuix, KernelSUClassic, Default).forEach { animation ->
             assertFalse(animation.previewsNothing)
         }
     }

@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">뒤로 가기 제스처를 끄는 동안 재생되는 미리보기입니다.</string>
     <string name="settings_predictive_back_animation_scale">배율</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU 클래식</string>
     <string name="settings_predictive_back_animation_default">기본값</string>
     <string name="settings_predictive_back_animation_none">없음</string>

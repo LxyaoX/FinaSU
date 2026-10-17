@@ -143,6 +143,7 @@ private fun PredictiveBackAnimationSection() {
             id = when (style) {
                 PredictiveBackAnimation.Scale -> R.string.settings_predictive_back_animation_scale
                 PredictiveBackAnimation.Aosp -> R.string.settings_predictive_back_animation_aosp
+                PredictiveBackAnimation.Miuix -> R.string.settings_predictive_back_animation_miuix
                 PredictiveBackAnimation.KernelSUClassic ->
                     R.string.settings_predictive_back_animation_ksu_classic
 
@@ -182,7 +183,12 @@ private fun PredictiveBackAnimationSection() {
                     },
                 )
             }
-            if (animation == PredictiveBackAnimation.Scale) {
+            // A style that takes its exit direction from the gesture needs the row; the others do
+            // not, whatever direction is stored.
+            if (
+                animation == PredictiveBackAnimation.Scale ||
+                animation == PredictiveBackAnimation.Aosp
+            ) {
                 add {
                     SegmentedDropdownItem(
                         icon = Icons.Rounded.SwapHoriz,

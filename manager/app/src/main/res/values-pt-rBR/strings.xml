@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Prévia reproduzida enquanto o gesto de retorno é arrastado.</string>
     <string name="settings_predictive_back_animation_scale">Escala</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU clássico</string>
     <string name="settings_predictive_back_animation_default">Padrão</string>
     <string name="settings_predictive_back_animation_none">Nenhum</string>

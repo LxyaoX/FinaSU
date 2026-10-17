@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">拖动预知回归手势时显现的预览</string>
     <string name="settings_predictive_back_animation_scale">缩放</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU 经典</string>
     <string name="settings_predictive_back_animation_default">星轨默认</string>
     <string name="settings_predictive_back_animation_none">无</string>

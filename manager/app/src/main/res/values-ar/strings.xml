@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">معاينة تُعرض أثناء سحب إيماءة الرجوع.</string>
     <string name="settings_predictive_back_animation_scale">المقياس</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU الكلاسيكي</string>
     <string name="settings_predictive_back_animation_default">الافتراضي</string>
     <string name="settings_predictive_back_animation_none">لا شيء</string>

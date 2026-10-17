@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">戻るジェスチャーのドラッグ中に再生されるプレビュー。</string>
     <string name="settings_predictive_back_animation_scale">スケール</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU クラシック</string>
     <string name="settings_predictive_back_animation_default">デフォルト</string>
     <string name="settings_predictive_back_animation_none">なし</string>

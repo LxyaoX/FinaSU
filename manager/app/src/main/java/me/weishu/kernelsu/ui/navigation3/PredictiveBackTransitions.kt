@@ -5,6 +5,7 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -54,9 +55,16 @@ class PredictiveBackTransitions<T : Any>(
 /** Matches the "programmatic" curve BakaSU uses for its predictive back styles. */
 private val PredictiveBackEasing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
 
-private const val SCALE_DURATION_MILLIS = 250
-private const val AOSP_DURATION_MILLIS = 450
-private const val CLASSIC_DURATION_MILLIS = 200
+private const val SCALE_DURATION_MILLIS = 350
+private const val AOSP_DURATION_MILLIS = 500
+private const val CLASSIC_DURATION_MILLIS = 300
+
+/**
+ * miuix settles a change that no gesture drives with a 500ms tween. Its gesture motion is a
+ * bounceless spring there, which a seeked transition cannot express, so the style takes the tween
+ * timing for both.
+ */
+private const val MIUIX_DURATION_MILLIS = 500
 
 /** Scale the leaving page settles on, so it reads as a sheet sliding over the page below. */
 private const val SCALE_LEAVING_TARGET = 0.85f
@@ -69,6 +77,12 @@ private const val CLASSIC_LEAVING_TARGET = 0.9f
 
 /** How much of the width the revealed page drifts by in the cross-activity style. */
 private const val DRIFT_DIVISOR = 12f
+
+/** How much of the width the page revealed by the miuix style drifts while it is uncovered. */
+private const val MIUIX_REVEALED_DRIFT_DIVISOR = 4f
+
+/** Alpha the miuix style uncovers its revealed page from. */
+private const val MIUIX_REVEALED_ALPHA = 0.9f
 
 /**
  * Builds the navigation3 transitions for [animation]. [exitDirection] only resolves which way a
@@ -140,6 +154,30 @@ private fun <T : Any> predictiveBackTransitions(
                 targetScale = AOSP_MIN_SCALE,
                 transformOrigin = leavingOrigin(sign),
             ),
+        )
+    }
+
+    PredictiveBackAnimation.Miuix -> {
+        // The direction follows the layout rather than the gesture, the way miuix covers a page, so
+        // the exit direction row does not apply to this style.
+        val leaveSign = if (rtl) 1f else -1f
+        val transform = ContentTransform(
+            targetContentEnter = slideInHorizontally(
+                animationSpec = tween(MIUIX_DURATION_MILLIS, easing = PredictiveBackEasing),
+                initialOffsetX = { (-leaveSign * it / MIUIX_REVEALED_DRIFT_DIVISOR).roundToInt() },
+            ) + fadeIn(
+                animationSpec = tween(MIUIX_DURATION_MILLIS, easing = PredictiveBackEasing),
+                initialAlpha = MIUIX_REVEALED_ALPHA,
+            ),
+            initialContentExit = slideOutHorizontally(
+                animationSpec = tween(MIUIX_DURATION_MILLIS, easing = PredictiveBackEasing),
+                targetOffsetX = { (leaveSign * it).roundToInt() },
+            ),
+        )
+        PredictiveBackTransitions(
+            transitionSpec = defaultTransitionSpec(),
+            popTransitionSpec = { transform },
+            predictivePopTransitionSpec = { transform },
         )
     }
 

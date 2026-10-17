@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Vista previa que se reproduce mientras se arrastra el gesto de retroceso.</string>
     <string name="settings_predictive_back_animation_scale">Escala</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU clásico</string>
     <string name="settings_predictive_back_animation_default">Predeterminado</string>
     <string name="settings_predictive_back_animation_none">Ninguno</string>

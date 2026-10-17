@@ -210,6 +210,7 @@
     <string name="settings_predictive_back_animation_summary">拖动返回手势时播放的预览动画</string>
     <string name="settings_predictive_back_animation_scale">缩放</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">KernelSU 经典</string>
     <string name="settings_predictive_back_animation_default">默认</string>
     <string name="settings_predictive_back_animation_none">无</string>

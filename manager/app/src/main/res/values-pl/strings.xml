@@ -225,6 +225,7 @@
     <string name="settings_predictive_back_animation_summary">Podgląd odtwarzany podczas przeciągania gestu wstecz.</string>
     <string name="settings_predictive_back_animation_scale">Skala</string>
     <string name="settings_predictive_back_animation_aosp">AOSP</string>
+    <string name="settings_predictive_back_animation_miuix">Miuix</string>
     <string name="settings_predictive_back_animation_ksu_classic">Klasyczny KernelSU</string>
     <string name="settings_predictive_back_animation_default">Domyślna</string>
     <string name="settings_predictive_back_animation_none">Brak</string>
