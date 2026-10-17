@@ -22,21 +22,54 @@ fn ready(boot: Option<&str>, surface: Option<&str>, animation: Option<&str>) -> 
     boot == Some("1") && surface == Some("running") && animation == Some("stopped")
 }
 
+/// What an earlier boot's UI observation means for this boot.
+#[cfg(any(target_os = "android", test))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Previous {
+    /// No marker, this boot's own marker, or a marker we cannot attribute.
+    None,
+    /// The observation never produced a verdict: the boot ended before the
+    /// deadline, or the helper died. A fast reboot is not evidence of a UI
+    /// failure, so NoMount may run; the caller drops the stale marker.
+    Inconclusive(String),
+    /// The observation ran and readiness was not confirmed.
+    Failed(String),
+}
+
 #[cfg(target_os = "android")]
-pub fn previous_failure(boot_id: &str) -> Option<String> {
-    previous_failure_at(Path::new(defs::MOUNT_UI_PENDING), boot_id)
+#[must_use]
+pub fn previous(boot_id: &str) -> Previous {
+    previous_at(Path::new(defs::MOUNT_UI_PENDING), boot_id)
 }
 
 #[cfg(any(target_os = "android", test))]
-fn previous_failure_at(path: &std::path::Path, boot_id: &str) -> Option<String> {
-    let record = crate::mount_guard::read(path)?;
-    if record.boot_id == boot_id || record.provider != "nomount" || record.detail != "ui-pending" {
-        return None;
+fn previous_at(path: &std::path::Path, boot_id: &str) -> Previous {
+    let Some(record) = crate::mount_guard::read(path) else {
+        return Previous::None;
+    };
+    if record.boot_id == boot_id || record.provider != "nomount" {
+        return Previous::None;
     }
-    Some(format!(
-        "NoMount UI readiness was not confirmed in boot {}; using builtin this boot (not proof of a NoMount fault)",
+    if record.detail == "ui-failed" {
+        return Previous::Failed(format!(
+            "NoMount UI readiness was not confirmed in boot {}; using builtin this boot (not proof of a NoMount fault)",
+            record.boot_id
+        ));
+    }
+    Previous::Inconclusive(format!(
+        "UI observation from boot {} never completed (the boot ended before the deadline?); keeping NoMount",
         record.boot_id
     ))
+}
+
+/// Leave one line in the shared mount log without involving the boot warning.
+#[cfg(target_os = "android")]
+pub fn note(text: &str) {
+    let _ = mount_guard::append_log(
+        Path::new(defs::MOUNT_LOG),
+        &format!("--- nomount UI\n{text}\n"),
+        defs::MOUNT_LOG_MAX_BYTES,
+    );
 }
 
 #[cfg(target_os = "android")]
@@ -97,6 +130,16 @@ pub fn arm(boot_id: &str, lock_fd: std::os::fd::RawFd) {
         if healthy {
             clear();
         } else {
+            // Record the verdict itself. A marker that still says `ui-pending`
+            // means the observation never ran (fast reboot, killed helper),
+            // which must not be read as a UI failure on the next boot.
+            let _ = mount_guard::begin(
+                Path::new(defs::MOUNT_UI_PENDING),
+                mount_guard::Stage::Inject,
+                "nomount",
+                "ui-failed",
+                boot_id,
+            );
             crate::magic_mount::record_ui_warning(boot_id, &message);
         }
     }
@@ -124,7 +167,7 @@ mod tests {
     }
 
     #[test]
-    fn pending_ui_survives_boot_completion_guard_cleanup() {
+    fn a_pending_observation_is_inconclusive_not_a_failure() {
         let temp = tempfile::tempdir().unwrap();
         let pending = temp.path().join("ui");
         let inflight = temp.path().join("inflight");
@@ -141,13 +184,36 @@ mod tests {
         }
         crate::mount_guard::clear_if_ours(&inflight);
         assert!(!inflight.exists());
-        assert!(previous_failure_at(&pending, &boot_id).is_none());
-        assert!(
-            previous_failure_at(&pending, "new")
-                .unwrap()
-                .contains("builtin")
-        );
+        // This boot's own marker is not a verdict about an earlier boot.
+        assert_eq!(previous_at(&pending, &boot_id), Previous::None);
+        // A marker that still says `ui-pending` means the observation never ran
+        // (the device rebooted before the deadline), so NoMount keeps its turn.
+        let Previous::Inconclusive(note) = previous_at(&pending, "new") else {
+            panic!("a pending observation must not be read as a failure");
+        };
+        assert!(note.contains("keeping NoMount"));
         crate::mount_guard::clear(&pending);
-        assert!(previous_failure_at(&pending, "new").is_none());
+        assert_eq!(previous_at(&pending, "new"), Previous::None);
+    }
+
+    #[test]
+    fn a_completed_unconfirmed_observation_blocks_the_next_boot() {
+        let temp = tempfile::tempdir().unwrap();
+        let pending = temp.path().join("ui");
+        let boot_id = crate::mount_guard::current_boot_id();
+        crate::mount_guard::begin(
+            &pending,
+            crate::mount_guard::Stage::Inject,
+            "nomount",
+            "ui-failed",
+            &boot_id,
+        )
+        .unwrap();
+        // The same boot that wrote the verdict is not affected by it.
+        assert_eq!(previous_at(&pending, &boot_id), Previous::None);
+        let Previous::Failed(note) = previous_at(&pending, "next-boot") else {
+            panic!("a recorded ui-failed verdict must block the next boot");
+        };
+        assert!(note.contains("builtin"));
     }
 }

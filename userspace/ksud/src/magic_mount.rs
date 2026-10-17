@@ -786,16 +786,23 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     // recorded failure of the built-in engine itself only gets reported, since
     // there is nothing safer left to fall back to.
     let mut guard_note = None;
-    let ui_fallback = if provider == Provider::Nomount
-        && crate::nomount::installed_driver_module().is_none()
-        && let Some(note) = crate::mount_ui::previous_failure(&boot_id)
-    {
-        guard_note = Some(note);
-        provider = Provider::Builtin;
-        true
-    } else {
-        false
-    };
+    let mut ui_fallback = false;
+    if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
+        match crate::mount_ui::previous(&boot_id) {
+            crate::mount_ui::Previous::Failed(note) => {
+                guard_note = Some(note);
+                provider = Provider::Builtin;
+                ui_fallback = true;
+            }
+            crate::mount_ui::Previous::Inconclusive(note) => {
+                // A boot that ended before the observation window says nothing
+                // about the UI: drop the stale marker and let NoMount run.
+                crate::mount_ui::clear();
+                crate::mount_ui::note(&note);
+            }
+            crate::mount_ui::Previous::None => {}
+        }
+    }
     if let Some(record) = mount_guard::read(inflight_path())
         && record.boot_id != boot_id
         && record.provider == provider.as_str()
