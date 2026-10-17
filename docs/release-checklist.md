@@ -45,9 +45,10 @@ release) takes over the update prompt for everyone.
 
 ## 4. Steps
 
-1. Confirm a clean tree and that the release commit is on the remote. The local branch is named `main`
-   but tracks `origin/master` with `push.default=upstream`, so publish it with a plain `git push`;
-   `git push origin main` would create a second remote branch instead of updating `master`.
+1. Confirm a clean tree and that the release commit is on the remote. Development and release tags are
+   cut from `dev` (tracking `origin/dev`, `push.default=upstream`), so publish it with a plain
+   `git push`; the tag itself is what CI builds, so any remote branch carrying that commit is enough.
+   `master` only moves when `dev` is merged into it.
 2. Tag and push: `git tag -a v0.1.0 -m "FinaSU v0.1.0" && git push origin v0.1.0`.
 3. Wait for the `Release` workflow (LKM and NoMount via DDK, the Sui payload, ksuinit, ksud for three
    Android ABIs plus the desktop targets, manager APK, repack and resign, then the GitHub release).
