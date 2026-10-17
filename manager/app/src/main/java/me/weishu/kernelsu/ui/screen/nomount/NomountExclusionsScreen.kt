@@ -3,12 +3,21 @@ package me.weishu.kernelsu.ui.screen.nomount
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Deselect
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -23,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -30,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.ui.component.AppIconImage
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
@@ -134,6 +145,57 @@ fun NomountExclusionsScreen() {
                 }
             }
 
+            // Bulk selection works on what the filter currently shows, so searching
+            // for a vendor prefix and selecting that whole group stays a two-tap
+            // action. Icons keep the row in the same visual language as the rest of
+            // the list instead of a second strip of text buttons.
+            val visibleUids = visible.map { it.uid }
+            val canEdit = !state.appsLoading && !state.isWriting
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.nomount_selected_count, selected.size),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    enabled = canEdit && visibleUids.isNotEmpty(),
+                    onClick = { selected = selected + visibleUids },
+                ) {
+                    Icon(
+                        Icons.Filled.SelectAll,
+                        contentDescription = stringResource(R.string.nomount_select_all),
+                    )
+                }
+                IconButton(
+                    enabled = canEdit && visibleUids.isNotEmpty(),
+                    onClick = {
+                        selected = visibleUids.fold(selected) { acc, uid ->
+                            if (acc.contains(uid)) acc - uid else acc + uid
+                        }
+                    },
+                ) {
+                    Icon(
+                        Icons.Filled.SwapVert,
+                        contentDescription = stringResource(R.string.nomount_invert_selection),
+                    )
+                }
+                IconButton(
+                    enabled = canEdit && selected.isNotEmpty(),
+                    onClick = { selected = selected - visibleUids.toSet() },
+                ) {
+                    Icon(
+                        Icons.Filled.Deselect,
+                        contentDescription = stringResource(R.string.nomount_clear_selection),
+                    )
+                }
+            }
+
             if (state.appsLoading) {
                 Text(
                     text = stringResource(R.string.nomount_loading),
@@ -145,17 +207,6 @@ fun NomountExclusionsScreen() {
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    item {
-                        Text(
-                            text = stringResource(
-                                R.string.nomount_selected_count,
-                                selected.size,
-                            ),
-                            style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
-                        )
-                    }
                     items(visible, key = { it.uid }) { app ->
                         val checked = selected.contains(app.uid)
                         SegmentedListItem(
@@ -165,6 +216,15 @@ fun NomountExclusionsScreen() {
                                     selected + app.uid
                                 } else {
                                     selected - app.uid
+                                }
+                            },
+                            leadingContent = {
+                                app.packageInfo?.let { info ->
+                                    AppIconImage(
+                                        packageInfo = info,
+                                        label = app.label,
+                                        modifier = Modifier.size(40.dp),
+                                    )
                                 }
                             },
                             headlineContent = { Text(app.label) },

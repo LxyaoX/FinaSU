@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">%1$d개 앱 선택됨</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">저장</string>
+    <string name="nomount_select_all">모두 선택</string>
+    <string name="nomount_invert_selection">선택 반전</string>
+    <string name="nomount_clear_selection">선택 해제</string>
     <string name="nomount_follow_profiles">앱 프로필 따르기</string>
     <string name="nomount_follow_profiles_summary">프로필이 모듈을 숨기는 대상인 목록의 앱을 선택합니다. 기본 프로필은 모든 비 root 앱에서 모듈을 숨기므로 보통 거의 모든 앱이 선택됩니다. 이후 프로필은 추적되지 않습니다. 변경한 경우 다시 복사하세요.</string>
     <string name="nomount_clear_everything">모두 지우기</string>

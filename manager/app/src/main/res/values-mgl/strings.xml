@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">已选择 %1$d 个应用</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">保存</string>
+    <string name="nomount_select_all">全选</string>
+    <string name="nomount_invert_selection">反选</string>
+    <string name="nomount_clear_selection">清空</string>
     <string name="nomount_follow_profiles">跟随 App Profile</string>
     <string name="nomount_follow_profiles_summary">在列表范围内选中那些 App Profile 里「解除魔法阵」的应用。默认 Profile 对所有应用生效，所以通常会选中其中绝大多数。之后不会自动跟随 Profile 变化，改动后需要再复制一次。</string>
     <string name="nomount_clear_everything">清空全部</string>

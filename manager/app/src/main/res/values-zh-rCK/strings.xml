@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">已挑 %1$d 个应用</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">存下</string>
+    <string name="nomount_select_all">全点</string>
+    <string name="nomount_invert_selection">反点</string>
+    <string name="nomount_clear_selection">清空</string>
     <string name="nomount_follow_profiles">跟着 App Profile 走</string>
     <string name="nomount_follow_profiles_summary">在列表里勾上那些 App Profile 里「收起招牌菜」的应用。默认 Profile 对全部非 root 应用都算，所以这一下几乎全选。之后不会跟着 Profile 变：改了还得再抄一遍。</string>
     <string name="nomount_clear_everything">一锅端</string>

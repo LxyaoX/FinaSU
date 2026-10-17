@@ -377,6 +377,9 @@
     <string name="nomount_selected_count">%1$d uygulama seçildi</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">Kaydet</string>
+    <string name="nomount_select_all">Tümünü seç</string>
+    <string name="nomount_invert_selection">Seçimi ters çevir</string>
+    <string name="nomount_clear_selection">Seçimi temizle</string>
     <string name="nomount_follow_profiles">Uygulama profillerini takip et</string>
     <string name="nomount_follow_profiles_summary">Listelenen uygulamalardan profilinin modülleri gizlediği uygulamaları seçin. Varsayılan profil modülleri tüm root olmayan uygulamalardan gizler, bu yüzden bu genellikle neredeyse hepsini seçer. Profiller sonrasında izlenmez: birini değiştirip yeniden kopyalayın.</string>
     <string name="nomount_clear_everything">Her şeyi temizle</string>

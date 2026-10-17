@@ -377,6 +377,9 @@
     <string name="nomount_selected_count">%1$d تطبيق محدد</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">حفظ</string>
+    <string name="nomount_select_all">تحديد الكل</string>
+    <string name="nomount_invert_selection">عكس التحديد</string>
+    <string name="nomount_clear_selection">مسح التحديد</string>
     <string name="nomount_follow_profiles">اتباع ملفات تعريف التطبيقات</string>
     <string name="nomount_follow_profiles_summary">حدد التطبيقات المدرجة التي يخفي ملفها التعريفي الإضافات عنها. يخفي الملف التعريفي الافتراضي الإضافات عن كل تطبيق غير جذر، لذا يحدد هذا عادةً معظمها. لا تُتابَع الملفات التعريفية بعد ذلك: غيّر أحدها وانسخ مجددًا.</string>
     <string name="nomount_clear_everything">مسح كل شيء</string>

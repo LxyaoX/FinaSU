@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">%1$d aplicaciones seleccionadas</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">Guardar</string>
+    <string name="nomount_select_all">Seleccionar todo</string>
+    <string name="nomount_invert_selection">Invertir selección</string>
+    <string name="nomount_clear_selection">Borrar selección</string>
     <string name="nomount_follow_profiles">Seguir los perfiles de aplicación</string>
     <string name="nomount_follow_profiles_summary">Selecciona las aplicaciones de la lista cuyo perfil les oculta los módulos. El perfil predeterminado los oculta a todas las aplicaciones sin root, así que esto suele seleccionar casi todas. Los perfiles no se siguen después: cambia uno y vuelve a copiar.</string>
     <string name="nomount_clear_everything">Borrar todo</string>

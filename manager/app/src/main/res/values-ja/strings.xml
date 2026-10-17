@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">%1$d 個のアプリを選択中</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">保存</string>
+    <string name="nomount_select_all">すべて選択</string>
+    <string name="nomount_invert_selection">選択を反転</string>
+    <string name="nomount_clear_selection">選択解除</string>
     <string name="nomount_follow_profiles">アプリプロファイルに従う</string>
     <string name="nomount_follow_profiles_summary">プロファイルがモジュールを隠す対象である、一覧のアプリを選択します。デフォルトのプロファイルはすべての非 root アプリからそれらを隠すため、通常はほぼすべてが選択されます。以降プロファイルは追跡されません。変更した場合は再度コピーしてください。</string>
     <string name="nomount_clear_everything">すべてクリア</string>

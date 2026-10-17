@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">已择 %1$d 部凡器</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">封存</string>
+    <string name="nomount_select_all">全擇</string>
+    <string name="nomount_invert_selection">反擇</string>
+    <string name="nomount_clear_selection">清空</string>
     <string name="nomount_follow_profiles">随 App Profile 而行</string>
     <string name="nomount_follow_profiles_summary">于所列为器中，择其 App Profile 会隐去仙符者。默认 Profile 施于诸非 root 凡器，故此举常选其大半。其后不复随 Profile 而变：有改则须再拓一次。</string>
     <string name="nomount_clear_everything">尽数清之</string>

@@ -22,6 +22,8 @@ data class ExclusionApp(
     val packageName: String,
     val isSystem: Boolean,
     val excluded: Boolean,
+    /** Source package, so the picker can show the app icon without another lookup. */
+    val packageInfo: android.content.pm.PackageInfo?,
 )
 
 /**
@@ -174,6 +176,7 @@ private object NomountAppList {
                 isSystem = ((app.packageInfo.applicationInfo?.flags ?: 0)
                     and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0,
                 excluded = excluded.contains(app.uid),
+                packageInfo = app.packageInfo,
             )
         }.distinctBy { it.uid }
     }

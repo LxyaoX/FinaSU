@@ -377,6 +377,9 @@
     <string name="nomount_selected_count">Выбрано приложений: %1$d</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">Сохранить</string>
+    <string name="nomount_select_all">Выбрать все</string>
+    <string name="nomount_invert_selection">Инвертировать выбор</string>
+    <string name="nomount_clear_selection">Очистить выбор</string>
     <string name="nomount_follow_profiles">Следовать профилям приложений</string>
     <string name="nomount_follow_profiles_summary">Выберите приложения из списка, профиль которых скрывает от них модули. Профиль по умолчанию скрывает их от всех приложений без root, поэтому обычно выбираются почти все. После этого профили не отслеживаются: измените профиль и скопируйте снова.</string>
     <string name="nomount_clear_everything">Очистить всё</string>

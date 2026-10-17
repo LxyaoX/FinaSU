@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">%1$d aplikasi dipilih</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">Simpan</string>
+    <string name="nomount_select_all">Pilih semua</string>
+    <string name="nomount_invert_selection">Balikkan pilihan</string>
+    <string name="nomount_clear_selection">Hapus pilihan</string>
     <string name="nomount_follow_profiles">Ikuti profil aplikasi</string>
     <string name="nomount_follow_profiles_summary">Pilih aplikasi yang terdaftar yang profilnya menyembunyikan modul darinya. Profil bawaan menyembunyikannya dari setiap aplikasi non-root, jadi ini biasanya memilih hampir semuanya. Profil tidak dilacak setelahnya: ubah satu lalu salin lagi.</string>
     <string name="nomount_clear_everything">Bersihkan semuanya</string>

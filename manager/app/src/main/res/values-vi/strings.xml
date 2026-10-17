@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">Đã chọn %1$d ứng dụng</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">Lưu</string>
+    <string name="nomount_select_all">Chọn tất cả</string>
+    <string name="nomount_invert_selection">Đảo ngược lựa chọn</string>
+    <string name="nomount_clear_selection">Bỏ chọn</string>
     <string name="nomount_follow_profiles">Theo hồ sơ ứng dụng</string>
     <string name="nomount_follow_profiles_summary">Chọn những ứng dụng được liệt kê mà hồ sơ của chúng ẩn module khỏi chúng. Hồ sơ mặc định ẩn module khỏi mọi ứng dụng không phải root, nên việc này thường chọn gần như tất cả. Hồ sơ không được theo dõi sau đó: thay đổi một hồ sơ rồi sao chép lại.</string>
     <string name="nomount_clear_everything">Xoá mọi thứ</string>

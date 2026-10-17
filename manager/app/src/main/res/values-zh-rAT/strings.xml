@@ -375,6 +375,9 @@
     <string name="nomount_selected_count">已择 %1$d 座圣器</string>
     <string name="nomount_app_uid">%1$s · uid %2$d</string>
     <string name="nomount_save">封存</string>
+    <string name="nomount_select_all">全择</string>
+    <string name="nomount_invert_selection">反择</string>
+    <string name="nomount_clear_selection">清空</string>
     <string name="nomount_follow_profiles">随 App Profile</string>
     <string name="nomount_follow_profiles_summary">于列中择其 App Profile 载「解除圣光阵」之圣器。本初 Profile 施于一切圣器，故所择者常近全部。此后不复自动随 Profile 之变，改之须再拓一次。</string>
     <string name="nomount_clear_everything">涤尽一切</string>
