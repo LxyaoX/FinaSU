@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -126,7 +127,8 @@ fun AppLockGate(session: AuthenticationSession, onCancel: () -> Unit, content: @
             } else {
                 AppAuthenticationScreen(
                     state = if (pending != null || failed || state.storageError) AuthenticationVisualState.ERROR
-                        else if (busy) AuthenticationVisualState.BUSY else AuthenticationVisualState.BIOMETRIC,
+                        else if (busy || !foreground) AuthenticationVisualState.BUSY
+                        else AuthenticationVisualState.BIOMETRIC,
                     error = when {
                         state.storageError -> stringResource(R.string.security_storage_error)
                         pending != null -> stringResource(R.string.security_biometric_unavailable)
@@ -147,6 +149,14 @@ fun AppLockGate(session: AuthenticationSession, onCancel: () -> Unit, content: @
                     }) else null,
                 )
             }
+        }
+    }
+    if (!state.loaded) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator()
         }
     }
     }

@@ -84,6 +84,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.security.CredentialKind
@@ -436,6 +437,8 @@ fun PatternGrid(
                 var working: List<Int> = emptyList()
                 detectDragGestures(
                     onDragStart = { position ->
+                        working = emptyList()
+                        latestNodesChange.value(emptyList())
                         hitTest(position, Size(size.width.toFloat(), size.height.toFloat()))?.let { node ->
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             working = listOf(node)
@@ -452,7 +455,10 @@ fun PatternGrid(
                         }
                     },
                     onDragEnd = { latestComplete.value(working) },
-                    onDragCancel = { latestComplete.value(working) },
+                    onDragCancel = {
+                        working = emptyList()
+                        latestNodesChange.value(emptyList())
+                    },
                 )
             },
     ) {
@@ -537,7 +543,7 @@ private fun CredentialChallenge(
             if (busy) return
             val secret = when (kind) {
                 CredentialKind.PIN -> pin.toCharArray().takeIf { Credentials.isValidPin(it) }
-                CredentialKind.PATTERN -> Credentials.patternSecret(nodes)
+                CredentialKind.PATTERN -> Credentials.patternSecret(nodes, interpolate = true)
             } ?: return
             busy = true
             result = null
@@ -550,10 +556,8 @@ private fun CredentialChallenge(
                     } catch (_: Exception) {
                         CredentialResult.StorageError
                     }
-                    if (outcome == CredentialResult.Success) {
-                        pin = ""
-                        nodes = emptyList()
-                    }
+                    pin = ""
+                    nodes = emptyList()
                     result = outcome
                 } finally {
                     secret.fill('\u0000')
@@ -563,32 +567,41 @@ private fun CredentialChallenge(
         }
 
         LaunchedEffect(result) {
-            if (result == CredentialResult.Success) {
-                result = null
-                onVerified()
+            when (val current = result) {
+                CredentialResult.Success -> {
+                    result = null
+                    onVerified()
+                }
+
+                is CredentialResult.RetryAfter -> {
+                    delay(current.millis)
+                    if (result == current) result = null
+                }
+
+                else -> Unit
             }
         }
 
         val state = when {
             busy -> AuthenticationVisualState.BUSY
-            result != null && result != CredentialResult.Success -> AuthenticationVisualState.ERROR
             kind == CredentialKind.PIN -> AuthenticationVisualState.PIN
             else -> AuthenticationVisualState.PATTERN
         }
         val error = when (result) {
-            CredentialResult.Incorrect, CredentialResult.InvalidFormat -> stringResource(R.string.security_password_incorrect)
+            CredentialResult.Incorrect, CredentialResult.InvalidFormat -> stringResource(R.string.security_unlock_failed)
             is CredentialResult.RetryAfter ->
                 stringResource(R.string.security_password_retry, ((result as CredentialResult.RetryAfter).millis + 999) / 1000)
             CredentialResult.StorageError -> stringResource(R.string.security_storage_error)
             CredentialResult.Unavailable, CredentialResult.AlreadySet -> stringResource(R.string.security_password_unavailable)
             else -> null
         }
+        val inputEnabled = !busy && result !is CredentialResult.RetryAfter
 
         AppAuthenticationScreen(
             state = state,
             error = error,
-            enabled = !busy,
-            actionEnabled = ready,
+            enabled = inputEnabled,
+            actionEnabled = ready && inputEnabled,
             onVerify = ::submit,
             onCancel = onCancel,
             credentialInput = {
@@ -596,7 +609,7 @@ private fun CredentialChallenge(
                     CredentialKind.PIN -> PinPad(
                         value = pin,
                         length = Credentials.PIN_LENGTH_LONG,
-                        enabled = !busy,
+                        enabled = inputEnabled,
                         isError = error != null,
                         onValueChange = { pin = it; result = null },
                         onComplete = ::submit,
@@ -604,7 +617,7 @@ private fun CredentialChallenge(
 
                     CredentialKind.PATTERN -> PatternGrid(
                         nodes = nodes,
-                        enabled = !busy,
+                        enabled = inputEnabled,
                         isError = error != null,
                         onNodesChange = { nodes = it; result = null },
                         onComplete = { final -> nodes = final; result = null; submit() },

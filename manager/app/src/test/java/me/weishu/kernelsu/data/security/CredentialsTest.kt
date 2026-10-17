@@ -37,6 +37,21 @@ class CredentialsTest {
     }
 
     @Test
+    fun patternInterpolationAddsCrossedNodesWithoutChangingSimplePatterns() {
+        assertEquals(
+            "0-1-2-4-6-7-8",
+            Credentials.patternSecret(listOf(0, 2, 6, 8), interpolate = true)!!.concatToString(),
+        )
+        assertEquals(
+            "0-3-6-7",
+            Credentials.patternSecret(listOf(0, 3, 6, 7), interpolate = true)!!.concatToString(),
+        )
+        val candidates = Credentials.patternCandidates("0-2-5-8".toCharArray()).map { it.concatToString() }
+        assertTrue(candidates.contains("0-2-5-8"))
+        assertTrue(candidates.contains("0-1-2-5-8"))
+    }
+
+    @Test
     fun kindsDoNotAcceptEachOthersSecrets() {
         assertTrue(Credentials.isValid(CredentialKind.PIN, "1234".toCharArray()))
         assertFalse(Credentials.isValid(CredentialKind.PIN, "0-3-6-7".toCharArray()))

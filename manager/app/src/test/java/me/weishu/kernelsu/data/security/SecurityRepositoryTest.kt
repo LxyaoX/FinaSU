@@ -117,6 +117,30 @@ class SecurityRepositoryTest {
         assertEquals(CredentialResult.Success, repo.verify(CredentialKind.PIN, pin))
     }
 
+    @Test fun legacyAndInterpolatedPatternFormsVerifyEachOther() = runBlocking {
+        val legacy = "0-2-5-8".toCharArray()
+        val interpolated = requireNotNull(Credentials.patternSecret(listOf(0, 2, 5, 8), interpolate = true))
+        val legacyRepo = repository(Prefs())
+        assertEquals(CredentialResult.Success, legacyRepo.set(CredentialKind.PATTERN, legacy))
+        assertEquals(CredentialResult.Success, legacyRepo.verify(CredentialKind.PATTERN, interpolated))
+        assertEquals(CredentialResult.Success, legacyRepo.verify(CredentialKind.PATTERN, legacy))
+
+        val interpolatedRepo = repository(Prefs())
+        assertEquals(CredentialResult.Success, interpolatedRepo.set(CredentialKind.PATTERN, interpolated))
+        assertEquals(CredentialResult.Success, interpolatedRepo.verify(CredentialKind.PATTERN, legacy))
+    }
+
+    @Test fun aWrongPatternCountsAsOneFailedAttempt() = runBlocking {
+        var now = 0L
+        val repo = repository(Prefs()) { now }
+        val wrong = "0-1-2-5".toCharArray()
+        assertEquals(CredentialResult.Success, repo.set(CredentialKind.PATTERN, pattern))
+        repeat(5) { assertEquals(CredentialResult.Incorrect, repo.verify(CredentialKind.PATTERN, wrong)) }
+        assertEquals(CredentialResult.RetryAfter(1_000L), repo.verify(CredentialKind.PATTERN, pattern))
+        now = 1_000L
+        assertEquals(CredentialResult.Success, repo.verify(CredentialKind.PATTERN, pattern))
+    }
+
     @Test fun changingRequiresTheOldSecretAndClearingRestoresThePolicy() = runBlocking {
         val repo = repository(Prefs())
         val replacement = "654321".toCharArray()

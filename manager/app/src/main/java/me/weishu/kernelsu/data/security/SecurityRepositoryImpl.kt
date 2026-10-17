@@ -141,7 +141,16 @@ class SecurityRepositoryImpl(
         val record = records[kind] ?: return CredentialResult.Unavailable
         val remaining = retryAt - elapsedRealtime()
         if (remaining > 0) return CredentialResult.RetryAfter(remaining)
-        if (vault.verify(secret, record)) {
+        val candidates = when (kind) {
+            CredentialKind.PIN -> listOf(secret)
+            CredentialKind.PATTERN -> Credentials.patternCandidates(secret)
+        }
+        val matched = try {
+            candidates.any { vault.verify(it, record) }
+        } finally {
+            if (kind == CredentialKind.PATTERN) candidates.forEach { it.fill('\u0000') }
+        }
+        if (matched) {
             failures = 0
             retryAt = 0
             return CredentialResult.Success

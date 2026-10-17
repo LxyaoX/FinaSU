@@ -2,13 +2,18 @@ package me.weishu.kernelsu.ui.component.security
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -53,16 +58,25 @@ private fun CredentialDialogFrame(content: @Composable () -> Unit) {
             usePlatformDefaultWidth = false,
         ),
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(0.9f).widthIn(max = DialogMaxWidth),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainer,
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) { content() }
+        BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .widthIn(max = DialogMaxWidth)
+                    .heightIn(max = maxHeight * 0.9f),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .imePadding()
+                        .verticalScroll(rememberScrollState())
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) { content() }
+            }
         }
     }
 }
@@ -152,7 +166,8 @@ private fun subtitleOf(kind: CredentialKind): Int = when (kind) {
 
 private fun secretOfPin(pin: String): CharArray? = pin.toCharArray().takeIf { Credentials.isValidPin(it) }
 
-private fun secretOfPattern(nodes: List<Int>): CharArray? = Credentials.patternSecret(nodes)
+private fun secretOfPattern(nodes: List<Int>): CharArray? =
+    Credentials.patternSecret(nodes, interpolate = true)
 
 private fun secretOf(kind: CredentialKind, pin: String, nodes: List<Int>): CharArray? = when (kind) {
     CredentialKind.PIN -> secretOfPin(pin)
@@ -405,7 +420,7 @@ private fun credentialErrorText(result: CredentialResult): String = when (result
     CredentialResult.StorageError -> stringResource(R.string.security_storage_error)
     CredentialResult.InvalidFormat -> stringResource(R.string.security_pin_subtitle)
     CredentialResult.Unavailable, CredentialResult.AlreadySet -> stringResource(R.string.security_password_unavailable)
-    CredentialResult.Incorrect, CredentialResult.Success -> stringResource(R.string.security_password_incorrect)
+    CredentialResult.Incorrect, CredentialResult.Success -> stringResource(R.string.security_unlock_failed)
 }
 
 private enum class Stage { VerifyOld, New, Confirm }
