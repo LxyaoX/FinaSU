@@ -74,7 +74,7 @@ NoMount 是内建的 VFS 路径重定向后端：不产生任何挂载，而是�
 
 目录型符号链接会被当作目录递归遍历并**逐文件合并**（带环路检测与按模块去重）；`.replace` 标记或 opaque 目录同样默认降级为逐文件合并，只有白名单里的 `/product/fonts`、且其原目录不存在或为空时才允许整目录替换。分区根目录，以及名为 `lib64`、`lib`、`bin`、`etc` 的目录，**永远不会**被整目录替换。降级会写进日志：`mount.log` 里带 `dir_replace=N`，`ksud nomount inject --dry-run --verbose` 也会分别标注文件重定向与目录替换。
 
-内建 NoMount 还会启动一个独立的 UI 就绪观察者（默认 180 秒）：它要求 `sys.boot_completed=1`、SurfaceFlinger 正在运行、开机动画已结束，而不只是收到 boot-completed 回调。观察未能确认时会留下一个独立的持久标记，下一次开机会改用内建挂载引擎并记录一条 warning。这些信号不保证显示真的可用，它也不是内核装载器的超时。把 `/data/adb/ksu/mount_ui_guard` 写成 `delay=300` 可以改观察时长（30–900 秒），写 `off` 则停止新的观察；已存在的 `mount_ui_pending` 标记仍然生效，用内建引擎成功挂载一次后会自动清除，所以重试之前请先把那次失败开机的 `/data/adb/ksu/log/mount.log` 取走。
+内建 NoMount 还会启动一个独立的 UI 就绪观察者（默认 180 秒）：它要求 `sys.boot_completed=1`、SurfaceFlinger 正在运行、开机动画已结束，而不只是收到 boot-completed 回调。**观察跑完但没能确认**时会留下一个持久标记，下一次开机会改用内建挂载引擎并记录一条 warning；如果观察**根本没来得及跑**（设备在时限内就重启，或助手进程被结束），则判为「不确定」，标记会被丢弃、NoMount 照常启用。这些信号不保证显示真的可用，它也不是内核装载器的超时。把 `/data/adb/ksu/mount_ui_guard` 写成 `delay=300` 可以改观察时长（30–900 秒），写 `off` 则停止新的观察；「已确认失败」的标记会在下一次用内建引擎成功挂载后自动清除，所以重试之前请先把那次失败开机的 `/data/adb/ksu/log/mount.log` 取走。
 
 ## 安全提示
 
