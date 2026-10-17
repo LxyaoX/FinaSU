@@ -50,12 +50,17 @@ fun AppLockGate(session: AuthenticationSession, onCancel: () -> Unit, content: @
     var failed by remember { mutableStateOf(false) }
     var attempt by remember { mutableIntStateOf(0) }
     var entered by remember { mutableStateOf(false) }
-    val protected = !state.loaded || state.storageError || state.config.methodFor(SecurityTarget.APP_START) != AuthMethod.NONE
+    // Only a stored policy locks the screen. A repository that has not answered yet holds no
+    // policy, so waiting for it must not put a lock screen over an app that has no lock at all.
+    // A storage failure is the one case that fails closed: the policy may exist but be unreadable.
+    val policy = state.loaded && state.config.methodFor(SecurityTarget.APP_START) != AuthMethod.NONE
+    val protected = policy || state.storageError
     // Authentication is per app launch: returning from the background must not prompt again.
-    val unlocked = state.loaded && !state.storageError && (!protected || granted)
+    val unlocked = state.loaded && !state.storageError && (!policy || granted)
+    val locked = state.loaded && !unlocked
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(unlocked) { if (!unlocked) focusManager.clearFocus(force = true) }
+    LaunchedEffect(locked) { if (locked) focusManager.clearFocus(force = true) }
     DisposableEffect(context, protected, unlocked) {
         var host: Context = context
         while (host is ContextWrapper && host !is FragmentActivity) host = host.baseContext
@@ -98,7 +103,7 @@ fun AppLockGate(session: AuthenticationSession, onCancel: () -> Unit, content: @
             CompositionLocalProvider(LocalAppUnlocked provides unlocked) { content() }
         }
     }
-    if (!unlocked) {
+    if (locked) {
         BackHandler(onBack = onCancel)
         Box(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer)
@@ -121,7 +126,7 @@ fun AppLockGate(session: AuthenticationSession, onCancel: () -> Unit, content: @
             } else {
                 AppAuthenticationScreen(
                     state = if (pending != null || failed || state.storageError) AuthenticationVisualState.ERROR
-                        else if (busy || !state.loaded) AuthenticationVisualState.BUSY else AuthenticationVisualState.BIOMETRIC,
+                        else if (busy) AuthenticationVisualState.BUSY else AuthenticationVisualState.BIOMETRIC,
                     error = when {
                         state.storageError -> stringResource(R.string.security_storage_error)
                         pending != null -> stringResource(R.string.security_biometric_unavailable)
