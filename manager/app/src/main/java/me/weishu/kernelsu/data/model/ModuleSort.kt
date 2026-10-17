@@ -45,6 +45,23 @@ fun isZygiskModule(id: String): Boolean = id.contains("zygisk", ignoreCase = tru
 fun isLSPosedModule(name: String): Boolean = name.contains("LSPosed", ignoreCase = true)
 
 /**
+ * The module ids that carry the Zygisk runtime, the same set the daemon recognises. Sharing an id
+ * is the only thing these modules agree on: the id of a provider is unrelated to the ids of the
+ * modules that hook through it, so the alphabet alone cannot put the provider first.
+ */
+private val ZygiskProviderIds = setOf(
+    "zygisksu",
+    "zygisknext",
+    "rezygisk",
+    "neozygisk",
+    "shirokozygisk",
+    "onyxzygisk",
+)
+
+/** Whether [id] provides the Zygisk runtime rather than using it. */
+fun isZygiskProvider(id: String): Boolean = id.lowercase() in ZygiskProviderIds
+
+/**
  * The facts the order is decided from. A module carries them; this file reads no disk.
  *
  * [enabled] is consulted only when enabled-first is on. Without that option a module that is
@@ -88,9 +105,18 @@ fun moduleSortComparator(
     return compareBy<ModuleSortFacts> { facts ->
         val index = facts.sortGroup()?.let(ranking::indexOf) ?: -1
         index.takeIf { it >= 0 } ?: ranking.size
-    }.thenBy { facts -> enabledFirst && !facts.enabled }
+    }.thenBy { facts -> facts.sortRank() }
+        .thenBy { facts -> enabledFirst && !facts.enabled }
         .thenBy(collator) { it.id }
 }
+
+/**
+ * Where [this] sits inside its own group. Only the Zygisk group has an order of its own: the module
+ * that provides the runtime leads the modules that hook through it, so the one the device actually
+ * loads is not read past a list of its users.
+ */
+private fun ModuleSortFacts.sortRank(): Int =
+    if (sortGroup() == ModuleSortGroup.Zygisk && !isZygiskProvider(id)) 1 else 0
 
 /**
  * Orders by [order] first, then by id for anything the order does not mention. Ids absent from the

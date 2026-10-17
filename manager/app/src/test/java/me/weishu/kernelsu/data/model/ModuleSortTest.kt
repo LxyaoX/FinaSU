@@ -3,7 +3,9 @@ package me.weishu.kernelsu.data.model
 import java.text.Collator
 import java.util.Locale
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ModuleSortTest {
@@ -52,6 +54,35 @@ class ModuleSortTest {
         assertEquals(ModuleSortGroup.WebUi, facts("web", webUi = true, action = true).sortGroup())
         assertEquals(ModuleSortGroup.ActionScript, facts("act", action = true).sortGroup())
         assertNull(facts("plain").sortGroup())
+    }
+
+    @Test
+    fun `the zygisk runtime provider leads the modules that hook through it`() {
+        val modules = listOf(
+            facts("zygisk_lsposed", name = "LSPosed IT"),
+            facts("zygisk-module-xfingerprint-pay-wechat", name = "Zygisk - 指纹支付 - 微信"),
+            facts("zygisksu", name = "Zygisk Next"),
+            facts("rezygisk"),
+        )
+
+        // The two providers are the only modules carrying the runtime, and both read before the
+        // modules that merely mention Zygisk in their id.
+        assertEquals(
+            listOf("rezygisk", "zygisksu", "zygisk_lsposed", "zygisk-module-xfingerprint-pay-wechat"),
+            sorted(modules),
+        )
+    }
+
+    @Test
+    fun `a zygisk provider is recognised by its id alone`() {
+        assertTrue(isZygiskProvider("zygisksu"))
+        assertTrue(isZygiskProvider("ZygiskNext"))
+        assertTrue(isZygiskProvider("rezygisk"))
+        assertTrue(isZygiskProvider("NeoZygisk"))
+        assertTrue(isZygiskProvider("shirokozygisk"))
+        assertTrue(isZygiskProvider("onyxzygisk"))
+        assertFalse(isZygiskProvider("zygisk_lsposed"))
+        assertFalse(isZygiskProvider("zygisk-module-xfingerprint-pay-wechat"))
     }
 
     @Test
