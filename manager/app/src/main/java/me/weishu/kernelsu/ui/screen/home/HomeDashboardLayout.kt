@@ -73,7 +73,7 @@ internal fun DashboardHomeContent(
                 emphasis = CountCardEmphasis.Value,
             )
         }
-        InfoCard(systemInfo = state.systemInfo, susfs = state.susfs, zygiskProvider = state.zygiskProvider, onSusfs = actions.onSusfs)
+        InfoCard(systemInfo = state.systemInfo, susfs = state.susfs, zygiskProvider = state.zygiskProvider, mount = state.mount, onSusfs = actions.onSusfs)
     }
 }
 

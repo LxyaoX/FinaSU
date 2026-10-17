@@ -457,6 +457,15 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 onCheckedChange = actions.onSetHideHomeSusfs,
             )
         }
+        item(visible = uiState.folkMountStatus != null && !uiState.folkMountReadError) {
+            SegmentedSwitchItem(
+                icon = Icons.Filled.Layers,
+                title = stringResource(R.string.settings_hide_home_mount),
+                summary = stringResource(R.string.settings_hide_home_mount_summary),
+                checked = uiState.hideHomeMount,
+                onCheckedChange = actions.onSetHideHomeMount,
+            )
+        }
     }
 
     if (showLauncherIconDialog) {

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Tag
@@ -35,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkType
@@ -96,6 +98,14 @@ internal fun HomeFactsTile(
                 )
             }
         }
+        if (!display.hideMount) {
+            homeMountValue(state.mount)?.let { value ->
+                HomeFactRow(
+                    label = stringResource(R.string.home_mount_implementation),
+                    value = value,
+                )
+            }
+        }
         if (!display.hideSusfs) SusfsHomeRow(state.susfs, onSusfs)
     }
 }
@@ -130,6 +140,7 @@ internal fun InfoCard(
     modifier: Modifier = Modifier,
     susfs: me.weishu.kernelsu.data.susfs.SusfsStatus = me.weishu.kernelsu.data.susfs.SusfsStatus(),
     zygiskProvider: String? = null,
+    mount: HomeMount = HomeMount(),
     onSusfs: () -> Unit = {},
 ) {
     val selinuxDisplay = selinuxDisplayName(systemInfo.selinuxStatus)
@@ -181,6 +192,15 @@ internal fun InfoCard(
                     label = stringResource(R.string.home_zygisk_implement),
                     value = zygiskProvider,
                 )
+            }
+            if (!display.hideMount) {
+                homeMountValue(mount)?.let { value ->
+                    InfoRow(
+                        icon = Icons.Filled.Layers,
+                        label = stringResource(R.string.home_mount_implementation),
+                        value = value,
+                    )
+                }
             }
             if (susfs.detected && !display.hideSusfs) {
                 val interactionSource = remember { MutableInteractionSource() }
@@ -266,4 +286,19 @@ internal fun InfoRow(
             trailingContent()
         }
     }
+}
+
+/** The provider that really mounted modules this boot, or null when it cannot be named. */
+@Composable
+private fun homeMountValue(mount: HomeMount): String? = when (mount.provider) {
+    FolkMountProvider.METAMODULE -> listOfNotNull(
+        stringResource(R.string.settings_folk_mount_provider_metamodule),
+        mount.metamodule?.name?.takeIf { it.isNotBlank() } ?: mount.metamoduleId,
+        mount.metamodule?.version?.takeIf { it.isNotBlank() && it != "Unknown" },
+    ).joinToString(" · ")
+
+    FolkMountProvider.BUILTIN -> stringResource(R.string.home_mount_builtin_magic)
+    FolkMountProvider.NOMOUNT -> stringResource(R.string.home_mount_builtin_vfs)
+    FolkMountProvider.NONE -> stringResource(R.string.settings_folk_mount_mode_off)
+    null -> null
 }

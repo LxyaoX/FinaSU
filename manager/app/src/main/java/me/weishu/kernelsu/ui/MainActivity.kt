@@ -113,6 +113,7 @@ import me.weishu.kernelsu.ui.screen.appprofile.AppProfileScreen
 import me.weishu.kernelsu.ui.screen.colorpalette.ColorPaletteScreen
 import me.weishu.kernelsu.ui.screen.executemoduleaction.ExecuteModuleActionScreen
 import me.weishu.kernelsu.ui.screen.flash.FlashScreen
+import me.weishu.kernelsu.ui.screen.home.HomeMetamodule
 import me.weishu.kernelsu.ui.screen.home.HomePager
 import me.weishu.kernelsu.ui.screen.home.LocalHomeLayoutStyle
 import me.weishu.kernelsu.ui.screen.home.LocalSupportLinksCustom
@@ -579,6 +580,15 @@ fun MainScreen(
     }
 
     val moduleEnabledCount = moduleUiState.modules.count { it.enabled }
+    val homeMetamodule = remember(moduleUiState.modules) {
+        moduleUiState.modules.firstOrNull { it.metamodule && !it.remove }?.let { module ->
+            HomeMetamodule(
+                id = module.id,
+                name = module.name.ifBlank { module.id },
+                version = module.version,
+            )
+        }
+    }
 
     val navigationBadge = if (badgeEnabled) {
         NavigationBadgeState(
@@ -662,7 +672,7 @@ fun MainScreen(
                 ) { page ->
                     val isCurrentPage = page == settledPage
                     when (destinations.getOrNull(page)) {
-                        BottomBarDestination.Home -> if (contentReady || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount)
+                        BottomBarDestination.Home -> if (contentReady || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
                         BottomBarDestination.Plugin -> if (contentReady || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
                         BottomBarDestination.SuperUser -> if (contentReady || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
                         BottomBarDestination.Module -> if (contentReady || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)

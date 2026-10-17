@@ -24,6 +24,7 @@ interface SettingsRepository {
     var hideHomeFingerprint: Boolean
     var hideHomeZygisk: Boolean
     var hideHomeSusfs: Boolean
+    var hideHomeMount: Boolean
     var enablePredictiveBack: Boolean
     var enableNavigationBadge: Boolean
     var pageScale: Float

@@ -124,6 +124,10 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getBoolean("hide_home_susfs", false)
         set(value) = prefs.edit { putBoolean("hide_home_susfs", value) }
 
+    override var hideHomeMount: Boolean
+        get() = prefs.getBoolean("hide_home_mount", false)
+        set(value) = prefs.edit { putBoolean("hide_home_mount", value) }
+
     override var enablePredictiveBack: Boolean
         get() = prefs.getBoolean("enable_predictive_back", false)
         set(value) = prefs.edit { putBoolean("enable_predictive_back", value) }

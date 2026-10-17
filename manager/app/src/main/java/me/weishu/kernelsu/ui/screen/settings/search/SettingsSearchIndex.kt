@@ -415,6 +415,16 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
     )
     add(
         SettingsCategory.APPEARANCE.row(
+            id = "appearance.hide_home_mount",
+            titleRes = R.string.settings_hide_home_mount,
+            summaryRes = R.string.settings_hide_home_mount_summary,
+            icon = Icons.Filled.Layers,
+            aliases = listOf("home", "mount", "metamodule", "vfs", "hide", "card"),
+            available = { it.folkMountStatus != null && !it.folkMountReadError },
+        )
+    )
+    add(
+        SettingsCategory.APPEARANCE.row(
             id = "appearance.page_scale",
             titleRes = R.string.settings_page_scale,
             summaryRes = R.string.settings_page_scale_summary,

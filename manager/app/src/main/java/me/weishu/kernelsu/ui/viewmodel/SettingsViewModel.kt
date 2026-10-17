@@ -142,6 +142,7 @@ class SettingsViewModel(
                     hideHomeFingerprint = repo.hideHomeFingerprint,
                     hideHomeZygisk = repo.hideHomeZygisk,
                     hideHomeSusfs = repo.hideHomeSusfs,
+                    hideHomeMount = repo.hideHomeMount,
                     susfsDetected = susfsDetected,
                     colorStyle = colorStyle,
                     colorSpec = colorSpec,
@@ -376,6 +377,11 @@ class SettingsViewModel(
     fun setHideHomeSusfs(hidden: Boolean) {
         repo.hideHomeSusfs = hidden
         _uiState.update { it.copy(hideHomeSusfs = hidden) }
+    }
+
+    fun setHideHomeMount(hidden: Boolean) {
+        repo.hideHomeMount = hidden
+        _uiState.update { it.copy(hideHomeMount = hidden) }
     }
 
     fun setSuCompatMode(mode: Int) {

@@ -19,6 +19,7 @@ internal data class HomeDisplaySettings(
     val hideFingerprint: Boolean,
     val hideZygisk: Boolean,
     val hideSusfs: Boolean,
+    val hideMount: Boolean,
 )
 
 @Composable
@@ -29,6 +30,7 @@ internal fun rememberHomeDisplaySettings(): HomeDisplaySettings {
         hideFingerprint = repository.hideHomeFingerprint,
         hideZygisk = repository.hideHomeZygisk,
         hideSusfs = repository.hideHomeSusfs,
+        hideMount = repository.hideHomeMount,
     )
     var settings by remember { mutableStateOf(read()) }
     DisposableEffect(context) {
@@ -37,7 +39,8 @@ internal fun rememberHomeDisplaySettings(): HomeDisplaySettings {
             if (key == null ||
                 key == "hide_home_fingerprint" ||
                 key == "hide_home_zygisk" ||
-                key == "hide_home_susfs"
+                key == "hide_home_susfs" ||
+                key == "hide_home_mount"
             ) {
                 settings = read()
             }

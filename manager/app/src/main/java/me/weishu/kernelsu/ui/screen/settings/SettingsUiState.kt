@@ -36,6 +36,7 @@ data class SettingsUiState(
     val hideHomeFingerprint: Boolean = false,
     val hideHomeZygisk: Boolean = false,
     val hideHomeSusfs: Boolean = false,
+    val hideHomeMount: Boolean = false,
 
     // Su Compat
     val suCompatStatus: String = "",
@@ -144,6 +145,7 @@ data class SettingsScreenActions(
     val onSetHideHomeFingerprint: (Boolean) -> Unit,
     val onSetHideHomeZygisk: (Boolean) -> Unit,
     val onSetHideHomeSusfs: (Boolean) -> Unit,
+    val onSetHideHomeMount: (Boolean) -> Unit,
     val onSetEnableNavigationBadge: (Boolean) -> Unit,
     val onSetEnablePredictiveBack: (Boolean) -> Unit,
     val onSetPageScale: (Float) -> Unit,
