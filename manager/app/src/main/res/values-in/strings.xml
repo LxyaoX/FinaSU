@@ -279,6 +279,7 @@
     <string name="flashing">Memasang</string>
     <string name="flash_success">Pemasangan berhasil</string>
     <string name="flash_failed">Pemasangan gagal</string>
+    <string name="flash_back_blocked">Sedang memasang, harap tunggu</string>
     <string name="selected_lkm">LKM dipilih: %s</string>
     <string name="save_log">Simpan log</string>
     <string name="log_saved">Log disimpan</string>

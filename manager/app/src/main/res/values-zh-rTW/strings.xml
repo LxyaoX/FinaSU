@@ -279,6 +279,7 @@
     <string name="flashing">正在閃刷</string>
     <string name="flash_success">閃刷成功</string>
     <string name="flash_failed">閃刷失敗</string>
+    <string name="flash_back_blocked">閃刷中，請稍候</string>
     <string name="selected_lkm">已選定 LKM：%s</string>
     <string name="save_log">儲存日誌</string>
     <string name="log_saved">已儲存運作日誌</string>

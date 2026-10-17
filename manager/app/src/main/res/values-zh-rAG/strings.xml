@@ -279,6 +279,7 @@
     <string name="flashing">刷写中喵…</string>
     <string name="flash_success">刷写成功啦喵！</string>
     <string name="flash_failed">刷写失败啦…呜喵</string>
+    <string name="flash_back_blocked">刷写中喵，稍等一下啦</string>
     <string name="selected_lkm">选好的 LKM 喵：%s</string>
     <string name="save_log">保存日志喵</string>
     <string name="log_saved">日志乖乖存好啦喵！</string>

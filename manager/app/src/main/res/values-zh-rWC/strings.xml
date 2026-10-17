@@ -279,6 +279,7 @@
     <string name="flashing">炼化中</string>
     <string name="flash_success">炼化功成</string>
     <string name="flash_failed">炼化败陨</string>
+    <string name="flash_back_blocked">炼化中，请稍候</string>
     <string name="selected_lkm">已择之 LKM：%s</string>
     <string name="save_log">藏渡劫日志</string>
     <string name="log_saved">渡劫日志已藏</string>

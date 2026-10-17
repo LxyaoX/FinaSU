@@ -279,6 +279,7 @@
     <string name="flashing">注入中</string>
     <string name="flash_success">注入完成</string>
     <string name="flash_failed">注入失败</string>
+    <string name="flash_back_blocked">注入中，请稍候</string>
     <string name="selected_lkm">已选择的 LKM：%s</string>
     <string name="save_log">保存魔法记录</string>
     <string name="log_saved">魔法记录已保存</string>

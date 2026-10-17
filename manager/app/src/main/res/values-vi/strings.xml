@@ -279,6 +279,7 @@
     <string name="flashing">Đang Flash...</string>
     <string name="flash_success">Flash thành công</string>
     <string name="flash_failed">Flash thất bại!</string>
+    <string name="flash_back_blocked">Đang flash, vui lòng chờ</string>
     <string name="selected_lkm">LKM đã chọn: %s</string>
     <string name="save_log">Lưu nhật ký</string>
     <string name="log_saved">Đã lưu nhật ký</string>

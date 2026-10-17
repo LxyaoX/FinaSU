@@ -281,6 +281,7 @@
     <string name="flashing">Flaşlanıyor</string>
     <string name="flash_success">Flaşlama başarılı</string>
     <string name="flash_failed">Flaşlama başarısız</string>
+    <string name="flash_back_blocked">Flaşlama sürüyor, lütfen bekleyin</string>
     <string name="selected_lkm">Seçili LKM: %s</string>
     <string name="save_log">Günlükleri Kaydet</string>
     <string name="log_saved">Günlükler kaydedildi</string>

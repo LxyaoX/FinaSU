@@ -279,6 +279,7 @@
     <string name="flashing">플래싱 중</string>
     <string name="flash_success">플래싱 성공</string>
     <string name="flash_failed">플래싱 실패</string>
+    <string name="flash_back_blocked">플래싱 중입니다. 잠시만 기다려 주세요</string>
     <string name="selected_lkm">선택된 LKM: %s</string>
     <string name="save_log">로그 저장</string>
     <string name="log_saved">로그 저장됨</string>

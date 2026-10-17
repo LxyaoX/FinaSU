@@ -279,6 +279,7 @@
     <string name="flashing">Flasheando</string>
     <string name="flash_success">Éxito de Flash</string>
     <string name="flash_failed">Flash falló</string>
+    <string name="flash_back_blocked">Flasheando, espera un momento</string>
     <string name="selected_lkm">LKM seleccionado: %s</string>
     <string name="save_log">Guardar registros</string>
     <string name="log_saved">Registros guardados</string>
