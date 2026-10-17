@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
@@ -43,6 +44,13 @@ fun FlashScreen(flashIt: FlashIt, onBackEnabledChange: (Boolean) -> Unit) {
     var authorized by remember(flashIt, authenticator) { mutableStateOf(false) }
     val snackbarHost = remember { SnackbarHostState() }
     val backEnabled = !flashingEnabled || !authorized || flashingStatus != FlashingStatus.FLASHING
+    val backBlockedMessage = stringResource(R.string.flash_back_blocked)
+
+    fun showMessage(message: String) {
+        scope.launch {
+            snackbarHost.showSnackbar(message)
+        }
+    }
 
     LaunchedEffect(flashIt, authenticator, flashingEnabled, authorized) {
         if (!flashingEnabled || authorized) return@LaunchedEffect
@@ -50,17 +58,13 @@ fun FlashScreen(flashIt: FlashIt, onBackEnabledChange: (Boolean) -> Unit) {
     }
 
     SideEffect { onBackEnabledChange(backEnabled) }
+    // A running flash holds the page: answer the gesture with a reason, so a decline does not read
+    // as a gesture that never arrived.
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
         isBackEnabled = !backEnabled,
-        onBackCompleted = {},
+        onBackCompleted = { showMessage(backBlockedMessage) },
     )
-
-    fun showMessage(message: String) {
-        scope.launch {
-            snackbarHost.showSnackbar(message)
-        }
-    }
 
     FlashEffect(
         flashIt = flashIt,
