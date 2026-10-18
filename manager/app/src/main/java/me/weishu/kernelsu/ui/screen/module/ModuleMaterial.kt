@@ -103,6 +103,7 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
@@ -142,6 +143,7 @@ import me.weishu.kernelsu.ui.component.material.rememberSearchAppBarScrollBehavi
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.NavOrigin
+import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.util.reboot
@@ -295,20 +297,25 @@ fun ModulePagerMaterial(
                 navigationIcon = {
                     val originState = LocalNavOriginState.current
                     val density = LocalDensity.current
+                    val view = LocalView.current
                     val originColor = MaterialTheme.colorScheme.surfaceContainer
                     var originBounds by remember { mutableStateOf(Rect.Zero) }
                     FolkIconButton(
                         onClick = {
-                            if (originBounds != Rect.Zero) {
-                                originState.recordOrigin(
-                                    NavOrigin(
-                                        rect = originBounds,
-                                        cornerRadius = with(density) { 20.dp.toPx() },
-                                        color = originColor,
-                                        originId = "module-store",
-                                    ),
-                                )
+                            val bounds = if (originBounds != Rect.Zero) {
+                                originBounds
+                            } else {
+                                with(density) { Rect(24.dp.toPx(), 140.dp.toPx(), 144.dp.toPx(), 260.dp.toPx()) }
                             }
+                            originState.recordOrigin(
+                                captureNavOrigin(
+                                    view = view,
+                                    rect = bounds,
+                                    cornerRadius = with(density) { 20.dp.toPx() },
+                                    color = originColor,
+                                    originId = "module-store",
+                                ),
+                            )
                             actions.onOpenRepo()
                         },
                         modifier = Modifier

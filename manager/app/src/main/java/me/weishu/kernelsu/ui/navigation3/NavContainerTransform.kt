@@ -294,6 +294,20 @@ private fun captureCardBitmap(
     }
 }
 
+fun captureNavOrigin(
+    view: android.view.View,
+    rect: Rect,
+    cornerRadius: Float,
+    color: Color,
+    originId: Any? = null,
+): NavOrigin = NavOrigin(
+    rect = rect,
+    cornerRadius = cornerRadius,
+    color = color,
+    bitmap = captureCardBitmap(view, rect),
+    originId = originId,
+)
+
 private class NavOriginGeometry {
     var root: Rect = Rect.Zero
     var window: Rect = Rect.Zero
@@ -338,7 +352,7 @@ private fun NavContainerTransformEntry(
             null
         }
     }
-    val popping = (direction == NavDirection.Pop && !isCurrent) ||
+    val popping = (direction == NavDirection.Pop && cachedOrigin != null) ||
         (state.predictiveActive && isCurrent)
     val origin = when {
         direction == NavDirection.Push && isCurrent -> enteringOrigin ?: cachedOrigin

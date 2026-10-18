@@ -833,6 +833,13 @@ private fun navTransition(
     originState: NavOriginState,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
     if (originState.hasExpandableOrigin()) {
+        targetState.entries.lastOrNull()?.contentKey?.let { key ->
+            val origin = originState.consumePendingIfFresh()
+                ?: originState.consumeLastOriginIfFresh()
+            if (origin != null) {
+                originState.putOrigin(key, origin)
+            }
+        }
         containerPushTransform()
     } else {
         slideTransition(layoutDirection).invoke(this)
@@ -841,28 +848,18 @@ private fun navTransition(
 
 private fun navPopTransition(
     @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
-    originState: NavOriginState,
-    wallpaperActive: Boolean,
+    @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
+    @Suppress("UNUSED_PARAMETER") wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    val key = initialState.entries.lastOrNull()?.contentKey
-    if (originState.hasCachedOrigin(key)) {
-        cardPopTransform()
-    } else {
-        containerPopTransform()
-    }
+    containerPopTransform()
 }
 
 private fun navPredictivePopTransition(
     @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
-    originState: NavOriginState,
-    wallpaperActive: Boolean,
+    @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
+    @Suppress("UNUSED_PARAMETER") wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
-    val key = initialState.entries.lastOrNull()?.contentKey
-    if (originState.hasCachedOrigin(key)) {
-        cardPopTransform()
-    } else {
-        containerPopTransform()
-    }
+    containerPopTransform()
 }
 
 private fun containerPushTransform(): ContentTransform =

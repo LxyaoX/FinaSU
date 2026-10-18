@@ -74,6 +74,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
@@ -108,6 +109,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedItemContainer
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.NavOrigin
+import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
@@ -200,20 +202,25 @@ fun PluginPagerMaterial(
                 navigationIcon = {
                     val originState = LocalNavOriginState.current
                     val density = LocalDensity.current
+                    val view = LocalView.current
                     val originColor = MaterialTheme.colorScheme.surfaceContainer
                     var originBounds by remember { mutableStateOf(Rect.Zero) }
                     FolkIconButton(
                         onClick = {
-                            if (originBounds != Rect.Zero) {
-                                originState.recordOrigin(
-                                    NavOrigin(
-                                        rect = originBounds,
-                                        cornerRadius = with(density) { 20.dp.toPx() },
-                                        color = originColor,
-                                        originId = "plugin-store",
-                                    ),
-                                )
+                            val bounds = if (originBounds != Rect.Zero) {
+                                originBounds
+                            } else {
+                                with(density) { Rect(24.dp.toPx(), 140.dp.toPx(), 144.dp.toPx(), 260.dp.toPx()) }
                             }
+                            originState.recordOrigin(
+                                captureNavOrigin(
+                                    view = view,
+                                    rect = bounds,
+                                    cornerRadius = with(density) { 20.dp.toPx() },
+                                    color = originColor,
+                                    originId = "plugin-store",
+                                ),
+                            )
                             actions.onOpenStore()
                         },
                         modifier = Modifier
