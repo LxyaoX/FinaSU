@@ -801,10 +801,10 @@ private fun navPopTransition(
 }
 
 private fun navPredictivePopTransition(
-    layoutDirection: LayoutDirection,
+    @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
     @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
-): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = { swipeEdge ->
-    predictiveSlideBackTransition(layoutDirection).invoke(this, swipeEdge)
+): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
+    containerPopTransform()
 }
 
 private fun containerPushTransform(): ContentTransform =
