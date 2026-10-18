@@ -108,7 +108,7 @@ NoMount 是内建的 VFS 路径重定向后端：不产生任何挂载，而是�
 - [KernelSU](https://github.com/tiann/KernelSU)：上游项目
 - [ReZygisk](https://github.com/PerformanC/ReZygisk)：FolkZygisk 由其改写而来
 - [YukiSU](https://github.com/Anatdx/YukiSU)：动态管理器参考
-- [BakaSU](https://github.com/Baka-SU/BakaSU)：AnyKernel3 刷写、预测返回导航及部分小功能参考
+- [BakaSU](https://github.com/Baka-SU/BakaSU)：AnyKernel3 刷写及部分小功能参考
 - [Magisk](https://github.com/topjohnwu/Magisk)：`magiskpolicy` 与模块概念
 - [SUSFS](https://gitlab.com/simonpunk/susfs4ksu)：内核级隐藏
 - [Sui](https://github.com/XiaoTong6666/Sui)：内置 Shizuku API 后端实现

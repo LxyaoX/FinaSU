@@ -9,10 +9,17 @@ import android.os.SystemClock
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -50,8 +57,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -60,7 +69,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.defaultTransitionSpec
+import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -103,10 +115,7 @@ import me.weishu.kernelsu.ui.navigation3.EXTRA_INCOMING_URIS
 import me.weishu.kernelsu.ui.navigation3.IntentDispatcher
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Navigator
-import me.weishu.kernelsu.ui.navigation3.PredictiveBackConfig
 import me.weishu.kernelsu.ui.navigation3.Route
-import me.weishu.kernelsu.ui.navigation3.rememberPredictiveBackEntryDecorator
-import me.weishu.kernelsu.ui.navigation3.rememberPredictiveBackTransitions
 import me.weishu.kernelsu.ui.navigation3.rememberNavigator
 import me.weishu.kernelsu.ui.screen.about.AboutScreen
 import me.weishu.kernelsu.ui.screen.appprofile.AppProfileScreen
@@ -292,8 +301,6 @@ open class MainActivity : FragmentActivity() {
                     if (LocalAppUnlocked.current) IntentDispatcher(intentChannel = intentChannel)
                     val flashRoute = navigator.current() as? Route.Flash
                     var flashBackEnabled by remember(flashRoute) { mutableStateOf(false) }
-                    // Shared by the display and by the predictive back interceptor, so a gesture
-                    // that is handled outside the display behaves exactly like a system back.
                     val navigateBack: () -> Unit = {
                         when (val top = navigator.current()) {
                             is Route.Flash -> if (flashBackEnabled) navigator.pop()
@@ -308,30 +315,18 @@ open class MainActivity : FragmentActivity() {
                             else -> navigator.pop()
                         }
                     }
-                    val predictiveBackRevision by PredictiveBackConfig.revision.collectAsStateWithLifecycle()
-                    val predictiveBackAnimation = remember(predictiveBackRevision) {
-                        PredictiveBackConfig.animation
-                    }
-                    val predictiveBackExitDirection = remember(predictiveBackRevision) {
-                        PredictiveBackConfig.exitDirection
-                    }
-                    val predictiveBackTransitions = rememberPredictiveBackTransitions<NavKey>(
-                        animation = predictiveBackAnimation,
-                        exitDirection = predictiveBackExitDirection,
-                    )
-                    val predictiveBackEntryDecorator = rememberPredictiveBackEntryDecorator<NavKey>(
-                        interceptPredictiveBack = predictiveBackTransitions.interceptsPredictiveBack,
-                        isBackEnabled = { navigator.backStackSize() > 1 },
-                        onBack = navigateBack,
-                    )
-                    // The interceptor is only added for the style that previews nothing, so every
-                    // other style keeps the plain entry decoration it had before.
                     val saveableStateHolderDecorator =
                         rememberSaveableStateHolderNavEntryDecorator<NavKey>()
-                    val entryDecorators = if (predictiveBackTransitions.interceptsPredictiveBack) {
-                        listOf(saveableStateHolderDecorator, predictiveBackEntryDecorator)
-                    } else {
-                        listOf(saveableStateHolderDecorator)
+                    val entryDecorators = listOf(saveableStateHolderDecorator)
+                    val layoutDirection = LocalLayoutDirection.current
+                    val transition = remember(layoutDirection) {
+                        slideTransition(layoutDirection)
+                    }
+                    val popTransition = remember(layoutDirection) {
+                        slideBackTransition(layoutDirection)
+                    }
+                    val predictivePopTransition = remember(layoutDirection) {
+                        predictiveSlideBackTransition(layoutDirection)
                     }
                     val mainScreenEntry = @Composable {
                         MainScreen(
@@ -344,9 +339,9 @@ open class MainActivity : FragmentActivity() {
                         NavDisplay(
                             backStack = navigator.backStack,
                             onBack = navigateBack,
-                            transitionSpec = predictiveBackTransitions.transitionSpec,
-                            popTransitionSpec = predictiveBackTransitions.popTransitionSpec,
-                            predictivePopTransitionSpec = predictiveBackTransitions.predictivePopTransitionSpec,
+                            transitionSpec = transition,
+                            popTransitionSpec = popTransition,
+                            predictivePopTransitionSpec = predictivePopTransition,
                             entryDecorators = entryDecorators,
                             entryProvider = entryProvider<NavKey> {
                                 entry<Route.Main> { mainScreenEntry() }
@@ -384,10 +379,6 @@ open class MainActivity : FragmentActivity() {
                                         key.fromShortcut
                                     )
                                 }
-                                entry<Route.Home> { mainScreenEntry() }
-                                entry<Route.SuperUser> { mainScreenEntry() }
-                                entry<Route.Module> { mainScreenEntry() }
-                                entry<Route.Settings> { mainScreenEntry() }
                                 entry<Route.Wallpaper> { WallpaperScreen() }
                                 entry<Route.Font> { FontScreen() }
                                 entry<Route.SettingsCategory> { key -> CategorySettingsScreen(key.key) }
@@ -625,6 +616,7 @@ fun MainScreen(
         LocalMainPagerState provides mainPagerState
     ) {
         val contentReady = rememberContentReady()
+        val renderPagerPages = contentReady || mainPagerState.isNavigating
         val floatingBarRevision = FloatingBarConfig.revision.collectAsStateWithLifecycle().value
         val navModeRevision = NavModeConfig.revision.collectAsStateWithLifecycle().value
         val navMode = remember(navModeRevision) { NavModeConfig.mode }
@@ -658,7 +650,7 @@ fun MainScreen(
             ) {
                 HorizontalPager(
                     state = mainPagerState.pagerState,
-                    beyondViewportPageCount = if (contentReady) 3 else 0,
+                    beyondViewportPageCount = if (renderPagerPages) 3 else 0,
                     overscrollEffect = null,
                     userScrollEnabled = userScrollEnabled,
                     pageNestedScrollConnection = pageNestedScrollConnection(
@@ -672,11 +664,11 @@ fun MainScreen(
                 ) { page ->
                     val isCurrentPage = page == settledPage
                     when (destinations.getOrNull(page)) {
-                        BottomBarDestination.Home -> if (contentReady || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
-                        BottomBarDestination.Plugin -> if (contentReady || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
-                        BottomBarDestination.SuperUser -> if (contentReady || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
-                        BottomBarDestination.Module -> if (contentReady || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
-                        BottomBarDestination.Setting -> if (contentReady || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
+                        BottomBarDestination.Plugin -> if (renderPagerPages || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.SuperUser -> if (renderPagerPages || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.Module -> if (renderPagerPages || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.Setting -> if (renderPagerPages || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)
                         null -> Unit
                     }
                 }
@@ -766,6 +758,53 @@ fun MainScreen(
     }
 }
 
+private fun slideTransition(
+    layoutDirection: LayoutDirection,
+): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
+    val initialCount = initialState.entries.size + initialState.previousEntries.size
+    val targetCount = targetState.entries.size + targetState.previousEntries.size
+    if (targetCount < initialCount) {
+        slideBackTransform(layoutDirection)
+    } else {
+        defaultTransitionSpec<NavKey>().invoke(this)
+    }
+}
+
+private fun slideBackTransition(
+    layoutDirection: LayoutDirection,
+): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
+    slideBackTransform(layoutDirection)
+}
+
+private fun slideBackTransform(layoutDirection: LayoutDirection): ContentTransform =
+    ContentTransform(
+        targetContentEnter = EnterTransition.None,
+        initialContentExit = slideOutHorizontally(
+            animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
+            targetOffsetX = { width ->
+                if (layoutDirection == LayoutDirection.Rtl) -width else width
+            },
+        ),
+        targetContentZIndex = -1f,
+    )
+
+private fun predictiveSlideBackTransition(
+    layoutDirection: LayoutDirection,
+): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = { swipeEdge ->
+    val sign = when (swipeEdge) {
+        NavigationEvent.EDGE_LEFT -> 1
+        NavigationEvent.EDGE_RIGHT -> -1
+        else -> if (layoutDirection == LayoutDirection.Rtl) -1 else 1
+    }
+    ContentTransform(
+        targetContentEnter = EnterTransition.None,
+        initialContentExit = slideOutHorizontally(
+            animationSpec = tween(durationMillis = 300, easing = LinearEasing),
+            targetOffsetX = { width -> sign * width },
+        ),
+        targetContentZIndex = -1f,
+    )
+}
 
 @Composable
 private fun MainScreenBackHandler(

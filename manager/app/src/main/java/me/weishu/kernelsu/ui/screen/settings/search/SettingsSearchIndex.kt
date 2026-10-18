@@ -1,6 +1,5 @@
 package me.weishu.kernelsu.ui.screen.settings.search
 
-import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -57,7 +56,6 @@ import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.rounded.Animation
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.BlurCircular
@@ -459,26 +457,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_enable_predictive_back_summary,
             icon = Icons.AutoMirrored.Rounded.MenuOpen,
             aliases = listOf("predictive back", "gesture", "back"),
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.predictive_back_animation",
-            titleRes = R.string.settings_predictive_back_animation,
-            summaryRes = R.string.settings_predictive_back_animation_summary,
-            icon = Icons.Rounded.Animation,
-            aliases = listOf("predictive back", "animation", "gesture"),
-            available = { it.enablePredictiveBack && supportsPredictiveBackAnimations() },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.predictive_back_exit_direction",
-            titleRes = R.string.settings_predictive_back_exit_direction,
-            summaryRes = R.string.settings_predictive_back_exit_direction_summary,
-            icon = Icons.Rounded.SwapHoriz,
-            aliases = listOf("predictive back", "direction", "gesture"),
-            available = { it.enablePredictiveBack && supportsPredictiveBackAnimations() },
         )
     )
     add(
@@ -1205,7 +1183,4 @@ fun rememberSettingsSearchEntries(): List<ResolvedSettingsEntry> {
         }
     }
 }
-
-/** Whether this device can play the predictive back previews at all. */
-internal fun supportsPredictiveBackAnimations(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
