@@ -14,7 +14,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -53,6 +52,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,13 +70,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneInfo
+import androidx.navigation3.scene.SinglePaneSceneStrategy
+import androidx.navigation3.scene.rememberSceneState
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.defaultTransitionSpec
-import androidx.navigationevent.NavigationEvent
 import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.NavigationEventTransitionState.InProgress
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.Dispatchers
@@ -334,15 +338,21 @@ open class MainActivity : FragmentActivity() {
                         containerTransformDecorator,
                     )
                     val layoutDirection = LocalLayoutDirection.current
+                    val wallpaperActive = LocalFolkWallpaperTokens.current != null
                     val transition = remember(layoutDirection, navOriginState) {
                         navTransition(layoutDirection, navOriginState)
                     }
-                    val popTransition = remember(layoutDirection, navOriginState) {
-                        navPopTransition(layoutDirection, navOriginState)
+                    val popTransition = remember(layoutDirection, navOriginState, wallpaperActive) {
+                        navPopTransition(layoutDirection, navOriginState, wallpaperActive)
                     }
-                    val predictivePopTransition = remember(layoutDirection, navOriginState) {
-                        navPredictivePopTransition(layoutDirection, navOriginState)
-                    }
+                    val predictivePopTransition =
+                        remember(layoutDirection, navOriginState, wallpaperActive) {
+                            navPredictivePopTransition(
+                                layoutDirection,
+                                navOriginState,
+                                wallpaperActive,
+                            )
+                        }
                     val mainScreenEntry = @Composable {
                         MainScreen(
                             initialPage = selectedMainPage,
@@ -351,12 +361,8 @@ open class MainActivity : FragmentActivity() {
                     }
 
                     val navDisplay = @Composable {
-                        NavDisplay(
+                        val decoratedEntries = rememberDecoratedNavEntries(
                             backStack = navigator.backStack,
-                            onBack = navigateBack,
-                            transitionSpec = transition,
-                            popTransitionSpec = popTransition,
-                            predictivePopTransitionSpec = predictivePopTransition,
                             entryDecorators = entryDecorators,
                             entryProvider = entryProvider<NavKey> {
                                 entry<Route.Main> { mainScreenEntry() }
@@ -411,6 +417,51 @@ open class MainActivity : FragmentActivity() {
                                     me.weishu.kernelsu.ui.screen.bannerapi.ApiMarketplaceScreen()
                                 }
                             },
+                        )
+                        val sceneState = rememberSceneState(
+                            entries = decoratedEntries,
+                            sceneStrategies = listOf(SinglePaneSceneStrategy()),
+                            onBack = navigateBack,
+                        )
+                        val gestureState = rememberNavigationEventState(
+                            currentInfo = SceneInfo(sceneState.currentScene),
+                            backInfo = sceneState.previousScenes.map { SceneInfo(it) },
+                        )
+                        NavigationBackHandler(
+                            state = gestureState,
+                            isBackEnabled = sceneState.currentScene.previousEntries.isNotEmpty(),
+                            onBackCompleted = {
+                                repeat(
+                                    decoratedEntries.size -
+                                        sceneState.currentScene.previousEntries.size,
+                                ) {
+                                    navigateBack()
+                                }
+                            },
+                        )
+                        LaunchedEffect(gestureState, sceneState, navOriginState) {
+                            snapshotFlow { gestureState.transitionState }.collect { gesture ->
+                                if (gesture is InProgress) {
+                                    navOriginState.updatePredictive(
+                                        active = true,
+                                        key = sceneState.currentScene.entries.lastOrNull()?.contentKey,
+                                        fraction = 1f - gesture.latestEvent.progress,
+                                    )
+                                } else {
+                                    navOriginState.updatePredictive(
+                                        active = false,
+                                        key = null,
+                                        fraction = 1f,
+                                    )
+                                }
+                            }
+                        }
+                        NavDisplay(
+                            sceneState = sceneState,
+                            navigationEventState = gestureState,
+                            transitionSpec = transition,
+                            popTransitionSpec = popTransition,
+                            predictivePopTransitionSpec = predictivePopTransition,
                         )
                     }
 
@@ -789,22 +840,29 @@ private fun navTransition(
 }
 
 private fun navPopTransition(
-    layoutDirection: LayoutDirection,
+    @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
     originState: NavOriginState,
+    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
     val key = initialState.entries.lastOrNull()?.contentKey
     if (originState.hasCachedOrigin(key)) {
-        containerPopTransform()
+        cardPopTransform()
     } else {
-        slideBackTransition(layoutDirection).invoke(this)
+        containerPopTransform()
     }
 }
 
 private fun navPredictivePopTransition(
     @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
-    @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
+    originState: NavOriginState,
+    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
-    containerPopTransform()
+    val key = initialState.entries.lastOrNull()?.contentKey
+    if (originState.hasCachedOrigin(key)) {
+        cardPopTransform()
+    } else {
+        containerPopTransform()
+    }
 }
 
 private fun containerPushTransform(): ContentTransform =
@@ -832,6 +890,20 @@ private fun containerPopTransform(): ContentTransform =
         targetContentZIndex = -1f,
     )
 
+/**
+ * Keeps the outgoing scene alive for the card-shrink draw without transforming the whole page.
+ * The 0.999 end alpha gives the exit a duration while remaining visually opaque.
+ */
+private fun cardPopTransform(): ContentTransform =
+    ContentTransform(
+        targetContentEnter = EnterTransition.None,
+        initialContentExit = fadeOut(
+            animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
+            targetAlpha = 0.999f,
+        ),
+        targetContentZIndex = -1f,
+    )
+
 private fun slideTransition(
     layoutDirection: LayoutDirection,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
@@ -842,12 +914,6 @@ private fun slideTransition(
     } else {
         defaultTransitionSpec<NavKey>().invoke(this)
     }
-}
-
-private fun slideBackTransition(
-    layoutDirection: LayoutDirection,
-): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    slideBackTransform(layoutDirection)
 }
 
 private fun slideBackTransform(layoutDirection: LayoutDirection): ContentTransform =
@@ -861,24 +927,6 @@ private fun slideBackTransform(layoutDirection: LayoutDirection): ContentTransfo
         ),
         targetContentZIndex = -1f,
     )
-
-private fun predictiveSlideBackTransition(
-    layoutDirection: LayoutDirection,
-): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = { swipeEdge ->
-    val sign = when (swipeEdge) {
-        NavigationEvent.EDGE_LEFT -> 1
-        NavigationEvent.EDGE_RIGHT -> -1
-        else -> if (layoutDirection == LayoutDirection.Rtl) -1 else 1
-    }
-    ContentTransform(
-        targetContentEnter = EnterTransition.None,
-        initialContentExit = slideOutHorizontally(
-            animationSpec = tween(durationMillis = 300, easing = LinearEasing),
-            targetOffsetX = { width -> sign * width },
-        ),
-        targetContentZIndex = -1f,
-    )
-}
 
 @Composable
 private fun MainScreenBackHandler(

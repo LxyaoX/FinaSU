@@ -137,6 +137,7 @@ import me.weishu.kernelsu.ui.component.material.SearchAppBar
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.rememberSearchAppBarScrollBehavior
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
+import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.util.reboot
 
@@ -288,7 +289,11 @@ fun ModulePagerMaterial(
                 snackbarHostState = snackBarHost,
                 navigationIcon = {
                     FolkIconButton(
-                        onClick = { actions.onOpenRepo() }
+                        onClick = { actions.onOpenRepo() },
+                        modifier = Modifier.navOrigin(
+                            cornerRadius = 20.dp,
+                            color = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Cloud,

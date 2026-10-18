@@ -103,12 +103,14 @@ import me.weishu.kernelsu.ui.component.material.SearchAppBar
 import me.weishu.kernelsu.ui.component.material.rememberSearchAppBarScrollBehavior
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedItemContainer
+import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
+import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.screen.module.ExpandableDescriptionText
 import me.weishu.kernelsu.ui.screen.module.ModuleButtonStyle
 import me.weishu.kernelsu.ui.screen.module.rememberModuleCardVisual
@@ -192,7 +194,13 @@ fun PluginPagerMaterial(
                 onClearClick = { searchText = "" },
                 snackbarHostState = snackBarHost,
                 navigationIcon = {
-                    FolkIconButton(onClick = actions.onOpenStore) {
+                    FolkIconButton(
+                        onClick = actions.onOpenStore,
+                        modifier = Modifier.navOrigin(
+                            cornerRadius = 20.dp,
+                            color = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.Cloud,
                             contentDescription = stringResource(R.string.plugin_store),
