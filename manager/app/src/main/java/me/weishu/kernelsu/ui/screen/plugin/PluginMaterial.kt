@@ -199,6 +199,8 @@ fun PluginPagerMaterial(
                         modifier = Modifier.navOrigin(
                             cornerRadius = 20.dp,
                             color = MaterialTheme.colorScheme.surfaceContainer,
+                            captureBitmap = true,
+                            originId = "plugin-store",
                         ),
                     ) {
                         Icon(

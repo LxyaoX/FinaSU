@@ -2,7 +2,6 @@ package me.weishu.kernelsu.ui.navigation3
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.util.Log
 import android.os.SystemClock
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -48,6 +47,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,11 +65,14 @@ data class NavOrigin(
     val cornerRadius: Float,
     val color: Color,
     val bitmap: ImageBitmap? = null,
+    val originId: Any? = null,
 )
 
 class NavOriginState {
     private var pendingOrigin: NavOrigin? = null
     private var pendingAt: Long = 0L
+    private var lastOrigin: NavOrigin? = null
+    private var lastOriginAt: Long = 0L
     private var lastTouch: Offset? = null
     private var lastTouchAt: Long = 0L
     private var predictiveKey = mutableStateOf<Any?>(null)
@@ -82,6 +85,18 @@ class NavOriginState {
     internal fun markPending(origin: NavOrigin) {
         pendingOrigin = origin
         pendingAt = SystemClock.uptimeMillis()
+        lastOrigin = origin
+        lastOriginAt = pendingAt
+    }
+
+    fun recordOrigin(origin: NavOrigin) {
+        markPending(origin)
+    }
+
+    internal fun consumeLastOriginIfFresh(): NavOrigin? {
+        val now = SystemClock.uptimeMillis()
+        val origin = lastOrigin
+        return origin?.takeIf { now - lastOriginAt <= ORIGIN_TIMEOUT_MS }
     }
 
     internal fun clearPending() {
@@ -190,6 +205,8 @@ fun rememberNavContainerTransformDecorator(
 fun Modifier.navOrigin(
     cornerRadius: Dp = 22.dp,
     color: Color? = null,
+    captureBitmap: Boolean = false,
+    originId: Any? = null,
 ): Modifier {
     val state = LocalNavOriginState.current
     val density = LocalDensity.current
@@ -198,6 +215,8 @@ fun Modifier.navOrigin(
     val geometry = remember { NavOriginGeometry() }
     val currentRadius by rememberUpdatedState(with(density) { cornerRadius.toPx() })
     val currentColor by rememberUpdatedState(resolvedColor)
+    val currentCapture by rememberUpdatedState(captureBitmap)
+    val currentId by rememberUpdatedState(originId)
 
     return this
         .onGloballyPositioned { coordinates ->
@@ -207,13 +226,19 @@ fun Modifier.navOrigin(
         .pointerInput(state, view) {
             awaitPointerEventScope {
                 while (true) {
-                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                    val event = awaitPointerEvent(PointerEventPass.Final)
                     if (event.type == PointerEventType.Press && geometry.root != Rect.Zero) {
                         state.markPending(
                             NavOrigin(
                                 rect = geometry.root,
                                 cornerRadius = currentRadius,
                                 color = currentColor,
+                                bitmap = if (currentCapture) {
+                                    captureCardBitmap(view, geometry.root)
+                                } else {
+                                    null
+                                },
+                                originId = currentId,
                             ),
                         )
                     }
@@ -229,20 +254,17 @@ fun Modifier.navOrigin(
  */
 private fun captureCardBitmap(
     view: android.view.View,
-    windowBounds: Rect,
+    bounds: Rect,
 ): ImageBitmap? {
-    if (!windowBounds.isFinite || windowBounds.width <= 0f || windowBounds.height <= 0f) {
-        Log.d("NavCapture", "invalid bounds=$windowBounds")
+    if (!bounds.isFinite || bounds.width <= 0f || bounds.height <= 0f) {
         return null
     }
 
-    val viewLocation = IntArray(2)
-    view.getLocationInWindow(viewLocation)
-    val left = windowBounds.left - viewLocation[0]
-    val top = windowBounds.top - viewLocation[1]
+    val left = bounds.left
+    val top = bounds.top
 
-    val width = windowBounds.width
-    val height = windowBounds.height
+    val width = bounds.width
+    val height = bounds.height
     val edgeScale = MAX_CAPTURE_EDGE_PX / maxOf(width, height)
     val areaScale = sqrt(MAX_CAPTURE_AREA_PX / (width * height))
     val captureScale = min(1f, min(edgeScale, areaScale))
@@ -262,7 +284,6 @@ private fun captureCardBitmap(
         canvas.translate(-left * captureScale, -top * captureScale)
         canvas.scale(captureScale, captureScale)
         view.draw(canvas)
-        Log.d("NavCapture", "captured bounds=$windowBounds size=${pixelWidth}x${pixelHeight}")
         bitmap.asImageBitmap()
     } catch (_: OutOfMemoryError) {
         bitmap.recycle()
@@ -308,10 +329,10 @@ private fun NavContainerTransformEntry(
     val fallbackColor = wallpaperTokens?.group?.fill ?: MaterialTheme.colorScheme.surfaceContainer
     val fallbackRadius = with(density) { 28.dp.toPx() }
     val cachedOrigin = state.origins[key]
-    Log.d("NavCapture", "entry=$key dir=$direction current=$isCurrent cached=${cachedOrigin != null} bitmap=${cachedOrigin?.bitmap != null}")
     val enteringOrigin = remember(key, animateIn) {
         if (animateIn) {
             state.consumePendingIfFresh()
+                ?: state.consumeLastOriginIfFresh()
                 ?: state.touchOriginIfFresh(fallbackRadius, fallbackColor)
         } else {
             null
@@ -515,6 +536,23 @@ private fun ContentDrawScope.drawPagePop(
         addRoundRect(RoundRect(rect, CornerRadius(radius)))
     }
     val alpha = fraction.coerceIn(0f, 1f)
+    val bitmap = origin.bitmap
+    if (bitmap != null && fraction <= 0.22f) {
+        val dstWidth = rect.width
+        val dstHeight = if (bitmap.width > 0) {
+            dstWidth * bitmap.height / bitmap.width
+        } else {
+            rect.height
+        }
+        clipPath(path) {
+            drawImage(
+                image = bitmap,
+                dstOffset = IntOffset(rect.left.roundToInt(), rect.top.roundToInt()),
+                dstSize = IntSize(dstWidth.roundToInt(), dstHeight.roundToInt()),
+            )
+        }
+        return
+    }
     drawContext.canvas.saveLayer(
         Rect(offset = Offset.Zero, size = size),
         Paint().apply { this.alpha = alpha },
