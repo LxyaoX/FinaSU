@@ -1,6 +1,10 @@
 package me.weishu.kernelsu.ui.navigation3
 
+import android.os.SystemClock
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -18,6 +22,15 @@ class Navigator(
     val backStack: NavBackStack<NavKey>,
 ) {
 
+    var lastDirection by mutableStateOf(NavDirection.None)
+        private set
+
+    var lastPopAt by mutableStateOf(0L)
+        private set
+
+    fun wasJustPopped(withinMs: Long = 600L): Boolean =
+        lastPopAt > 0L && SystemClock.elapsedRealtime() - lastPopAt < withinMs
+
     private val resultBus = mutableMapOf<String, MutableSharedFlow<Any>>()
 
     /**
@@ -27,6 +40,7 @@ class Navigator(
      */
     fun push(key: NavKey) {
         if (key !in backStack) {
+            lastDirection = NavDirection.Push
             backStack.add(key)
         }
     }
@@ -35,6 +49,7 @@ class Navigator(
      * Replace the top key, or push if the stack is empty.
      */
     fun replace(key: NavKey) {
+        lastDirection = NavDirection.Push
         if (backStack.isNotEmpty()) {
             backStack[backStack.lastIndex] = key
         } else {
@@ -50,6 +65,7 @@ class Navigator(
             return
         }
         if (backStack.isNotEmpty()) {
+            lastDirection = NavDirection.Push
             backStack.clear()
             backStack.addAll(keys)
         }
@@ -61,6 +77,8 @@ class Navigator(
      */
     fun pop() {
         if (backStack.size > 1) {
+            lastDirection = NavDirection.Pop
+            lastPopAt = SystemClock.elapsedRealtime()
             backStack.removeLastOrNull()
         }
     }
@@ -69,8 +87,14 @@ class Navigator(
      * Pop until predicate matches the top key.
      */
     fun popUntil(predicate: (NavKey) -> Boolean) {
+        var changed = false
         while (backStack.size > 1 && !predicate(backStack.last())) {
             backStack.removeAt(backStack.lastIndex)
+            changed = true
+        }
+        if (changed) {
+            lastDirection = NavDirection.Pop
+            lastPopAt = SystemClock.elapsedRealtime()
         }
     }
 
@@ -130,4 +154,10 @@ fun rememberNavigator(startRoute: Route): Navigator {
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> {
     error("LocalNavigator not provided")
+}
+
+enum class NavDirection {
+    None,
+    Push,
+    Pop,
 }

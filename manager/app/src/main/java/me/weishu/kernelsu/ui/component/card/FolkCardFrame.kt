@@ -20,12 +20,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
 import me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.component.module.LocalInsideSplicedGroup
+import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.screen.module.ModuleBannerVisual
 import me.weishu.kernelsu.ui.theme.ContinuousCornerShape
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
@@ -46,9 +49,11 @@ fun FolkCardFrame(
     onClick: () -> Unit,
     onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
+    bannerCacheKey: String? = null,
     content: @Composable () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
+    val context = LocalContext.current
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
 
@@ -65,11 +70,14 @@ fun FolkCardFrame(
     val insideSplicedGroup = LocalInsideSplicedGroup.current
 
     val isWallpaperMode = LocalFolkWallpaperTokens.current != null
+    val navOriginColor = LocalFolkWallpaperTokens.current?.group?.fill
+        ?: MaterialTheme.colorScheme.surfaceBright
     val opacity = cardSurfaceOpacity()
     val bannerImageAlpha = bannerImageAlpha(isWallpaperMode, opacity)
 
     val clickModifier = Modifier
         .fillMaxWidth()
+        .navOrigin(cornerRadius = cardCorner, color = navOriginColor)
         .animateContentSize(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec())
         .folkPressScale(interactionSource)
         .combinedClickable(
@@ -90,9 +98,19 @@ fun FolkCardFrame(
             banner?.takeIf { ModuleBannerConfig.policy.active }?.let { image ->
                 val fadeColor = MaterialTheme.colorScheme.surface
                 val gradientAlpha = if (isWallpaperMode) 0.5f else 0.8f
+                val bannerModel = remember(image.model, bannerCacheKey) {
+                    if (bannerCacheKey == null) {
+                        image.model
+                    } else {
+                        ImageRequest.Builder(context)
+                            .data(image.model)
+                            .memoryCacheKey(bannerCacheKey)
+                            .build()
+                    }
+                }
                 Box(Modifier.matchParentSize(), contentAlignment = Alignment.Center) {
                     AsyncImage(
-                        model = image.model,
+                        model = bannerModel,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,

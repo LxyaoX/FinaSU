@@ -75,6 +75,7 @@ fun ModuleItemCard(
 
     FolkCardFrame(
         banner = visual.banner,
+        bannerCacheKey = "module:${module.id}",
         expanded = expanded,
         onLongPress = onLongPress,
         onClick = {

@@ -48,6 +48,7 @@ fun ThemePreviewCard(
     TonalCard(
         modifier = Modifier.fillMaxWidth(),
         shape = FolkShape.Corner16,
+        navOriginRadius = 16.dp,
         onClick = onClick,
         onLongClick = onLongClick,
     ) {

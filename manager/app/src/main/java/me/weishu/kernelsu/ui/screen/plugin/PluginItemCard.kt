@@ -60,6 +60,7 @@ fun PluginItemCard(
 
     FolkCardFrame(
         banner = visual.banner,
+        bannerCacheKey = "plugin:${plugin.id}",
         expanded = expanded,
         onLongPress = onLongPress,
         onClick = { if (foldActions) onExpandToggle() },

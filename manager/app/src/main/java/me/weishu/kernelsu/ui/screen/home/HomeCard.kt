@@ -56,6 +56,7 @@ internal fun HomeCard(
         shape = FolkShape.Corner20,
         onClick = onClick,
         onLongClick = onLongClick,
+        navOriginRadius = 20.dp,
         content = content,
     )
 }

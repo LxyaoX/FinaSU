@@ -355,6 +355,7 @@ private fun StoreModuleCard(
     TonalCard(
         modifier = Modifier.fillMaxWidth(),
         shape = FolkShape.Corner20,
+        navOriginRadius = 20.dp,
         onClick = { onOpen(module) },
     ) {
         Column(

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.material.folkPressScale
+import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.FolkShape
 
 /** One tappable entry in [SettingsCategoryGrid]. */
@@ -85,6 +86,10 @@ private fun CategoryCell(
     Column(
         modifier = modifier
             .clip(FolkShape.Corner12)
+            .navOrigin(
+                cornerRadius = 12.dp,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            )
             .folkPressScale(interactionSource)
             .clickable(
                 role = Role.Button,

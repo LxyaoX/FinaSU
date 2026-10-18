@@ -18,6 +18,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
@@ -70,6 +72,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.NavigationEvent
@@ -113,10 +116,15 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import me.weishu.kernelsu.ui.navigation3.EXTRA_INCOMING_URIS
 import me.weishu.kernelsu.ui.navigation3.IntentDispatcher
+import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
+import me.weishu.kernelsu.ui.navigation3.NavOriginState
 import me.weishu.kernelsu.ui.navigation3.Navigator
 import me.weishu.kernelsu.ui.navigation3.Route
+import me.weishu.kernelsu.ui.navigation3.rememberNavContainerTransformDecorator
+import me.weishu.kernelsu.ui.navigation3.rememberNavOriginState
 import me.weishu.kernelsu.ui.navigation3.rememberNavigator
+import me.weishu.kernelsu.ui.navigation3.trackNavPointer
 import me.weishu.kernelsu.ui.screen.about.AboutScreen
 import me.weishu.kernelsu.ui.screen.appprofile.AppProfileScreen
 import me.weishu.kernelsu.ui.screen.colorpalette.ColorPaletteScreen
@@ -259,6 +267,7 @@ open class MainActivity : FragmentActivity() {
             }
 
             val navigator = rememberNavigator(Route.Main)
+            val navOriginState = rememberNavOriginState()
             val systemDensity = LocalDensity.current
             val density = remember(systemDensity, uiState.pageScale) {
                 Density(systemDensity.density * uiState.pageScale, systemDensity.fontScale)
@@ -280,6 +289,7 @@ open class MainActivity : FragmentActivity() {
 
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
+                LocalNavOriginState provides navOriginState,
                 LocalDensity provides density,
                 LocalColorMode provides appSettings.colorMode.value,
                 LocalEnableNavigationBadge provides uiState.enableNavigationBadge,
@@ -317,16 +327,21 @@ open class MainActivity : FragmentActivity() {
                     }
                     val saveableStateHolderDecorator =
                         rememberSaveableStateHolderNavEntryDecorator<NavKey>()
-                    val entryDecorators = listOf(saveableStateHolderDecorator)
+                    val containerTransformDecorator =
+                        rememberNavContainerTransformDecorator(navOriginState)
+                    val entryDecorators = listOf(
+                        saveableStateHolderDecorator,
+                        containerTransformDecorator,
+                    )
                     val layoutDirection = LocalLayoutDirection.current
-                    val transition = remember(layoutDirection) {
-                        slideTransition(layoutDirection)
+                    val transition = remember(layoutDirection, navOriginState) {
+                        navTransition(layoutDirection, navOriginState)
                     }
-                    val popTransition = remember(layoutDirection) {
-                        slideBackTransition(layoutDirection)
+                    val popTransition = remember(layoutDirection, navOriginState) {
+                        navPopTransition(layoutDirection, navOriginState)
                     }
-                    val predictivePopTransition = remember(layoutDirection) {
-                        predictiveSlideBackTransition(layoutDirection)
+                    val predictivePopTransition = remember(layoutDirection, navOriginState) {
+                        navPredictivePopTransition(layoutDirection, navOriginState)
                     }
                     val mainScreenEntry = @Composable {
                         MainScreen(
@@ -399,7 +414,11 @@ open class MainActivity : FragmentActivity() {
                         )
                     }
 
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .trackNavPointer(navOriginState)
+                    ) {
                         WallpaperBackgroundLayer()
                         androidx.compose.material3.Scaffold(
                             containerColor = if (LocalFolkWallpaperTokens.current != null) {
@@ -758,6 +777,61 @@ fun MainScreen(
     }
 }
 
+private fun navTransition(
+    layoutDirection: LayoutDirection,
+    originState: NavOriginState,
+): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
+    if (originState.hasExpandableOrigin()) {
+        containerPushTransform()
+    } else {
+        slideTransition(layoutDirection).invoke(this)
+    }
+}
+
+private fun navPopTransition(
+    layoutDirection: LayoutDirection,
+    originState: NavOriginState,
+): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
+    val key = initialState.entries.lastOrNull()?.contentKey
+    if (originState.hasCachedOrigin(key)) {
+        containerPopTransform()
+    } else {
+        slideBackTransition(layoutDirection).invoke(this)
+    }
+}
+
+private fun navPredictivePopTransition(
+    layoutDirection: LayoutDirection,
+    @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
+): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = { swipeEdge ->
+    predictiveSlideBackTransition(layoutDirection).invoke(this, swipeEdge)
+}
+
+private fun containerPushTransform(): ContentTransform =
+    ContentTransform(
+        targetContentEnter = fadeIn(
+            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+            initialAlpha = 0.999f,
+        ),
+        initialContentExit = fadeOut(
+            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+            targetAlpha = 0.999f,
+        ),
+    )
+
+private fun containerPopTransform(): ContentTransform =
+    ContentTransform(
+        targetContentEnter = EnterTransition.None,
+        initialContentExit = scaleOut(
+            animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
+            targetScale = 0.86f,
+            transformOrigin = TransformOrigin(0.08f, 0.08f),
+        ) + fadeOut(
+            animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
+        ),
+        targetContentZIndex = -1f,
+    )
+
 private fun slideTransition(
     layoutDirection: LayoutDirection,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
@@ -811,10 +885,13 @@ private fun MainScreenBackHandler(
     mainState: MainPagerState,
     navController: Navigator,
 ) {
-    val isPagerBackHandlerEnabled by remember {
+    val navAnimatedContentScope = LocalNavAnimatedContentScope.current
+    val isPagerBackHandlerEnabled by remember(navAnimatedContentScope) {
         derivedStateOf {
             navController.current() is Route.Main && navController.backStackSize() == 1 &&
-                mainState.selectedDestination != BottomBarDestination.Home
+                mainState.selectedDestination != BottomBarDestination.Home &&
+                !navController.wasJustPopped() &&
+                !navAnimatedContentScope.transition.isRunning
         }
     }
 

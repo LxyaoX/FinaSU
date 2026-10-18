@@ -15,6 +15,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import me.weishu.kernelsu.ui.navigation3.navOrigin
+import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 
 /**
@@ -42,9 +46,22 @@ fun TonalCard(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    navOriginRadius: Dp = 24.dp,
     content: @Composable () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
+    val wallpaperTokens = LocalFolkWallpaperTokens.current
+    val originColor = if (wallpaperTokens != null && wallpaperRole != null) {
+        wallpaperTokens.material(wallpaperRole).fill
+    } else {
+        containerColor.takeIf { it.alpha > 0f }
+            ?: MaterialTheme.colorScheme.surfaceContainer
+    }
+    val originModifier = if (onClick != null) {
+        Modifier.navOrigin(cornerRadius = navOriginRadius, color = originColor)
+    } else {
+        Modifier
+    }
 
     val clickModifier = when {
         onLongClick != null -> Modifier
@@ -84,7 +101,7 @@ fun TonalCard(
         FolkWallpaperSurface(
             role = wallpaperRole,
             shape = shape,
-            modifier = modifier.then(clickModifier),
+            modifier = modifier.then(originModifier).then(clickModifier),
             fallbackColor = containerColor,
             fallbackContentColor = contentColor,
         ) {
@@ -92,7 +109,7 @@ fun TonalCard(
         }
     } else {
         Card(
-            modifier = modifier.then(clickModifier),
+            modifier = modifier.then(originModifier).then(clickModifier),
             colors = CardDefaults.cardColors(
                 containerColor = containerColor,
                 contentColor = contentColor,

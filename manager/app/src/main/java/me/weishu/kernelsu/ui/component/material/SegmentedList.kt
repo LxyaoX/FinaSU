@@ -90,6 +90,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
@@ -489,8 +490,19 @@ fun SegmentedListItem(
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
+    val tokens = LocalFolkWallpaperTokens.current
+    val originModifier = if (onClick != null) {
+        modifier.navOrigin(
+            cornerRadius = 12.dp,
+            color = tokens?.group?.fill
+                ?: colors.containerColor.takeIf { it.alpha > 0f }
+                ?: MaterialTheme.colorScheme.surfaceContainer,
+        )
+    } else {
+        modifier
+    }
     SegmentedRow(
-        modifier = modifier,
+        modifier = originModifier,
         clickable = onClick != null,
         enabled = enabled,
         interactionSource = interactionSource,
@@ -568,8 +580,14 @@ fun SegmentedListItem(
     trailingContent: @Composable (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val tokens = LocalFolkWallpaperTokens.current
     SegmentedRow(
-        modifier = modifier,
+        modifier = modifier.navOrigin(
+            cornerRadius = 12.dp,
+            color = tokens?.group?.fill
+                ?: colors.containerColor.takeIf { it.alpha > 0f }
+                ?: MaterialTheme.colorScheme.surfaceContainer,
+        ),
         clickable = true,
         enabled = enabled,
         interactionSource = interactionSource,
