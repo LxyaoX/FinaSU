@@ -2,6 +2,7 @@ package me.weishu.kernelsu.ui.screen.home
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -60,6 +62,7 @@ fun HomePager(
     val scope = rememberCoroutineScope()
     val latestIsCurrentPage by rememberUpdatedState(isCurrentPage)
     val initialResumeHandled = rememberSaveable { mutableStateOf(false) }
+    val activity = LocalActivity.current
 
     var hasActivated by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(isCurrentPage) {
@@ -75,7 +78,7 @@ fun HomePager(
         }
     }
 
-    LifecycleResumeEffect(Unit) {
+    LifecycleResumeEffect(Unit, activity ?: LocalLifecycleOwner.current) {
         if (initialResumeHandled.value && latestIsCurrentPage) {
             CapabilityRepository.refresh()
             viewModel.refresh()

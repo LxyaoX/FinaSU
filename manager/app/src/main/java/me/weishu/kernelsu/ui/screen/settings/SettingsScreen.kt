@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.KernelSUApplication
@@ -35,14 +35,9 @@ fun SettingPager(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val latestIsCurrentPage by rememberUpdatedState(isCurrentPage)
     val initialResumeHandled = rememberSaveable { mutableStateOf(false) }
+    val activity = LocalActivity.current
 
-    LaunchedEffect(isCurrentPage) {
-        if (isCurrentPage) {
-            viewModel.refresh()
-        }
-    }
-
-    LifecycleResumeEffect(Unit) {
+    LifecycleResumeEffect(Unit, activity ?: LocalLifecycleOwner.current) {
         if (initialResumeHandled.value && latestIsCurrentPage) {
             viewModel.refresh()
         }
