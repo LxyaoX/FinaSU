@@ -89,6 +89,7 @@ private fun CategoryCell(
             .navOrigin(
                 cornerRadius = 12.dp,
                 color = MaterialTheme.colorScheme.surfaceContainer,
+                interactionSource = interactionSource,
             )
             .folkPressScale(interactionSource)
             .clickable(

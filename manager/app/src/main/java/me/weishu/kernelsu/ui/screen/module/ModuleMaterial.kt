@@ -144,7 +144,6 @@ import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.NavOrigin
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
-import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.util.reboot
 
@@ -319,13 +318,7 @@ fun ModulePagerMaterial(
                             actions.onOpenRepo()
                         },
                         modifier = Modifier
-                            .onGloballyPositioned { originBounds = it.boundsInRoot() }
-                            .navOrigin(
-                                cornerRadius = 20.dp,
-                                color = MaterialTheme.colorScheme.surfaceContainer,
-                                captureBitmap = true,
-                                originId = "module-store",
-                            ),
+                            .onGloballyPositioned { originBounds = it.boundsInRoot() },
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Cloud,

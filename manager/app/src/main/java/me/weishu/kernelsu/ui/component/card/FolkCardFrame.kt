@@ -77,7 +77,11 @@ fun FolkCardFrame(
 
     val clickModifier = Modifier
         .fillMaxWidth()
-        .navOrigin(cornerRadius = cardCorner, color = navOriginColor)
+        .navOrigin(
+            cornerRadius = cardCorner,
+            color = navOriginColor,
+            interactionSource = interactionSource,
+        )
         .animateContentSize(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec())
         .folkPressScale(interactionSource)
         .combinedClickable(

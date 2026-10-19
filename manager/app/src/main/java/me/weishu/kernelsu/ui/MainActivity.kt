@@ -832,16 +832,20 @@ private fun navTransition(
     layoutDirection: LayoutDirection,
     originState: NavOriginState,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    if (originState.hasExpandableOrigin()) {
-        targetState.entries.lastOrNull()?.contentKey?.let { key ->
+    val expandable = originState.hasExpandableOrigin()
+    val targetKey = targetState.entries.lastOrNull()?.contentKey
+    if (expandable) {
+        targetKey?.let { key ->
             val origin = originState.consumePendingIfFresh()
-                ?: originState.consumeLastOriginIfFresh()
             if (origin != null) {
                 originState.putOrigin(key, origin)
+            } else {
+                originState.removeOrigin(key)
             }
         }
         containerPushTransform()
     } else {
+        targetKey?.let(originState::removeOrigin)
         slideTransition(layoutDirection).invoke(this)
     }
 }

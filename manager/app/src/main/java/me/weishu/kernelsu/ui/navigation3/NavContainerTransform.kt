@@ -6,6 +6,8 @@ import android.os.SystemClock
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
+import kotlinx.coroutines.flow.collect
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -71,10 +73,6 @@ data class NavOrigin(
 class NavOriginState {
     private var pendingOrigin: NavOrigin? = null
     private var pendingAt: Long = 0L
-    private var lastOrigin: NavOrigin? = null
-    private var lastOriginAt: Long = 0L
-    private var lastTouch: Offset? = null
-    private var lastTouchAt: Long = 0L
     private var predictiveKey = mutableStateOf<Any?>(null)
     private var predictiveFraction = mutableFloatStateOf(1f)
     val origins = mutableStateMapOf<Any, NavOrigin>()
@@ -85,18 +83,10 @@ class NavOriginState {
     internal fun markPending(origin: NavOrigin) {
         pendingOrigin = origin
         pendingAt = SystemClock.uptimeMillis()
-        lastOrigin = origin
-        lastOriginAt = pendingAt
     }
 
     fun recordOrigin(origin: NavOrigin) {
         markPending(origin)
-    }
-
-    internal fun consumeLastOriginIfFresh(): NavOrigin? {
-        val now = SystemClock.uptimeMillis()
-        val origin = lastOrigin
-        return origin?.takeIf { now - lastOriginAt <= ORIGIN_TIMEOUT_MS }
     }
 
     internal fun clearPending() {
@@ -110,34 +100,8 @@ class NavOriginState {
         return origin?.takeIf { now - pendingAt <= ORIGIN_TIMEOUT_MS }
     }
 
-    internal fun updateTouch(position: Offset) {
-        lastTouch = position
-        lastTouchAt = SystemClock.uptimeMillis()
-    }
-
-    internal fun touchOriginIfFresh(
-        radius: Float,
-        color: Color,
-    ): NavOrigin? {
-        val point = lastTouch ?: return null
-        if (SystemClock.uptimeMillis() - lastTouchAt > ORIGIN_TIMEOUT_MS) return null
-        return NavOrigin(
-            rect = Rect(
-                left = point.x - radius,
-                top = point.y - radius,
-                right = point.x + radius,
-                bottom = point.y + radius,
-            ),
-            cornerRadius = radius,
-            color = color,
-        )
-    }
-
-    internal fun hasExpandableOrigin(): Boolean {
-        val now = SystemClock.uptimeMillis()
-        return (pendingOrigin != null && now - pendingAt <= ORIGIN_TIMEOUT_MS) ||
-            (lastTouch != null && now - lastTouchAt <= ORIGIN_TIMEOUT_MS)
-    }
+    internal fun hasExpandableOrigin(): Boolean =
+        pendingOrigin != null && SystemClock.uptimeMillis() - pendingAt <= ORIGIN_TIMEOUT_MS
 
     internal fun hasCachedBitmapOrigin(key: Any?): Boolean =
         key != null && origins[key]?.bitmap != null
@@ -207,6 +171,7 @@ fun Modifier.navOrigin(
     color: Color? = null,
     captureBitmap: Boolean = false,
     originId: Any? = null,
+    interactionSource: MutableInteractionSource? = null,
 ): Modifier {
     val state = LocalNavOriginState.current
     val density = LocalDensity.current
@@ -217,34 +182,55 @@ fun Modifier.navOrigin(
     val currentColor by rememberUpdatedState(resolvedColor)
     val currentCapture by rememberUpdatedState(captureBitmap)
     val currentId by rememberUpdatedState(originId)
+    val pressSource = interactionSource ?: remember { MutableInteractionSource() }
+
+    fun markOrigin() {
+        if (geometry.root == Rect.Zero) return
+        state.markPending(
+            NavOrigin(
+                rect = geometry.root,
+                cornerRadius = currentRadius,
+                color = currentColor,
+                bitmap = if (currentCapture) {
+                    captureCardBitmap(view, geometry.root)
+                } else {
+                    null
+                },
+                originId = currentId,
+            ),
+        )
+    }
+
+    LaunchedEffect(pressSource, interactionSource) {
+        if (interactionSource == null) return@LaunchedEffect
+        pressSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Press) {
+                markOrigin()
+            }
+        }
+    }
 
     return this
         .onGloballyPositioned { coordinates ->
             geometry.root = coordinates.boundsInRoot()
             geometry.window = coordinates.boundsInWindow()
         }
-        .pointerInput(state, view) {
-            awaitPointerEventScope {
-                while (true) {
-                    val event = awaitPointerEvent(PointerEventPass.Final)
-                    if (event.type == PointerEventType.Press && geometry.root != Rect.Zero) {
-                        state.markPending(
-                            NavOrigin(
-                                rect = geometry.root,
-                                cornerRadius = currentRadius,
-                                color = currentColor,
-                                bitmap = if (currentCapture) {
-                                    captureCardBitmap(view, geometry.root)
-                                } else {
-                                    null
-                                },
-                                originId = currentId,
-                            ),
-                        )
+        .then(
+            if (interactionSource == null) {
+                Modifier.pointerInput(state, view) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Final)
+                            if (event.type == PointerEventType.Press) {
+                                markOrigin()
+                            }
+                        }
                     }
                 }
+            } else {
+                Modifier
             }
-        }
+        )
 }
 
 /**
@@ -319,7 +305,6 @@ fun Modifier.trackNavPointer(state: NavOriginState): Modifier = pointerInput(sta
             val event = awaitPointerEvent(PointerEventPass.Initial)
             if (event.type == PointerEventType.Press) {
                 state.clearPending()
-                event.changes.firstOrNull()?.position?.let(state::updateTouch)
             }
         }
     }
@@ -332,50 +317,28 @@ private fun NavContainerTransformEntry(
 ) {
     val navigator = LocalNavigator.current
     val key = entry.contentKey
-    val currentId = navigator.current()?.toString()
-    val entryId = (key as? Pair<*, *>)?.first as? String
-    val isCurrent = entryId != null && entryId == currentId
+    val currentKey = navigator.current()
+    val isCurrent = currentKey != null &&
+        key == (currentKey.toString() to currentKey::class)
     val direction = navigator.lastDirection
     val animateIn = direction == NavDirection.Push && isCurrent
 
-    val density = LocalDensity.current
-    val wallpaperTokens = LocalFolkWallpaperTokens.current
-    val fallbackColor = wallpaperTokens?.group?.fill ?: MaterialTheme.colorScheme.surfaceContainer
-    val fallbackRadius = with(density) { 28.dp.toPx() }
     val cachedOrigin = state.origins[key]
-    val enteringOrigin = remember(key, animateIn) {
-        if (animateIn) {
-            state.consumePendingIfFresh()
-                ?: state.consumeLastOriginIfFresh()
-                ?: state.touchOriginIfFresh(fallbackRadius, fallbackColor)
-        } else {
-            null
-        }
-    }
-    val popping = (direction == NavDirection.Pop && cachedOrigin != null) ||
-        (state.predictiveActive && isCurrent)
+    val predictiveFraction = state.predictiveFraction(key)
+    val popping = (direction == NavDirection.Pop && !isCurrent && cachedOrigin != null) ||
+        (state.predictiveActive && predictiveFraction != null)
     val origin = when {
-        direction == NavDirection.Push && isCurrent -> enteringOrigin ?: cachedOrigin
-        popping -> cachedOrigin ?: enteringOrigin
-        else -> cachedOrigin
-    }
-
-    LaunchedEffect(key, animateIn, enteringOrigin) {
-        if (animateIn) {
-            if (enteringOrigin != null) {
-                state.putOrigin(key, enteringOrigin)
-            } else {
-                state.removeOrigin(key)
-            }
-        }
+        popping -> cachedOrigin
+        animateIn -> cachedOrigin
+        else -> null
     }
 
     val progress = remember {
         Animatable(if (animateIn) 0f else 1f)
     }
-    LaunchedEffect(direction, isCurrent, animateIn, state.predictiveActive) {
+    LaunchedEffect(direction, isCurrent, animateIn, state.predictiveActive, predictiveFraction) {
         when {
-            state.predictiveActive -> Unit
+            state.predictiveActive && predictiveFraction != null -> Unit
 
             direction == NavDirection.Push && isCurrent &&
                 animateIn && progress.value < 0.999f ->

@@ -110,7 +110,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedItemContainer
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.NavOrigin
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
-import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
@@ -224,13 +223,7 @@ fun PluginPagerMaterial(
                             actions.onOpenStore()
                         },
                         modifier = Modifier
-                            .onGloballyPositioned { originBounds = it.boundsInRoot() }
-                            .navOrigin(
-                                cornerRadius = 20.dp,
-                                color = originColor,
-                                captureBitmap = true,
-                                originId = "plugin-store",
-                            ),
+                            .onGloballyPositioned { originBounds = it.boundsInRoot() },
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Cloud,

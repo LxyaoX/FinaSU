@@ -491,12 +491,14 @@ fun SegmentedListItem(
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
     val tokens = LocalFolkWallpaperTokens.current
+    val source = interactionSource ?: remember { MutableInteractionSource() }
     val originModifier = if (onClick != null) {
         modifier.navOrigin(
             cornerRadius = 12.dp,
             color = tokens?.group?.fill
                 ?: colors.containerColor.takeIf { it.alpha > 0f }
                 ?: MaterialTheme.colorScheme.surfaceContainer,
+            interactionSource = source,
         )
     } else {
         modifier
@@ -505,7 +507,7 @@ fun SegmentedListItem(
         modifier = originModifier,
         clickable = onClick != null,
         enabled = enabled,
-        interactionSource = interactionSource,
+        interactionSource = source,
     ) { rowModifier, source ->
         SegmentedListItem(
             onClick = onClick ?: {},
@@ -581,16 +583,18 @@ fun SegmentedListItem(
     onLongClick: (() -> Unit)? = null,
 ) {
     val tokens = LocalFolkWallpaperTokens.current
+    val source = interactionSource ?: remember { MutableInteractionSource() }
     SegmentedRow(
         modifier = modifier.navOrigin(
             cornerRadius = 12.dp,
             color = tokens?.group?.fill
                 ?: colors.containerColor.takeIf { it.alpha > 0f }
                 ?: MaterialTheme.colorScheme.surfaceContainer,
+            interactionSource = source,
         ),
         clickable = true,
         enabled = enabled,
-        interactionSource = interactionSource,
+        interactionSource = source,
     ) { rowModifier, source ->
         SegmentedListItem(
             selected = selected,

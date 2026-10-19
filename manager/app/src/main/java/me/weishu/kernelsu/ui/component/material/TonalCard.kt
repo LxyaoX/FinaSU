@@ -58,7 +58,11 @@ fun TonalCard(
             ?: MaterialTheme.colorScheme.surfaceContainer
     }
     val originModifier = if (onClick != null) {
-        Modifier.navOrigin(cornerRadius = navOriginRadius, color = originColor)
+        Modifier.navOrigin(
+            cornerRadius = navOriginRadius,
+            color = originColor,
+            interactionSource = interactionSource,
+        )
     } else {
         Modifier
     }
