@@ -57,6 +57,14 @@ data class FolkWallpaperTokens(
         val alpha = if (under >= 1f) 0f else (raised.alpha - under) / (1f - under)
         return raised.tint.copy(alpha = alpha.coerceIn(0f, 1f))
     }
+
+    /**
+     * Fill for a small control drawn on the chrome platform.
+     *
+     * It keeps the caller's own tone, one step above the bar, but takes the platform's alpha, so the
+     * chip fades together with the bar it sits on instead of cutting a solid hole into the wallpaper.
+     */
+    fun chromeControlFill(tint: Color): Color = tint.copy(alpha = chrome.alpha)
 }
 
 /**
