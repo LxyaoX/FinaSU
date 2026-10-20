@@ -140,11 +140,12 @@ import me.weishu.kernelsu.ui.component.material.FolkTextButton
 import me.weishu.kernelsu.ui.component.material.SearchAppBar
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.rememberSearchAppBarScrollBehavior
+import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.NavOrigin
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
-import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
+import me.weishu.kernelsu.ui.navigation3.navThemeSignature
 import me.weishu.kernelsu.ui.util.reboot
 
 @SuppressLint("StringFormatInvalid")
@@ -297,7 +298,9 @@ fun ModulePagerMaterial(
                     val originState = LocalNavOriginState.current
                     val density = LocalDensity.current
                     val view = LocalView.current
-                    val originColor = MaterialTheme.colorScheme.surfaceContainer
+                    val originColorScheme = MaterialTheme.colorScheme
+                    val originColor = originColorScheme.surfaceContainer
+                    val originThemeSignature = navThemeSignature(originColorScheme)
                     var originBounds by remember { mutableStateOf(Rect.Zero) }
                     FolkIconButton(
                         onClick = {
@@ -312,6 +315,7 @@ fun ModulePagerMaterial(
                                     rect = bounds,
                                     cornerRadius = with(density) { 20.dp.toPx() },
                                     color = originColor,
+                                    themeSignature = originThemeSignature,
                                     originId = "module-store",
                                 ),
                             )

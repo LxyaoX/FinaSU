@@ -432,6 +432,7 @@ open class MainActivity : FragmentActivity() {
                             state = gestureState,
                             isBackEnabled = sceneState.currentScene.previousEntries.isNotEmpty(),
                             onBackCompleted = {
+                                navOriginState.markPredictiveCommit()
                                 repeat(
                                     decoratedEntries.size -
                                         sceneState.currentScene.previousEntries.size,

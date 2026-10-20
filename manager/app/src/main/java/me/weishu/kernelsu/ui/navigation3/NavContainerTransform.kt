@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -24,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -57,6 +57,7 @@ import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.collect
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -66,6 +67,7 @@ data class NavOrigin(
     val rect: Rect,
     val cornerRadius: Float,
     val color: Color,
+    val themeSignature: Int,
     val bitmap: ImageBitmap? = null,
     val originId: Any? = null,
 )
@@ -75,6 +77,9 @@ class NavOriginState {
     private var pendingAt: Long = 0L
     private var predictiveKey = mutableStateOf<Any?>(null)
     private var predictiveFraction = mutableFloatStateOf(1f)
+    private var lastPredictiveDrawnFraction = 1f
+    private var commitFraction = mutableStateOf<Float?>(null)
+    private var settleAnimationStarted = mutableStateOf(false)
     val origins = mutableStateMapOf<Any, NavOrigin>()
 
     var predictiveActive by mutableStateOf(false)
@@ -125,21 +130,59 @@ class NavOriginState {
 
     internal fun updatePredictive(active: Boolean, key: Any?, fraction: Float) {
         if (active) {
+            val drawnFraction = fraction.coerceIn(0f, 1f)
             predictiveKey.value = key
-            predictiveFraction.floatValue = fraction.coerceIn(0f, 1f)
+            predictiveFraction.floatValue = drawnFraction
+            lastPredictiveDrawnFraction = drawnFraction
+            commitFraction.value = null
+            settleAnimationStarted.value = false
         }
         predictiveActive = active
     }
 
     internal fun predictiveFraction(key: Any?): Float? {
-        if (predictiveKey.value != key) return null
+        if (!predictiveActive || predictiveKey.value != key) return null
         return predictiveFraction.floatValue.takeIf { it < 0.999f }
+    }
+
+    internal fun markPredictiveCommit() {
+        if (predictiveKey.value != null) {
+            commitFraction.value = lastPredictiveDrawnFraction.coerceIn(0f, 1f)
+        }
+    }
+
+    internal fun committedFraction(key: Any?): Float? {
+        if (predictiveKey.value != key) return null
+        return commitFraction.value
+    }
+
+    internal fun lastPredictiveFraction(key: Any?): Float? {
+        if (predictiveKey.value != key) return null
+        return lastPredictiveDrawnFraction.takeIf { it < 0.999f }
+    }
+
+    internal fun predictiveDrawFraction(key: Any?): Float? {
+        if (predictiveKey.value != key) return null
+        if (predictiveActive) {
+            return predictiveFraction.floatValue.takeIf { it < 0.999f }
+        }
+        if (settleAnimationStarted.value) return null
+        return lastPredictiveDrawnFraction.takeIf { it < 0.999f }
+    }
+
+    internal fun beginPredictiveSettle(key: Any?) {
+        if (predictiveKey.value == key) {
+            settleAnimationStarted.value = true
+        }
     }
 
     internal fun clearPredictive(key: Any?) {
         if (predictiveKey.value == key) {
             predictiveKey.value = null
             predictiveFraction.floatValue = 1f
+            lastPredictiveDrawnFraction = 1f
+            commitFraction.value = null
+            settleAnimationStarted.value = false
         }
     }
 
@@ -176,10 +219,13 @@ fun Modifier.navOrigin(
     val state = LocalNavOriginState.current
     val density = LocalDensity.current
     val view = LocalView.current
-    val resolvedColor = color ?: MaterialTheme.colorScheme.surfaceContainer
+    val colorScheme = MaterialTheme.colorScheme
+    val resolvedColor = color ?: colorScheme.surfaceContainer
+    val resolvedThemeSignature = navThemeSignature(colorScheme)
     val geometry = remember { NavOriginGeometry() }
     val currentRadius by rememberUpdatedState(with(density) { cornerRadius.toPx() })
     val currentColor by rememberUpdatedState(resolvedColor)
+    val currentThemeSignature by rememberUpdatedState(resolvedThemeSignature)
     val currentCapture by rememberUpdatedState(captureBitmap)
     val currentId by rememberUpdatedState(originId)
     val pressSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -191,6 +237,7 @@ fun Modifier.navOrigin(
                 rect = geometry.root,
                 cornerRadius = currentRadius,
                 color = currentColor,
+                themeSignature = currentThemeSignature,
                 bitmap = if (currentCapture) {
                     captureCardBitmap(view, geometry.root)
                 } else {
@@ -285,11 +332,13 @@ fun captureNavOrigin(
     rect: Rect,
     cornerRadius: Float,
     color: Color,
+    themeSignature: Int,
     originId: Any? = null,
 ): NavOrigin = NavOrigin(
     rect = rect,
     cornerRadius = cornerRadius,
     color = color,
+    themeSignature = themeSignature,
     bitmap = captureCardBitmap(view, rect),
     originId = originId,
 )
@@ -325,8 +374,10 @@ private fun NavContainerTransformEntry(
 
     val cachedOrigin = state.origins[key]
     val predictiveFraction = state.predictiveFraction(key)
+    val committedFraction = state.committedFraction(key)
     val popping = (direction == NavDirection.Pop && !isCurrent && cachedOrigin != null) ||
-        (state.predictiveActive && predictiveFraction != null)
+        (state.predictiveActive && predictiveFraction != null) ||
+        committedFraction != null
     val origin = when {
         popping -> cachedOrigin
         animateIn -> cachedOrigin
@@ -335,48 +386,67 @@ private fun NavContainerTransformEntry(
     val progress = remember {
         Animatable(if (animateIn) 0f else 1f)
     }
-    LaunchedEffect(direction, isCurrent, animateIn, state.predictiveActive, predictiveFraction) {
+    LaunchedEffect(
+        direction,
+        isCurrent,
+        animateIn,
+        state.predictiveActive,
+        predictiveFraction,
+        committedFraction,
+    ) {
         when {
+            direction == NavDirection.Pop && !isCurrent ->
+                {
+                    if (progress.value <= 0.0001f) {
+                        state.clearPredictive(key)
+                        return@LaunchedEffect
+                    }
+                    val animation = containerTransformAnimation(
+                        startFraction = state.committedFraction(key) ?: 1f,
+                        targetFraction = 0f,
+                    )
+                    state.beginPredictiveSettle(key)
+                    progress.snapTo(animation.startFraction)
+                    try {
+                        progress.animateTo(
+                            animation.targetFraction,
+                            tween(
+                                durationMillis = animation.durationMillis,
+                                easing = FastOutSlowInEasing,
+                            ),
+                        )
+                    } finally {
+                        state.clearPredictive(key)
+                    }
+                }
+
             state.predictiveActive && predictiveFraction != null -> Unit
 
             direction == NavDirection.Push && isCurrent &&
                 animateIn && progress.value < 0.999f ->
                 progress.animateTo(1f, tween(durationMillis = 300, easing = FastOutSlowInEasing))
 
-            direction == NavDirection.Pop && !isCurrent ->
-                {
-                    val startFraction = state.predictiveFraction(key) ?: 1f
-                    progress.snapTo(startFraction)
-                    state.clearPredictive(key)
-                    progress.animateTo(
-                        0f,
-                        tween(
-                            durationMillis = (startFraction * 280f).toInt().coerceAtLeast(1),
-                            easing = FastOutSlowInEasing,
-                        ),
-                    )
-                }
+            committedFraction != null ->
+                progress.snapTo(committedFraction)
 
             else -> {
-                // A completed predictive-back commit pops the stack in the same frame the
-                // gesture ends. Let that commit change direction before treating this as a
-                // cancelled gesture that should spring back open.
-                withFrameNanos { }
-                val predictiveFraction = state.predictiveFraction(key)
-                if (predictiveFraction != null) {
-                    progress.snapTo(predictiveFraction)
-                    state.clearPredictive(key)
+                val startFraction = state.lastPredictiveFraction(key) ?: return@LaunchedEffect
+                val animation = containerTransformAnimation(
+                    startFraction = startFraction,
+                    targetFraction = 1f,
+                )
+                state.beginPredictiveSettle(key)
+                progress.snapTo(animation.startFraction)
+                try {
                     progress.animateTo(
-                        1f,
+                        animation.targetFraction,
                         tween(
-                            durationMillis = ((1f - predictiveFraction) * 280f)
-                                .toInt()
-                                .coerceAtLeast(1),
+                            durationMillis = animation.durationMillis,
                             easing = FastOutSlowInEasing,
                         ),
                     )
-                } else {
-                    progress.snapTo(1f)
+                } finally {
+                    state.clearPredictive(key)
                 }
             }
         }
@@ -399,7 +469,7 @@ private fun NavContainerTransformEntry(
         origin = origin,
         progress = progress.asState(),
         popping = popping,
-        gestureFraction = { state.predictiveFraction(key) },
+        gestureFraction = { state.predictiveDrawFraction(key) },
     ) {
         entry.Content()
     }
@@ -415,7 +485,9 @@ private fun ContainerTransformLayout(
 ) {
     var offsetInRoot by remember { mutableStateOf(Offset.Zero) }
     var contentBoundsInRoot by remember { mutableStateOf(Rect.Zero) }
-    val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
+    val colorScheme = MaterialTheme.colorScheme
+    val surfaceColor = colorScheme.surfaceContainer
+    val themeSignature = navThemeSignature(colorScheme)
 
     Box(
         modifier = Modifier
@@ -455,6 +527,7 @@ private fun ContainerTransformLayout(
                     localOrigin = localOrigin,
                     localContentBounds = localContentBounds,
                     surfaceColor = surfaceColor,
+                    currentThemeSignature = themeSignature,
                     popping = popping,
                 )
             },
@@ -473,18 +546,28 @@ private fun ContentDrawScope.drawContainerTransform(
     localOrigin: Rect,
     localContentBounds: Rect,
     surfaceColor: Color,
+    currentThemeSignature: Int,
     popping: Boolean,
 ) {
     val rect = interpolateContainerBounds(localOrigin, localContentBounds, fraction)
     if (rect.width <= 0f || rect.height <= 0f) return
     val radius = interpolateContainerCorner(origin.cornerRadius, fraction)
     val corner = CornerRadius(radius)
+    val appearance = resolveContainerAppearance(
+        originColor = origin.color,
+        originThemeSignature = origin.themeSignature,
+        currentThemeSignature = currentThemeSignature,
+        surfaceColor = surfaceColor,
+        popping = popping,
+        hasSnapshot = origin.bitmap != null,
+        fraction = fraction,
+    )
     val path = Path().apply {
         addRoundRect(RoundRect(rect, corner))
     }
 
     drawRoundRect(
-        color = origin.color,
+        color = appearance.fillColor,
         topLeft = rect.topLeft,
         size = rect.size,
         cornerRadius = corner,
@@ -499,15 +582,15 @@ private fun ContentDrawScope.drawContainerTransform(
         }
     }
 
-    val hasSnapshot = popping && origin.bitmap != null
     val veilAlpha = if (popping) {
-        popSurfaceVeilAlpha(fraction) * if (hasSnapshot) SnapshotWashAlpha else 1f
+        popSurfaceVeilAlpha(fraction) *
+            if (appearance.snapshotEnabled) SnapshotWashAlpha else 1f
     } else {
         pushSurfaceVeilAlpha(fraction)
     }
     if (veilAlpha > 0f) {
         drawRoundRect(
-            color = lerp(origin.color, surfaceColor, fraction).copy(alpha = veilAlpha),
+            color = lerp(appearance.fillColor, surfaceColor, fraction).copy(alpha = veilAlpha),
             topLeft = rect.topLeft,
             size = rect.size,
             cornerRadius = corner,
@@ -515,11 +598,7 @@ private fun ContentDrawScope.drawContainerTransform(
     }
 
     val snapshot = origin.bitmap
-    val snapshotAlpha = if (popping && snapshot != null) {
-        popSnapshotAlpha(fraction)
-    } else {
-        0f
-    }
+    val snapshotAlpha = appearance.snapshotAlpha
     if (snapshotAlpha > 0f && snapshot != null) {
         clipPath(path) {
             drawImage(
@@ -531,6 +610,61 @@ private fun ContentDrawScope.drawContainerTransform(
             )
         }
     }
+}
+
+internal data class ContainerTransformAnimation(
+    val startFraction: Float,
+    val targetFraction: Float,
+    val durationMillis: Int,
+)
+
+internal fun containerTransformAnimation(
+    startFraction: Float,
+    targetFraction: Float,
+): ContainerTransformAnimation {
+    val start = startFraction.coerceIn(0f, 1f)
+    val target = targetFraction.coerceIn(0f, 1f)
+    return ContainerTransformAnimation(
+        startFraction = start,
+        targetFraction = target,
+        durationMillis = (abs(target - start) * ContainerTransformDurationMs)
+            .roundToInt()
+            .coerceAtLeast(1),
+    )
+}
+
+internal data class ContainerAppearance(
+    val fillColor: Color,
+    val snapshotEnabled: Boolean,
+    val snapshotAlpha: Float,
+)
+
+internal fun resolveContainerAppearance(
+    originColor: Color,
+    originThemeSignature: Int,
+    currentThemeSignature: Int,
+    surfaceColor: Color,
+    popping: Boolean,
+    hasSnapshot: Boolean,
+    fraction: Float,
+): ContainerAppearance {
+    val themeMatches = originThemeSignature == currentThemeSignature
+    val snapshotEnabled = themeMatches && popping && hasSnapshot
+    return ContainerAppearance(
+        fillColor = if (themeMatches) originColor else surfaceColor,
+        snapshotEnabled = snapshotEnabled,
+        snapshotAlpha = if (snapshotEnabled) popSnapshotAlpha(fraction) else 0f,
+    )
+}
+
+internal fun navThemeSignature(colorScheme: ColorScheme): Int {
+    var signature = 1
+    signature = 31 * signature + colorScheme.background.hashCode()
+    signature = 31 * signature + colorScheme.surface.hashCode()
+    signature = 31 * signature + colorScheme.surfaceContainer.hashCode()
+    signature = 31 * signature + colorScheme.surfaceBright.hashCode()
+    signature = 31 * signature + colorScheme.surfaceDim.hashCode()
+    return signature
 }
 
 internal fun interpolateContainerBounds(
@@ -571,6 +705,7 @@ internal fun popSnapshotAlpha(fraction: Float): Float {
 /** Keep a pressed-card capture small enough to hold for the pop animation. */
 private const val MAX_CAPTURE_EDGE_PX = 1_280f
 private const val MAX_CAPTURE_AREA_PX = 1_200_000f
+private const val ContainerTransformDurationMs = 280f
 private const val VeilRevealStart = 0.08f
 private const val VeilRevealEnd = 0.42f
 private const val SnapshotRevealStart = 0.42f
