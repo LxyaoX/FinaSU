@@ -21,12 +21,20 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -40,6 +48,9 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.rebootlistpopup.RebootListPopup
+import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
+import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
+import me.weishu.kernelsu.ui.navigation3.navThemeSignature
 
 
 @Composable
@@ -119,6 +130,13 @@ fun HomePagerMaterial(
 
 @Composable
 private fun TopBar(state: HomeUiState, actions: HomeActions) {
+    val originState = LocalNavOriginState.current
+    val density = LocalDensity.current
+    val view = LocalView.current
+    val originColorScheme = MaterialTheme.colorScheme
+    val originColor = originColorScheme.surfaceContainer
+    val originThemeSignature = navThemeSignature(originColorScheme)
+    var installBounds by remember { mutableStateOf(Rect.Zero) }
     TopAppBar(
         title = { me.weishu.kernelsu.ui.component.HomeTitleImage() },
         actions = {
@@ -136,7 +154,24 @@ private fun TopBar(state: HomeUiState, actions: HomeActions) {
                     )
                 }
             }
-            IconButton(onClick = actions.onInstallClick, enabled = !state.isLateLoadMode) {
+            IconButton(
+                onClick = {
+                    if (installBounds != Rect.Zero) {
+                        originState.recordOrigin(
+                            captureNavOrigin(
+                                view = view,
+                                rect = installBounds,
+                                cornerRadius = with(density) { 24.dp.toPx() },
+                                color = originColor,
+                                themeSignature = originThemeSignature,
+                            ),
+                        )
+                    }
+                    actions.onInstallClick()
+                },
+                modifier = Modifier.onGloballyPositioned { installBounds = it.boundsInRoot() },
+                enabled = !state.isLateLoadMode,
+            ) {
                 Icon(
                     imageVector = Icons.Filled.AutoFixHigh,
                     contentDescription = stringResource(R.string.install),
