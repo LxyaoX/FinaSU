@@ -45,6 +45,8 @@ internal fun FloatingBarStandard(
     badge: (BottomBarDestination) -> NavBadge?,
     onSelect: (BottomBarDestination) -> Unit,
     liquidIndicator: LiquidIndicatorGlass? = null,
+    selectionColor: Color? = null,
+    selectionContentColor: Color? = null,
     modifier: Modifier = Modifier,
 ) {
     if (destinations.isEmpty()) return
@@ -104,22 +106,20 @@ internal fun FloatingBarStandard(
                         .width(itemSize)
                         .then(
                             if (liquidIndicator != null) {
-                                Modifier
-                                    .liquidIndicatorGlass(
-                                        glass = liquidIndicator,
-                                        shape = itemShape,
-                                        lensPx = with(density) { 10.dp.toPx() },
-                                    )
-                                    .background(
-                                        color = liquidIndicator.film,
-                                        shape = itemShape,
-                                    )
-                            } else {
-                                Modifier.background(
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                Modifier.liquidIndicatorGlass(
+                                    glass = liquidIndicator,
                                     shape = itemShape,
+                                    lensPx = with(density) { 10.dp.toPx() },
                                 )
+                            } else {
+                                Modifier
                             }
+                        )
+                        .background(
+                            color = liquidIndicator?.film
+                                ?: selectionColor
+                                ?: MaterialTheme.colorScheme.secondaryContainer,
+                            shape = itemShape,
                         ),
                 )
             }
@@ -132,10 +132,10 @@ internal fun FloatingBarStandard(
                     val selected = index == selectedIndex
                     val navBadge = badge(destination)
                     val tint = if (selected) {
-                        if (liquidIndicator != null) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSecondaryContainer
+                        when {
+                            selectionContentColor != null -> selectionContentColor
+                            liquidIndicator != null -> MaterialTheme.colorScheme.onSurface
+                            else -> MaterialTheme.colorScheme.onSecondaryContainer
                         }
                     } else {
                         if (liquidIndicator != null) {

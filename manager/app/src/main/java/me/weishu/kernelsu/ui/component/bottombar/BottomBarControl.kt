@@ -34,8 +34,10 @@ enum class BottomBarLayout {
  * instead of hard-cutting at the bar edge; it is `null` when no scrim is wanted.
  *
  * [indicatorColor] is the selected item's selection pill. `null` keeps the Material default; in
- * wallpaper mode the bar sets it transparent, because the selected item already switches to the
- * filled icon and a second background block would only re-introduce a floating layer over the photo.
+ * wallpaper mode the docked bar sets it transparent, because the selected item already switches to
+ * the filled icon and a second background block would only re-introduce a floating layer over the
+ * photo. A pill with a fill of its own (the floating bar) takes the wallpaper selection material
+ * instead, so its fill fades with the user's opacity rather than staying solid.
  */
 @Immutable
 data class BottomBarStyle(
@@ -101,7 +103,9 @@ object BottomBarControl {
      * pill's own hairline edge, so the step never has to carry the separation alone.
      *
      * In wallpaper mode the pill keeps its own fill from the wallpaper materials at the raised alpha,
-     * so it stays a readable platform over the photo.
+     * so it stays a readable platform over the photo. Its selection fill comes from the wallpaper
+     * selection material for the same reason: the accent has to fade with the surface it sits on
+     * instead of cutting a solid hole into it.
      */
     @Composable
     private fun floatingStyle(tokens: FolkWallpaperTokens?): BottomBarStyle = BottomBarStyle(
@@ -111,7 +115,7 @@ object BottomBarControl {
             tokens.material(WallpaperSurfaceRole.Raised).fill
         },
         scrim = null,
-        indicatorColor = null,
+        indicatorColor = tokens?.selection?.fill,
     )
 
     /**

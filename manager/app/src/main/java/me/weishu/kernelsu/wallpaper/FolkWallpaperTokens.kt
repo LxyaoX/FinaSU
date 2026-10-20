@@ -28,7 +28,8 @@ data class WallpaperMaterial(
 }
 
 /**
- * The wallpaper materials, one per [WallpaperSurfaceRole], plus [chrome] for the top/bottom bars.
+ * The wallpaper materials, one per [WallpaperSurfaceRole], plus [chrome] for the top/bottom bars and
+ * [selection] for a selected control that still needs a fill of its own.
  *
  * Held only while wallpaper mode is active (see [LocalFolkWallpaperTokens]); consumers fall back to
  * their original solid colors when it is null.
@@ -39,6 +40,7 @@ data class FolkWallpaperTokens(
     val raised: WallpaperMaterial,
     val overlay: WallpaperMaterial,
     val chrome: WallpaperMaterial,
+    val selection: WallpaperMaterial,
 ) {
     fun material(role: WallpaperSurfaceRole): WallpaperMaterial = when (role) {
         WallpaperSurfaceRole.Group -> group
@@ -82,13 +84,24 @@ private const val CHROME_ALPHA_FLOOR = 0.10f
 private const val SUPPORTING_CONTENT_ALPHA = 0.8f
 
 /**
+ * How much accent tint a selected control keeps at opacity 0.
+ *
+ * A selection fill is the one place where the accent colour still has to be visible: at zero opacity
+ * a fully transparent pill leaves only the icon polarity to read the state. The floor is high because
+ * a tinted fill that is too thin does not read as a tint at all: whatever hue the photo happens to
+ * have behind it bleeds through and turns the accent into a stain.
+ */
+private const val SELECTION_ALPHA_FLOOR = 0.45f
+
+/**
  * Maps the user-facing opacity preference (0..1) onto the role alphas.
  *
  * The preference *is* the surface alpha: 0 lets the wallpaper show through completely and 1 is
  * fully opaque, so every role tracks the slider one-to-one instead of living in a narrowed band.
- * Two exceptions survive on purpose: [overlay] (dialogs and menus) stays near-opaque, because a popup
- * that lets the content behind it read through is not usable; and [chrome] never drops below
- * [CHROME_ALPHA_FLOOR], because the bars' labels sit over scrolling content.
+ * Three exceptions survive on purpose: [overlay] (dialogs and menus) stays near-opaque, because a
+ * popup that lets the content behind it read through is not usable; [chrome] never drops below
+ * [CHROME_ALPHA_FLOOR], because the bars' labels sit over scrolling content; and [selection] keeps
+ * [SELECTION_ALPHA_FLOOR] so the selected control still reads as selected.
  */
 fun resolveFolkWallpaperTokens(colorScheme: ColorScheme, opacity: Float): FolkWallpaperTokens {
     val alpha = opacity.coerceIn(0f, 1f)
@@ -110,5 +123,15 @@ fun resolveFolkWallpaperTokens(colorScheme: ColorScheme, opacity: Float): FolkWa
             supportingColor = colorScheme.onSurfaceVariant,
         ),
         chrome = panel.copy(alpha = CHROME_ALPHA_FLOOR + (1f - CHROME_ALPHA_FLOOR) * alpha),
+        // The accent tint here is the container role, not the panel tint: a selected control has to
+        // stay distinguishable from the surface it sits on, and the accent is what carries that.
+        // Content follows the panel rather than `onSecondaryContainer`, because a translucent fill
+        // composites with whatever is behind it instead of being the colour that pair was tuned for.
+        selection = WallpaperMaterial(
+            tint = colorScheme.secondaryContainer,
+            alpha = SELECTION_ALPHA_FLOOR + (1f - SELECTION_ALPHA_FLOOR) * alpha,
+            contentColor = colorScheme.onSurface,
+            supportingColor = colorScheme.onSurface.copy(alpha = SUPPORTING_CONTENT_ALPHA),
+        ),
     )
 }

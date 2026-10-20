@@ -73,6 +73,12 @@ internal fun FloatingBar(
     val effectPx = with(LocalDensity.current) { 4.dp.toPx() }
     val lensPx = with(LocalDensity.current) { 24.dp.toPx() }
     val liquidHighlight by rememberGravityRotatedHighlight(IosGlassHighlight)
+    val barStyle = BottomBarControl.style(BottomBarLayout.Floating)
+    val containerColor = barStyle.containerColor
+    // A wallpaper selection fill fades with the surface it sits on; the liquid film has to be the
+    // same colour, otherwise the lens below it is covered by an opaque pill again.
+    val selectionColor = barStyle.indicatorColor
+    val selectionContentColor = LocalFolkWallpaperTokens.current?.selection?.contentColor
     // The indicator samples the page, never a backdrop recorded from the row it lives in: that
     // records itself and crashes the render thread.
     val liquidIndicator = liquidBackdrop?.let {
@@ -81,7 +87,7 @@ internal fun FloatingBar(
             highlight = liquidHighlight,
             // surfaceBright is the brightest step in either polarity, so the selected item is always a
             // step up from the bar instead of a hole in it when the page behind it is dark.
-            film = MaterialTheme.colorScheme.surfaceBright.copy(alpha = LIQUID_FILM_ALPHA),
+            film = selectionColor ?: MaterialTheme.colorScheme.surfaceBright.copy(alpha = LIQUID_FILM_ALPHA),
             contentShadow = Shadow(
                 color = if (isInDarkTheme()) {
                     Color.Black.copy(alpha = 0.45f)
@@ -101,14 +107,12 @@ internal fun FloatingBar(
     val visibilityRevision by NavBarVisibilityConfig.revision.collectAsStateWithLifecycle()
     val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
     val selectedIndex = mainPagerState.selectedPage
-    val containerColor = BottomBarControl.style(BottomBarLayout.Floating).containerColor
     // Outside wallpaper mode the pill's fill is derived from the page, so it does not carry the raised
     // neutral's own lift and a tonal tint on top would only pull it back toward the canvas it was
     // moved off of. It is given a hairline edge instead: an outline depends on nothing the theme
     // painted behind the bar, so the shape stays legible even where the step is small. Wallpaper mode
     // keeps the lift it has always had.
     val wallpaperActive = LocalFolkWallpaperTokens.current != null
-    val barTonalElevation = if (wallpaperActive) 3.dp else 0.dp
 
     BoxWithConstraints(
         modifier = modifier
@@ -178,8 +182,10 @@ internal fun FloatingBar(
                     useGlass -> Color.Transparent
                     else -> containerColor
                 },
-                tonalElevation = if (useGlass) 0.dp else barTonalElevation,
-                shadowElevation = if (useGlass) 0.dp else 8.dp,
+                // A translucent surface cannot carry a shadow: the shadow is painted behind a fill that
+                // no longer hides it, so it reads as a dark halo around the capsule instead of a lift.
+                tonalElevation = 0.dp,
+                shadowElevation = if (useGlass || wallpaperActive) 0.dp else 8.dp,
                 // A white specular rim is invisible on a bright page, so the liquid pill keeps a
                 // hairline of its own to hold the edge in either polarity.
                 border = when {
@@ -203,6 +209,8 @@ internal fun FloatingBar(
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
                         liquidIndicator = liquidIndicator,
+                        selectionColor = selectionColor,
+                        selectionContentColor = selectionContentColor,
                     )
                 } else {
                     FloatingBarStandard(
@@ -215,6 +223,8 @@ internal fun FloatingBar(
                             me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
                         liquidIndicator = liquidIndicator,
+                        selectionColor = selectionColor,
+                        selectionContentColor = selectionContentColor,
                     )
                 }
             }
