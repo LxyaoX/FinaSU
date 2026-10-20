@@ -642,6 +642,11 @@ fun MainScreen(
     }
 
     val moduleEnabledCount = moduleUiState.modules.count { it.enabled }
+    val pluginEnabledCount by remember(pluginViewModel) {
+        pluginViewModel.uiState
+            .map { state -> state.plugins.count { it.enabled } }
+            .distinctUntilChanged()
+    }.collectAsStateWithLifecycle(0)
     val homeMetamodule = remember(moduleUiState.modules) {
         moduleUiState.modules.firstOrNull { it.metamodule && !it.remove }?.let { module ->
             HomeMetamodule(
@@ -735,7 +740,7 @@ fun MainScreen(
                 ) { page ->
                     val isCurrentPage = page == settledPage
                     when (destinations.getOrNull(page)) {
-                        BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
+                        BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, pluginEnabledCount, homeMetamodule)
                         BottomBarDestination.Plugin -> if (renderPagerPages || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
                         BottomBarDestination.SuperUser -> if (renderPagerPages || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
                         BottomBarDestination.Module -> if (renderPagerPages || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)

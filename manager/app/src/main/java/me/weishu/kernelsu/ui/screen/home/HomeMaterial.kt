@@ -49,6 +49,7 @@ fun HomePagerMaterial(
     bottomInnerPadding: Dp,
     superuserCount: Int = 0,
     moduleEnabledCount: Int = 0,
+    pluginEnabledCount: Int = 0,
     metrics: HomeMetrics = HomeMetrics(),
 ) {
     ExpressiveScaffold(
@@ -90,6 +91,7 @@ fun HomePagerMaterial(
                     actions = actions,
                     superuserCount = superuserCount,
                     moduleEnabledCount = moduleEnabledCount,
+                    pluginEnabledCount = pluginEnabledCount,
                     metrics = metrics,
                 )
 
