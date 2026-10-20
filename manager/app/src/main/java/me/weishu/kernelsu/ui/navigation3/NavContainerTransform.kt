@@ -497,8 +497,9 @@ private fun ContentDrawScope.drawContainerTransform(
         }
     }
 
+    val hasSnapshot = popping && origin.bitmap != null
     val veilAlpha = if (popping) {
-        popSurfaceVeilAlpha(fraction)
+        popSurfaceVeilAlpha(fraction) * if (hasSnapshot) SnapshotWashAlpha else 1f
     } else {
         pushSurfaceVeilAlpha(fraction)
     }
@@ -511,21 +512,19 @@ private fun ContentDrawScope.drawContainerTransform(
         )
     }
 
-    val bitmap = origin.bitmap
-    if (popping && bitmap != null && fraction <= BitmapRevealEnd) {
-        val dstWidth = rect.width
-        val dstHeight = if (bitmap.width > 0) {
-            dstWidth * bitmap.height / bitmap.width
-        } else {
-            rect.height
-        }
-        val bitmapAlpha = ((BitmapRevealEnd - fraction) / BitmapRevealEnd).coerceIn(0f, 1f)
+    val snapshot = origin.bitmap
+    val snapshotAlpha = if (popping && snapshot != null) {
+        popSnapshotAlpha(fraction)
+    } else {
+        0f
+    }
+    if (snapshotAlpha > 0f && snapshot != null) {
         clipPath(path) {
             drawImage(
-                image = bitmap,
+                image = snapshot,
                 dstOffset = IntOffset(rect.left.roundToInt(), rect.top.roundToInt()),
-                dstSize = IntSize(dstWidth.roundToInt(), dstHeight.roundToInt()),
-                alpha = bitmapAlpha,
+                dstSize = IntSize(rect.width.roundToInt(), rect.height.roundToInt()),
+                alpha = snapshotAlpha,
                 filterQuality = FilterQuality.Low,
             )
         }
@@ -561,9 +560,17 @@ internal fun popSurfaceVeilAlpha(fraction: Float): Float {
     return FastOutSlowInEasing.transform(conceal)
 }
 
+internal fun popSnapshotAlpha(fraction: Float): Float {
+    val snapshot = ((SnapshotRevealStart - fraction) / (SnapshotRevealStart - SnapshotRevealEnd))
+        .coerceIn(0f, 1f)
+    return FastOutSlowInEasing.transform(snapshot)
+}
+
 /** Keep a pressed-card capture small enough to hold for the pop animation. */
 private const val MAX_CAPTURE_EDGE_PX = 1_280f
 private const val MAX_CAPTURE_AREA_PX = 1_200_000f
-private const val BitmapRevealEnd = 0.18f
 private const val VeilRevealStart = 0.08f
 private const val VeilRevealEnd = 0.42f
+private const val SnapshotRevealStart = 0.42f
+private const val SnapshotRevealEnd = 0.14f
+private const val SnapshotWashAlpha = 0.18f

@@ -2,6 +2,7 @@ package me.weishu.kernelsu.ui.navigation3
 
 import androidx.compose.ui.geometry.Rect
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NavContainerTransformTest {
@@ -50,5 +51,16 @@ class NavContainerTransformTest {
         assertEquals(0f, popSurfaceVeilAlpha(0.42f), 0.001f)
         assertEquals(1f, popSurfaceVeilAlpha(0.08f), 0.001f)
         assertEquals(1f, popSurfaceVeilAlpha(0f), 0.001f)
+    }
+
+    @Test
+    fun `origin snapshot takes over as the page reaches its source`() {
+        assertEquals(0f, popSnapshotAlpha(1f), 0.001f)
+        assertEquals(0f, popSnapshotAlpha(0.42f), 0.001f)
+        assertTrue(popSnapshotAlpha(0.28f) in 0f..1f)
+        assertTrue(popSnapshotAlpha(0.28f) > 0f)
+        assertTrue(popSnapshotAlpha(0.28f) < 1f)
+        assertEquals(1f, popSnapshotAlpha(0.14f), 0.001f)
+        assertEquals(1f, popSnapshotAlpha(0f), 0.001f)
     }
 }
