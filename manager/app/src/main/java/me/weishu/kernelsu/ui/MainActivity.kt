@@ -20,6 +20,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -339,8 +340,8 @@ open class MainActivity : FragmentActivity() {
                     )
                     val layoutDirection = LocalLayoutDirection.current
                     val wallpaperActive = LocalFolkWallpaperTokens.current != null
-                    val transition = remember(layoutDirection, navOriginState) {
-                        navTransition(layoutDirection, navOriginState)
+                    val transition = remember(layoutDirection, navOriginState, wallpaperActive) {
+                        navTransition(layoutDirection, navOriginState, wallpaperActive)
                     }
                     val popTransition = remember(layoutDirection, navOriginState, wallpaperActive) {
                         navPopTransition(layoutDirection, navOriginState, wallpaperActive)
@@ -831,50 +832,63 @@ fun MainScreen(
 private fun navTransition(
     layoutDirection: LayoutDirection,
     originState: NavOriginState,
+    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    val expandable = originState.hasExpandableOrigin()
-    val targetKey = targetState.entries.lastOrNull()?.contentKey
-    if (expandable) {
-        targetKey?.let { key ->
-            val origin = originState.consumePendingIfFresh()
-            if (origin != null) {
-                originState.putOrigin(key, origin)
-            } else {
-                originState.removeOrigin(key)
+    if (wallpaperActive) {
+        wallpaperPushTransform()
+    } else {
+        val expandable = originState.hasExpandableOrigin()
+        val targetKey = targetState.entries.lastOrNull()?.contentKey
+        if (expandable) {
+            targetKey?.let { key ->
+                val origin = originState.consumePendingIfFresh()
+                if (origin != null) {
+                    originState.putOrigin(key, origin)
+                } else {
+                    originState.removeOrigin(key)
+                }
             }
         }
-    }
-    if (originState.hasCachedOrigin(targetKey)) {
-        containerPushTransform()
-    } else {
-        targetKey?.let(originState::removeOrigin)
-        slideTransition(layoutDirection).invoke(this)
+        if (originState.hasCachedOrigin(targetKey)) {
+            containerPushTransform()
+        } else {
+            targetKey?.let(originState::removeOrigin)
+            slideTransition(layoutDirection).invoke(this)
+        }
     }
 }
 
 private fun navPopTransition(
-    @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
+    layoutDirection: LayoutDirection,
     originState: NavOriginState,
-    @Suppress("UNUSED_PARAMETER") wallpaperActive: Boolean,
+    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    val sourceKey = initialState.entries.lastOrNull()?.contentKey
-    if (originState.hasCachedOrigin(sourceKey)) {
-        cardPopTransform()
+    if (wallpaperActive) {
+        wallpaperPopTransform()
     } else {
-        containerPopTransform()
+        val sourceKey = initialState.entries.lastOrNull()?.contentKey
+        if (originState.hasCachedOrigin(sourceKey)) {
+            cardPopTransform()
+        } else {
+            containerPopTransform()
+        }
     }
 }
 
 private fun navPredictivePopTransition(
-    @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
+    layoutDirection: LayoutDirection,
     originState: NavOriginState,
-    @Suppress("UNUSED_PARAMETER") wallpaperActive: Boolean,
+    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
-    val sourceKey = initialState.entries.lastOrNull()?.contentKey
-    if (originState.hasCachedOrigin(sourceKey)) {
-        cardPopTransform()
+    if (wallpaperActive) {
+        wallpaperPopTransform()
     } else {
-        containerPopTransform()
+        val sourceKey = initialState.entries.lastOrNull()?.contentKey
+        if (originState.hasCachedOrigin(sourceKey)) {
+            cardPopTransform()
+        } else {
+            containerPopTransform()
+        }
     }
 }
 
@@ -928,6 +942,19 @@ private fun slideTransition(
         defaultTransitionSpec<NavKey>().invoke(this)
     }
 }
+
+private fun wallpaperPushTransform(): ContentTransform =
+    ContentTransform(
+        targetContentEnter = slideInHorizontally(initialOffsetX = { it }),
+        initialContentExit = slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(),
+    )
+
+private fun wallpaperPopTransform(): ContentTransform =
+    ContentTransform(
+        targetContentEnter = fadeIn(animationSpec = tween(durationMillis = 340)),
+        initialContentExit = scaleOut(targetScale = 0.9f) + fadeOut(),
+        targetContentZIndex = -1f,
+    )
 
 private fun slideBackTransform(layoutDirection: LayoutDirection): ContentTransform =
     ContentTransform(
