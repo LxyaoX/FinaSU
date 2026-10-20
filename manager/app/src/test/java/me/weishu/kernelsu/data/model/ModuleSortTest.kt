@@ -228,4 +228,13 @@ class ModuleSortTest {
     fun `reconcile leaves an unset order unset`() {
         assertEquals(emptyList<String>(), reconcileCustomOrder(order = emptyList(), moduleIds = listOf("a", "b")))
     }
+
+    @Test
+    fun `reconcile keeps the order when the installed list reads empty`() {
+        // A refresh that fails returns no modules; that must not erase the reader's order.
+        assertEquals(
+            listOf("b", "a"),
+            reconcileCustomOrder(order = listOf("b", "a"), moduleIds = emptyList()),
+        )
+    }
 }

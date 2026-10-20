@@ -134,10 +134,11 @@ fun customOrderComparator(
 /**
  * Keeps the relative order of [order], drops ids no longer installed, and appends ids not yet in
  * it in [moduleIds] order. An empty [order] stays empty: a reader who never set a custom order
- * does not get one from the first refresh.
+ * does not get one from the first refresh. An empty [moduleIds] also leaves the order untouched:
+ * a refresh that failed to read anything must not be mistaken for every module being uninstalled.
  */
 fun reconcileCustomOrder(order: List<String>, moduleIds: List<String>): List<String> {
-    if (order.isEmpty()) return emptyList()
+    if (order.isEmpty() || moduleIds.isEmpty()) return order
 
     val installed = moduleIds.toHashSet()
     val kept = order.filter { it in installed }
