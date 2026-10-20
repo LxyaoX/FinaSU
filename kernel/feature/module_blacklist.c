@@ -11,6 +11,8 @@
 
 // Use the native module loader blacklist, without adding syscall hooks.
 // Static storage is required because built-in params may precede slab init.
+// Developer only: EPERM is fatal to first stage init for modules listed in
+// modules.load / modules.load.recovery but absent from modules.blocklist.
 static char block_modules[256];
 
 static int block_modules_param_set(const char *val, const struct kernel_param *kp)

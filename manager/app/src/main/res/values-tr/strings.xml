@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">Shell root erişimini ADB ile sınırla</string>
     <string name="settings_shell_su_adb_only_summary">Shell\'e root verildiğinde ek denetim: yalnızca adbd veya bir KernelSU root süreci (ör. bir ADB modülü) tarafından oluşturulan süreçler bunu kullanabilir; böylece shell ayrıcalıkları elde eden uygulamaların root\'a yükselmesi engellenir</string>
     <string name="feature_status_forced_summary">Önyükleme yapılandırması tarafından zorlandı; buradan değiştirilemez</string>
-    <string name="install_block_modules">Çekirdek modüllerini engelle</string>
-    <string name="install_block_modules_warning">Listelenen çekirdek modüllerinin önyüklemede yüklenmesini durdurun. Sistemin bağımlı olduğu bir modülü engellemek cihazın önyükleme logosunda takılmasına veya önyükleme döngüsüne girmesine neden olabilir (bazı cihazlarda MediaTek mkp gibi). Bunu yalnızca modülleri cihazınızda engellemenin güvenli olduğundan eminseniz etkinleştirin. Kurtarmak için fastboot ile stok boot / init_boot imajını flaşlayın.</string>
-    <string name="install_block_modules_list">Engellenecek modüller</string>
-    <string name="install_block_modules_summary">Virgülle ayrılmış adlar. Sonraki önyüklemede etkili olur; bu ayarı kaldırmak için temizleyin.</string>
-    <string name="install_block_modules_invalid">Yalnızca harf, rakam ve alt çizgi kullanın; ad başına en fazla 64, toplamda 255 karakter.</string>
     <string name="install_anykernel">AnyKernel3 ZIP flaşla</string>
     <string name="install_anykernel_summary">Geçerli yuvayı kullanarak güvenilir bir çekirdek yükleyicisi çalıştırır. Root gerekir.</string>
     <string name="install_anykernel_warning">Bu ZIP root ile çalışır ve birden fazla bölümü değiştirebilir. Hangi bölümlerin ve yuvaların yazılacağını yükleyici belirler; FinaSU yuvayı geçersiz kılmaz veya ksud\'u yenilemez. Başarılı bir kurulum açılabilirliği garanti etmez ve başarısızlık kısmi değişiklikler bırakabilir. Mevcut boot imajı yedekleri bu değişiklikleri kapsamayabilir. Devam etmeden önce cihaz uyumluluğunu doğrulayın ve bir kurtarma imajı hazırlayın.</string>

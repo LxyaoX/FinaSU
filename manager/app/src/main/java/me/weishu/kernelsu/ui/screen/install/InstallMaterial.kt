@@ -23,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
@@ -206,28 +205,6 @@ internal fun InstallScreenMaterial(
                         onCheckedChange = actions.onSelectBackupBeforeFlash,
                     )
                 }
-                item(visible = uiState.advancedOptionsShown) {
-                    SegmentedCheckboxItem(
-                        title = stringResource(id = R.string.install_block_modules),
-                        summary = stringResource(id = R.string.install_block_modules_warning),
-                        checked = uiState.blockModulesEnabled,
-                        onCheckedChange = actions.onSelectBlockModules,
-                    )
-                }
-                item(visible = uiState.advancedOptionsShown && uiState.blockModulesEnabled) {
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                        value = uiState.blockModules,
-                        onValueChange = actions.onBlockModulesChange,
-                        label = { Text(stringResource(R.string.install_block_modules_list)) },
-                        supportingText = {
-                            Text(stringResource(if (uiState.blockModulesValid) R.string.install_block_modules_summary
-                                else R.string.install_block_modules_invalid))
-                        },
-                        isError = !uiState.blockModulesValid,
-                        singleLine = true,
-                    )
-                }
             }
             } else {
                 SegmentedColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -247,7 +224,6 @@ internal fun InstallScreenMaterial(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 enabled = uiState.installMethod != null &&
-                    (uiState.installMethod is InstallMethod.AnyKernel || uiState.blockModulesValid) &&
                     (uiState.installMethod !is InstallMethod.AnyKernel || uiState.installMethod.uri != null),
                 onClick = actions.onNext
             ) { Text(stringResource(R.string.install_next)) }

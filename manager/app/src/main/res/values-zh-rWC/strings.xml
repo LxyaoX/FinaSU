@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">唯许 ADB 取 shell 之 Root 权</string>
     <string name="settings_shell_su_adb_only_summary">凡 shell 获 Root 之权时另加查验：唯由 adbd 或 KernelSU Root 之进程（如 ADB 仙符）所生之进程可用，以防得 shell 之权的凡器提为 Root</string>
     <string name="feature_status_forced_summary">已由启道之序强制钦定，此处不可更易</string>
-    <string name="install_block_modules">禁道核仙符</string>
-    <string name="install_block_modules_warning">禁所列道核仙符于启道时载入。禁断天道所倚之符，或致仙器滞于启道画面或坠入启道轮回（如某些仙器之 MediaTek mkp）。唯确知此符于本器可安全禁断，方可启用。若欲复还，请以 fastboot 炼化原厂 boot / init_boot 镜像。</string>
-    <string name="install_block_modules_list">欲禁之仙符</string>
-    <string name="install_block_modules_summary">以逗号分隔名讳，下次启道时生效；清空即可除此设定。</string>
-    <string name="install_block_modules_invalid">仅容字母、数字与下划线；单名不过 64 个字符，总计不过 255。</string>
     <string name="install_anykernel">炼化 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">以当前仙槽运转可信之道核炼器，需 root 之权。</string>
     <string name="install_anykernel_warning">此 ZIP 将以 root 运转，或改多方分区。所书分区与仙槽皆由炼器之符决定，FinaSU 不夺仙槽，亦不更新 ksud。炼化功成不保可启，败陨亦可能已留残迹。现有仙躯镜像之拓印未必涵盖此番改动。请先验仙器之相容，备下回滚之镜像，再行继续。</string>

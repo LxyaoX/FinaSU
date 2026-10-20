@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">限制 shell 的 Root 仅可经 ADB 获取</string>
     <string name="settings_shell_su_adb_only_summary">授予 shell Root 权限后的额外咒印检定：仅由 adbd 或 KernelSU Root 进程（如 ADB 魔法阵）启动的进程可获取，防止获得 shell 权限的应用进一步提权至 Root</string>
     <string name="feature_status_forced_summary">已由星界启动仪式强制指定，无法在此修改</string>
-    <string name="install_block_modules">封印心之契约结晶</string>
-    <string name="install_block_modules_warning">觉醒时阻止所列心之契约结晶加载。封印系统依赖的结晶可能使法器卡在觉醒标识或反复觉醒（例如部分 MediaTek 法器上的 mkp）。请仅在确认这些结晶在你的法器上可以安全封印时点亮。若无法觉醒，可用 fastboot 复原原厂 boot / init_boot 镜像。</string>
-    <string name="install_block_modules_list">待封印的结晶</string>
-    <string name="install_block_modules_summary">用逗号分隔结晶名称，下次觉醒时生效；清空可撤除此封印。</string>
-    <string name="install_block_modules_invalid">仅限字母、数字与下划线；单个名称不超过 64 个字符，总长不超过 255。</string>
     <string name="install_anykernel">注入 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">以当前星槽运行可信的心之契约安装器，需要 root 权限。</string>
     <string name="install_anykernel_warning">此 ZIP 将以 root 施法，可能改写多个星域分区。实际写入的分区与星槽由安装咒式决定，FinaSU 不会覆盖星槽，也不更新 ksud。变身成功不保证能够苏醒，变身失败也可能留下部分改写。已有的启动镜像备份未必覆盖这些改动。请先确认法器相容性并备好回滚镜像，再继续。</string>

@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">Ogranicz root powłoki do ADB</string>
     <string name="settings_shell_su_adb_only_summary">Dodatkowe sprawdzenie przy przyznawaniu roota powłoce: mogą go używać tylko procesy uruchomione przez adbd lub proces root KernelSU (np. moduł ADB), co zapobiega eskalacji do roota przez aplikacje, które uzyskały uprawnienia powłoki</string>
     <string name="feature_status_forced_summary">Wymuszone przez konfigurację rozruchu; nie można tego tutaj zmienić</string>
-    <string name="install_block_modules">Blokuj moduły jądra</string>
-    <string name="install_block_modules_warning">Zatrzymaj ładowanie wymienionych modułów jądra przy rozruchu. Zablokowanie modułu, od którego zależy system, może spowodować zawieszenie urządzenia na logo rozruchowym lub pętlę rozruchową (np. MediaTek mkp na niektórych urządzeniach). Włącz to tylko, jeśli masz pewność, że blokowanie tych modułów jest bezpieczne na Twoim urządzeniu. Aby je przywrócić, wgraj fabryczny obraz boot / init_boot przez fastboot.</string>
-    <string name="install_block_modules_list">Moduły do zablokowania</string>
-    <string name="install_block_modules_summary">Nazwy oddzielone przecinkami. Zaczyna działać po następnym ponownym uruchomieniu; wyczyść, aby usunąć to ustawienie.</string>
-    <string name="install_block_modules_invalid">Używaj wyłącznie liter, cyfr i podkreśleń; maksymalnie 64 znaki na nazwę i 255 łącznie.</string>
     <string name="install_anykernel">Wgraj plik ZIP AnyKernel3</string>
     <string name="install_anykernel_summary">Uruchom zaufany instalator jądra w bieżącym slocie. Wymagane uprawnienia root.</string>
     <string name="install_anykernel_warning">Ten plik ZIP działa z uprawnieniami root i może modyfikować wiele partycji. To instalator decyduje, które partycje i sloty zostaną zapisane; FinaSU nie nadpisuje slotu ani nie odświeża ksud. Pomyślna instalacja nie gwarantuje możliwości uruchomienia, a niepowodzenie może pozostawić częściowe zmiany. Istniejące kopie zapasowe obrazu boot mogą nie obejmować tych zmian. Przed kontynuowaniem potwierdź zgodność urządzenia i przygotuj obraz do odzyskiwania.</string>

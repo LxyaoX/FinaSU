@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">Giới hạn root shell cho ADB</string>
     <string name="settings_shell_su_adb_only_summary">Kiểm tra bổ sung khi Shell được cấp quyền Root: chỉ các tiến trình do adbd hoặc tiến trình Root của KernelSU (ví dụ: module ADB) khởi tạo mới được dùng, ngăn các ứng dụng có được đặc quyền shell leo thang lên Root</string>
     <string name="feature_status_forced_summary">Bị buộc bởi cấu hình khởi động; không thể thay đổi tại đây</string>
-    <string name="install_block_modules">Chặn module kernel</string>
-    <string name="install_block_modules_warning">Ngăn các module kernel trong danh sách tải khi khởi động. Chặn một module mà hệ thống phụ thuộc có thể khiến thiết bị treo ở logo khởi động hoặc lặp khởi động (ví dụ: MediaTek mkp trên một số thiết bị). Chỉ bật tùy chọn này nếu bạn biết chắc các module đó an toàn khi bị chặn trên thiết bị của mình. Để khôi phục, hãy flash image boot / init_boot gốc bằng fastboot.</string>
-    <string name="install_block_modules_list">Module cần chặn</string>
-    <string name="install_block_modules_summary">Các tên cách nhau bằng dấu phẩy. Có hiệu lực từ lần khởi động tiếp theo; xoá trống để gỡ cài đặt này.</string>
-    <string name="install_block_modules_invalid">Chỉ dùng chữ cái, chữ số và dấu gạch dưới; tối đa 64 ký tự mỗi tên và 255 ký tự tổng cộng.</string>
     <string name="install_anykernel">Flash ZIP AnyKernel3</string>
     <string name="install_anykernel_summary">Chạy trình cài đặt kernel tin cậy bằng slot hiện tại. Yêu cầu quyền Root.</string>
     <string name="install_anykernel_warning">File ZIP này chạy với quyền root và có thể sửa đổi nhiều phân vùng. Trình cài đặt kiểm soát những phân vùng và slot nào được ghi; FinaSU không ghi đè slot hay làm mới ksud. Cài đặt thành công không đảm bảo thiết bị khởi động được, và thất bại có thể để lại các thay đổi dở dang. Các bản sao lưu boot image hiện có có thể không bao phủ những thay đổi này. Hãy xác nhận khả năng tương thích của thiết bị và chuẩn bị một recovery image trước khi tiếp tục.</string>

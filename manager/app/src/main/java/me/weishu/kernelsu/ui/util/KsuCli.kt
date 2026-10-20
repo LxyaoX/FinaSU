@@ -511,34 +511,14 @@ private fun writeLkmFile(lkm: LkmSelection): File? {
     return file
 }
 
-fun parseBlockModules(input: String): List<String> =
-    input.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-
-fun isBlockModulesValid(input: String): Boolean {
-    val names = parseBlockModules(input)
-    return names.all { name -> name.length <= 64 &&
-        name.all { it in 'a'..'z' || it in 'A'..'Z' || it in '0'..'9' || it == '_' } } &&
-        names.joinToString(",").length <= 255
-}
-
-suspend fun getLoadedBlockableModules(): List<String> = withContext(Dispatchers.IO) {
-    val loaded = getRootShell().newJob().add("cat /proc/modules").to(ArrayList<String>(), null).exec().out
-        .map { it.trim().substringBefore(' ') }.toSet()
-    listOf("vr", "vklp", "oplus_secure_guard", "oplus_secure_guard_new", "mkp").filter { it in loaded }
-}
-
 private fun bootPatchFlags(
     allowShell: Boolean,
     enableAdb: Boolean,
     forceBackup: Boolean,
-    blockModules: String,
 ): String = buildString {
-    require(isBlockModulesValid(blockModules)) { "Invalid block-module list" }
     if (allowShell) append(" --allow-shell")
     if (enableAdb) append(" --enable-adbd")
     if (forceBackup) append(" --backup")
-    val names = parseBlockModules(blockModules)
-    if (names.isNotEmpty()) append(" --block-module ${names.joinToString(",")}")
 }
 
 fun installBoot(
@@ -549,13 +529,9 @@ fun installBoot(
     allowShell: Boolean,
     enableAdb: Boolean,
     forceBackup: Boolean,
-    blockModules: String,
     onStdout: (String) -> Unit,
     onStderr: (String) -> Unit,
 ): FlashResult {
-    if (!isBlockModulesValid(blockModules)) {
-        return FlashResult(-1, "Invalid block-module list", false)
-    }
     val resolver = ksuApp.contentResolver
 
     val bootFile = bootUri?.let { uri ->
@@ -577,7 +553,7 @@ fun installBoot(
     } else {
         " -b ${bootFile.absolutePath}"
     }
-    cmd += bootPatchFlags(allowShell, enableAdb, forceBackup, blockModules)
+    cmd += bootPatchFlags(allowShell, enableAdb, forceBackup)
 
     if (ota) {
         cmd += " -u"
@@ -621,13 +597,9 @@ fun downloadBoot(
     allowShell: Boolean,
     enableAdb: Boolean,
     forceBackup: Boolean,
-    blockModules: String,
     onStdout: (String) -> Unit,
     onStderr: (String) -> Unit,
 ): FlashResult {
-    if (!isBlockModulesValid(blockModules)) {
-        return FlashResult(-1, "Invalid block-module list", false)
-    }
     val bootFile = File(ksuApp.cacheDir, "download-boot.img")
     var probedKmi: String? = null
     try {
@@ -681,7 +653,7 @@ fun downloadBoot(
     }
 
     var cmd = "${getKsuDaemonPath()} boot-patch -b ${bootFile.absolutePath}"
-    cmd += bootPatchFlags(allowShell, enableAdb, forceBackup, blockModules)
+    cmd += bootPatchFlags(allowShell, enableAdb, forceBackup)
 
     val lkmFile = writeLkmFile(lkm)
     if (lkmFile != null) {

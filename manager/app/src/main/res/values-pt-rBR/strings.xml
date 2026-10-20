@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">Restringir o root do shell ao ADB</string>
     <string name="settings_shell_su_adb_only_summary">Verificação extra quando o Shell recebe root: apenas processos gerados pelo adbd ou por um processo root do KernelSU (por exemplo, um módulo ADB) podem usá-lo, impedindo que apps que obtêm privilégios de shell escalem para root</string>
     <string name="feature_status_forced_summary">Forçado pela configuração de inicialização; não pode ser alterado aqui</string>
-    <string name="install_block_modules">Bloquear módulos do kernel</string>
-    <string name="install_block_modules_warning">Impede que os módulos do kernel listados sejam carregados na inicialização. Bloquear um módulo do qual o sistema depende pode fazer o dispositivo travar no logo de inicialização ou entrar em bootloop (por exemplo, mkp da MediaTek em alguns dispositivos). Ative isto apenas se você tiver certeza de que esses módulos podem ser bloqueados com segurança no seu dispositivo. Para recuperar, faça o flash da imagem boot / init_boot original com o fastboot.</string>
-    <string name="install_block_modules_list">Módulos a bloquear</string>
-    <string name="install_block_modules_summary">Nomes separados por vírgula. Entra em vigor na próxima inicialização; limpe para remover esta configuração.</string>
-    <string name="install_block_modules_invalid">Use apenas letras, dígitos e sublinhados; até 64 caracteres por nome e 255 no total.</string>
     <string name="install_anykernel">Instalar ZIP AnyKernel3</string>
     <string name="install_anykernel_summary">Executa um instalador de kernel confiável usando o slot atual. Requer root.</string>
     <string name="install_anykernel_warning">Este ZIP é executado com root e pode modificar várias partições. O instalador controla quais partições e slots são gravados; o FinaSU não substitui o slot nem atualiza o ksud. Uma instalação bem-sucedida não garante a inicialização e uma falha pode deixar alterações parciais. Os backups existentes da imagem de boot podem não cobrir essas alterações. Confirme a compatibilidade do dispositivo e prepare uma imagem de recuperação antes de continuar.</string>

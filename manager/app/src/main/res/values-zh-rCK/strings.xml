@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">shell 想拿大厨权限？只认 ADB</string>
     <string name="settings_shell_su_adb_only_summary">给 Shell 发大厨权限时多把一道关：只有 adbd 拉起来的活儿，或者 KernelSU 的 Root 活儿（比方 ADB 招牌菜）使得上，省得应用蹭到 shell 权限就往大厨位子上爬</string>
     <string name="feature_status_forced_summary">饭庄开张时就定死了，这儿改不了</string>
-    <string name="install_block_modules">拦住秘酱料模块下锅</string>
-    <string name="install_block_modules_warning">开火的时候拦住单子上的这些秘酱料模块，不让它们下锅。拦了饭庄离不了的家伙，灶具没准儿卡在开机招牌上，要么一遍遍重新开火（比方某些灶具上的 MediaTek mkp）。拿准了这些家伙在你灶具上拦得住再开。想救场就拿 fastboot 刷回原厂 boot / init_boot 镜像。</string>
-    <string name="install_block_modules_list">要拦的秘酱料</string>
-    <string name="install_block_modules_summary">模块名儿拿逗号隔开，下次开火才认；清空了这规矩就撤了。</string>
-    <string name="install_block_modules_invalid">只许字母、数字和下划线；单个名儿不超 64 个字符，加起来不超 255。</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">拿当前灶台跑可信的秘酱料安装器，得有大厨权限。</string>
     <string name="install_anykernel_warning">这 ZIP 会以大厨身份下锅，可能动好几个分区。真写哪块、哪个灶台，全看安装脚本，FinaSU 不插手灶台，也不更新 ksud。装成了也不保准能开机，翻车了也可能已经写了半截。现有的启动镜像备份未必罩得住这些改动。先确认灶具合不合得来、备好回滚镜像，再动手。</string>

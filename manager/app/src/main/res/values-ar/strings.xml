@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">تقييد جذر Shell على ADB</string>
     <string name="settings_shell_su_adb_only_summary">فحص إضافي عند منح Shell صلاحية الجذر: لا يمكن استخدامها إلا للعمليات التي ينشئها adbd أو عملية جذر لـ KernelSU (مثل وحدة ADB)، مما يمنع التطبيقات التي تحصل على صلاحيات shell من التصعيد إلى الجذر</string>
     <string name="feature_status_forced_summary">مفروض بواسطة إعدادات الإقلاع؛ لا يمكن تغييره من هنا</string>
-    <string name="install_block_modules">حظر وحدات النواة</string>
-    <string name="install_block_modules_warning">أوقف تحميل وحدات النواة المذكورة عند الإقلاع. قد يؤدي حظر وحدة يعتمد عليها النظام إلى تعلّق الجهاز على شعار الإقلاع أو حلقة إقلاع (مثل MediaTek mkp على بعض الأجهزة). لا تفعّل هذا إلا إذا كنت تعلم أن حظر هذه الوحدات آمن على جهازك. للاستعادة، ثبّت صورة boot / init_boot الأصلية باستخدام fastboot.</string>
-    <string name="install_block_modules_list">الوحدات المراد حظرها</string>
-    <string name="install_block_modules_summary">أسماء مفصولة بفواصل. يُطبَّق عند إعادة التشغيل التالية؛ امسحه لإزالة هذا الإعداد.</string>
-    <string name="install_block_modules_invalid">استخدم الحروف والأرقام والشرطات السفلية فقط؛ حتى 64 حرفًا لكل اسم و255 إجمالًا.</string>
     <string name="install_anykernel">تثبيت ملف AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">تشغيل مُثبِّت نواة موثوق باستخدام الفتحة الحالية. يتطلب صلاحية الجذر.</string>
     <string name="install_anykernel_warning">يعمل ملف ZIP هذا بصلاحية الجذر وقد يعدّل عدة أقسام. يتحكم المُثبِّت في الأقسام والفتحات التي تُكتب؛ ولا يقوم FinaSU بتجاوز الفتحة أو تحديث ksud. لا يضمن نجاح التثبيت قابلية الإقلاع، وقد يترك الفشل تغييرات جزئية. قد لا تغطي النسخ الاحتياطية الحالية لصورة الإقلاع هذه التغييرات. تأكد من توافق الجهاز وجهّز صورة استرداد قبل المتابعة.</string>

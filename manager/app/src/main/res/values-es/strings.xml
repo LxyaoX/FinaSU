@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">Limitar el root de shell a ADB</string>
     <string name="settings_shell_su_adb_only_summary">Comprobación adicional cuando se concede root a Shell: solo pueden usarlo los procesos iniciados por adbd o por un proceso root de KernelSU (p. ej., un módulo ADB), lo que evita que las aplicaciones que obtienen privilegios de shell escalen a root</string>
     <string name="feature_status_forced_summary">Forzado por la configuración de arranque; no se puede cambiar aquí</string>
-    <string name="install_block_modules">Bloquear módulos del kernel</string>
-    <string name="install_block_modules_warning">Impide que los módulos del kernel indicados se carguen al arrancar. Bloquear un módulo del que depende el sistema puede hacer que el dispositivo se quede en el logotipo de arranque o entre en un bucle de arranque (p. ej., MediaTek mkp en algunos dispositivos). Actívalo solo si sabes que es seguro bloquear esos módulos en tu dispositivo. Para recuperarlo, flashea la imagen stock de boot / init_boot con fastboot.</string>
-    <string name="install_block_modules_list">Módulos a bloquear</string>
-    <string name="install_block_modules_summary">Nombres separados por comas. Surte efecto en el próximo arranque; borra el campo para eliminar este ajuste.</string>
-    <string name="install_block_modules_invalid">Usa solo letras, dígitos y guiones bajos; hasta 64 caracteres por nombre y 255 en total.</string>
     <string name="install_anykernel">Flashear ZIP de AnyKernel3</string>
     <string name="install_anykernel_summary">Ejecutar un instalador de kernel de confianza usando la ranura actual. Se requiere root.</string>
     <string name="install_anykernel_warning">Este ZIP se ejecuta con root y puede modificar varias particiones. El instalador controla qué particiones y ranuras se escriben; FinaSU no anula la ranura ni actualiza ksud. Una instalación correcta no garantiza que el dispositivo arranque, y si falla puede dejar cambios parciales. Es posible que las copias de seguridad existentes de la imagen de arranque no cubran estos cambios. Confirma la compatibilidad del dispositivo y prepara una imagen de recuperación antes de continuar.</string>

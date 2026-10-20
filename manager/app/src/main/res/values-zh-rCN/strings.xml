@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">限制 Shell 仅可通过 ADB 获取 Root</string>
     <string name="settings_shell_su_adb_only_summary">授权 Shell 后的额外检查：仅由 adbd 或 KernelSU Root 进程（如 ADB 模块）启动的 shell 进程可获取 Root，防止应用提权到 shell 后进一步获取 Root</string>
     <string name="feature_status_forced_summary">已由启动配置强制指定，无法在此修改</string>
-    <string name="install_block_modules">屏蔽内核模块（风险）</string>
-    <string name="install_block_modules_warning">启动时阻止所列内核模块加载。屏蔽系统依赖的模块可能导致卡开机 logo 或反复重启（例如部分联发科机型上的 mkp）。请仅在确认这些模块在你的设备上可以安全屏蔽时启用。如无法开机，可通过 fastboot 刷回原厂 boot / init_boot 镜像恢复。</string>
-    <string name="install_block_modules_list">要屏蔽的模块</string>
-    <string name="install_block_modules_summary">用逗号分隔模块名称，下次启动时生效；清空可移除此配置。</string>
-    <string name="install_block_modules_invalid">仅限字母、数字和下划线；单个名称不超过 64 个字符，总长度不超过 255。</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">以当前槽运行可信内核安装器，需要 root 权限。</string>
     <string name="install_anykernel_warning">此 ZIP 将以 root 执行，可能修改多个分区。实际写入的分区和槽位由安装脚本决定，FinaSU 不覆盖槽位，也不更新 ksud。安装成功不保证能够启动，失败也可能已产生部分写入。现有启动镜像备份未必覆盖这些改动。请确认设备兼容性并准备回滚镜像，再继续。</string>

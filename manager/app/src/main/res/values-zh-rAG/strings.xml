@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">shell 的 Root 权限只给 ADB 喵</string>
     <string name="settings_shell_su_adb_only_summary">给 Shell 授予 Root 权限时多查一道喵：只有 adbd 拉起来的进程，或者 KernelSU 的 Root 进程（比如 ADB 模块）才用得上它，免得应用拿到 shell 权限就偷偷爬到 Root 哦</string>
     <string name="feature_status_forced_summary">启动配置已经强制定好啦喵，在这里改不了哦</string>
-    <string name="install_block_modules">拦住内核模块加载喵</string>
-    <string name="install_block_modules_warning">开机的时候拦住列出来的这些内核模块，不让它们加载喵。要是拦了系统离不开的模块，设备可能会卡在开机 logo 上，或者一直重启（比如某些设备上的 MediaTek mkp）。确认这些模块在你设备上拦着没事再开哦喵。想救回来就用 fastboot 刷回原厂 boot / init_boot 镜像啦</string>
-    <string name="install_block_modules_list">要拦住的模块喵</string>
-    <string name="install_block_modules_summary">用逗号把模块名字分开写喵，下次启动才生效；清空就能撤掉这个配置啦</string>
-    <string name="install_block_modules_invalid">只能用字母、数字和下划线喵；单个名字别超过 64 个字符，总共别超过 255 哦</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP 喵</string>
     <string name="install_anykernel_summary">用当前槽位跑受信任的内核安装器喵，需要 root 权限哦</string>
     <string name="install_anykernel_warning">这个 ZIP 会以 root 权限执行喵，可能会改动好几个分区。具体写哪些分区和槽位由安装脚本说了算，FinaSU 不会覆盖槽位，也不会更新 ksud。装成功不保证开得了机，装失败了也可能已经写进去一部分了。现有的启动镜像备份未必兜得住这些改动。先确认设备兼容、准备好回滚镜像，再继续哦喵！</string>

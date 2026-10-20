@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">Shell 之 Root 之权，唯 ADB 可赐</string>
     <string name="settings_shell_su_adb_only_summary">赐 Shell 以 Root 之权时，复加一重勘验：唯 adbd 所生之圣使，或 KernelSU 之 Root 行者（如 ADB 圣光阵）所出之魂，方得施用；以禁凡器因得 shell 之权而私升为 Root</string>
     <string name="feature_status_forced_summary">天意已由圣启配置钦定，不可于此处更改</string>
-    <string name="install_block_modules">禁锢灵魂之力之圣光阵</string>
-    <string name="install_block_modules_warning">圣启之际，禁锢所列灵魂之力之阵，使不得降临。若禁锢圣域所倚之阵，圣器或凝滞于启圣之印记，或陷轮回不止（如某些圣器之 MediaTek mkp）。唯确知此诸阵于尔圣器可安锢者，方得唤醒。欲归元，请以 fastboot 铭刻原厂 boot / init_boot 镜像。</string>
-    <string name="install_block_modules_list">待禁锢之圣光阵</string>
-    <string name="install_block_modules_summary">以逗号分隔圣光阵圣名，下次圣启时生效；涤空即可除去此设定。</string>
-    <string name="install_block_modules_invalid">仅容字母、数字与下划线；单个圣名不逾 64 字符，总长不逾 255。</string>
     <string name="install_anykernel">铭刻 AnyKernel3 圣匣</string>
     <string name="install_anykernel_summary">以当前星辰槽运转可信灵魂安装器，需 root 之权。</string>
     <string name="install_anykernel_warning">此圣匣将以 root 施展，或改动多方圣域分区。实际铭刻之分区与星辰槽由安装符咒决定，FinaSU 不抢占星辰槽，亦不更新 ksud。铭刻功成未必可启，败陨亦可能留下残迹。现有圣启镜像拓印未必涵盖此番改动。请先确认圣器相容，备好归元镜像，再续行。</string>

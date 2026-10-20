@@ -523,7 +523,12 @@ pub struct KsuConfigArgs {
     /// Force a writable feature at boot, e.g. su_compat=0. Can be repeated.
     #[arg(long, value_name = "FEATURE=VALUE", value_parser = parse_force_feature)]
     force_feature: Vec<(FeatureId, u64)>,
-    /// Block kernel modules at boot. Comma-separated and/or repeated; omission clears the list.
+    /// [Developer only] Block kernel modules at boot. Comma-separated and/or repeated;
+    /// omission clears the list. Blocked modules fail to load with EPERM; blocking one
+    /// loaded by first stage init (modules.load / modules.load.recovery) or needed by
+    /// others can bootloop the device. Choosing safe names is the developer's responsibility.
+    /// Re-patching from Manager clears a CLI-configured list for the next boot;
+    /// it does not change the running kernel's blacklist or external cmdline settings.
     #[arg(long = "block-module", value_name = "NAME", value_delimiter = ',', value_parser = parse_block_module)]
     block_module: Vec<String>,
 }

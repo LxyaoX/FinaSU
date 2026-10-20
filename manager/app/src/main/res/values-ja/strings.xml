@@ -3,11 +3,6 @@
     <string name="settings_shell_su_adb_only">shell の root を ADB に限定</string>
     <string name="settings_shell_su_adb_only_summary">Shell に root を付与する際の追加チェック: adbd または KernelSU の root プロセス (例: ADB モジュール) が起動したプロセスのみ使用でき、shell 権限を得たアプリが root へ昇格するのを防ぎます</string>
     <string name="feature_status_forced_summary">起動設定により強制されています。ここでは変更できません</string>
-    <string name="install_block_modules">カーネルモジュールをブロック</string>
-    <string name="install_block_modules_warning">記載のカーネルモジュールが起動時に読み込まれるのを停止します。システムが依存するモジュールをブロックすると、デバイスが起動ロゴで停止したりブートループに陥る可能性があります (一部のデバイスにおける MediaTek mkp など)。デバイスでブロックしても安全だと確信できる場合にのみ有効にしてください。復旧するには、fastboot で純正の boot / init_boot イメージをフラッシュしてください。</string>
-    <string name="install_block_modules_list">ブロックするモジュール</string>
-    <string name="install_block_modules_summary">カンマ区切りの名前です。次回の起動時に有効になります。空にするとこの設定を削除します。</string>
-    <string name="install_block_modules_invalid">使用できるのは英字、数字、アンダースコアのみです。名前は 64 文字まで、合計 255 文字までです。</string>
     <string name="install_anykernel">AnyKernel3 ZIP を書き込む</string>
     <string name="install_anykernel_summary">現在のスロットで信頼できるカーネルインストーラーを実行します。root 権限が必要です。</string>
     <string name="install_anykernel_warning">この ZIP は root 権限で実行され、複数のパーティションを変更する可能性があります。書き込まれるパーティションとスロットはインストーラーが制御し、FinaSU はスロットの上書きや ksud の更新を行いません。インストールが成功しても起動できるとは限らず、失敗すると変更が中途半端に残る可能性があります。既存の boot イメージのバックアップではこれらの変更をカバーできない場合があります。続行する前にデバイスの互換性を確認し、リカバリーイメージを用意してください。</string>
