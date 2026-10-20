@@ -68,6 +68,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.TonalCard
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
@@ -425,6 +426,7 @@ fun DisplayDensitySection(uiState: SettingsUiState, actions: SettingsScreenActio
     TonalCard(modifier = SectionModifier) {
         val sliderState = rememberSliderState(
             value = uiState.pageScale,
+            steps = if (SliderTrackConfig.isDiscrete) 19 else 0,
             trackRange = 0.8f..1.1f
         )
 

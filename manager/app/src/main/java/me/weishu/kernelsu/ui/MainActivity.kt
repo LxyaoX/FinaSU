@@ -237,6 +237,8 @@ open class MainActivity : FragmentActivity() {
         me.weishu.kernelsu.media.MusicConfig.load(this)
         me.weishu.kernelsu.media.SoundEffectConfig.load(this)
         me.weishu.kernelsu.media.VibrationConfig.load(this)
+        me.weishu.kernelsu.ui.component.material.SwitchIconConfig.load(this)
+        me.weishu.kernelsu.ui.component.material.SliderTrackConfig.load(this)
         me.weishu.kernelsu.media.VisualMediaConfig.load(this)
         me.weishu.kernelsu.media.MusicManager.init(this)
         if (savedInstanceState == null) me.weishu.kernelsu.media.SoundEffectManager.playStartup(this)

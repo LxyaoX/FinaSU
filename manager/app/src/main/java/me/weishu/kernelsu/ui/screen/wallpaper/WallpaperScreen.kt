@@ -75,6 +75,7 @@ import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
+import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SliderCommitEffect
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
@@ -781,7 +782,8 @@ private fun SliderSetting(
     summary: String? = null,
     format: (Float) -> String = { "${(it * 100).roundToInt()}%" },
 ) {
-    val sliderState = remember(range) { SliderState(value = value, trackRange = range) }
+    val steps = SliderTrackConfig.steps
+    val sliderState = remember(range, steps) { SliderState(value = value, steps = steps, trackRange = range) }
     if (sliderState.value != value) sliderState.value = value
     SliderCommitEffect(value, onCommit)
     Column {

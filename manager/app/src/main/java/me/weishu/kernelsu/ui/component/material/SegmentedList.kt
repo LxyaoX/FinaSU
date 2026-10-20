@@ -735,11 +735,13 @@ fun SegmentedSliderItem(
     valueText: (Float) -> String,
     colors: ListItemColors = defaultSegmentedColors(),
     enabled: Boolean = true,
+    discreteSteps: Int = 19,
     onValueChange: ((Float) -> Unit)? = null,
     onValueChangeFinished: (Float) -> Unit,
 ) {
     val hoisted = onValueChange != null
-    val sliderState = rememberSliderState(value = value, trackRange = valueRange)
+    val steps = if (SliderTrackConfig.isDiscrete) discreteSteps else 0
+    val sliderState = rememberSliderState(value = value, steps = steps, trackRange = valueRange)
 
     SegmentedListItem(
         enabled = enabled,
@@ -752,7 +754,7 @@ fun SegmentedSliderItem(
                 summary?.let { Text(it) }
                 if (hoisted) {
                     // The caller owns both the thumb and label; no saved slider value may override it.
-                    val state = remember(valueRange) { SliderState(value = value, trackRange = valueRange) }
+                    val state = remember(valueRange, steps) { SliderState(value = value, steps = steps, trackRange = valueRange) }
                     if (state.value != value) state.value = value
                     // A release normally reports itself; this covers the gesture the scroll container took over.
                     SliderCommitEffect(value) { onValueChangeFinished(state.value) }

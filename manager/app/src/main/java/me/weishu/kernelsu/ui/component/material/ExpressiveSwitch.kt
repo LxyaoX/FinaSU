@@ -24,7 +24,7 @@ fun ExpressiveSwitch(
     enabled: Boolean = true,
     colors: SwitchColors = expressiveSwitchColors(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    showThumbIcon: Boolean = true,
+    showThumbIcon: Boolean = SwitchIconConfig.showIcon,
 ) {
     Switch(
         checked = checked,
