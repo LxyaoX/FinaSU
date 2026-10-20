@@ -28,6 +28,7 @@ import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.FolkShape
+import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 /** One tappable entry in [SettingsCategoryGrid]. */
 data class SettingsCategoryEntry(
@@ -82,14 +83,15 @@ private fun CategoryCell(
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
+    val originColor = LocalFolkWallpaperTokens.current?.group?.fill
+        ?: MaterialTheme.colorScheme.surfaceBright
 
     Column(
         modifier = modifier
             .clip(FolkShape.Corner12)
             .navOrigin(
                 cornerRadius = 12.dp,
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                captureBitmap = true,
+                color = originColor,
                 interactionSource = interactionSource,
             )
             .folkPressScale(interactionSource)
