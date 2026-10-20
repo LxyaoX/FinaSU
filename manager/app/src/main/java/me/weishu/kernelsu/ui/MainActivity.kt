@@ -843,6 +843,8 @@ private fun navTransition(
                 originState.removeOrigin(key)
             }
         }
+    }
+    if (originState.hasCachedOrigin(targetKey)) {
         containerPushTransform()
     } else {
         targetKey?.let(originState::removeOrigin)
@@ -852,18 +854,28 @@ private fun navTransition(
 
 private fun navPopTransition(
     @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
-    @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
+    originState: NavOriginState,
     @Suppress("UNUSED_PARAMETER") wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    containerPopTransform()
+    val sourceKey = initialState.entries.lastOrNull()?.contentKey
+    if (originState.hasCachedOrigin(sourceKey)) {
+        cardPopTransform()
+    } else {
+        containerPopTransform()
+    }
 }
 
 private fun navPredictivePopTransition(
     @Suppress("UNUSED_PARAMETER") layoutDirection: LayoutDirection,
-    @Suppress("UNUSED_PARAMETER") originState: NavOriginState,
+    originState: NavOriginState,
     @Suppress("UNUSED_PARAMETER") wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
-    containerPopTransform()
+    val sourceKey = initialState.entries.lastOrNull()?.contentKey
+    if (originState.hasCachedOrigin(sourceKey)) {
+        cardPopTransform()
+    } else {
+        containerPopTransform()
+    }
 }
 
 private fun containerPushTransform(): ContentTransform =

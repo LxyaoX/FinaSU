@@ -34,13 +34,12 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -49,9 +48,9 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
@@ -319,7 +318,7 @@ private fun NavContainerTransformEntry(
     val key = entry.contentKey
     val currentKey = navigator.current()
     val isCurrent = currentKey != null &&
-        key == (currentKey.toString() to currentKey::class)
+        key == (currentKey.toString() to currentKey::class.toString())
     val direction = navigator.lastDirection
     val animateIn = direction == NavDirection.Push && isCurrent
 
@@ -332,7 +331,6 @@ private fun NavContainerTransformEntry(
         animateIn -> cachedOrigin
         else -> null
     }
-
     val progress = remember {
         Animatable(if (animateIn) 0f else 1f)
     }
@@ -386,6 +384,7 @@ private fun NavContainerTransformEntry(
     DisposableEffect(key) {
         onDispose {
             state.clearPredictive(key)
+            state.removeOrigin(key)
         }
     }
 
@@ -413,11 +412,14 @@ private fun ContainerTransformLayout(
     content: @Composable () -> Unit,
 ) {
     var offsetInRoot by remember { mutableStateOf(Offset.Zero) }
+    var contentBoundsInRoot by remember { mutableStateOf(Rect.Zero) }
+    val surfaceColor = MaterialTheme.colorScheme.surfaceContainer
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .onGloballyPositioned { coordinates ->
+                contentBoundsInRoot = coordinates.boundsInRoot()
                 offsetInRoot = coordinates.localToRoot(Offset.Zero)
             }
             .drawWithContent {
@@ -433,127 +435,135 @@ private fun ContainerTransformLayout(
                     right = origin.rect.right - offsetInRoot.x,
                     bottom = origin.rect.bottom - offsetInRoot.y,
                 )
-                if (popping) {
-                    drawPagePop(origin, fraction, localOrigin)
-                    return@drawWithContent
-                }
-
-                val tailAlpha = (fraction / 0.08f).coerceIn(0f, 1f)
-                if (tailAlpha <= 0f) {
-                    return@drawWithContent
-                }
-
-                val rect = Rect(
-                    left = localOrigin.left * (1f - fraction),
-                    top = localOrigin.top * (1f - fraction),
-                    right = localOrigin.right + (size.width - localOrigin.right) * fraction,
-                    bottom = localOrigin.bottom + (size.height - localOrigin.bottom) * fraction,
-                )
-                val radius = origin.cornerRadius * (1f - fraction)
-                val corner = CornerRadius(radius)
-                val path = Path().apply {
-                    addRoundRect(RoundRect(rect, corner))
-                }
-
-                val needsTailLayer = tailAlpha < 1f
-                if (needsTailLayer) {
-                    drawContext.canvas.saveLayer(
-                        rect,
-                        Paint().apply { alpha = tailAlpha },
-                    )
-                }
-
-                val reveal = ((fraction - 0.18f) / 0.24f).coerceIn(0f, 1f)
-                val backgroundAlpha = origin.color.alpha * (1f - reveal)
-                if (backgroundAlpha > 0f) {
-                    drawRoundRect(
-                        color = origin.color.copy(alpha = backgroundAlpha),
-                        topLeft = rect.topLeft,
-                        size = rect.size,
-                        cornerRadius = corner,
-                    )
-                }
-                val contentAlpha = reveal
-                if (contentAlpha > 0f) {
-                    val needsContentLayer = contentAlpha < 1f
-                    if (needsContentLayer) {
-                        drawContext.canvas.saveLayer(
-                            rect,
-                            Paint().apply { alpha = contentAlpha },
+                val localContentBounds = contentBoundsInRoot
+                    .takeIf { it.isFinite && !it.isEmpty }
+                    ?.let {
+                        Rect(
+                            left = it.left - offsetInRoot.x,
+                            top = it.top - offsetInRoot.y,
+                            right = it.right - offsetInRoot.x,
+                            bottom = it.bottom - offsetInRoot.y,
                         )
                     }
-                    clipPath(path) {
-                        translate(left = rect.left, top = rect.top) {
-                            this@drawWithContent.drawContent()
-                        }
-                    }
-                    if (needsContentLayer) {
-                        drawContext.canvas.restore()
-                    }
-                }
-                if (needsTailLayer) {
-                    drawContext.canvas.restore()
-                }
+                    ?: Rect(Offset.Zero, size)
+
+                drawContainerTransform(
+                    origin = origin,
+                    fraction = fraction,
+                    localOrigin = localOrigin,
+                    localContentBounds = localContentBounds,
+                    surfaceColor = surfaceColor,
+                    popping = popping,
+                )
             },
     ) {
         content()
     }
 }
 
-private fun ContentDrawScope.drawPagePop(
+/**
+ * Reveals the settled page through a clipped, moving container. An opaque surface veil replaces
+ * layered content alpha, so the transform stays on the normal draw path without `saveLayer`.
+ */
+private fun ContentDrawScope.drawContainerTransform(
     origin: NavOrigin,
     fraction: Float,
     localOrigin: Rect,
+    localContentBounds: Rect,
+    surfaceColor: Color,
+    popping: Boolean,
 ) {
-    if (fraction <= 0f) return
-    val rect = animatedCardRect(localOrigin, fraction)
+    val rect = interpolateContainerBounds(localOrigin, localContentBounds, fraction)
     if (rect.width <= 0f || rect.height <= 0f) return
-    val radius = origin.cornerRadius * (1f - fraction)
+    val radius = interpolateContainerCorner(origin.cornerRadius, fraction)
+    val corner = CornerRadius(radius)
     val path = Path().apply {
-        addRoundRect(RoundRect(rect, CornerRadius(radius)))
+        addRoundRect(RoundRect(rect, corner))
     }
-    val alpha = fraction.coerceIn(0f, 1f)
+
+    drawRoundRect(
+        color = origin.color,
+        topLeft = rect.topLeft,
+        size = rect.size,
+        cornerRadius = corner,
+    )
+
+    clipPath(path) {
+        translate(
+            left = rect.left - localContentBounds.left,
+            top = rect.top - localContentBounds.top,
+        ) {
+            this@drawContainerTransform.drawContent()
+        }
+    }
+
+    val veilAlpha = if (popping) {
+        popSurfaceVeilAlpha(fraction)
+    } else {
+        pushSurfaceVeilAlpha(fraction)
+    }
+    if (veilAlpha > 0f) {
+        drawRoundRect(
+            color = lerp(origin.color, surfaceColor, fraction).copy(alpha = veilAlpha),
+            topLeft = rect.topLeft,
+            size = rect.size,
+            cornerRadius = corner,
+        )
+    }
+
     val bitmap = origin.bitmap
-    if (bitmap != null && fraction <= 0.22f) {
+    if (popping && bitmap != null && fraction <= BitmapRevealEnd) {
         val dstWidth = rect.width
         val dstHeight = if (bitmap.width > 0) {
             dstWidth * bitmap.height / bitmap.width
         } else {
             rect.height
         }
+        val bitmapAlpha = ((BitmapRevealEnd - fraction) / BitmapRevealEnd).coerceIn(0f, 1f)
         clipPath(path) {
             drawImage(
                 image = bitmap,
                 dstOffset = IntOffset(rect.left.roundToInt(), rect.top.roundToInt()),
                 dstSize = IntSize(dstWidth.roundToInt(), dstHeight.roundToInt()),
+                alpha = bitmapAlpha,
+                filterQuality = FilterQuality.Low,
             )
         }
-        return
     }
-    drawContext.canvas.saveLayer(
-        Rect(offset = Offset.Zero, size = size),
-        Paint().apply { this.alpha = alpha },
-    )
-    clipPath(path) {
-        translate(left = rect.left, top = rect.top) {
-            this@drawPagePop.drawContent()
-        }
-    }
-    drawContext.canvas.restore()
 }
 
-private fun ContentDrawScope.animatedCardRect(
-    localOrigin: Rect,
+internal fun interpolateContainerBounds(
+    origin: Rect,
+    destination: Rect,
     fraction: Float,
 ): Rect {
+    val progress = fraction.coerceIn(0f, 1f)
     return Rect(
-        left = localOrigin.left * (1f - fraction),
-        top = localOrigin.top * (1f - fraction),
-        right = localOrigin.right + (size.width - localOrigin.right) * fraction,
-        bottom = localOrigin.bottom + (size.height - localOrigin.bottom) * fraction,
+        left = origin.left + (destination.left - origin.left) * progress,
+        top = origin.top + (destination.top - origin.top) * progress,
+        right = origin.right + (destination.right - origin.right) * progress,
+        bottom = origin.bottom + (destination.bottom - origin.bottom) * progress,
     )
+}
+
+internal fun interpolateContainerCorner(cornerRadius: Float, fraction: Float): Float =
+    cornerRadius * (1f - fraction.coerceIn(0f, 1f))
+
+internal fun pushSurfaceVeilAlpha(fraction: Float): Float {
+    val reveal = ((fraction - VeilRevealStart) / (VeilRevealEnd - VeilRevealStart))
+        .coerceIn(0f, 1f)
+    return 1f - FastOutSlowInEasing.transform(reveal)
+}
+
+internal fun popSurfaceVeilAlpha(fraction: Float): Float {
+    val conceal = ((VeilRevealEnd - fraction) / (VeilRevealEnd - VeilRevealStart))
+        .coerceIn(0f, 1f)
+    return FastOutSlowInEasing.transform(conceal)
 }
 
 /** Keep a pressed-card capture small enough to hold for the pop animation. */
 private const val MAX_CAPTURE_EDGE_PX = 1_280f
 private const val MAX_CAPTURE_AREA_PX = 1_200_000f
+private const val BitmapRevealEnd = 0.18f
+private const val VeilRevealStart = 0.08f
+private const val VeilRevealEnd = 0.42f
