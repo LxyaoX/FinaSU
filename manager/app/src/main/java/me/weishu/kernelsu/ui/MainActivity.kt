@@ -117,8 +117,6 @@ import me.weishu.kernelsu.ui.component.bottombar.rememberFloatingBarVisibilitySt
 import me.weishu.kernelsu.ui.component.bottombar.rememberMainPagerState
 import me.weishu.kernelsu.ui.component.bottombar.rememberNavBarGlassLiquidState
 import me.weishu.kernelsu.ui.component.bottombar.useNavigationRail
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import me.weishu.kernelsu.ui.navigation3.EXTRA_INCOMING_URIS
 import me.weishu.kernelsu.ui.navigation3.IntentDispatcher
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
@@ -703,14 +701,6 @@ fun MainScreen(
             remember(floatingBarRevision) { FloatingBarConfig.glass } &&
             isRealTimeBlurAvailable()
         val floatingLiquidState = if (floatingBarGlassEnabled) rememberNavBarGlassLiquidState() else null
-        // The liquid glass style samples the page through a miuix backdrop.
-        val liquidGlassBackdrop = rememberLayerBackdrop()
-        val pagerBackdrop = liquidGlassBackdrop.takeIf {
-            floatingBarEnabled &&
-                remember(floatingBarRevision) { FloatingBarConfig.glass } &&
-                remember(floatingBarRevision) { FloatingBarConfig.glassStyle } ==
-                FloatingBarConfig.GlassStyle.Liquid
-        }
         val floatingAutoHide = remember(floatingBarRevision) { FloatingBarConfig.autoHide }
         val floatingSwipeHide = remember(floatingBarRevision) { FloatingBarConfig.swipeHide }
         val floatingBarVisibility = rememberFloatingBarVisibilityState(
@@ -719,11 +709,7 @@ fun MainScreen(
             swipeHide = floatingSwipeHide,
         )
         val pagerContent = @Composable { bottomInnerPadding: Dp ->
-            Box(
-                modifier = Modifier
-                    .navBarLiquefiable(floatingLiquidState)
-                    .then(if (pagerBackdrop != null) Modifier.layerBackdrop(pagerBackdrop) else Modifier)
-            ) {
+            Box(modifier = Modifier.navBarLiquefiable(floatingLiquidState)) {
                 HorizontalPager(
                     state = mainPagerState.pagerState,
                     beyondViewportPageCount = if (renderPagerPages) 3 else 0,
@@ -809,7 +795,6 @@ fun MainScreen(
                         FloatingBar(
                             navigationBadge = navigationBadge,
                             liquidState = floatingLiquidState,
-                            backdrop = pagerBackdrop,
                             onUserInteraction = { floatingBarVisibility.onUserInteraction() },
                         )
                     }

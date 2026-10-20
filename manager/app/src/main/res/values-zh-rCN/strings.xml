@@ -453,8 +453,8 @@
     <string name="settings_enable_blur_summary">启用顶栏和底栏的模糊效果</string>
     <string name="settings_floating_bottom_bar">悬浮底栏</string>
     <string name="settings_floating_bottom_bar_summary">使用 Apple 风格的悬浮底栏</string>
-    <string name="settings_enable_glass">液态玻璃</string>
-    <string name="settings_enable_glass_summary">启用悬浮底栏的液态玻璃效果</string>
+    <string name="settings_enable_glass">毛玻璃</string>
+    <string name="settings_enable_glass_summary">启用悬浮底栏的毛玻璃效果</string>
     <string name="show_only_primary_user_apps">只显示主用户应用</string>
     <string name="settings_auto_jailbreak">自动越狱</string>
     <string name="settings_auto_jailbreak_summary">开机检测到 Permissive SELinux 时自动使用 Magica 提权。需要授予本应用自启动权限！</string>
@@ -609,9 +609,6 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">毛玻璃效果</string>
     <string name="settings_floating_bar_glass_summary">悬浮栏背后的实时模糊（Android 13+）</string>
-    <string name="settings_floating_glass_style">玻璃样式</string>
-    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
-    <string name="settings_floating_glass_style_liquid">液态玻璃</string>
     <string name="settings_floating_auto_hide">自动隐藏悬浮底栏</string>
     <string name="settings_floating_auto_hide_summary">无操作3秒后自动隐藏悬浮底栏</string>
     <string name="settings_floating_swipe_hide">滑动隐藏悬浮底栏</string>

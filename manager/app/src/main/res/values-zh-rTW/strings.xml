@@ -564,8 +564,8 @@
     <string name="settings_enable_blur_summary">啟用頂部與底部列的模糊效果。</string>
     <string name="settings_floating_bottom_bar">懸浮底部列</string>
     <string name="settings_floating_bottom_bar_summary">使用 Apple 風格的懸浮底部列。</string>
-    <string name="settings_enable_glass">液態玻璃</string>
-    <string name="settings_enable_glass_summary">為懸浮底部列啟用液態玻璃效果。</string>
+    <string name="settings_enable_glass">毛玻璃</string>
+    <string name="settings_enable_glass_summary">為懸浮底部列啟用毛玻璃效果。</string>
     <string name="show_only_primary_user_apps">僅顯示主要使用者的應用程式</string>
     <string name="settings_auto_jailbreak">自動越獄</string>
     <string name="settings_auto_jailbreak_summary">開機偵測到 Permissive SELinux 時，自動使用 Magica 提升權限。需要授予本應用程式自動啟動權限。</string>
@@ -615,9 +615,6 @@
     <string name="settings_floating_bar_compact">緊湊圓角</string>
     <string name="settings_floating_bar_glass">毛玻璃效果</string>
     <string name="settings_floating_bar_glass_summary">懸浮列後方的即時模糊（Android 13+）</string>
-    <string name="settings_floating_glass_style">玻璃樣式</string>
-    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
-    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">自動隱藏懸浮列</string>
     <string name="settings_floating_auto_hide_summary">閒置 3 秒後自動隱藏懸浮列</string>
     <string name="settings_floating_swipe_hide">滑動隱藏懸浮列</string>

@@ -555,8 +555,8 @@
     <string name="settings_enable_blur_summary">点亮顶栏与底栏的幻彩模糊</string>
     <string name="settings_floating_bottom_bar">悬浮星栏</string>
     <string name="settings_floating_bottom_bar_summary">使用 Apple 风格的悬浮星栏</string>
-    <string name="settings_enable_glass">液态幻彩毛玻璃</string>
-    <string name="settings_enable_glass_summary">点亮悬浮星栏的液态幻彩毛玻璃</string>
+    <string name="settings_enable_glass">幻彩毛玻璃</string>
+    <string name="settings_enable_glass_summary">点亮悬浮星栏的幻彩毛玻璃</string>
     <string name="show_only_primary_user_apps">只现出主用户应用</string>
     <string name="settings_auto_jailbreak">自动越狱</string>
     <string name="settings_auto_jailbreak_summary">觉醒时检测到 Permissive SELinux，便自动召唤 Magica 提权。需要授予本应用自启动权限！</string>
@@ -606,9 +606,6 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">幻彩毛玻璃</string>
     <string name="settings_floating_bar_glass_summary">悬浮星栏背后的实时模糊魔法（Android 13+）</string>
-    <string name="settings_floating_glass_style">Шилний загвар</string>
-    <string name="settings_floating_glass_style_frosted">Матлаг шил</string>
-    <string name="settings_floating_glass_style_liquid">Шингэн шил</string>
     <string name="settings_floating_auto_hide">悬浮星栏自动隐遁</string>
     <string name="settings_floating_auto_hide_summary">3 秒无魔法操作后，悬浮星栏自动隐遁</string>
     <string name="settings_floating_swipe_hide">滑动隐遁悬浮星栏</string>

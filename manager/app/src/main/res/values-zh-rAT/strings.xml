@@ -564,8 +564,8 @@
     <string name="settings_enable_blur_summary">为顶栏与底栏施加圣光模糊。</string>
     <string name="settings_floating_bottom_bar">悬浮圣光底栏</string>
     <string name="settings_floating_bottom_bar_summary">施 Apple 之仪的悬浮圣光底栏。</string>
-    <string name="settings_enable_glass">液态琉璃</string>
-    <string name="settings_enable_glass_summary">为悬浮圣光底栏施加液态琉璃之光。</string>
+    <string name="settings_enable_glass">毛玻璃</string>
+    <string name="settings_enable_glass_summary">为悬浮圣光底栏施加毛玻璃之光。</string>
     <string name="show_only_primary_user_apps">唯现主圣者之圣器</string>
     <string name="settings_auto_jailbreak">天意圣辉解禁</string>
     <string name="settings_auto_jailbreak_summary">启圣时觉察 Permissive SELinux 即以 Magica 提权。须赐予圣器自启之权！</string>
@@ -615,9 +615,6 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">圣光琉璃</string>
     <string name="settings_floating_bar_glass_summary">悬浮圣囊背后之实时圣光模糊（Android 13+）</string>
-    <string name="settings_floating_glass_style">玻璃樣式</string>
-    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
-    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">天意隐匿悬浮底栏</string>
     <string name="settings_floating_auto_hide_summary">无圣光操作三息后自动隐匿悬浮底栏</string>
     <string name="settings_floating_swipe_hide">滑动隐匿悬浮底栏</string>

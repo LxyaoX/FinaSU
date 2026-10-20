@@ -564,8 +564,8 @@
     <string name="settings_enable_blur_summary">给顶栏和底栏都开上模糊效果喵</string>
     <string name="settings_floating_bottom_bar">悬浮底栏喵</string>
     <string name="settings_floating_bottom_bar_summary">用 Apple 风格的悬浮底栏喵</string>
-    <string name="settings_enable_glass">液态玻璃喵</string>
-    <string name="settings_enable_glass_summary">给悬浮底栏开上液态玻璃效果喵</string>
+    <string name="settings_enable_glass">毛玻璃喵</string>
+    <string name="settings_enable_glass_summary">给悬浮底栏开上毛玻璃效果喵</string>
     <string name="show_only_primary_user_apps">只显示主用户的应用喵</string>
     <string name="settings_auto_jailbreak">自动越狱喵</string>
     <string name="settings_auto_jailbreak_summary">开机发现 SELinux 是 Permissive 就自动用 Magica 提权喵。得给人家的自启动权限啦！</string>
@@ -615,9 +615,6 @@
     <string name="settings_floating_bar_compact">紧凑圆角喵</string>
     <string name="settings_floating_bar_glass">毛玻璃效果喵</string>
     <string name="settings_floating_bar_glass_summary">悬浮栏背后的实时模糊喵（Android 13+）</string>
-    <string name="settings_floating_glass_style">玻璃樣式</string>
-    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
-    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">自动隐藏悬浮底栏喵</string>
     <string name="settings_floating_auto_hide_summary">3 秒没动静就自己躲起来喵</string>
     <string name="settings_floating_swipe_hide">滑动隐藏悬浮底栏喵</string>

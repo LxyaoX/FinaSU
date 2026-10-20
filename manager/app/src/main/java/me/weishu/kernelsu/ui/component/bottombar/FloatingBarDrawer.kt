@@ -43,7 +43,6 @@ internal fun FloatingBarDrawer(
     selectedIndex: Int,
     badge: (BottomBarDestination) -> NavBadge?,
     onSelect: (BottomBarDestination) -> Unit,
-    liquidIndicator: LiquidIndicatorGlass? = null,
     selectionColor: Color? = null,
     selectionContentColor: Color? = null,
     modifier: Modifier = Modifier,
@@ -55,9 +54,7 @@ internal fun FloatingBarDrawer(
     // same colour would vanish into it. There the selection takes the accent pill the standard form
     // already draws. In wallpaper mode it follows the wallpaper selection fill, whose alpha tracks
     // the user's opacity.
-    val selectedContainer = liquidIndicator?.film
-        ?: selectionColor
-        ?: MaterialTheme.colorScheme.secondaryContainer
+    val selectedContainer = selectionColor ?: MaterialTheme.colorScheme.secondaryContainer
     BoxWithConstraints(modifier = modifier) {
         val barWidth = (56.dp * destinations.size + 88.dp).coerceAtMost(maxWidth)
         val extraWidth = (barWidth - 16.dp - 4.dp * (destinations.size - 1) - 48.dp * destinations.size)
@@ -79,13 +76,8 @@ internal fun FloatingBarDrawer(
                         label = "drawerSelection",
                     )
                     val tint = when {
-                        !selected -> if (liquidIndicator != null) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                        !selected -> MaterialTheme.colorScheme.onSurfaceVariant
                         selectionContentColor != null -> selectionContentColor
-                        liquidIndicator != null -> MaterialTheme.colorScheme.onSurface
                         else -> MaterialTheme.colorScheme.onSecondaryContainer
                     }
                     val navBadge = badge(destination)
@@ -94,17 +86,6 @@ internal fun FloatingBarDrawer(
                             .weight(1f + (openWeight - 1f) * expansion)
                             .height(44.dp)
                             .clip(CircleShape)
-                            .then(
-                                if (selected && liquidIndicator != null) {
-                                    Modifier.liquidIndicatorGlass(
-                                        glass = liquidIndicator,
-                                        shape = CircleShape,
-                                        lensPx = with(LocalDensity.current) { 10.dp.toPx() },
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                            )
                             .background(background)
                             .selectable(selected = selected, role = Role.Tab, onClick = { onSelect(destination) })
                             .padding(horizontal = 12.dp),
@@ -141,9 +122,7 @@ internal fun FloatingBarDrawer(
                                     .padding(start = 8.dp * expansion)
                                     .graphicsLayer { alpha = expansion },
                                 color = tint,
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    shadow = liquidIndicator?.contentShadow,
-                                ),
+                                style = MaterialTheme.typography.labelLarge,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )

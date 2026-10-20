@@ -211,7 +211,6 @@ private fun NavModeSection() {
     val floatingStyle = remember(floatingRevision) { FloatingBarConfig.style }
     val floatingCompact = remember(floatingRevision) { FloatingBarConfig.compact }
     val floatingGlass = remember(floatingRevision) { FloatingBarConfig.glass }
-    val glassStyle = remember(floatingRevision) { FloatingBarConfig.glassStyle }
     val floatingAutoHide = remember(floatingRevision) { FloatingBarConfig.autoHide }
     val floatingSwipeHide = remember(floatingRevision) { FloatingBarConfig.swipeHide }
     val glassBlurStrength = remember(floatingRevision) { FloatingBarConfig.glassBlurStrength }
@@ -232,11 +231,6 @@ private fun NavModeSection() {
     val styleLabels = listOf(
         stringResource(R.string.settings_floating_bar_style_standard),
         stringResource(R.string.settings_floating_bar_style_drawer),
-    )
-    val glassStyles = FloatingBarConfig.GlassStyle.entries
-    val glassStyleLabels = listOf(
-        stringResource(R.string.settings_floating_glass_style_frosted),
-        stringResource(R.string.settings_floating_glass_style_liquid),
     )
 
     SegmentedColumn(
@@ -271,19 +265,7 @@ private fun NavModeSection() {
                         onCheckedChange = { FloatingBarConfig.glass = it },
                     )
                 }
-                    if (floatingGlass) {
-                        add {
-                            SegmentedDropdownItem(
-                                icon = Icons.Rounded.Style,
-                                title = stringResource(R.string.settings_floating_glass_style),
-                                items = glassStyleLabels,
-                                selectedIndex = glassStyles.indexOf(glassStyle).coerceAtLeast(0),
-                                onItemSelected = { FloatingBarConfig.glassStyle = glassStyles[it] },
-                            )
-                        }
-                    }
-                    // The liquid look is fixed, so the frosted dials stay hidden.
-                    if (floatingGlass && glassStyle == FloatingBarConfig.GlassStyle.Frosted) {
+                if (floatingGlass) {
                     add {
                         SegmentedSliderItem(
                             icon = Icons.Rounded.BlurCircular,

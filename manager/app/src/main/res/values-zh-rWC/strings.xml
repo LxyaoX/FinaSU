@@ -564,8 +564,8 @@
     <string name="settings_enable_blur_summary">启顶栏与底栏之模糊效果。</string>
     <string name="settings_floating_bottom_bar">悬浮底栏</string>
     <string name="settings_floating_bottom_bar_summary">用 Apple 风之悬浮底栏。</string>
-    <string name="settings_enable_glass">液态琉璃</string>
-    <string name="settings_enable_glass_summary">启悬浮底栏之液态琉璃效果。</string>
+    <string name="settings_enable_glass">毛玻璃</string>
+    <string name="settings_enable_glass_summary">启悬浮底栏之毛玻璃效果。</string>
     <string name="show_only_primary_user_apps">唯现主修之凡器</string>
     <string name="settings_auto_jailbreak">自动破禁</string>
     <string name="settings_auto_jailbreak_summary">启道侦得宽宥之 SELinux 时，自动以 Magica 破禁提权。需授本器自启之权！</string>
@@ -615,9 +615,6 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">琉璃效果</string>
     <string name="settings_floating_bar_glass_summary">悬浮仙阵背后之实时模糊（Android 13+）</string>
-    <string name="settings_floating_glass_style">玻璃樣式</string>
-    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
-    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">悬浮仙阵自动隐遁</string>
     <string name="settings_floating_auto_hide_summary">3 息无操作后自动隐遁悬浮仙阵</string>
     <string name="settings_floating_swipe_hide">滑动以隐遁悬浮仙阵</string>

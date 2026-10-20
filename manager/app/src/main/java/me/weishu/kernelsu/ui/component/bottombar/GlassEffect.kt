@@ -31,6 +31,16 @@ private const val DEFAULT_BLUR_STRENGTH = 0.7f
 private const val DEFAULT_TRANSPARENCY = 0.3f
 private const val DEFAULT_HIGHLIGHT_STRENGTH = 0.5f
 
+@Composable
+internal fun glassFilmColor(transparency: Float): Color {
+    val isDarkTheme = !(MaterialTheme.colorScheme.background.luminance() > 0.5f)
+    return if (isDarkTheme) {
+        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.14f + (1f - transparency) * 0.10f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.10f + (1f - transparency) * 0.08f)
+    }
+}
+
 fun isRealTimeBlurAvailable(): Boolean = Build.VERSION.SDK_INT >= 33
 
 @Composable
@@ -60,11 +70,7 @@ fun Modifier.navBarGlassEffect(
     val fourDp = with(density) { 4.dp.toPx() }
     val eightDp = with(density) { 8.dp.toPx() }
 
-    val glassBaseColor = if (isDarkTheme) {
-        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.14f + (1f - transparency) * 0.10f)
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.10f + (1f - transparency) * 0.08f)
-    }
+    val glassBaseColor = glassFilmColor(transparency)
 
     val glassModifier = this.then(
         Modifier.drawBehind {

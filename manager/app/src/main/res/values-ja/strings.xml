@@ -606,9 +606,6 @@
     <string name="settings_floating_bar_compact">コンパクトな角丸</string>
     <string name="settings_floating_bar_glass">ガラス効果</string>
     <string name="settings_floating_bar_glass_summary">フローティングバー背面のリアルタイムぼかし (Android 13 以降)</string>
-    <string name="settings_floating_glass_style">ガラスのスタイル</string>
-    <string name="settings_floating_glass_style_frosted">すりガラス</string>
-    <string name="settings_floating_glass_style_liquid">リキッドガラス</string>
     <string name="settings_floating_auto_hide">フローティングバーを自動的に隠す</string>
     <string name="settings_floating_auto_hide_summary">3 秒間操作がないとフローティングバーを自動的に隠します</string>
     <string name="settings_floating_swipe_hide">スワイプでフローティングバーを隠す</string>

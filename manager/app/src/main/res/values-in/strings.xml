@@ -556,7 +556,7 @@
     <string name="settings_floating_bottom_bar">Bilah bawah mengambang</string>
     <string name="settings_floating_bottom_bar_summary">Gunakan bilah bawah mengambang ala Apple</string>
     <string name="settings_enable_glass">Kaca cair</string>
-    <string name="settings_enable_glass_summary">Aktifkan efek kaca cair (liquid glass) untuk bilah bawah mengambang</string>
+    <string name="settings_enable_glass_summary">Aktifkan efek kaca cair (frosted glass) untuk bilah bawah mengambang</string>
     <string name="show_only_primary_user_apps">Hanya tampilkan aplikasi pengguna utama</string>
     <string name="settings_auto_jailbreak">Jailbreak otomatis</string>
     <string name="settings_auto_jailbreak_summary">Secara otomatis menggunakan Magica untuk meningkatkan hak akses ketika SELinux Permissive terdeteksi saat boot. Membutuhkan pemberian izin mulai otomatis ke aplikasi ini.</string>
@@ -606,9 +606,6 @@
     <string name="settings_floating_bar_compact">Sudut membulat ringkas</string>
     <string name="settings_floating_bar_glass">Efek kaca</string>
     <string name="settings_floating_bar_glass_summary">Blur waktu nyata di belakang bilah mengambang (Android 13+)</string>
-    <string name="settings_floating_glass_style">Gaya kaca</string>
-    <string name="settings_floating_glass_style_frosted">Buram</string>
-    <string name="settings_floating_glass_style_liquid">Kaca cair</string>
     <string name="settings_floating_auto_hide">Sembunyikan otomatis bilah mengambang</string>
     <string name="settings_floating_auto_hide_summary">Sembunyikan bilah mengambang secara otomatis setelah 3 detik tanpa aktivitas</string>
     <string name="settings_floating_swipe_hide">Geser untuk menyembunyikan bilah mengambang</string>

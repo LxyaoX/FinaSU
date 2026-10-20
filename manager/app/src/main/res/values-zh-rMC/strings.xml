@@ -615,9 +615,6 @@
     <string name="settings_floating_bar_compact">紧凑圆角</string>
     <string name="settings_floating_bar_glass">磨砂玻璃效果</string>
     <string name="settings_floating_bar_glass_summary">悬浮栏背后的实时模糊（Android 13+）</string>
-    <string name="settings_floating_glass_style">玻璃樣式</string>
-    <string name="settings_floating_glass_style_frosted">毛玻璃</string>
-    <string name="settings_floating_glass_style_liquid">液態玻璃</string>
     <string name="settings_floating_auto_hide">自动藏起悬浮快捷栏</string>
     <string name="settings_floating_auto_hide_summary">无操作3秒后自动藏起悬浮快捷栏</string>
     <string name="settings_floating_swipe_hide">滑动藏起悬浮快捷栏</string>

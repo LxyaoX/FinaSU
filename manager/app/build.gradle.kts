@@ -265,7 +265,6 @@ dependencies {
     implementation(libs.material.kolor)
 
     implementation(libs.liquid.android)
-    implementation(libs.miuix.blur)
 
     implementation(libs.coil.compose)
 

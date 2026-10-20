@@ -610,9 +610,6 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="settings_floating_bar_compact">Kompaktowe zaokrąglone rogi</string>
     <string name="settings_floating_bar_glass">Efekt szkła</string>
     <string name="settings_floating_bar_glass_summary">Rozmycie w czasie rzeczywistym za pływającym paskiem (Android 13+)</string>
-    <string name="settings_floating_glass_style">Styl szkła</string>
-    <string name="settings_floating_glass_style_frosted">Matowe</string>
-    <string name="settings_floating_glass_style_liquid">Płynne szkło</string>
     <string name="settings_floating_auto_hide">Automatyczne ukrywanie pływającego paska</string>
     <string name="settings_floating_auto_hide_summary">Automatycznie ukrywaj pływający pasek po 3 sekundach bezczynności</string>
     <string name="settings_floating_swipe_hide">Przesuń, aby ukryć pływający pasek</string>

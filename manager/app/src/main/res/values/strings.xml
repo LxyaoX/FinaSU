@@ -564,8 +564,8 @@
     <string name="settings_enable_blur_summary">Enable blur effect for top and bottom bars.</string>
     <string name="settings_floating_bottom_bar">Floating bottom bar</string>
     <string name="settings_floating_bottom_bar_summary">Use Apple style floating bottom bar.</string>
-    <string name="settings_enable_glass">Liquid glass</string>
-    <string name="settings_enable_glass_summary">Enable liquid glass effect for floating bottom bar.</string>
+    <string name="settings_enable_glass">Frosted glass</string>
+    <string name="settings_enable_glass_summary">Enable frosted glass effect for floating bottom bar.</string>
     <string name="show_only_primary_user_apps">Show only primary user apps</string>
     <string name="settings_auto_jailbreak">Auto jailbreak</string>
     <string name="settings_auto_jailbreak_summary">Automatically use Magica to escalate privileges when Permissive SELinux is detected at boot. Requires granting autostart permission to this app.</string>
@@ -615,9 +615,6 @@
     <string name="settings_floating_bar_compact">Compact rounded corners</string>
     <string name="settings_floating_bar_glass">Glass effect</string>
     <string name="settings_floating_bar_glass_summary">Real-time blur behind the floating bar (Android 13+)</string>
-    <string name="settings_floating_glass_style">Glass style</string>
-    <string name="settings_floating_glass_style_frosted">Frosted</string>
-    <string name="settings_floating_glass_style_liquid">Liquid glass</string>
     <string name="settings_floating_auto_hide">Auto-hide Floating Bar</string>
     <string name="settings_floating_auto_hide_summary">Automatically hide the floating bar after 3 seconds of inactivity</string>
     <string name="settings_floating_swipe_hide">Swipe to Hide Floating Bar</string>
