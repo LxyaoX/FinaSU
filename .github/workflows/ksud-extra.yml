@@ -73,11 +73,7 @@ jobs:
         done
 
     - name: Setup rustup
-      run: |
-        rustup update stable
-        if [[ ${{ inputs.target }} == *"-apple-darwin" ]]; then
-          rustup target add ${{ inputs.target }}
-        fi
+      run: rustup update stable
     - uses: Swatinem/rust-cache@v2
       with:
         workspaces: userspace/ksud
