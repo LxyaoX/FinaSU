@@ -125,6 +125,7 @@ fun rememberMainPagerState(
 @Immutable
 data class NavigationBadgeState(
     val superuserCount: Int = 0,
+    val pluginEnabledCount: Int = 0,
     val moduleEnabledCount: Int = 0,
     val moduleUpdatableCount: Int = 0,
 )
@@ -154,6 +155,9 @@ internal data class NavBadge(val count: Int, val tone: BadgeTone)
 internal fun badgeFor(destination: BottomBarDestination, state: NavigationBadgeState): NavBadge? = when (destination) {
     BottomBarDestination.SuperUser ->
         state.superuserCount.takeIf { it > 0 }?.let { NavBadge(it, BadgeTone.Accent) }
+
+    BottomBarDestination.Plugin ->
+        state.pluginEnabledCount.takeIf { it > 0 }?.let { NavBadge(it, BadgeTone.Accent) }
 
     BottomBarDestination.Module -> when {
         state.moduleUpdatableCount > 0 -> NavBadge(state.moduleUpdatableCount, BadgeTone.Alert)

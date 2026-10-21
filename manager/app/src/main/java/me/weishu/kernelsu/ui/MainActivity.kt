@@ -661,6 +661,7 @@ fun MainScreen(
     val navigationBadge = if (badgeEnabled) {
         NavigationBadgeState(
             superuserCount = superuserCount,
+            pluginEnabledCount = pluginEnabledCount,
             moduleEnabledCount = moduleEnabledCount,
             moduleUpdatableCount = moduleUiState.updateInfo.count { it.value.downloadUrl.isNotBlank() },
         )
