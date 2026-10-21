@@ -37,8 +37,9 @@ data class RekernelXStatus(
         /**
          * `android<ver>-<core>` for a `uname -r` release, mirroring the upstream `customize.sh`.
          *
-         * Release names look like `6.1.75-android14-11-gabcdef` (GKI) or `5.10.101-android12-9`
-         * (android12-5.10). Non-GKI names fall back to the core-version table.
+         * Release names look like `6.1.75-android14-11-gabcdef` (GKI) or `6.1.75-android14-9`.
+         * Non-GKI names fall back to the core-version table, which only covers the 6.1+ builds
+         * shipped in the assets.
          */
         fun kmiOf(release: String): String {
             val trimmed = release.trim()
@@ -49,8 +50,6 @@ data class RekernelXStatus(
                 trimmed.substringAfter("-android").substringBefore('-')
             } else {
                 when (core) {
-                    "5.10" -> "12"
-                    "5.15" -> "13"
                     "6.1" -> "14"
                     "6.6" -> "15"
                     "6.12" -> "16"
