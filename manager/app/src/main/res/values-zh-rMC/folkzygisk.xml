@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">引擎尚未合成</string>
     <string name="folkzygisk_startup_protection">启动保护已触发</string>
     <string name="folkzygisk_unknown_gate">未知限制</string>
+    <string name="folkzygisk_recover">恢复并在重生后重试</string>
+    <string name="folkzygisk_recover_summary">清除启动暂停，下一次完整重生或软重启后可重新尝试一次。现在不会立即启动。</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk 恢复已合成。请重生或软重启后再试。</string>
+    <string name="folkzygisk_startup_paused">连续 %1$d 次启动未成功，内置引擎已暂停自动合成。</string>
+    <string name="folkzygisk_failure_engine_missing">最近问题：内嵌引擎缺失或合成不完整。</string>
+    <string name="folkzygisk_failure_runtime_unsafe">最近问题：运行目录或锁状态不安全，未自动复用。</string>
+    <string name="folkzygisk_failure_monitor_start_failed">最近问题：monitor 无法合成启动。</string>
+    <string name="folkzygisk_failure_monitor_exited">最近问题：monitor 在就绪前退出。</string>
+    <string name="folkzygisk_failure_readiness_timeout">最近问题：monitor 未在时限内就绪。</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">最近问题：未确认完成 zygote 注入。</string>
+    <string name="folkzygisk_failure_runtime_invalid">最近问题：运行状态数据无效。</string>
+    <string name="folkzygisk_failure_unknown">最近问题：无法识别启动失败原因。</string>
 </resources>

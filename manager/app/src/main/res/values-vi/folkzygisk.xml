@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">chưa cài đặt engine</string>
     <string name="folkzygisk_startup_protection">bảo vệ khởi động đang hoạt động</string>
     <string name="folkzygisk_unknown_gate">hạn chế không nhận dạng</string>
+    <string name="folkzygisk_recover">Khôi phục và thử lại sau khi khởi động lại</string>
+    <string name="folkzygisk_recover_summary">Xóa trạng thái tạm dừng khởi động và cho phép một lần thử mới sau lần khởi động lại toàn bộ hoặc khởi động lại mềm tiếp theo. Hiện tại sẽ không khởi động gì.</string>
+    <string name="folkzygisk_recovery_restart_required">Đã lưu khôi phục FolkZygisk. Hãy khởi động lại hoặc khởi động lại mềm để thử lại.</string>
+    <string name="folkzygisk_startup_paused">Tự động khởi động đã tạm dừng sau %1$d lần thử khởi động không thành công.</string>
+    <string name="folkzygisk_failure_engine_missing">Sự cố gần nhất: engine nhúng bị thiếu hoặc không đầy đủ.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Sự cố gần nhất: thư mục runtime hoặc khóa không an toàn để sử dụng lại.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Sự cố gần nhất: không thể khởi động monitor.</string>
+    <string name="folkzygisk_failure_monitor_exited">Sự cố gần nhất: monitor đã thoát trước khi sẵn sàng.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Sự cố gần nhất: monitor không sẵn sàng trong thời gian cho phép.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Sự cố gần nhất: chưa xác nhận việc tiêm đầy đủ vào zygote.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Sự cố gần nhất: trạng thái runtime không hợp lệ.</string>
+    <string name="folkzygisk_failure_unknown">Sự cố gần nhất: không nhận dạng được nguyên nhân lỗi khởi động.</string>
 </resources>

@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">mesin tidak terpasang</string>
     <string name="folkzygisk_startup_protection">perlindungan saat mulai aktif</string>
     <string name="folkzygisk_unknown_gate">pembatasan tidak dikenal</string>
+    <string name="folkzygisk_recover">Pulihkan dan coba lagi setelah mulai ulang</string>
+    <string name="folkzygisk_recover_summary">Hapus jeda awal dan izinkan satu percobaan baru setelah mulai ulang penuh atau mulai ulang lunak berikutnya. Tidak ada yang dimulai sekarang.</string>
+    <string name="folkzygisk_recovery_restart_required">Pemulihan FolkZygisk telah disimpan. Mulai ulang atau gunakan mulai ulang lunak untuk mencoba lagi.</string>
+    <string name="folkzygisk_startup_paused">Mulai otomatis dijeda setelah %1$d percobaan awal yang gagal.</string>
+    <string name="folkzygisk_failure_engine_missing">Masalah terakhir: mesin bawaan tidak ada atau tidak lengkap.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Masalah terakhir: direktori runtime atau kunci tidak aman untuk digunakan kembali.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Masalah terakhir: monitor tidak dapat dimulai.</string>
+    <string name="folkzygisk_failure_monitor_exited">Masalah terakhir: monitor berhenti sebelum siap.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Masalah terakhir: monitor tidak siap tepat waktu.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Masalah terakhir: injeksi zygote yang lengkap tidak dapat dikonfirmasi.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Masalah terakhir: status runtime tidak valid.</string>
+    <string name="folkzygisk_failure_unknown">Masalah terakhir: penyebab kegagalan awal tidak dikenali.</string>
 </resources>

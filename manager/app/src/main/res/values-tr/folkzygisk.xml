@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">motor kurulu değil</string>
     <string name="folkzygisk_startup_protection">başlangıç koruması etkin</string>
     <string name="folkzygisk_unknown_gate">tanınmayan kısıtlama</string>
+    <string name="folkzygisk_recover">Kurtar ve yeniden başlatmadan sonra tekrar dene</string>
+    <string name="folkzygisk_recover_summary">Başlangıç duraklatmasını temizleyin ve sonraki tam yeniden başlatma veya yumuşak yeniden başlatmadan sonra yeni bir denemeye izin verin. Şimdi hiçbir şey başlatılmaz.</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk kurtarması kaydedildi. Tekrar denemek için cihazı yeniden başlatın veya yumuşak yeniden başlatma yapın.</string>
+    <string name="folkzygisk_startup_paused">%1$d başarısız başlangıç denemesinden sonra otomatik başlatma duraklatıldı.</string>
+    <string name="folkzygisk_failure_engine_missing">Son sorun: yerleşik motor eksik veya tamamlanmamış.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Son sorun: çalışma zamanı dizini veya kilit yeniden kullanım için güvenli değildi.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Son sorun: izleyici başlatılamadı.</string>
+    <string name="folkzygisk_failure_monitor_exited">Son sorun: izleyici hazır olmadan çıktı.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Son sorun: izleyici zamanında hazır olmadı.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Son sorun: zygote içine tam enjeksiyon doğrulanamadı.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Son sorun: çalışma zamanı durumu geçersizdi.</string>
+    <string name="folkzygisk_failure_unknown">Son sorun: başlangıç hatasının nedeni tanınamadı.</string>
 </resources>

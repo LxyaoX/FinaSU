@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">引擎尚未结下</string>
     <string name="folkzygisk_startup_protection">启动守护已触发</string>
     <string name="folkzygisk_unknown_gate">未知限制</string>
+    <string name="folkzygisk_recover">复归并于重新觉醒后再试</string>
+    <string name="folkzygisk_recover_summary">解除启动停滞，待下一次完整重新觉醒或星之软重启后，允许再燃一次试炼。此刻不会立即觉醒。</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk 复归已铭刻。请重新觉醒或行星之软重启后再试。</string>
+    <string name="folkzygisk_startup_paused">连续 %1$d 次觉醒未成，已暂封引擎自动觉醒。</string>
+    <string name="folkzygisk_failure_engine_missing">最近异象：内嵌引擎缺失或残损。</string>
+    <string name="folkzygisk_failure_runtime_unsafe">最近异象：运行法域或封印状态不稳，未敢复用。</string>
+    <string name="folkzygisk_failure_monitor_start_failed">最近异象：监视使魔未能苏醒。</string>
+    <string name="folkzygisk_failure_monitor_exited">最近异象：监视使魔尚未就绪便已退散。</string>
+    <string name="folkzygisk_failure_readiness_timeout">最近异象：监视使魔未能在时限内就绪。</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">最近异象：尚未确认 zygote 注入圆满完成。</string>
+    <string name="folkzygisk_failure_runtime_invalid">最近异象：运行状态记录失效。</string>
+    <string name="folkzygisk_failure_unknown">最近异象：无法辨识觉醒失败之源。</string>
 </resources>
