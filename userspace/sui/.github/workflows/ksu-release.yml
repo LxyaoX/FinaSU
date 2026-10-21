@@ -41,7 +41,7 @@ defaults:
 jobs:
   ksu-release:
     name: Sync KernelSU community release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Download module zips

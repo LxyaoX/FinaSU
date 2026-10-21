@@ -22,7 +22,7 @@ defaults:
 jobs:
   sync-module-readmes:
     name: Sync README files to module repo
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Checkout current repository
