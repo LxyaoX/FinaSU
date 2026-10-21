@@ -30,6 +30,24 @@ fun getVersionCode(): Int {
     return 30000 + commitCount
 }
 
+/**
+ * Version name used when the clone has no reachable tag.
+ *
+ * `git describe --tags --always` then degrades to a bare commit id, which is not a version: the
+ * About page showed a hash and the release asset lost the `v` prefix that both the updater and
+ * the release workflow key on. Tagging `v*` still wins when a tag exists.
+ */
+val managerFallbackVersion =
+    (findProperty("managerFallbackVersion") as String?)?.takeIf { it.isNotBlank() } ?: "v1.0.0"
+
+/** A `git describe` fallback to a commit id: lowercase hex, 7 to 40 chars, nothing else. */
+val commitIdPattern = Regex("[0-9a-f]{7,40}")
+
 fun getVersionName(): String {
-    return getGitDescribe()
+    val described = getGitDescribe()
+    return if (described.isEmpty() || commitIdPattern.matches(described)) {
+        managerFallbackVersion
+    } else {
+        described
+    }
 }
