@@ -29,26 +29,19 @@ jobs:
       run: |
         cp aarch64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
         cp aarch64-android*-lkm/*_nomount.ko ./userspace/ksud/bin/aarch64/
-        cp x86_64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/x86_64/
-        cp x86_64-android*-lkm/*_nomount.ko ./userspace/ksud/bin/x86_64/
 
-        # Every architecture that ships modules needs one of each kind. Check it
-        # here: a missing artifact otherwise ships silently and only shows up as a
-        # dead NoMount page on the affected devices.
-        for bindir in aarch64 x86_64; do
-          kernelsu=$(find "userspace/ksud/bin/$bindir" -name '*_kernelsu.ko' | wc -l)
-          nomount=$(find "userspace/ksud/bin/$bindir" -name '*_nomount.ko' | wc -l)
-          echo "$bindir: $kernelsu kernelsu.ko, $nomount nomount.ko"
-          test "$kernelsu" -gt 0
-          test "$kernelsu" -eq "$nomount"
-        done
+        # arm64 is the only Android ABI this project ships, so a missing artifact
+        # here would silently disable LKM updates (and NoMount) on every device.
+        kernelsu=$(find userspace/ksud/bin/aarch64 -name '*_kernelsu.ko' | wc -l)
+        nomount=$(find userspace/ksud/bin/aarch64 -name '*_nomount.ko' | wc -l)
+        echo "aarch64: $kernelsu kernelsu.ko, $nomount nomount.ko"
+        test "$kernelsu" -gt 0
+        test "$kernelsu" -eq "$nomount"
 
     - name: Prepare ksuinit
       if: ${{ inputs.pack_ksuinit }}
       run: |
         mv ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
-        mv ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/
-        mv ksuinit-riscv64/ksuinit ./userspace/ksud/bin/riscv64/
 
     # Sui ships as a payload embedded in ksud, so the package has to carry it for
     # every ABI upstream still publishes one for. riscv64 has no Sui payload, and
