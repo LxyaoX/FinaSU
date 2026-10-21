@@ -33,7 +33,7 @@ rustix = { version = "1", features = [
     "all-apis",
 ] }
 android_logger = { version = "0.15", default-features = false }
-zip = { version = "8",  features = [
+zip = { version = "9",  features = [
     "deflate",
     "deflate64",
     "time",
@@ -61,7 +61,7 @@ mlua = { version = "=0.12.0", features = ["lua55", "vendored"] }
 
 [dev-dependencies]
 rustix = { version = "1", features = ["all-apis"] }
-zip = { version = "8", features = ["deflate"], default-features = false }
+zip = { version = "9", features = ["deflate"], default-features = false }
 zip-extensions = { version = "0.14", features = ["deflate", "lzma", "xz"], default-features = false }
 java-properties = { git = "https://github.com/KernelSU2/java-properties.git", branch = "master", default-features = false }
 encoding_rs = "0.8"
