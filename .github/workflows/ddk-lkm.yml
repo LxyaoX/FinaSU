@@ -31,7 +31,7 @@ on:
 jobs:
   build-kernelsu-ko:
     name: Build kernelsu.ko for ${{ inputs.kmi }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     container:
       image: ghcr.io/ylarod/ddk-min:${{ inputs.kmi }}-${{ inputs.ddk_release }}
       options: --privileged

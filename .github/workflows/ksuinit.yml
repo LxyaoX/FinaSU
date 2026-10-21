@@ -5,7 +5,7 @@ on:
       os:
         required: false
         type: string
-        default: ubuntu-latest
+        default: ubuntu-26.04
 jobs:
   build:
     runs-on: ${{ inputs.os }}

@@ -39,7 +39,7 @@ on:
 
 jobs:
   generate-key:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       expected_size: ${{ steps.extract.outputs.expected_size || steps.extract-release.outputs.expected_size || '' }}
       expected_hash: ${{ steps.extract.outputs.expected_hash || steps.extract-release.outputs.expected_hash || '' }}
@@ -163,15 +163,15 @@ jobs:
       matrix:
         include:
           - target: x86_64-pc-windows-gnu # windows pc
-            os: ubuntu-latest
+            os: ubuntu-26.04
           - target: x86_64-apple-darwin # Intel mac
             os: macos-latest
           - target: aarch64-apple-darwin # M chip mac
             os: macos-latest
           - target: aarch64-unknown-linux-musl # arm64 Linux
-            os: ubuntu-latest
+            os: ubuntu-26.04
           - target: x86_64-unknown-linux-musl # x86 Linux
-            os: ubuntu-latest
+            os: ubuntu-26.04
     uses: ./.github/workflows/ksud-extra.yml
     with:
       target: ${{ matrix.target }}
@@ -182,7 +182,7 @@ jobs:
   build-manager:
     needs: [generate-key]
     if: always() && needs.generate-key.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     defaults:
       run:
         working-directory: ./manager
@@ -265,7 +265,7 @@ jobs:
   repack-manager:
     needs: [build-manager, build-ksud, generate-key]
     if: always() && needs.build-manager.result == 'success' && needs.build-ksud.result == 'success' && needs.generate-key.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Checkout

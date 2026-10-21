@@ -2,9 +2,9 @@
 
 set -e
 
-KMIS=(android12-5.10 android13-5.10 android13-5.15 android14-5.15 android14-6.1 android15-6.6 android16-6.12 android17-6.18)
-CLANGS=(clang-r416183b clang-r450784e clang-r450784e clang-r487747c clang-r487747c clang-r510928 clang-r536225 clang-r584948c)
-RUSTS=(none none none none none none rust-1.82.0 rust-1.91.1.p3)
+KMIS=(android14-6.1 android15-6.6 android16-6.12 android17-6.18)
+CLANGS=(clang-r487747c clang-r510928 clang-r536225 clang-r584948c)
+RUSTS=(none none rust-1.82.0 rust-1.91.1.p3)
 
 
 for i in "${!KMIS[@]}"; do

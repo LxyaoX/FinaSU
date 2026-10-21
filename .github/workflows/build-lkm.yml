@@ -22,11 +22,9 @@ jobs:
   build-lkm:
     strategy:
       matrix:
+        # 6.1 and newer only: the 5.10 / 5.15 targets added four DDK container builds
+        # for kernels this project no longer ships.
         kmi:
-          - android12-5.10
-          - android13-5.10
-          - android13-5.15
-          - android14-5.15
           - android14-6.1
           - android15-6.6
           - android16-6.12
