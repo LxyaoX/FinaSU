@@ -385,6 +385,9 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.AppProfile> { key -> AppProfileScreen(key.uid) }
                                 entry<Route.ModuleRepo> { ModuleRepoScreen() }
                                 entry<Route.ModuleRepoDetail> { key -> ModuleRepoDetailScreen(key.module) }
+                                entry<Route.KernelModules> {
+                                    me.weishu.kernelsu.ui.screen.kernelmodule.KernelModuleScreen()
+                                }
                                 entry<Route.PluginStore> { PluginStoreScreen() }
                                 entry<Route.Install> { InstallScreen() }
                                 entry<Route.Flash> { key ->

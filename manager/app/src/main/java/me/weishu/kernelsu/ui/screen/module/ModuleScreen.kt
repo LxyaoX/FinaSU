@@ -141,6 +141,7 @@ fun ModulePager(
             viewModel.dismissConfirmRequest()
         },
         onOpenRepo = { navigator.push(Route.ModuleRepo) },
+        onOpenKernelModules = { navigator.push(Route.KernelModules) },
         onSetSortGroup = { group, selected ->
             viewModel.setSortGroup(group, selected)
         },

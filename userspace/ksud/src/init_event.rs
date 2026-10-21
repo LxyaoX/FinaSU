@@ -32,12 +32,17 @@ pub fn on_post_fs_data() -> Result<()> {
     let _ = catch_bootlog("logcat", &["logcat", "-b", "all"]);
     let _ = catch_bootlog("dmesg", &["dmesg", "-w", "-r"]);
 
+    let boot_safe_mode = crate::utils::is_safe_mode();
+    if boot_safe_mode && let Err(e) = crate::kernel_module::disable_all_for_safe_mode() {
+        warn!("disable managed kernel modules failed: {e}");
+    }
+
     if utils::has_magisk() {
         warn!("Magisk detected, skip post-fs-data!");
         return Ok(());
     }
 
-    let safe_mode = crate::utils::is_safe_mode();
+    let safe_mode = boot_safe_mode;
     let wait = ScriptWait::Until(Instant::now() + defs::BOOT_STAGE_TIMEOUT);
 
     if safe_mode {
@@ -99,6 +104,27 @@ pub fn on_post_fs_data() -> Result<()> {
         warn!("safe mode, skip load feature config");
     } else if let Err(e) = crate::feature::init_features() {
         warn!("init features failed: {e}");
+    }
+
+    match crate::kernel_module::autoload_with_startup_timeout() {
+        Ok(Some(report)) => {
+            if !report.failures.is_empty() {
+                for failure in &report.failures {
+                    warn!(
+                        "kernel module autoload {} failed: {}",
+                        failure.id, failure.message
+                    );
+                }
+            }
+            info!(
+                "kernel module autoload: {} attempted, {} loaded, {} skipped",
+                report.attempted.len(),
+                report.loaded.len(),
+                report.skipped.len()
+            );
+        }
+        Ok(None) => warn!("kernel module autoload is still running in the background"),
+        Err(e) => warn!("kernel module autoload scheduler failed: {e:#}"),
     }
 
     // execute metamodule post-fs-data script first (priority)

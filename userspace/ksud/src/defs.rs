@@ -34,6 +34,7 @@ mod android {
     pub const MODULE_DIR: &str = concatcp!(ADB_DIR, "modules/");
     pub const MODULE_UPDATE_DIR: &str = concatcp!(ADB_DIR, "modules_update/");
     pub const METAMODULE_DIR: &str = concatcp!(ADB_DIR, "metamodule/");
+    pub const LKM_DIR: &str = concatcp!(WORKING_DIR, "lkm/");
     pub const HOT_INSTALL_TRASH_DIR: &str = concatcp!(WORKING_DIR, "hot_install_trash/");
 
     pub const PREINIT_DIR_VOLD: &str = "/metadata/vold/ksu/";

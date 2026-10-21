@@ -50,6 +50,11 @@ enum Commands {
         #[command(subcommand)]
         command: crate::plugin::Command,
     },
+    /// Manage installed Linux kernel modules
+    Kmod {
+        #[command(subcommand)]
+        command: crate::kernel_module::Command,
+    },
 
     /// Trigger `post-fs-data` event
     PostFsData,
@@ -774,6 +779,7 @@ pub fn run() -> Result<()> {
             utils::switch_mnt_ns(1)?;
             crate::plugin::run(command)
         }
+        Commands::Kmod { command } => crate::kernel_module::run(command),
 
         Commands::Module { command } => {
             utils::switch_mnt_ns(1)?;
