@@ -4,6 +4,7 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.NomountStatus
+import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.model.ModuleSortGroup
@@ -112,6 +113,8 @@ interface SettingsRepository {
     suspend fun suiHiddenUids(): Result<List<Int>>
     suspend fun setSuiAppMode(uid: Int, mode: Int): Result<Unit>
     suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit>
+    suspend fun getRekernelXStatus(): Result<RekernelXStatus>
+    suspend fun setRekernelXEnabled(enabled: Boolean): Result<Unit>
     suspend fun getNomountStatus(): Result<NomountStatus>
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>
     suspend fun injectNomountRules(): Result<Unit>

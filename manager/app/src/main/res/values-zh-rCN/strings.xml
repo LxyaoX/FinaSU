@@ -928,4 +928,18 @@
     <string name="module_preinit_error">预初始化同步失败，保留上次配置</string>
     <string name="module_preinit_bootloop">多次启动未完成，预初始化已暂停</string>
     <string name="module_preinit_unsupported">当前内核或加载模式不支持预初始化</string>
+    <string name="settings_rekernel_x">ReKernel-X 墓碑支持</string>
+    <string name="rekernel_x_search_summary">内置内核驱动，为冻结应用提供事件（Binder、信号、网络）</string>
+    <string name="rekernel_x_loading">正在读取 ReKernel-X 状态…</string>
+    <string name="rekernel_x_read_error">无法读取 ReKernel-X 状态</string>
+    <string name="rekernel_x_external_module">检测到已刷入的 ReKernel-X 模块，驱动由该模块加载，内置驱动不再使用</string>
+    <string name="rekernel_x_kmi_unsupported">当前内核（%1$s）没有匹配的内置驱动</string>
+    <string name="rekernel_x_loaded">内置驱动 %1$s 已加载（%2$s）</string>
+    <string name="rekernel_x_pending">已启用（%2$s · 内置 v%1$s），下次开机自动加载驱动</string>
+    <string name="rekernel_x_still_loaded">驱动仍在内存中，下次重启后卸载</string>
+    <string name="rekernel_x_off">未启用；开启后无需刷模块，开机自动加载内置驱动 v%1$s</string>
+    <string name="rekernel_x_loaded_toast">ReKernel-X 驱动已加载</string>
+    <string name="rekernel_x_reboot_required">已启用 ReKernel-X，重启后加载驱动</string>
+    <string name="rekernel_x_disabled_toast">已关闭 ReKernel-X，驱动将在下次重启后卸载</string>
+    <string name="rekernel_x_write_failed">修改 ReKernel-X 状态失败</string>
 </resources>

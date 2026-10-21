@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
+import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.BlurCircular
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.BorderOuter
@@ -849,6 +850,15 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Filled.Layers,
             route = Route.Nomount,
             aliases = listOf("nomount", "no mount", "exclusion", "injection"),
+        )
+    )
+    add(
+        SettingsCategory.FUNCTION.row(
+            id = "function.rekernel_x",
+            titleRes = R.string.settings_rekernel_x,
+            summaryRes = R.string.rekernel_x_search_summary,
+            icon = Icons.Rounded.Bedtime,
+            aliases = listOf("rekernel", "tombstone", "freeze", "frozen", "binder"),
         )
     )
 

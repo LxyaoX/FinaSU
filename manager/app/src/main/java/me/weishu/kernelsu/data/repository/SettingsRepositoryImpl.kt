@@ -17,6 +17,8 @@ import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.NomountStatus
+import me.weishu.kernelsu.data.model.RekernelXStatus
+import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.SuiStatus
@@ -500,6 +502,25 @@ class SettingsRepositoryImpl : SettingsRepository {
             check(execKsud("mount set-mode ${mode.token}", true)) {
                 "ksud mount set-mode ${mode.token} failed"
             }
+        }
+    }
+
+    override suspend fun getRekernelXStatus(): Result<RekernelXStatus> = withContext(Dispatchers.IO) {
+        runCatching { RekernelXInstaller.status() }
+    }
+
+    override suspend fun setRekernelXEnabled(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val before = RekernelXInstaller.status()
+            if (enabled) {
+                RekernelXInstaller.enable(before)
+            } else {
+                RekernelXInstaller.disable()
+            }
+            // The boot script is the persisted decision, so read it back instead of trusting the
+            // individual commands: that is what the next boot will act on.
+            val after = RekernelXInstaller.status()
+            check(after.enabled == enabled) { "ReKernel-X boot state did not change" }
         }
     }
 

@@ -1,0 +1,22 @@
+ReKernel-X driver binaries bundled with NeoSU
+=============================================
+
+The .ko files in this directory come from ReKernel-X 1.6:
+
+  Project : https://github.com/myflavor/ReKernel-X
+  Release : https://github.com/myflavor/ReKernel-X/releases/tag/1.6
+  Author  : myflavor <admin@myflv.cn>, Sakion Team
+  License : GPL-2.0 (see the project's LICENSE)
+
+They are copied unmodified from the release archive so the manager can load
+the tombstone driver without the user flashing a separate module. The same
+files are selected and insmod'ed by the upstream module's post-fs-data.sh.
+
+NeoSU loads one of them from /data/adb/rekernel_x at boot through
+/data/adb/post-fs-data.d/neosu_rekernel_x.sh. Removing that script and the
+/data/adb/rekernel_x directory removes every bundled copy installed on the
+device.
+
+Source for the module is available at the project URL above; the release
+archive it was taken from also contains the flashable module and the matching
+user-space client.
