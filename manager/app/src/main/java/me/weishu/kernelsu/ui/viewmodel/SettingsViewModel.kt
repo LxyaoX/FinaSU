@@ -41,7 +41,13 @@ class SettingsViewModel(
     fun refresh() {
         if (_uiState.value.isFolkZygiskWriting) return
         val generation = ++refreshGeneration
-        _uiState.update { it.copy(isFolkMountLoading = true, isFolkZygiskLoading = true) }
+        _uiState.update {
+            it.copy(
+                isFolkMountLoading = true,
+                isFolkZygiskLoading = true,
+                isRekernelXLoading = true,
+            )
+        }
         viewModelScope.launch {
             val checkUpdate = repo.checkUpdate
             val checkModuleUpdate = repo.checkModuleUpdate
@@ -104,6 +110,7 @@ class SettingsViewModel(
             val folkMountResult = repo.getFolkMountStatus()
             val nomountResult = repo.getNomountStatus()
             val folkZygiskResult = repo.getFolkZygiskStatus()
+            val rekernelXResult = repo.getRekernelXStatus()
             val suiResult = repo.getSuiStatus()
 
             // The home card's SUSFS row switch only makes sense when the kernel reports SUSFS.
@@ -178,6 +185,9 @@ class SettingsViewModel(
                     folkZygiskStatus = folkZygiskResult.getOrNull(),
                     folkZygiskReadError = folkZygiskResult.isFailure,
                     isFolkZygiskLoading = false,
+                    rekernelXStatus = rekernelXResult.getOrNull(),
+                    rekernelXReadError = rekernelXResult.isFailure,
+                    isRekernelXLoading = false,
                     suiStatus = suiResult.getOrNull(),
                     suiReadError = suiResult.isFailure,
                     isSuiLoading = false,
@@ -201,6 +211,33 @@ class SettingsViewModel(
             }
             Toast.makeText(ksuApp, if (result.isSuccess) R.string.folkzygisk_reboot_required
                 else R.string.folkzygisk_write_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun setRekernelXEnabled(enabled: Boolean) {
+        if (_uiState.value.isRekernelXWriting || _uiState.value.isRekernelXLoading) return
+        ++refreshGeneration
+        _uiState.update { it.copy(isRekernelXWriting = true) }
+        viewModelScope.launch {
+            val result = repo.setRekernelXEnabled(enabled)
+            val status = repo.getRekernelXStatus()
+            _uiState.update {
+                it.copy(
+                    isRekernelXWriting = false,
+                    isRekernelXLoading = false,
+                    rekernelXStatus = status.getOrNull(),
+                    rekernelXReadError = status.isFailure,
+                )
+            }
+            val message = when {
+                result.isFailure -> R.string.rekernel_x_write_failed
+                !enabled -> R.string.rekernel_x_disabled_toast
+                // The driver only loads now when the hot insmod was accepted; otherwise the
+                // module's post-fs-data script loads it at the next boot.
+                status.getOrNull()?.loaded == true -> R.string.rekernel_x_loaded_toast
+                else -> R.string.rekernel_x_reboot_required
+            }
+            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
         }
     }
 

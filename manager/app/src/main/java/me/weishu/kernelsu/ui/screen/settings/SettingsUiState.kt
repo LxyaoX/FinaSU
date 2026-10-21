@@ -9,6 +9,7 @@ import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.NomountStatus
+import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.data.themestore.ThemeStoreMode
@@ -85,6 +86,12 @@ data class SettingsUiState(
     val isSuiWriting: Boolean = false,
     val suiManagementAvailable: Boolean? = null,
 
+    // ReKernel-X tombstone kernel support (external LKM, only its module state is managed here)
+    val rekernelXStatus: RekernelXStatus? = null,
+    val isRekernelXLoading: Boolean = true,
+    val rekernelXReadError: Boolean = false,
+    val isRekernelXWriting: Boolean = false,
+
     // Umount Modules
     val isDefaultUmountModules: Boolean = false,
 
@@ -127,6 +134,7 @@ data class SettingsScreenActions(
     val onSetAvcSpoofEnabled: (Boolean) -> Unit,
     val onSetFolkMountMode: (FolkMountMode) -> Unit,
     val onOpenNomount: () -> Unit,
+    val onSetRekernelXEnabled: (Boolean) -> Unit,
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
     val onSetSuiEnabled: (Boolean) -> Unit,
     val onRepairSui: () -> Unit,

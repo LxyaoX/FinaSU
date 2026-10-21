@@ -760,6 +760,11 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
                         },
                     )
+                },
+                {
+                    // ReKernel-X is an external LKM: the row owns its module markers only, so
+                    // tombstone tooling keeps working across manager restarts and reboots.
+                    RekernelXStatusItem(uiState, actions)
                 }
             )
         )
