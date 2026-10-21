@@ -31,19 +31,23 @@ fun getVersionCode(): Int {
 }
 
 /**
- * Version name to use when the clone has no reachable tag.
+ * Manager version name.
  *
- * `git describe --tags --always` then degrades to a bare commit id, which is not a version: the
- * About page showed a hash and the APK lost the `v` prefix that the updater and the release
- * workflow both match on. `managerFallbackVersion` (gradle.properties) overrides the default,
- * and a reachable `v*` tag still wins. Everything is read inside the function on purpose: the
- * script calls getVersionName() before later top-level properties would be initialized.
+ * Upstream KernelSU derives it from `git describe --tags --always`: the bare tag (`v3.3.2`) on
+ * the tagged commit, and `v3.3.2-12-g1a2b3c4` after it. This clone carries no tag, so describe
+ * degrades to a commit id; build the same shape from `managerBaseVersion` plus the commit count
+ * and the short hash. A reachable `v*` tag still wins, which is exactly upstream behaviour.
  */
 fun getVersionName(): String {
     val described = getGitDescribe()
-    val fallback = (findProperty("managerFallbackVersion") as String?)
-        ?.takeIf { it.isNotBlank() } ?: "v1.0.0"
-    // 7-40 lowercase hex and nothing else is describe's commit-id fallback, not a tag.
     val isCommitId = described.matches(Regex("[0-9a-f]{7,40}"))
-    return if (described.isEmpty() || isCommitId) fallback else described
+    if (described.isNotEmpty() && !isCommitId) return described
+    val base = (findProperty("managerBaseVersion") as String?)?.takeIf { it.isNotBlank() }
+        ?: "v3.3.2"
+    return "$base-${getGitCommitCount()}-g${getGitShortHash()}"
+}
+
+fun getGitShortHash(): String {
+    val process = Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "HEAD"))
+    return process.inputStream.bufferedReader().use { it.readText().trim() }
 }
