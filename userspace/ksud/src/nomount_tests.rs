@@ -283,6 +283,134 @@ fn module_loaded_matches_proc_modules() {
 }
 
 #[test]
+fn unfinished_load_record_blocks_reentry_in_the_same_cycle() {
+    let dir = tempfile::tempdir().unwrap();
+    let attempt = dir.path().join("nomount_load_inflight");
+    mount_guard::begin(
+        &attempt,
+        mount_guard::Stage::Load,
+        "nomount",
+        "android12-5.10",
+        &mount_guard::current_boot_id(),
+        4,
+    )
+    .unwrap();
+    let error = reject_unfinished_load(&attempt).unwrap_err();
+    assert!(error.to_string().contains("unfinished"));
+}
+
+#[test]
+fn legacy_load_record_is_preserved_before_injection_reuses_the_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let attempt = dir.path().join("nomount_load_inflight");
+    let legacy = dir.path().join("mount_inflight");
+    mount_guard::begin(
+        &legacy,
+        mount_guard::Stage::Load,
+        "nomount",
+        "android12-5.10",
+        "old-boot",
+        2,
+    )
+    .unwrap();
+    preserve_legacy_load_record(&attempt, &legacy).unwrap();
+    let preserved = mount_guard::read(&attempt).unwrap();
+    assert_eq!(preserved.stage, mount_guard::Stage::Load);
+    assert_eq!(preserved.boot_id, "old-boot");
+    assert_eq!(preserved.generation, 2);
+    assert!(legacy.exists());
+
+    mount_guard::begin(
+        &legacy,
+        mount_guard::Stage::Inject,
+        "builtin",
+        "mode=nomount configured=nomount",
+        "old-boot",
+        2,
+    )
+    .unwrap();
+    mount_guard::clear(&legacy);
+    assert!(reject_unfinished_load(&attempt).is_err());
+}
+
+#[test]
+fn legacy_injection_record_does_not_become_a_load_blocker() {
+    let dir = tempfile::tempdir().unwrap();
+    let attempt = dir.path().join("nomount_load_inflight");
+    let legacy = dir.path().join("mount_inflight");
+    mount_guard::begin(
+        &legacy,
+        mount_guard::Stage::Inject,
+        "nomount",
+        "mode=nomount",
+        "old-boot",
+        2,
+    )
+    .unwrap();
+    preserve_legacy_load_record(&attempt, &legacy).unwrap();
+    assert!(!attempt.exists());
+}
+
+#[test]
+fn legacy_load_migration_failure_keeps_the_original_guard() {
+    let dir = tempfile::tempdir().unwrap();
+    let attempt_parent = dir.path().join("blocked");
+    let attempt = attempt_parent.join("nomount_load_inflight");
+    let legacy = dir.path().join("mount_inflight");
+    let lock_path = dir.path().join("nomount_load.lock");
+    std::fs::write(&attempt_parent, "not a directory").unwrap();
+    mount_guard::begin(
+        &legacy,
+        mount_guard::Stage::Load,
+        "nomount",
+        "android12-5.10",
+        "old-boot",
+        2,
+    )
+    .unwrap();
+    assert!(preserve_legacy_load_guard_at(&legacy, &attempt, &lock_path).is_err());
+    assert_eq!(
+        mount_guard::read(&legacy).map(|record| record.stage),
+        Some(mount_guard::Stage::Load)
+    );
+    assert!(!attempt.exists());
+}
+
+#[test]
+fn load_lock_serializes_concurrent_attempts() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("nomount_load.lock");
+    let lock = load_lock_at(&path).unwrap();
+    let error = load_lock_at(&path).unwrap_err();
+    assert!(error.to_string().contains("already in progress"));
+    drop(lock);
+    load_lock_at(&path).unwrap();
+}
+
+#[test]
+fn explicit_retry_cannot_clear_an_active_load_guard() {
+    let dir = tempfile::tempdir().unwrap();
+    let attempt = dir.path().join("nomount_load_inflight");
+    let legacy = dir.path().join("mount_inflight");
+    let lock_path = dir.path().join("nomount_load.lock");
+    mount_guard::begin(
+        &attempt,
+        mount_guard::Stage::Load,
+        "nomount",
+        "android12-5.10",
+        "boot",
+        3,
+    )
+    .unwrap();
+    let active = load_lock_at(&lock_path).unwrap();
+    assert!(forget_inflight_at(&attempt, &legacy, &lock_path).is_err());
+    assert!(attempt.exists());
+    drop(active);
+    forget_inflight_at(&attempt, &legacy, &lock_path).unwrap();
+    assert!(!attempt.exists());
+}
+
+#[test]
 fn redirect_and_whiteout_records_follow_the_wire_layout() {
     let redirect = Rule::redirect("/system/etc/hosts", "/data/adb/modules/m/system/etc/hosts");
     let batches = encode_batches(std::slice::from_ref(&redirect)).unwrap();

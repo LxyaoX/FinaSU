@@ -8,6 +8,7 @@ mod android {
     pub const EMULATED_SOFT_REBOOT_TIMEOUT: Duration = Duration::from_secs(5);
     pub const WAITSYS_READY_TIMEOUT: Duration = Duration::from_secs(2);
     pub const WAITSYS_STOP_TIMEOUT: Duration = Duration::from_secs(5);
+    pub const SOFT_REBOOT_LOCK: &str = concatcp!(WORKING_DIR, "soft_reboot.lock");
     pub const BOOTLOG_TIMEOUT: &str = "30s";
 
     pub const ADB_DIR: &str = "/data/adb/";
@@ -89,6 +90,8 @@ mod android {
     /// known to have finished. Finding an earlier boot's record means that step
     /// never finished, so the next boot has to skip it.
     pub const MOUNT_INFLIGHT: &str = concatcp!(WORKING_DIR, "mount_inflight");
+    pub const NOMOUNT_LOAD_INFLIGHT: &str = concatcp!(WORKING_DIR, "nomount_load_inflight");
+    pub const NOMOUNT_LOAD_LOCK: &str = concatcp!(WORKING_DIR, "nomount_load.lock");
     pub const MOUNT_UI_PENDING: &str = concatcp!(WORKING_DIR, "mount_ui_pending");
     pub const MOUNT_UI_CONFIG: &str = concatcp!(WORKING_DIR, "mount_ui_guard");
     /// Per-boot mount log, kept small enough to ride along in a bug report.

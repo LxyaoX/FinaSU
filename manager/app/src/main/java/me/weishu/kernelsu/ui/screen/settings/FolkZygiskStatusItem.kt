@@ -5,7 +5,14 @@ import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+
+internal fun showFolkZygiskRecovery(state: SettingsUiState): Boolean =
+    state.folkZygiskStatus?.startupBlocked == true
 
 @Composable
 internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScreenActions) {
@@ -33,6 +40,18 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
                     else -> R.string.folkzygisk_unknown_gate
                 })
             }.distinct()
+            val failure = status.startupFailureCode?.let { code ->
+                stringResource(when (code) {
+                    "engine_missing" -> R.string.folkzygisk_failure_engine_missing
+                    "runtime_unsafe" -> R.string.folkzygisk_failure_runtime_unsafe
+                    "monitor_start_failed" -> R.string.folkzygisk_failure_monitor_start_failed
+                    "monitor_exited" -> R.string.folkzygisk_failure_monitor_exited
+                    "readiness_timeout" -> R.string.folkzygisk_failure_readiness_timeout
+                    "injection_unconfirmed" -> R.string.folkzygisk_failure_injection_unconfirmed
+                    "runtime_invalid" -> R.string.folkzygisk_failure_runtime_invalid
+                    else -> R.string.folkzygisk_failure_unknown
+                })
+            }
             buildList {
                 add(stringResource(R.string.folkzygisk_current, injection))
                 add(selection)
@@ -47,6 +66,9 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
                 }
                 if (status.rebootRequired == true || state.folkZygiskRebootPending) add(stringResource(R.string.folkzygisk_reboot_required))
                 if (blockers.isNotEmpty()) add(stringResource(R.string.folkzygisk_blockers, blockers.joinToString("; ")))
+                if (status.startupBlocked) add(stringResource(R.string.folkzygisk_startup_paused, status.startupFailures))
+                failure?.let { add(it) }
+                status.startupFailureDetail?.takeIf(String::isNotBlank)?.let(::add)
             }.joinToString("\n")
         }
     }
@@ -58,4 +80,17 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
         enabled = status != null && !state.folkZygiskReadError && !state.isFolkZygiskLoading && !state.isFolkZygiskWriting,
         onCheckedChange = { actions.onSetFolkZygiskEnabled(it) },
     )
+    if (showFolkZygiskRecovery(state)) {
+        SegmentedListItem(
+            headlineContent = { Text(stringResource(R.string.folkzygisk_recover)) },
+            supportingContent = {
+                Text(stringResource(R.string.folkzygisk_recover_summary))
+            },
+            leadingContent = { Icon(Icons.Filled.Refresh, null) },
+            enabled = !state.folkZygiskReadError &&
+                !state.isFolkZygiskLoading &&
+                !state.isFolkZygiskWriting,
+            onClick = actions.onRecoverFolkZygisk,
+        )
+    }
 }

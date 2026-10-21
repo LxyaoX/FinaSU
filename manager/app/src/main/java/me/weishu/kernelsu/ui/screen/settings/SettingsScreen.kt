@@ -97,6 +97,7 @@ fun rememberSettingsActions(
         onSetFolkMountMode = onSetFolkMountMode,
         onOpenNomount = { navigator.push(Route.Nomount) },
         onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
+        onRecoverFolkZygisk = viewModel::recoverFolkZygisk,
         onSetSuiEnabled = viewModel::setSuiEnabled,
         onRepairSui = viewModel::repairSui,
         onManageSuiPermissions = { navigator.push(Route.SuiPermissions) },

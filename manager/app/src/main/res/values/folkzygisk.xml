@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">engine not installed</string>
     <string name="folkzygisk_startup_protection">startup protection active</string>
     <string name="folkzygisk_unknown_gate">unrecognized restriction</string>
+    <string name="folkzygisk_recover">Recover and retry after restart</string>
+    <string name="folkzygisk_recover_summary">Clear the startup pause and allow one new attempt after the next full or soft restart. Nothing starts now.</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk recovery saved. Restart or soft restart to try again.</string>
+    <string name="folkzygisk_startup_paused">Automatic startup paused after %1$d unsuccessful startup attempts.</string>
+    <string name="folkzygisk_failure_engine_missing">Last issue: the embedded engine is missing or incomplete.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Last issue: the runtime directory or lock was not safe to reuse.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Last issue: the monitor could not be started.</string>
+    <string name="folkzygisk_failure_monitor_exited">Last issue: the monitor exited before becoming ready.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Last issue: the monitor did not become ready in time.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Last issue: complete zygote injection was not confirmed.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Last issue: the runtime status was invalid.</string>
+    <string name="folkzygisk_failure_unknown">Last issue: startup failure reason not recognized.</string>
 </resources>

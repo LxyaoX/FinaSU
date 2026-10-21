@@ -23,28 +23,128 @@ const RUNTIME: &str = "/data/adb/ksu/.zygisk/state.json";
 const BOOT_GUARD: &str = "/data/adb/ksu/zygisk-boot.json";
 const FAILURE_LIMIT: u32 = 3;
 
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum StartupIssueCode {
+    EngineMissing,
+    RuntimeUnsafe,
+    MonitorStartFailed,
+    MonitorExited,
+    ReadinessTimeout,
+    InjectionUnconfirmed,
+    RuntimeInvalid,
+}
+
+impl StartupIssueCode {
+    const fn as_str(self) -> &'static str {
+        match self {
+            Self::EngineMissing => "engine_missing",
+            Self::RuntimeUnsafe => "runtime_unsafe",
+            Self::MonitorStartFailed => "monitor_start_failed",
+            Self::MonitorExited => "monitor_exited",
+            Self::ReadinessTimeout => "readiness_timeout",
+            Self::InjectionUnconfirmed => "injection_unconfirmed",
+            Self::RuntimeInvalid => "runtime_invalid",
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct StartupIssue {
+    code: StartupIssueCode,
+    detail: String,
+    boot_id: String,
+    generation: u64,
+    counted: bool,
+}
+
 #[derive(Default, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 struct BootGuard {
+    #[serde(default)]
     boot_id: String,
+    #[serde(default)]
     failures: u32,
+    #[serde(default)]
     latched: bool,
+    #[serde(default)]
+    attempted_generation: u64,
+    #[serde(default)]
+    last_issue: Option<StartupIssue>,
 }
 
 impl BootGuard {
-    fn attempt(&mut self, boot: &str) -> bool {
-        if self.latched || self.boot_id == boot {
-            return false;
+    fn prepare_cycle(&mut self, epoch: &crate::startup_epoch::StartupEpoch) {
+        if self.attempted_generation == 0 && self.boot_id == epoch.boot_id {
+            self.attempted_generation = epoch.generation;
         }
-        if self.failures >= FAILURE_LIMIT {
-            boot.clone_into(&mut self.boot_id);
-            self.latched = true;
-            return false;
-        }
-        boot.clone_into(&mut self.boot_id);
-        self.failures += 1;
-        true
     }
+
+    const fn blocked(&self) -> bool {
+        self.latched || self.failures >= FAILURE_LIMIT
+    }
+
+    fn handled_this_cycle(&self, epoch: &crate::startup_epoch::StartupEpoch) -> bool {
+        let same_boot = self.boot_id == epoch.boot_id;
+        let same_generation = self.attempted_generation == epoch.generation;
+        same_boot && same_generation
+    }
+
+    fn mark_attempt(
+        &mut self,
+        epoch: &crate::startup_epoch::StartupEpoch,
+        code: StartupIssueCode,
+        detail: impl Into<String>,
+        counted: bool,
+    ) {
+        epoch.boot_id.clone_into(&mut self.boot_id);
+        self.attempted_generation = epoch.generation;
+        if counted {
+            self.failures = self.failures.saturating_add(1);
+            if self.failures >= FAILURE_LIMIT {
+                self.latched = true;
+            }
+        }
+        self.record_issue(epoch, code, detail, counted);
+    }
+
+    fn record_issue(
+        &mut self,
+        epoch: &crate::startup_epoch::StartupEpoch,
+        code: StartupIssueCode,
+        detail: impl Into<String>,
+        counted: bool,
+    ) {
+        let detail = detail.into();
+        self.last_issue = Some(StartupIssue {
+            code,
+            detail: diagnostic_detail(&detail),
+            boot_id: epoch.boot_id.clone(),
+            generation: epoch.generation,
+            counted,
+        });
+    }
+
+    fn mark_handled(&mut self, epoch: &crate::startup_epoch::StartupEpoch) {
+        epoch.boot_id.clone_into(&mut self.boot_id);
+        self.attempted_generation = epoch.generation;
+    }
+
+    fn clear_failures(&mut self, epoch: &crate::startup_epoch::StartupEpoch) {
+        self.failures = 0;
+        self.latched = false;
+        self.last_issue = None;
+        self.mark_handled(epoch);
+    }
+}
+
+fn diagnostic_detail(detail: &str) -> String {
+    detail
+        .chars()
+        .filter(|character| !character.is_control() || *character == '\t')
+        .take(256)
+        .collect()
 }
 
 fn load_guard(path: &Path) -> Result<BootGuard> {
@@ -166,9 +266,7 @@ fn apply_sepolicy_rules() -> Result<()> {
 #[cfg(target_os = "android")]
 pub fn post_fs_data(safe_mode: bool) -> Result<()> {
     use std::os::unix::fs::MetadataExt;
-    use std::os::unix::process::CommandExt;
-    use std::process::{Command as ProcessCommand, Stdio};
-    use std::time::{Duration, Instant};
+
     if safe_mode || crate::utils::is_safe_mode() || crate::utils::has_magisk() {
         return Ok(());
     }
@@ -176,39 +274,144 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
     if !read_config(Path::new(CONFIG))?.enabled {
         return Ok(());
     }
-    // An active external provider wins. Step aside before touching the boot guard so that
-    // yielding never consumes a startup attempt.
+    // An active external provider wins. Step aside before touching the boot
+    // guard so that yielding never consumes a startup attempt.
     if !providers(Path::new(MODULES), Path::new(UPDATES))?.is_empty() {
         log::info!("External Zygisk provider active; built-in FolkZygisk steps aside");
         return Ok(());
     }
-    let boot = fs::read_to_string("/proc/sys/kernel/random/boot_id")?;
+
+    let epoch = crate::startup_epoch::current_or_create()?;
     let mut guard = load_guard(Path::new(BOOT_GUARD))?;
-    let attempt = guard.attempt(boot.trim());
-    write_json(Path::new(BOOT_GUARD), &guard)?;
-    if !attempt {
+    guard.prepare_cycle(&epoch);
+
+    if !engine_available(Path::new(ENGINE)) {
+        guard.record_issue(
+            &epoch,
+            StartupIssueCode::EngineMissing,
+            "embedded FolkZygisk engine is missing or incomplete",
+            false,
+        );
+        if let Err(error) = write_json(Path::new(BOOT_GUARD), &guard) {
+            log::warn!("Could not persist FolkZygisk engine-missing diagnostic: {error:#}");
+        }
+        anyhow::bail!("FolkZygisk engine missing; install the engine and retry");
+    }
+
+    if let Some(runtime) = match read_runtime(Path::new(RUNTIME), Path::new("/proc")) {
+        Ok(runtime) => runtime,
+        Err(error) => {
+            log::warn!("FolkZygisk runtime status is invalid: {error:#}");
+            guard.record_issue(
+                &epoch,
+                StartupIssueCode::RuntimeInvalid,
+                format!("{error:#}"),
+                false,
+            );
+            let _ = write_json(Path::new(BOOT_GUARD), &guard);
+            None
+        }
+    } {
+        log::info!(
+            "FolkZygisk monitor is already alive this kernel boot; injection state: {}",
+            injection_state(Some(&runtime))
+        );
+        guard.mark_handled(&epoch);
+        if let Err(error) = write_json(Path::new(BOOT_GUARD), &guard) {
+            log::warn!("Could not persist FolkZygisk handled cycle: {error:#}");
+        }
         return Ok(());
     }
-    ensure!(
-        engine_available(Path::new(ENGINE)),
-        "FolkZygisk engine missing"
+
+    if guard.blocked() || guard.handled_this_cycle(&epoch) {
+        guard.mark_handled(&epoch);
+        if let Err(error) = write_json(Path::new(BOOT_GUARD), &guard) {
+            log::warn!("Could not persist FolkZygisk blocked cycle: {error:#}");
+        }
+        return Ok(());
+    }
+
+    let runtime_dir = Path::new(RUNTIME).parent().context("Runtime directory")?;
+    let prepared = (|| -> Result<()> {
+        fs::create_dir_all(runtime_dir)?;
+        let metadata = fs::symlink_metadata(runtime_dir)?;
+        ensure!(
+            metadata.is_dir() && metadata.uid() == 0,
+            "Unsafe FolkZygisk runtime directory"
+        );
+        fs::set_permissions(runtime_dir, fs::Permissions::from_mode(0o711))?;
+        crate::restorecon::setsyscon(runtime_dir)?;
+        clear_stale_runtime(runtime_dir)
+    })();
+    if let Err(error) = prepared {
+        guard.record_issue(
+            &epoch,
+            StartupIssueCode::RuntimeUnsafe,
+            format!("{error:#}"),
+            false,
+        );
+        if let Err(write_error) = write_json(Path::new(BOOT_GUARD), &guard) {
+            log::warn!(
+                "Could not persist FolkZygisk runtime diagnostic: {write_error:#}; original error: {error:#}"
+            );
+        }
+        return Err(error);
+    }
+
+    guard.mark_attempt(
+        &epoch,
+        StartupIssueCode::InjectionUnconfirmed,
+        "startup attempt recorded; complete zygote injection was not yet confirmed",
+        true,
     );
+    write_json(Path::new(BOOT_GUARD), &guard)?;
+
+    if let Err(error) = start_monitor() {
+        let code = error
+            .downcast_ref::<StartupFailure>()
+            .map_or(StartupIssueCode::MonitorStartFailed, |failure| failure.code);
+        guard.record_issue(&epoch, code, format!("{error:#}"), true);
+        if let Err(write_error) = write_json(Path::new(BOOT_GUARD), &guard) {
+            log::warn!(
+                "Could not persist FolkZygisk startup diagnostic: {write_error:#}; original error: {error:#}"
+            );
+        }
+        return Err(error);
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "android")]
+#[derive(Debug)]
+struct StartupFailure {
+    code: StartupIssueCode,
+    source: anyhow::Error,
+}
+
+#[cfg(target_os = "android")]
+impl std::fmt::Display for StartupFailure {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(formatter, "{:#}", self.source)
+    }
+}
+
+#[cfg(target_os = "android")]
+impl std::error::Error for StartupFailure {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(self.source.root_cause())
+    }
+}
+
+#[cfg(target_os = "android")]
+fn start_monitor() -> Result<()> {
+    use std::os::unix::process::CommandExt;
+    use std::process::{Command as ProcessCommand, Stdio};
+    use std::time::{Duration, Instant};
     // The zygote must be able to search the engine's parent directories and read the injected
     // library and daemon socket; without these rules the injected remote `openat` fails with EACCES.
     if let Err(e) = apply_sepolicy_rules() {
         log::warn!("FolkZygisk sepolicy rules failed to apply: {e}");
     }
-    let runtime_dir = Path::new(RUNTIME).parent().context("Runtime directory")?;
-    fs::create_dir_all(runtime_dir)?;
-    let metadata = fs::symlink_metadata(runtime_dir)?;
-    ensure!(
-        metadata.is_dir() && metadata.uid() == 0,
-        "Unsafe FolkZygisk runtime directory"
-    );
-    // Zygisk clients need socket traversal after specialization, not listing.
-    fs::set_permissions(runtime_dir, fs::Permissions::from_mode(0o711))?;
-    crate::restorecon::setsyscon(runtime_dir)?;
-    clear_stale_runtime(runtime_dir)?;
     let executable = if cfg!(target_pointer_width = "64") {
         "bin/zygisk-ptrace64"
     } else {
@@ -231,16 +434,27 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
             detach_from_service_cgroup()
         });
     }
-    let mut child = command.spawn()?;
+    let mut child = command.spawn().map_err(|source| StartupFailure {
+        code: StartupIssueCode::MonitorStartFailed,
+        source: source.into(),
+    })?;
     let deadline = Instant::now() + Duration::from_secs(2);
     let result = loop {
         match child.try_wait() {
             Ok(Some(_)) => {
-                break Err(anyhow::anyhow!(
-                    "FolkZygisk monitor exited before readiness"
-                ));
+                break Err(StartupFailure {
+                    code: StartupIssueCode::MonitorExited,
+                    source: anyhow::anyhow!("FolkZygisk monitor exited before readiness"),
+                }
+                .into());
             }
-            Err(error) => break Err(error.into()),
+            Err(source) => {
+                break Err(StartupFailure {
+                    code: StartupIssueCode::MonitorStartFailed,
+                    source: source.into(),
+                }
+                .into());
+            }
             Ok(None) => {}
         }
         match read_runtime(Path::new(RUNTIME), Path::new("/proc")) {
@@ -255,7 +469,11 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
             _ => {}
         }
         if Instant::now() >= deadline {
-            break Err(anyhow::anyhow!("FolkZygisk readiness timeout"));
+            break Err(StartupFailure {
+                code: StartupIssueCode::ReadinessTimeout,
+                source: anyhow::anyhow!("FolkZygisk readiness timeout"),
+            }
+            .into());
         }
         std::thread::sleep(Duration::from_millis(20));
     };
@@ -264,6 +482,96 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
         let _ = child.wait();
     }
     result
+}
+
+#[cfg(any(target_os = "android", test))]
+fn kill_and_reap(child: &mut std::process::Child, label: &str) -> Result<()> {
+    if child.try_wait()?.is_some() {
+        return Ok(());
+    }
+    let _ = child.kill();
+    let deadline = std::time::Instant::now() + std::time::Duration::from_millis(500);
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => return Ok(()),
+            Ok(None) if std::time::Instant::now() < deadline => {
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+            Ok(None) => anyhow::bail!("{label} did not exit after termination"),
+            Err(error) => return Err(error).with_context(|| format!("Reap {label}")),
+        }
+    }
+}
+
+#[cfg(any(target_os = "android", test))]
+fn wait_child_until(
+    child: &mut std::process::Child,
+    deadline: std::time::Instant,
+    label: &str,
+) -> Result<std::process::ExitStatus> {
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => return Ok(status),
+            Ok(None) if std::time::Instant::now() < deadline => {
+                std::thread::sleep(std::time::Duration::from_millis(20));
+            }
+            Ok(None) => {
+                kill_and_reap(child, label)?;
+                anyhow::bail!("{label} timed out");
+            }
+            Err(error) => {
+                if let Err(reap_error) = kill_and_reap(child, label) {
+                    return Err(error).with_context(|| {
+                        format!("Wait for {label}; termination also failed: {reap_error:#}")
+                    });
+                }
+                return Err(error).with_context(|| format!("Wait for {label}"));
+            }
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+pub fn prepare_soft_reboot() -> Result<()> {
+    use std::process::{Command as ProcessCommand, Stdio};
+    use std::time::{Duration, Instant};
+
+    let _lock = lock()?;
+    let Some(runtime) = read_runtime(Path::new(RUNTIME), Path::new("/proc"))? else {
+        return Ok(());
+    };
+    // A failed monitor can remain alive after it stops tracing and therefore
+    // keeps monitor.lock. End it at the userspace-cycle boundary so the next
+    // post-fs-data can make a fresh attempt. Healthy monitors keep running and
+    // follow the replacement zygote.
+    if injection_state(Some(&runtime)) != "failed" {
+        return Ok(());
+    }
+    let executable = if cfg!(target_pointer_width = "64") {
+        "bin/zygisk-ptrace64"
+    } else {
+        "bin/zygisk-ptrace32"
+    };
+    let deadline = Instant::now() + Duration::from_secs(2);
+    let mut child = ProcessCommand::new(Path::new(ENGINE).join(executable))
+        .args(["ctl", "exit"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .context("Stop failed FolkZygisk monitor")?;
+    let status = wait_child_until(&mut child, deadline, "FolkZygisk ctl exit")?;
+    ensure!(
+        status.success(),
+        "Failed FolkZygisk monitor refused the soft-reboot exit request"
+    );
+    while Instant::now() < deadline {
+        if read_runtime(Path::new(RUNTIME), Path::new("/proc"))?.is_none() {
+            return Ok(());
+        }
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    anyhow::bail!("FolkZygisk monitor did not release its runtime before soft reboot")
 }
 
 #[cfg(target_os = "android")]
@@ -289,20 +597,58 @@ pub fn boot_completed() -> Result<()> {
         return Ok(());
     }
     let _lock = lock()?;
+    let epoch = crate::startup_epoch::current_or_create()?;
     let runtime = read_runtime(Path::new(RUNTIME), Path::new("/proc"))?;
     // Android boot completion alone does not prove the engine is healthy.
-    if injection_state(runtime.as_ref()) != "injected" {
-        return Ok(());
-    }
     let mut guard = load_guard(Path::new(BOOT_GUARD))?;
-    if runtime
-        .as_ref()
-        .is_some_and(|status| status.boot_id == guard.boot_id)
+    let state = injection_state(runtime.as_ref());
+    let injected = state == "injected"
+        && runtime
+            .as_ref()
+            .is_some_and(|status| status.boot_id == epoch.boot_id);
+    let detail = runtime.as_ref().map_or_else(
+        || "startup completed without a validated monitor".to_owned(),
+        |status| status.reason.clone(),
+    );
+    if apply_boot_receipt(&mut guard, &epoch, injected, state, &detail)
+        && let Err(error) = write_json(Path::new(BOOT_GUARD), &guard)
     {
-        guard.failures = 0;
-        write_json(Path::new(BOOT_GUARD), &guard)?;
+        if injected {
+            return Err(error).context("Clear FolkZygisk startup protection");
+        }
+        log::warn!("Could not persist FolkZygisk boot-completion diagnostic: {error:#}");
     }
     Ok(())
+}
+
+fn apply_boot_receipt(
+    guard: &mut BootGuard,
+    epoch: &crate::startup_epoch::StartupEpoch,
+    injected: bool,
+    state: &str,
+    detail: &str,
+) -> bool {
+    guard.prepare_cycle(epoch);
+    if injected {
+        guard.clear_failures(epoch);
+        return true;
+    }
+    let pending_attempt = guard.last_issue.as_ref().is_some_and(|issue| {
+        issue.generation == epoch.generation
+            && issue.boot_id == epoch.boot_id
+            && issue.counted
+            && issue.code == StartupIssueCode::InjectionUnconfirmed
+    });
+    if !pending_attempt {
+        return false;
+    }
+    guard.record_issue(
+        epoch,
+        StartupIssueCode::InjectionUnconfirmed,
+        format!("complete zygote injection was not confirmed ({state}): {detail}"),
+        true,
+    );
+    true
 }
 
 #[derive(Clone, Debug, clap::Subcommand)]
@@ -318,6 +664,8 @@ pub enum Command {
     Disable,
     /// Clear the startup failure latch without enabling or starting injection
     ResetFailures,
+    /// Restore automatic startup for the next userspace boot without starting now
+    Recover,
     /// Install embedded engine assets without enabling or starting injection
     InstallEngine,
 }
@@ -342,14 +690,19 @@ pub struct ProviderStatus {
     pub runtime: Option<RuntimeStatus>,
     pub startup_failures: u32,
     pub startup_blocked: bool,
+    pub startup_failure_code: Option<&'static str>,
+    pub startup_failure_detail: Option<String>,
+    pub startup_generation: u64,
 }
 
 pub fn provider_status() -> Result<ProviderStatus> {
     let runtime = read_runtime(Path::new(RUNTIME), Path::new("/proc"))?;
-    let guard = load_guard(Path::new(BOOT_GUARD))?;
+    let epoch = crate::startup_epoch::current_or_create()?;
+    let mut guard = load_guard(Path::new(BOOT_GUARD))?;
+    guard.prepare_cycle(&epoch);
     let engine = engine_available(Path::new(ENGINE));
     let external = providers(Path::new(MODULES), Path::new(UPDATES))?;
-    let blocked = guard.latched || guard.failures >= FAILURE_LIMIT;
+    let blocked = guard.blocked();
     Ok(ProviderStatus {
         schema_version: 1,
         enabled: read_config(Path::new(CONFIG))?.enabled,
@@ -361,6 +714,9 @@ pub fn provider_status() -> Result<ProviderStatus> {
         runtime,
         startup_failures: guard.failures,
         startup_blocked: blocked,
+        startup_failure_code: guard.last_issue.as_ref().map(|issue| issue.code.as_str()),
+        startup_failure_detail: guard.last_issue.as_ref().map(|issue| issue.detail.clone()),
+        startup_generation: epoch.generation,
     })
 }
 
@@ -588,6 +944,62 @@ fn write_json(path: &Path, value: &impl Serialize) -> Result<()> {
     Ok(())
 }
 
+fn install_engine_locked(
+    epoch: &crate::startup_epoch::StartupEpoch,
+    guard: &BootGuard,
+) -> Result<String> {
+    let runtime_is_live = read_runtime(Path::new(RUNTIME), Path::new("/proc"))?.is_some();
+    ensure_engine_installable(epoch, guard, runtime_is_live)?;
+    let files = crate::zygisk_assets::FILES
+        .iter()
+        .map(|name| {
+            let bytes = crate::assets::get_asset_data(&format!("folkzygisk/{name}"))?;
+            Ok(((*name).to_owned(), bytes.into_owned()))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    crate::zygisk_assets::install(
+        Path::new(ENGINE).parent().context("Engine parent")?,
+        &files,
+        |path| {
+            #[cfg(target_os = "android")]
+            crate::restorecon::restore_syscon(path)?;
+            #[cfg(not(target_os = "android"))]
+            let _ = path;
+            Ok(())
+        },
+    )
+}
+
+fn ensure_engine_installable(
+    epoch: &crate::startup_epoch::StartupEpoch,
+    guard: &BootGuard,
+    runtime_is_live: bool,
+) -> Result<()> {
+    ensure!(
+        !runtime_is_live,
+        "Cannot update a live FolkZygisk engine; soft reboot or disable it first"
+    );
+    ensure!(
+        !guard.handled_this_cycle(epoch),
+        "FolkZygisk startup was already handled in this userspace boot; soft reboot before installing"
+    );
+    Ok(())
+}
+
+fn print_enable_hint() {
+    match providers(Path::new(MODULES), Path::new(UPDATES)) {
+        Ok(external) if !external.is_empty() => println!(
+            "FolkZygisk enabled, but external provider(s) {} take precedence; the built-in engine will step aside",
+            external.join(", ")
+        ),
+        Ok(_) => println!("FolkZygisk enabled for the next boot; reboot required"),
+        Err(error) => {
+            log::warn!("Could not scan Zygisk providers: {error:#}");
+            println!("FolkZygisk enabled for the next boot; reboot required");
+        }
+    }
+}
+
 pub fn run(command: &Command) -> Result<()> {
     let _lock = lock()?;
     match command {
@@ -602,7 +1014,7 @@ pub fn run(command: &Command) -> Result<()> {
         Command::Enable => {
             let guard = load_guard(Path::new(BOOT_GUARD))?;
             let engine = engine_available(Path::new(ENGINE));
-            let blocked = guard.latched || guard.failures >= FAILURE_LIMIT;
+            let blocked = guard.blocked();
             let blockers = enable_blockers(engine, blocked);
             ensure!(
                 blockers.is_empty(),
@@ -610,62 +1022,60 @@ pub fn run(command: &Command) -> Result<()> {
                 blockers.join(", ")
             );
             write_config(Path::new(CONFIG), &Config { enabled: true })?;
-            // The configuration is already persisted; the provider scan only picks the hint text,
-            // so a scan failure must not turn a successful enable into a CLI error.
-            match providers(Path::new(MODULES), Path::new(UPDATES)) {
-                Ok(external) if !external.is_empty() => println!(
-                    "FolkZygisk enabled, but external provider(s) {} take precedence; the built-in engine will step aside",
-                    external.join(", ")
-                ),
-                Ok(_) => println!("FolkZygisk enabled for the next boot; reboot required"),
-                Err(error) => {
-                    log::warn!("Could not scan Zygisk providers: {error:#}");
-                    println!("FolkZygisk enabled for the next boot; reboot required");
-                }
-            }
+            print_enable_hint();
         }
         Command::Disable => {
             write_config(Path::new(CONFIG), &Config { enabled: false })?;
             println!("FolkZygisk disabled for the next boot");
         }
         Command::ResetFailures => {
+            let epoch = crate::startup_epoch::current_or_create()?;
             let mut guard = load_guard(Path::new(BOOT_GUARD))?;
             guard.failures = 0;
             guard.latched = false;
-            // Recovery never permits another attempt during the current boot.
-            let boot = fs::read_to_string("/proc/sys/kernel/random/boot_id")?;
-            boot.trim().clone_into(&mut guard.boot_id);
+            guard.last_issue = None;
+            // Compatibility command: never permits another attempt in this cycle.
+            guard.mark_handled(&epoch);
             write_json(Path::new(BOOT_GUARD), &guard)?;
             println!("FolkZygisk startup protection reset for the next boot");
         }
-        Command::InstallEngine => {
-            ensure!(
-                read_runtime(Path::new(RUNTIME), Path::new("/proc"))?.is_none(),
-                "Cannot update a live FolkZygisk engine; disable and reboot first"
-            );
-            let boot = fs::read_to_string("/proc/sys/kernel/random/boot_id")?;
-            ensure!(
-                load_guard(Path::new(BOOT_GUARD))?.boot_id != boot.trim(),
-                "Engine startup was attempted this boot; reboot before installing"
-            );
-            let files = crate::zygisk_assets::FILES
-                .iter()
-                .map(|name| {
-                    let bytes = crate::assets::get_asset_data(&format!("folkzygisk/{name}"))?;
-                    Ok(((*name).to_owned(), bytes.into_owned()))
-                })
-                .collect::<Result<Vec<_>>>()?;
-            let version = crate::zygisk_assets::install(
-                Path::new(ENGINE).parent().context("Engine parent")?,
-                &files,
-                |path| {
-                    #[cfg(target_os = "android")]
-                    crate::restorecon::restore_syscon(path)?;
-                    #[cfg(not(target_os = "android"))]
-                    let _ = path;
-                    Ok(())
-                },
+        Command::Recover => {
+            let epoch = crate::startup_epoch::current_or_create()?;
+            let mut guard = load_guard(Path::new(BOOT_GUARD))?;
+            guard.prepare_cycle(&epoch);
+            let installed = if engine_available(Path::new(ENGINE)) {
+                None
+            } else {
+                Some(install_engine_locked(&epoch, &guard).context(
+                    "FolkZygisk cannot safely restore its missing engine in this userspace boot",
+                )?)
+            };
+
+            // Reserve the current cycle first. A later failure may leave the
+            // latch in place, but it cannot make this cycle attempt startup.
+            guard.mark_handled(&epoch);
+            write_json(Path::new(BOOT_GUARD), &guard)
+                .context("FolkZygisk recovery could not reserve the current userspace boot")?;
+            write_config(Path::new(CONFIG), &Config { enabled: true }).context(
+                "FolkZygisk could not be enabled; the current userspace boot remains protected",
             )?;
+            guard.clear_failures(&epoch);
+            write_json(Path::new(BOOT_GUARD), &guard).context(
+                "FolkZygisk was enabled and the current boot remains protected, but the startup latch could not be cleared",
+            )?;
+
+            if let Some(version) = installed {
+                println!("FolkZygisk recovered and engine installed: {version}; restart required");
+            } else {
+                println!("FolkZygisk recovered; restart required");
+            }
+            print_enable_hint();
+        }
+        Command::InstallEngine => {
+            let epoch = crate::startup_epoch::current_or_create()?;
+            let mut guard = load_guard(Path::new(BOOT_GUARD))?;
+            guard.prepare_cycle(&epoch);
+            let version = install_engine_locked(&epoch, &guard)?;
             println!(
                 "FolkZygisk engine installed: {version}; provider selection unchanged, no injection started"
             );
@@ -692,6 +1102,24 @@ mod tests {
     use super::*;
 
     #[test]
+    fn hanging_child_is_reaped_at_the_deadline() {
+        let mut child = std::process::Command::new("sleep")
+            .arg("30")
+            .spawn()
+            .unwrap();
+        let started = std::time::Instant::now();
+        let error = wait_child_until(
+            &mut child,
+            started + std::time::Duration::from_millis(100),
+            "test child",
+        )
+        .unwrap_err();
+        assert!(error.to_string().contains("timed out"));
+        assert!(started.elapsed() < std::time::Duration::from_secs(2));
+        assert!(child.try_wait().unwrap().is_some());
+    }
+
+    #[test]
     fn activation_keeps_operational_protection() {
         assert!(enable_blockers(true, false).is_empty());
         assert_eq!(
@@ -703,20 +1131,215 @@ mod tests {
     #[test]
     fn boot_guard_counts_once_and_latches_after_three_failed_boots() -> Result<()> {
         let mut guard = BootGuard::default();
-        for boot in ["one", "two", "three"] {
-            assert!(guard.attempt(boot));
-            let count = guard.failures;
-            assert!(!guard.attempt(boot));
-            assert_eq!(guard.failures, count);
+        for generation in 1..=3 {
+            let epoch = crate::startup_epoch::StartupEpoch {
+                boot_id: "boot".to_owned(),
+                generation,
+            };
+            assert!(!guard.handled_this_cycle(&epoch));
+            guard.mark_attempt(
+                &epoch,
+                StartupIssueCode::InjectionUnconfirmed,
+                "not confirmed",
+                true,
+            );
+            assert!(guard.handled_this_cycle(&epoch));
+            assert_eq!(guard.failures, generation as u32);
         }
-        assert!(!guard.attempt("four"));
         assert!(guard.latched);
+        assert!(guard.blocked());
         let dir = tempfile::tempdir()?;
         let path = dir.path().join("guard.json");
         write_json(&path, &guard)?;
         assert!(load_guard(&path)?.latched);
         fs::write(&path, "broken")?;
         assert!(load_guard(&path).is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn recovery_defers_the_current_cycle_and_allows_the_next() -> Result<()> {
+        let mut guard = BootGuard::default();
+        let current = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 4,
+        };
+        guard.failures = FAILURE_LIMIT;
+        guard.latched = true;
+        guard.clear_failures(&current);
+        assert_eq!(guard.failures, 0);
+        assert!(!guard.latched);
+        assert!(guard.handled_this_cycle(&current));
+        assert!(
+            !guard.handled_this_cycle(&crate::startup_epoch::StartupEpoch {
+                boot_id: "boot".to_owned(),
+                generation: 5,
+            })
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn recovery_does_not_disable_future_protection() {
+        let mut guard = BootGuard {
+            failures: FAILURE_LIMIT,
+            latched: true,
+            ..BootGuard::default()
+        };
+        guard.clear_failures(&crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 1,
+        });
+        for generation in 2..=4 {
+            guard.mark_attempt(
+                &crate::startup_epoch::StartupEpoch {
+                    boot_id: "boot".to_owned(),
+                    generation,
+                },
+                StartupIssueCode::InjectionUnconfirmed,
+                "not confirmed",
+                true,
+            );
+        }
+        assert_eq!(guard.failures, FAILURE_LIMIT);
+        assert!(guard.blocked());
+    }
+
+    #[test]
+    fn recovery_reservation_keeps_the_old_protection_until_enablement_succeeds() {
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 3,
+        };
+        let mut guard = BootGuard {
+            failures: FAILURE_LIMIT,
+            latched: true,
+            last_issue: Some(StartupIssue {
+                code: StartupIssueCode::ReadinessTimeout,
+                detail: "timeout".to_owned(),
+                boot_id: "boot".to_owned(),
+                generation: 2,
+                counted: true,
+            }),
+            ..BootGuard::default()
+        };
+        guard.mark_handled(&epoch);
+        assert_eq!(guard.failures, FAILURE_LIMIT);
+        assert!(guard.latched);
+        assert!(guard.handled_this_cycle(&epoch));
+    }
+
+    #[test]
+    fn boot_receipt_only_clears_complete_injection() {
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 5,
+        };
+        let mut guard = BootGuard::default();
+        guard.mark_attempt(
+            &epoch,
+            StartupIssueCode::InjectionUnconfirmed,
+            "pending",
+            true,
+        );
+        assert!(apply_boot_receipt(
+            &mut guard,
+            &epoch,
+            false,
+            "partial",
+            "64-bit only"
+        ));
+        assert_eq!(guard.failures, 1);
+        assert!(guard.last_issue.as_ref().is_some_and(|issue| {
+            issue.code == StartupIssueCode::InjectionUnconfirmed && issue.detail.contains("partial")
+        }));
+        assert!(apply_boot_receipt(&mut guard, &epoch, true, "injected", ""));
+        assert_eq!(guard.failures, 0);
+        assert!(!guard.latched);
+        assert!(guard.last_issue.is_none());
+    }
+
+    #[test]
+    fn boot_receipt_preserves_a_specific_startup_failure() {
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 6,
+        };
+        let mut guard = BootGuard::default();
+        guard.mark_attempt(
+            &epoch,
+            StartupIssueCode::ReadinessTimeout,
+            "monitor timeout",
+            true,
+        );
+        assert!(!apply_boot_receipt(
+            &mut guard,
+            &epoch,
+            false,
+            "unverified",
+            "no runtime"
+        ));
+        assert_eq!(
+            guard.last_issue.as_ref().map(|issue| issue.code),
+            Some(StartupIssueCode::ReadinessTimeout)
+        );
+    }
+
+    #[test]
+    fn handled_cycle_is_scoped_to_its_boot_id() {
+        let guard = BootGuard {
+            boot_id: "old-boot".to_owned(),
+            attempted_generation: 7,
+            ..BootGuard::default()
+        };
+        assert!(
+            !guard.handled_this_cycle(&crate::startup_epoch::StartupEpoch {
+                boot_id: "new-boot".to_owned(),
+                generation: 7,
+            })
+        );
+    }
+
+    #[test]
+    fn engine_install_refuses_live_runtime_and_handled_cycles() {
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 2,
+        };
+        let guard = BootGuard {
+            boot_id: "boot".to_owned(),
+            attempted_generation: 2,
+            ..BootGuard::default()
+        };
+        let live = ensure_engine_installable(&epoch, &BootGuard::default(), true).unwrap_err();
+        assert!(format!("{live:#}").contains("live FolkZygisk engine"));
+        let handled = ensure_engine_installable(&epoch, &guard, false).unwrap_err();
+        assert!(format!("{handled:#}").contains("already handled"));
+    }
+
+    #[test]
+    fn uncounted_preflight_issue_does_not_consume_an_attempt() {
+        let mut guard = BootGuard::default();
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 2,
+        };
+        guard.record_issue(&epoch, StartupIssueCode::EngineMissing, "missing", false);
+        assert_eq!(guard.failures, 0);
+        assert!(!guard.handled_this_cycle(&epoch));
+    }
+
+    #[test]
+    fn legacy_guard_remains_handled_in_its_recorded_boot() -> Result<()> {
+        let mut guard: BootGuard =
+            serde_json::from_str(r#"{"boot_id":"boot","failures":1,"latched":false}"#)?;
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: "boot".to_owned(),
+            generation: 8,
+        };
+        guard.prepare_cycle(&epoch);
+        assert!(guard.handled_this_cycle(&epoch));
+        assert_eq!(guard.failures, 1);
         Ok(())
     }
 

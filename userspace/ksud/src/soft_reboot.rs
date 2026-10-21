@@ -2,6 +2,7 @@ use std::{
     fs::File,
     io::Write,
     os::fd::{AsRawFd, OwnedFd},
+    path::Path,
     process::{Child, Command},
     time::{Duration, Instant},
 };
@@ -148,6 +149,36 @@ fn wait_for_boot_completed() -> Result<()> {
     Ok(())
 }
 
+fn restore_boot_completed() -> Result<()> {
+    sys_prop::init().context("Failed to initialize system property API")?;
+    resetprop()
+        .set("sys.boot_completed", "1")
+        .map(|_| ())
+        .context("Failed to restore sys.boot_completed")
+}
+
+fn start_android() -> Result<()> {
+    info!("start");
+    let status = Command::new("start").status().context("start failed")?;
+    ensure!(status.success(), "start exited with status: {status}");
+    Ok(())
+}
+
+fn restart_after_failed_soft_reboot(reason: &str) -> anyhow::Error {
+    warn!("soft reboot aborted: {reason}");
+    if let Err(error) = restore_boot_completed() {
+        warn!("failed to restore boot completion: {error:#}");
+    }
+    if let Err(error) = start_android() {
+        return anyhow::anyhow!(
+            "Soft reboot aborted: {reason}; Android restart also failed: {error:#}"
+        );
+    }
+    anyhow::anyhow!(
+        "Soft reboot aborted: {reason}; Android userspace was restarted without advancing the startup generation"
+    )
+}
+
 pub fn soft_reboot() -> Result<()> {
     // check it avoid user click "soft_reboot" in manager when version mismatch
     if let Err(e) = ksucalls::ensure_uapi_version_matched() {
@@ -155,11 +186,17 @@ pub fn soft_reboot() -> Result<()> {
         return Ok(());
     }
 
+    let operation_lock = crate::startup_epoch::try_lock(
+        Path::new(defs::SOFT_REBOOT_LOCK),
+        "Another soft reboot is already in progress",
+    )?;
+
     utils::daemonize_with(true, || -> Result<()> {
         switch_mnt_ns(1)?;
         chdir("/")?;
         Ok(())
     })?;
+    crate::startup_epoch::retain_operation_lock(operation_lock)?;
 
     info!("emulating soft_reboot!");
     if let Err(e) = reset_boot_completed() {
@@ -177,7 +214,12 @@ pub fn soft_reboot() -> Result<()> {
             None
         }
     };
-    let wait_after_stop = waitsys.as_ref().is_some_and(|waitsys| {
+    if waitsys.is_none() {
+        return Err(restart_after_failed_soft_reboot(
+            "the service tracker could not start",
+        ));
+    }
+    let services_ready = waitsys.as_ref().is_some_and(|waitsys| {
         if let Err(error) = waitsys.wait_for_signal(1, defs::WAITSYS_READY_TIMEOUT) {
             warn!("waitsys failed to collect services: {error:#}");
             false
@@ -185,29 +227,64 @@ pub fn soft_reboot() -> Result<()> {
             true
         }
     });
-    if !wait_after_stop {
+    if !services_ready {
         terminate_waitsys(&mut waitsys);
+        return Err(restart_after_failed_soft_reboot(
+            "the service tracker did not become ready",
+        ));
+    }
+
+    if let Err(error) = crate::zygisk::prepare_soft_reboot() {
+        return Err(restart_after_failed_soft_reboot(&format!(
+            "FolkZygisk could not prepare for a new userspace cycle: {error:#}"
+        )));
     }
 
     info!("stop");
-    let status = Command::new("stop").status().context("stop failed")?;
+    let status = match Command::new("stop").status() {
+        Ok(status) => status,
+        Err(error) => {
+            return Err(restart_after_failed_soft_reboot(&format!(
+                "could not execute stop: {error}"
+            )));
+        }
+    };
     if !status.success() {
         warn!("stop exited with status: {status}");
     }
 
-    if let Some(waitsys) = waitsys.as_ref()
-        && let Err(error) = waitsys.wait_for_signal(2, defs::WAITSYS_STOP_TIMEOUT)
-    {
-        warn!("waitsys failed while waiting for services to stop: {error:#}");
-    }
+    let waited_for_stop = waitsys.as_ref().map(|waitsys| {
+        if let Err(error) = waitsys.wait_for_signal(2, defs::WAITSYS_STOP_TIMEOUT) {
+            warn!("waitsys failed while waiting for services to stop: {error:#}");
+            false
+        } else {
+            true
+        }
+    });
     terminate_waitsys(&mut waitsys);
 
+    if !crate::startup_epoch::stop_confirmed(status.success(), waited_for_stop) {
+        return Err(restart_after_failed_soft_reboot(
+            "userspace stop was not confirmed",
+        ));
+    }
+
+    let epoch = match crate::startup_epoch::advance_soft_reboot() {
+        Ok(epoch) => epoch,
+        Err(error) => {
+            return Err(restart_after_failed_soft_reboot(&format!(
+                "could not commit the next userspace generation: {error:#}"
+            )));
+        }
+    };
+    info!(
+        "Android userspace startup generation advanced to {}",
+        epoch.generation
+    );
     info!("post-fs-data");
     on_post_fs_data()?;
-    info!("start");
-    let status = Command::new("start").status().context("start failed")?;
-    if !status.success() {
-        warn!("start exited with status: {status}");
+    if let Err(error) = start_android() {
+        warn!("{error:#}");
     }
     info!("services");
     on_services();

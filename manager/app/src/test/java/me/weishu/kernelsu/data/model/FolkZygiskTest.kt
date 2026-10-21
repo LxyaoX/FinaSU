@@ -32,4 +32,29 @@ class FolkZygiskTest {
         val missing = payload().apply { remove("enable_blockers") }
         assertThrows(Exception::class.java) { FolkZygiskStatus.fromJson(missing) }
     }
+
+    @Test fun enabledAndBlockedStillExposesRecoveryState() {
+        val status = FolkZygiskStatus.fromJson(
+            payload()
+                .put("enabled", true)
+                .put("startup_failures", 3)
+                .put("startup_blocked", true)
+                .put("startup_failure_code", "readiness_timeout")
+                .put("startup_failure_detail", "monitor did not become ready"),
+        )
+        assertEquals(true, status.enabled)
+        assertEquals(true, status.startupBlocked)
+        assertEquals("readiness_timeout", status.startupFailureCode)
+        assertEquals("monitor did not become ready", status.startupFailureDetail)
+    }
+
+    @Test fun clearedDiagnosticsAreNullInsteadOfText() {
+        val status = FolkZygiskStatus.fromJson(
+            payload()
+                .put("startup_failure_code", JSONObject.NULL)
+                .put("startup_failure_detail", JSONObject.NULL),
+        )
+        assertEquals(null, status.startupFailureCode)
+        assertEquals(null, status.startupFailureDetail)
+    }
 }

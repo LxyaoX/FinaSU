@@ -261,7 +261,9 @@ fun execKsud(args: String, newShell: Boolean = false, globalMnt: Boolean = false
  */
 suspend fun execKsudResult(args: String): Shell.Result = withContext(Dispatchers.IO) {
     getRootShell().newJob()
-        .add("${getKsuDaemonPath()} $args").to(ArrayList<String>(), null).exec()
+        .add("${getKsuDaemonPath()} $args")
+        .to(ArrayList<String>(), ArrayList<String>())
+        .exec()
 }
 
 suspend fun getFeatureStatus(feature: String): String = withContext(Dispatchers.IO) {
