@@ -1061,8 +1061,8 @@ checksum = "34b357333733e8260735ba5894eb928c02ecc69c78715f01a8019e7fa7f2db4c"
 
 [[package]]
 name = "libc"
-version = "0.2.189"
-source = "git+https://github.com/rust-lang/libc?rev=1a661633f11a261ff9c00b40875ef72f1cbec818#1a661633f11a261ff9c00b40875ef72f1cbec818"
+version = "0.2.191"
+source = "git+https://github.com/rust-lang/libc?rev=1a661633f11a261ff9c00b40875ef72f1cbec818#ccc2ff4aaab962f7fde7b8edda7379c045b1ca12"
 
 [[package]]
 name = "libflate"
