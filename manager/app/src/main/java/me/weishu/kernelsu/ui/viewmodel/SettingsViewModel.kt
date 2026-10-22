@@ -17,7 +17,6 @@ import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
@@ -64,7 +63,6 @@ class SettingsViewModel(
             val supportLinksCustomSubtitle = repo.supportLinksCustomSubtitle
             val supportLinksCustomUrl = repo.supportLinksCustomUrl
             val themeStoreMode = repo.themeStoreMode
-            val layoutVariant = repo.layoutVariant
             val colorStyle = repo.colorStyle
             val colorSpec = repo.colorSpec
             val isLkmMode = repo.isLkmMode()
@@ -145,7 +143,6 @@ class SettingsViewModel(
                     supportLinksCustomSubtitle = supportLinksCustomSubtitle,
                     supportLinksCustomUrl = supportLinksCustomUrl,
                     themeStoreMode = themeStoreMode,
-                    layoutVariant = layoutVariant,
                     hideHomeFingerprint = repo.hideHomeFingerprint,
                     hideHomeZygisk = repo.hideHomeZygisk,
                     hideHomeSusfs = repo.hideHomeSusfs,
@@ -425,12 +422,6 @@ class SettingsViewModel(
     fun setThemeStoreMode(mode: String) {
         repo.themeStoreMode = mode
         _uiState.update { it.copy(themeStoreMode = mode) }
-    }
-
-    fun setLayoutVariant(variant: String) {
-        val normalized = LayoutVariant.fromValue(variant)
-        repo.layoutVariant = normalized
-        _uiState.update { it.copy(layoutVariant = normalized) }
     }
 
     fun setHideHomeFingerprint(hidden: Boolean) {

@@ -403,10 +403,6 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="settings_support_links_hidden">Ukryte</string>
     <string name="settings_theme_store_mode">Tryb sklepu z motywami</string>
     <string name="settings_theme_store_mode_summary">Wybierz, czy motywy maja byc pobierane w aplikacji, czy w przegladarce.</string>
-    <string name="settings_layout_variant">Wariant układu</string>
-    <string name="settings_layout_variant_summary">Używaj dużych tytułów Material 3 Expressive ze zwijanym polem wyszukiwania albo zachowaj klasyczne kompaktowe górne paski.</string>
-    <string name="settings_layout_variant_traditional">Tradycyjny</string>
-    <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">Szukaj wtyczek</string>
     <string name="superuser_search_hint">Szukaj aplikacji</string>
     <string name="module_search_hint">Szukaj modułów</string>

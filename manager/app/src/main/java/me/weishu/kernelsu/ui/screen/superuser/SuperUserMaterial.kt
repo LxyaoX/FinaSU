@@ -62,8 +62,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.AppInfo
-import me.weishu.kernelsu.data.model.LayoutVariant
-import me.weishu.kernelsu.ui.LocalLayoutVariant
 import me.weishu.kernelsu.ui.component.AppIconImage
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
@@ -93,7 +91,6 @@ fun SuperUserPagerMaterial(
         localSearchText = uiState.searchStatus.searchText
     }
 
-    val m3eLayout = LocalLayoutVariant.current == LayoutVariant.M3E
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchBarScrollBehavior = rememberSearchAppBarScrollBehavior(topAppBarScrollBehavior)
 
@@ -103,11 +100,11 @@ fun SuperUserPagerMaterial(
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                largeTitle = m3eLayout,
-                topSearch = !m3eLayout,
-                collapsibleSearch = m3eLayout,
+                largeTitle = true,
+                topSearch = false,
+                collapsibleSearch = true,
                 searchPlaceholder = stringResource(R.string.superuser_search_hint),
-                scrollBehavior = if (m3eLayout) searchBarScrollBehavior else null,
+                scrollBehavior = searchBarScrollBehavior,
                 snackbarHostState = snackbarHostState,
                 title = { Text(stringResource(R.string.superuser)) },
                 searchText = localSearchText,
@@ -351,18 +348,14 @@ fun SuperUserPagerMaterial(
             ) { latestGroupedApps.value }
 
             val displayGroups =
-                if (m3eLayout && localSearchText.isNotBlank()) uiState.searchResults else uiState.groupedApps
+                if (localSearchText.isNotBlank()) uiState.searchResults else uiState.groupedApps
 
             LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .then(
-                        if (m3eLayout) {
-                            Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
-                        } else {
-                            Modifier
-                        }
+                        Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
                     ),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 contentPadding = PaddingValues(

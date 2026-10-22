@@ -83,11 +83,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.KernelModule
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.LoadState
 import me.weishu.kernelsu.modulebanner.LkmBannerSlot
 import me.weishu.kernelsu.modulebanner.ModuleCardConfig
-import me.weishu.kernelsu.ui.LocalLayoutVariant
 import me.weishu.kernelsu.ui.component.card.CardBannerDialog
 import me.weishu.kernelsu.ui.component.card.CardSubject
 import me.weishu.kernelsu.ui.component.card.FolkCardFrame
@@ -123,7 +121,6 @@ fun KernelModuleScreen() {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val pullState = rememberPullToRefreshState()
-    val m3eLayout = LocalLayoutVariant.current == LayoutVariant.M3E
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchScrollBehavior = rememberSearchAppBarScrollBehavior(scrollBehavior)
     val installingMessage = stringResource(R.string.kernel_modules_installing)
@@ -156,11 +153,7 @@ fun KernelModuleScreen() {
                 .fillMaxSize()
                 .padding(padding)
                 .then(
-                    if (m3eLayout) {
-                        Modifier.nestedScroll(searchScrollBehavior.nestedScrollConnection)
-                    } else {
-                        Modifier
-                    }
+                    Modifier.nestedScroll(searchScrollBehavior.nestedScrollConnection)
                 ),
             onLongPress = { bannerDialogModule = it },
         )
@@ -169,10 +162,10 @@ fun KernelModuleScreen() {
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                largeTitle = m3eLayout,
-                topSearch = !m3eLayout,
-                collapsibleSearch = m3eLayout,
-                scrollBehavior = if (m3eLayout) searchScrollBehavior else null,
+                largeTitle = true,
+                topSearch = false,
+                collapsibleSearch = true,
+                scrollBehavior = searchScrollBehavior,
                 title = { Text(stringResource(R.string.kernel_modules)) },
                 searchText = state.searchText,
                 onSearchTextChange = actions.onSearchTextChange,

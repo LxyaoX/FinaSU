@@ -306,7 +306,6 @@ open class MainActivity : FragmentActivity() {
                     subtitle = uiState.supportLinksCustomSubtitle,
                     url = uiState.supportLinksCustomUrl,
                 ),
-                LocalLayoutVariant provides uiState.layoutVariant,
                 LocalWallpaperPage provides selectedMainPage,
                 LocalCapabilityState provides capability,
                 LocalAppAuthenticator provides authenticationSession.authenticator,

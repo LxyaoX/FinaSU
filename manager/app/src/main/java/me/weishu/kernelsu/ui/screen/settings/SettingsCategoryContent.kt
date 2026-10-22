@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
@@ -51,7 +50,6 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.NomountDriverState
 import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.themestore.ThemeStoreMode
@@ -279,31 +277,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 onItemSelected = { index ->
                     actions.onSetHomeLayoutStyle(
                         supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
-                    )
-                }
-            )
-        }
-        item {
-            val supportedLayoutVariants = LayoutVariant.supported
-            val layoutVariantItems = supportedLayoutVariants.map { variant ->
-                stringResource(
-                    when (variant) {
-                        LayoutVariant.M3E -> R.string.settings_layout_variant_m3e
-                        else -> R.string.settings_layout_variant_traditional
-                    }
-                )
-            }
-            val selectedLayoutVariant =
-                supportedLayoutVariants.indexOf(uiState.layoutVariant).coerceAtLeast(0)
-            SegmentedDropdownItem(
-                icon = Icons.Rounded.SpaceDashboard,
-                title = stringResource(id = R.string.settings_layout_variant),
-                summary = stringResource(id = R.string.settings_layout_variant_summary),
-                items = layoutVariantItems,
-                selectedIndex = selectedLayoutVariant,
-                onItemSelected = { index ->
-                    actions.onSetLayoutVariant(
-                        supportedLayoutVariants.getOrElse(index) { LayoutVariant.M3E }
                     )
                 }
             )

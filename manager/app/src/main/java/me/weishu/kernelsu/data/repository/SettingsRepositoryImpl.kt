@@ -15,7 +15,6 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
@@ -192,12 +191,6 @@ class SettingsRepositoryImpl : SettingsRepository {
     override var themeStoreMode: String
         get() = prefs.getString("theme_store_mode", ThemeStoreMode.UNSET) ?: ThemeStoreMode.UNSET
         set(value) = prefs.edit { putString("theme_store_mode", value) }
-    override var layoutVariant: String
-        get() = LayoutVariant.fromValue(
-            prefs.getString("layout_variant", LayoutVariant.M3E)
-        )
-        set(value) = prefs.edit { putString("layout_variant", LayoutVariant.fromValue(value)) }
-
     override var moduleSortGroups: Set<ModuleSortGroup>
         get() = ModuleSortPriorityStore.decode(prefs.getString(ModuleSortPriorityStore.Key, null))
         set(value) = prefs.edit { putString(ModuleSortPriorityStore.Key, ModuleSortPriorityStore.encode(value)) }

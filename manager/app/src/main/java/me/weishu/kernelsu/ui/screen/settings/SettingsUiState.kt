@@ -7,7 +7,6 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.SupportLinksStyle
@@ -33,7 +32,6 @@ data class SettingsUiState(
     val supportLinksCustomSubtitle: String = "",
     val supportLinksCustomUrl: String = "",
     val themeStoreMode: String = ThemeStoreMode.UNSET,
-    val layoutVariant: String = LayoutVariant.M3E,
     val hideHomeFingerprint: Boolean = false,
     val hideHomeZygisk: Boolean = false,
     val hideHomeSusfs: Boolean = false,
@@ -150,7 +148,6 @@ data class SettingsScreenActions(
     val onSetSupportLinksCustomSubtitle: (String) -> Unit,
     val onSetSupportLinksCustomUrl: (String) -> Unit,
     val onSetThemeStoreMode: (String) -> Unit,
-    val onSetLayoutVariant: (String) -> Unit,
     val onSetHideHomeFingerprint: (Boolean) -> Unit,
     val onSetHideHomeZygisk: (Boolean) -> Unit,
     val onSetHideHomeSusfs: (Boolean) -> Unit,

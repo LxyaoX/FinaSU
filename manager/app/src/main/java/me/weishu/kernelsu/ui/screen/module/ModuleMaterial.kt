@@ -120,13 +120,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.Module
 import me.weishu.kernelsu.data.model.ModuleUpdateInfo
 import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.data.repository.isSoftRebootPreferred
 import me.weishu.kernelsu.modulebanner.ModuleCardConfig
-import me.weishu.kernelsu.ui.LocalLayoutVariant
 import me.weishu.kernelsu.ui.component.ObserveAsEvents
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
 import me.weishu.kernelsu.ui.component.card.CardBannerDialog
@@ -171,7 +169,6 @@ fun ModulePagerMaterial(
     val listState = rememberLazyListState()
     val searchListState = rememberLazyListState()
 
-    val m3eLayout = LocalLayoutVariant.current == LayoutVariant.M3E
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchBarScrollBehavior = rememberSearchAppBarScrollBehavior(topAppBarScrollBehavior)
     val refreshTick = remember { mutableIntStateOf(0) }
@@ -286,11 +283,11 @@ fun ModulePagerMaterial(
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                largeTitle = m3eLayout,
-                topSearch = !m3eLayout,
-                collapsibleSearch = m3eLayout,
+                largeTitle = true,
+                topSearch = false,
+                collapsibleSearch = true,
                 searchPlaceholder = stringResource(R.string.module_search_hint),
-                scrollBehavior = if (m3eLayout) searchBarScrollBehavior else null,
+                scrollBehavior = searchBarScrollBehavior,
                 title = { Text(stringResource(R.string.module)) },
                 searchText = uiState.searchStatus.searchText,
                 onSearchTextChange = actions.onSearchTextChange,
@@ -507,15 +504,11 @@ fun ModulePagerMaterial(
 
             val m3eSearchQuery = uiState.searchStatus.searchText
             val displayModules =
-                if (m3eLayout && m3eSearchQuery.isNotBlank()) uiState.searchResults else uiState.moduleList
+                if (m3eSearchQuery.isNotBlank()) uiState.searchResults else uiState.moduleList
 
             ModuleList(
                 bottomInnerPadding = bottomInnerPadding,
-                modifier = if (m3eLayout) {
-                    Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
-                } else {
-                    Modifier
-                },
+                modifier = Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection),
                 listState = listState,
                 displayModules = displayModules,
                 updateInfoMap = uiState.updateInfo,

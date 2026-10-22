@@ -399,10 +399,6 @@
     <string name="settings_support_links_hidden">隐匿</string>
     <string name="settings_theme_store_mode">Сэдвийн дэлгүүрийн горим</string>
     <string name="settings_theme_store_mode_summary">Сэдвийг апп дотор эсвэл хөтөч дээр татахыг сонгоно.</string>
-    <string name="settings_layout_variant">布局变体</string>
-    <string name="settings_layout_variant_summary">在魔导器、魔法使与魔法阵页面使用 Material 3 Expressive 大标题与可折叠的内嵌搜索栏，或沿用古典的紧凑顶栏。</string>
-    <string name="settings_layout_variant_traditional">古典</string>
-    <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">搜索魔导器</string>
     <string name="superuser_search_hint">搜索应用</string>
     <string name="module_search_hint">搜索魔法阵</string>

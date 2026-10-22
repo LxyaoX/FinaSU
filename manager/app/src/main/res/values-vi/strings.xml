@@ -399,10 +399,6 @@
     <string name="settings_support_links_hidden">Ẩn</string>
     <string name="settings_theme_store_mode">Chế độ cửa hàng chủ đề</string>
     <string name="settings_theme_store_mode_summary">Chọn tải chủ đề trong ứng dụng hay trên trình duyệt.</string>
-    <string name="settings_layout_variant">Biến thể bố cục</string>
-    <string name="settings_layout_variant_summary">Dùng tiêu đề lớn Material 3 Expressive với thanh tìm kiếm nội tuyến có thể thu gọn, hoặc giữ thanh trên cùng gọn nhẹ như cũ.</string>
-    <string name="settings_layout_variant_traditional">Truyền thống</string>
-    <string name="settings_layout_variant_m3e">M3E</string>
     <string name="plugin_search_hint">Tìm plugin</string>
     <string name="superuser_search_hint">Tìm ứng dụng</string>
     <string name="module_search_hint">Tìm module</string>

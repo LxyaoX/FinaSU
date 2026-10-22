@@ -90,12 +90,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.Plugin
 import me.weishu.kernelsu.data.model.PluginConfigField
 import me.weishu.kernelsu.modulebanner.ModuleCardConfig
 import me.weishu.kernelsu.modulebanner.PluginBannerSlot
-import me.weishu.kernelsu.ui.LocalLayoutVariant
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
 import me.weishu.kernelsu.ui.component.bottombar.LocalFloatingBarReservedHeight
 import me.weishu.kernelsu.ui.component.bottombar.LocalFloatingBarVisible
@@ -142,7 +140,6 @@ fun PluginPagerMaterial(
     val refreshTick = remember { mutableIntStateOf(0) }
     var searchText by rememberSaveable { mutableStateOf("") }
 
-    val m3eLayout = LocalLayoutVariant.current == LayoutVariant.M3E
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchBarScrollBehavior = rememberSearchAppBarScrollBehavior(topAppBarScrollBehavior)
     val threshold = with(LocalDensity.current) { 100.dp.toPx() }
@@ -194,11 +191,11 @@ fun PluginPagerMaterial(
     ExpressiveScaffold(
         topBar = {
             SearchAppBar(
-                largeTitle = m3eLayout,
-                topSearch = !m3eLayout,
-                collapsibleSearch = m3eLayout,
+                largeTitle = true,
+                topSearch = false,
+                collapsibleSearch = true,
                 searchPlaceholder = stringResource(R.string.plugin_search_hint),
-                scrollBehavior = if (m3eLayout) searchBarScrollBehavior else null,
+                scrollBehavior = searchBarScrollBehavior,
                 title = { Text(stringResource(R.string.plugin)) },
                 searchText = searchText,
                 onSearchTextChange = { searchText = it },
@@ -328,13 +325,9 @@ fun PluginPagerMaterial(
             ) { latestPlugins.value }
             PluginList(
                 bottomInnerPadding = bottomInnerPadding,
-                modifier = if (m3eLayout) {
-                    Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
-                } else {
-                    Modifier
-                },
+                modifier = Modifier.nestedScroll(searchBarScrollBehavior.nestedScrollConnection),
                 listState = listState,
-                displayPlugins = if (m3eLayout && searchText.isNotBlank()) {
+                displayPlugins = if (searchText.isNotBlank()) {
                     uiState.plugins.matching(searchText)
                 } else {
                     uiState.plugins

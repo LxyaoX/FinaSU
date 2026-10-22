@@ -310,15 +310,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
     )
     add(
         SettingsCategory.APPEARANCE.row(
-            id = "appearance.layout_variant",
-            titleRes = R.string.settings_layout_variant,
-            summaryRes = R.string.settings_layout_variant_summary,
-            icon = Icons.Rounded.SpaceDashboard,
-            aliases = listOf("m3e", "expressive", "large title", "material 3", "traditional", "classic"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
             id = "appearance.support_links",
             titleRes = R.string.settings_support_links,
             summaryRes = R.string.settings_support_links_summary,

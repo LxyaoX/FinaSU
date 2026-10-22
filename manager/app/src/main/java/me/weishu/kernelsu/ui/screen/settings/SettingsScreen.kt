@@ -112,7 +112,6 @@ fun rememberSettingsActions(
         onSetSupportLinksCustomSubtitle = viewModel::setSupportLinksCustomSubtitle,
         onSetSupportLinksCustomUrl = viewModel::setSupportLinksCustomUrl,
         onSetThemeStoreMode = viewModel::setThemeStoreMode,
-        onSetLayoutVariant = viewModel::setLayoutVariant,
         onSetHideHomeFingerprint = viewModel::setHideHomeFingerprint,
         onSetHideHomeZygisk = viewModel::setHideHomeZygisk,
         onSetHideHomeSusfs = viewModel::setHideHomeSusfs,

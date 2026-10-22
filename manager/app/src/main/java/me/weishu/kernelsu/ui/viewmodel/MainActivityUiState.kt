@@ -2,7 +2,6 @@ package me.weishu.kernelsu.ui.viewmodel
 
 import androidx.compose.runtime.Immutable
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.data.model.LayoutVariant
 import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.ui.theme.AppSettings
 
@@ -17,5 +16,4 @@ data class MainActivityUiState(
     val supportLinksCustomTitle: String = "",
     val supportLinksCustomSubtitle: String = "",
     val supportLinksCustomUrl: String = "",
-    val layoutVariant: String = LayoutVariant.M3E,
 )
