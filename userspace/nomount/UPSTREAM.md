@@ -12,21 +12,48 @@ Rust, so no upstream shell scripts or WebUI are imported.
 ## Pinned sources
 
 - NoMount: https://github.com/maxsteeel/nomount
-  commit `7046c7ad3ee0bf4ae66e80f6b93b1e30db0cb4e3` (tag `v2.1.1`).
-  Imported from `kernel/src/` only:
+  commit `87603f4c6ddbc00eec99930a4438296781908453`, the head of the `dev`
+  branch (the nightly line upstream ships as "Nightly builds"). The last tagged
+  release, `v2.1.1` / `7046c7ad`, is 45 commits behind it and was the previous
+  pin here. Imported from `kernel/src/` only:
 
   | upstream path | vendored path | sha256 |
   | --- | --- | --- |
-  | `kernel/src/nomount.c` | `kernel/src/nomount.c` | `b082476d72ee755e3549b850fd3cf1e233234b6440f3d844b5ea190e392e0c69` |
-  | `kernel/src/nomount.h` | `kernel/src/nomount.h` | `8a805e7fe3bbc6bf8daf2f4fd26c1f00d880a5480ca66dd013485509028146ed` |
+  | `kernel/src/nomount.c` | `kernel/src/nomount.c` | `e355d181fa432c222b83328092106d45f6d58c4d664b7a9c68698728eeb9712f` |
+  | `kernel/src/nomount.h` | `kernel/src/nomount.h` | `96966c1e945dfcb7ef2d86fae0bfca0e2b989fe5017232e9de23b84f17c4d878` |
   | `kernel/src/Kconfig` | `kernel/src/Kconfig` | `1df7ad3589a282128f797f7a46b28aee315d080550aae26b681a898f11c7abc7` |
-  | `kernel/src/Makefile` | `kernel/src/Makefile` | `ce9ca3ca442e6e30e3091168dbc1091a93d65dfbe0e93caf92d3a21be148779f` |
+  | `kernel/src/Makefile` | `kernel/src/Makefile` | `1191fe9ef8e2f3549419fd90a118fbe3d11fc02a04b6353bae0e81be27e03e62` |
   | `kernel/LICENSE` | `kernel/LICENSE` | `8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643` |
   | `LICENSE` | `LICENSE` | `3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986` |
 
 All imported files are byte-identical to upstream. No copyright notice has been
 replaced or added inside them; FinaSU attribution is not applied to upstream
 files.
+
+### What the dev sync changed
+
+The kernel side was reworked between `v2.1.1` and this pin; the control
+interface FinaSU speaks did not move, which is why the Rust side needed no
+change:
+
+- opaque directory support: a new `NM_FLAG_OPAQUE` rule flag and directory-view
+  bookkeeping. FinaSU never sets the flag, so injected directories keep the
+  merge behaviour they had.
+- rules and leaves are retired with `call_rcu` instead of being freed under a
+  held lock, and the rule arrays are replaced in one pass.
+- readdir merging is bypassed for native replacements, and only injected names
+  are invalidated instead of the whole dentry.
+- a `rcu_guard()` scope guard, an fsuid cache in the actor proxy, and a Bloom
+  filter skip for small child sets.
+- the internal `nomount_*` symbols were renamed to `nm_*`; `NM_MAGIC_SIG`
+  replaces `NOMOUNT_MAGIC_SIG`. Both are private to the module.
+- `kernel/src/Makefile` probes `include/linux/xattr.h` for the `__get` member
+  and defines `NM_HAS_XATTR__GET`, so the same source builds against 6.1 and
+  6.18 DDK headers.
+
+Unchanged and still relied on by `userspace/ksud/src/nomount.rs`:
+`NOMOUNT_BASE_VERSION` is still `21`, the `NM_CMD_*` command set is identical,
+and `struct nm_payload` has the same layout.
 
 ## Deliberately not imported
 
@@ -91,7 +118,8 @@ matching `userspace/ksud/bin/aarch64/<kmi>_kernelsu.ko`. Output is staged as
 The upstream `kernel/src/Makefile` appends a commit count to
 `NOMOUNT_VERSION` only when the source tree's enclosing git repository has an
 origin URL containing `nomount`. Inside this repository that condition is
-false, so the built module reports the plain base version (`21` for v2.1.1).
+false, so the built module reports the plain base version (`21`, unchanged
+between v2.1.1 and this pin).
 FinaSU's driver check therefore compares against the base version, not a commit
 count.
 
@@ -99,6 +127,8 @@ count.
 
 - `android17-6.18` is in FinaSU's KMI matrix but is not in upstream's test
   matrix; compiling NoMount for it is unverified.
+- This pin tracks upstream `dev`, not a release: re-check it whenever upstream
+  tags a new version and re-pin to the tag then.
 - Upstream's LKM workflow strips page-pinner symbols from the DDK headers before
   building; the same workaround is needed here.
 - Stripped module size per KMI is not yet measured, so the APK size delta is
