@@ -64,8 +64,7 @@ static int validate_config(const struct ksu_uts_view_config *config)
 
     if (config->field_mask & ~KSU_UTS_FIELD_VALID_MASK)
         return -EINVAL;
-    if (config->mode != KSU_UTS_MODE_GLOBAL &&
-        config->mode != KSU_UTS_MODE_SELECTED)
+    if (config->mode != KSU_UTS_MODE_GLOBAL && config->mode != KSU_UTS_MODE_SELECTED)
         return -EINVAL;
     if (config->target_count > KSU_UTS_MAX_TARGETS)
         return -EINVAL;
@@ -94,25 +93,18 @@ static int validate_config(const struct ksu_uts_view_config *config)
     return 0;
 }
 
-#define KSU_UTS_UPDATE_FIELD(bit, field)                                      \
-    do {                                                                   \
-        if (new_mask & (bit)) {                                         \
-            if (!(old_mask & (bit)) ||                                 \
-                strncmp(active_name->field, global_last_applied.field,  \
-                        sizeof(active_name->field)))                   \
-                strscpy(global_restore_uts.field, active_name->field,   \
-                        sizeof(global_restore_uts.field));              \
-            strscpy(active_name->field, tmpl->field,                    \
-                    sizeof(active_name->field));                        \
-            strscpy(global_last_applied.field, tmpl->field,             \
-                    sizeof(global_last_applied.field));                 \
-        } else if ((old_mask & (bit)) &&                                \
-                   !strncmp(active_name->field,                         \
-                            global_last_applied.field,                  \
-                            sizeof(active_name->field))) {              \
-            strscpy(active_name->field, global_restore_uts.field,       \
-                    sizeof(active_name->field));                        \
-        }                                                              \
+#define KSU_UTS_UPDATE_FIELD(bit, field)                                                                               \
+    do {                                                                                                               \
+        if (new_mask & (bit)) {                                                                                        \
+            if (!(old_mask & (bit)) ||                                                                                 \
+                strncmp(active_name->field, global_last_applied.field, sizeof(active_name->field)))                    \
+                strscpy(global_restore_uts.field, active_name->field, sizeof(global_restore_uts.field));               \
+            strscpy(active_name->field, tmpl->field, sizeof(active_name->field));                                      \
+            strscpy(global_last_applied.field, tmpl->field, sizeof(global_last_applied.field));                        \
+        } else if ((old_mask & (bit)) &&                                                                               \
+                   !strncmp(active_name->field, global_last_applied.field, sizeof(active_name->field))) {              \
+            strscpy(active_name->field, global_restore_uts.field, sizeof(active_name->field));                         \
+        }                                                                                                              \
     } while (0)
 
 static void apply_global_locked(const struct ksu_uts_view_config *tmpl)
@@ -147,15 +139,13 @@ static void restore_global_locked(void)
 
 static bool uts_view_active_locked(void)
 {
-    return supported && feature_enabled && !stopping &&
-           template_cfg.field_mask != 0 &&
+    return supported && feature_enabled && !stopping && template_cfg.field_mask != 0 &&
            (template_cfg.mode & KSU_UTS_MODE_VALID_MASK);
 }
 
 static void refresh_active_locked(void)
 {
-    WRITE_ONCE(selected_active, uts_view_active_locked() &&
-                                    (template_cfg.mode & KSU_UTS_MODE_SELECTED));
+    WRITE_ONCE(selected_active, uts_view_active_locked() && (template_cfg.mode & KSU_UTS_MODE_SELECTED));
 }
 
 static u32 current_state_locked(void)
@@ -216,8 +206,7 @@ static int uts_view_feature_set(u64 value)
         ret = -ENODATA;
         goto out;
     }
-    if (enable && (template_cfg.mode & KSU_UTS_MODE_SELECTED) &&
-        template_cfg.target_count == 0) {
+    if (enable && (template_cfg.mode & KSU_UTS_MODE_SELECTED) && template_cfg.target_count == 0) {
         ret = -ENODATA;
         goto out;
     }
@@ -231,11 +220,9 @@ static int uts_view_feature_set(u64 value)
     feature_enabled = enable;
     reset_observation_locked();
     refresh_active_locked();
-    pr_info("uts_view: event=%s mode=%s mask=0x%x targets=%u uid=%d\n",
-            enable ? "enable" : "disable",
-            (template_cfg.mode & KSU_UTS_MODE_GLOBAL) ? "global" : "selected",
-            template_cfg.field_mask, template_cfg.target_count,
-            current_uid().val);
+    pr_info("uts_view: event=%s mode=%s mask=0x%x targets=%u uid=%d\n", enable ? "enable" : "disable",
+            (template_cfg.mode & KSU_UTS_MODE_GLOBAL) ? "global" : "selected", template_cfg.field_mask,
+            template_cfg.target_count, current_uid().val);
 out:
     mutex_unlock(&uts_view_lock);
     return ret;
@@ -258,8 +245,7 @@ int __init ksu_uts_view_init(void)
     if (ret < 0)
         return ret;
     if (!addrs[0] || !addrs[1]) {
-        pr_info("uts_view: event=init result=missing-symbol uts_sem=%d init_uts_ns=%d\n",
-                addrs[0] != 0, addrs[1] != 0);
+        pr_info("uts_view: event=init result=missing-symbol uts_sem=%d init_uts_ns=%d\n", addrs[0] != 0, addrs[1] != 0);
         return -ENODEV;
     }
 
@@ -384,10 +370,8 @@ int ksu_uts_view_set_config(const struct ksu_uts_view_config *config)
         ret = -ENODEV;
         goto out;
     }
-    was_global = uts_view_active_locked() &&
-                 (template_cfg.mode & KSU_UTS_MODE_GLOBAL);
-    will_global = feature_enabled && !stopping && next.field_mask &&
-                  (next.mode & KSU_UTS_MODE_GLOBAL);
+    was_global = uts_view_active_locked() && (template_cfg.mode & KSU_UTS_MODE_GLOBAL);
+    will_global = feature_enabled && !stopping && next.field_mask && (next.mode & KSU_UTS_MODE_GLOBAL);
     if (was_global && !will_global)
         restore_global_locked();
     template_cfg = next;
@@ -396,9 +380,8 @@ int ksu_uts_view_set_config(const struct ksu_uts_view_config *config)
     reset_observation_locked();
     refresh_active_locked();
     pr_info("uts_view: event=set mode=%s mask=0x%x targets=%u uid=%d\n",
-            (template_cfg.mode & KSU_UTS_MODE_GLOBAL) ? "global" : "selected",
-            template_cfg.field_mask, template_cfg.target_count,
-            current_uid().val);
+            (template_cfg.mode & KSU_UTS_MODE_GLOBAL) ? "global" : "selected", template_cfg.field_mask,
+            template_cfg.target_count, current_uid().val);
 out:
     mutex_unlock(&uts_view_lock);
     return ret;
@@ -472,15 +455,13 @@ void ksu_uts_view_on_setresuid(uid_t old_uid, uid_t new_uid)
         atomic_inc(&skip_not_zygote);
         return;
     }
-    if (!current || (current->flags & PF_KTHREAD) || !current->nsproxy ||
-        !current->nsproxy->uts_ns)
+    if (!current || (current->flags & PF_KTHREAD) || !current->nsproxy || !current->nsproxy->uts_ns)
         return;
     if (!callback_enter())
         return;
 
     mutex_lock(&uts_view_lock);
-    if (stopping || !feature_enabled || template_cfg.field_mask == 0 || !uts_sem_ptr ||
-        !init_uts_ns_ptr || !ksu_cred) {
+    if (stopping || !feature_enabled || template_cfg.field_mask == 0 || !uts_sem_ptr || !init_uts_ns_ptr || !ksu_cred) {
         mutex_unlock(&uts_view_lock);
         goto out;
     }
@@ -503,16 +484,15 @@ void ksu_uts_view_on_setresuid(uid_t old_uid, uid_t new_uid)
     revert_creds(saved);
     if (ret) {
         atomic_inc(&unshare_failed);
-        pr_warn("uts_view: event=apply-fail pid=%d comm=\"%s\" uid=%d stage=unshare result=%ld\n",
-                current->pid, current->comm, new_uid, ret);
+        pr_warn("uts_view: event=apply-fail pid=%d comm=\"%s\" uid=%d stage=unshare result=%ld\n", current->pid,
+                current->comm, new_uid, ret);
         goto out;
     }
 
     mutex_lock(&uts_view_lock);
-    if (!stopping && feature_enabled && READ_ONCE(selected_active) &&
-        generation == snapshot_generation && snapshot.field_mask != 0) {
-        if (!current->nsproxy || !current->nsproxy->uts_ns ||
-            current->nsproxy->uts_ns == init_uts_ns_ptr) {
+    if (!stopping && feature_enabled && READ_ONCE(selected_active) && generation == snapshot_generation &&
+        snapshot.field_mask != 0) {
+        if (!current->nsproxy || !current->nsproxy->uts_ns || current->nsproxy->uts_ns == init_uts_ns_ptr) {
             atomic_inc(&merge_missing_ns);
             goto unlock;
         }
@@ -522,11 +502,11 @@ void ksu_uts_view_on_setresuid(uid_t old_uid, uid_t new_uid)
         last_pid = current->pid;
         last_uid = new_uid;
         if (atomic_inc_return(&matched_callbacks) == 1)
-            pr_info("uts_view: event=observed-first pid=%d comm=\"%s\" uid=%d generation=%u\n",
-                    current->pid, current->comm, new_uid, generation);
+            pr_info("uts_view: event=observed-first pid=%d comm=\"%s\" uid=%d generation=%u\n", current->pid,
+                    current->comm, new_uid, generation);
         else
-            pr_debug("uts_view: event=observed pid=%d comm=\"%s\" uid=%d generation=%u\n",
-                     current->pid, current->comm, new_uid, generation);
+            pr_debug("uts_view: event=observed pid=%d comm=\"%s\" uid=%d generation=%u\n", current->pid, current->comm,
+                     new_uid, generation);
     } else {
         atomic_inc(&discarded_callbacks);
     }
