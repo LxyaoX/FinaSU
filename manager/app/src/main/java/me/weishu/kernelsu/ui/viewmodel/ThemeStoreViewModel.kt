@@ -1,7 +1,6 @@
 package me.weishu.kernelsu.ui.viewmodel
 
 import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -360,7 +359,6 @@ class ThemeStoreViewModel : ViewModel() {
         private const val KEY_DOWNLOADED_THEMES = "downloaded_themes"
         private const val PREVIEW_FILE_NAME = "Theme.webp"
         private const val META_FILE_NAME = "theme_meta.json"
-        private const val MIN_THEME_SIZE = 32L
 
         const val SOURCE_ALL = "all"
         const val SOURCE_OFFICIAL = "official"

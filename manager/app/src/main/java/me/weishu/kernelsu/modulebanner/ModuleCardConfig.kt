@@ -26,7 +26,6 @@ object ModuleCardConfig {
     /** Icon-only action buttons, the denser look. */
     const val STYLE_ICON_ONLY = "icon_only"
 
-    private const val LEGACY_STYLE_FULL = "kernelsu"
     private const val LEGACY_STYLE_ICON_ONLY = "apatch"
 
     private val prefs get() = ksuApp.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

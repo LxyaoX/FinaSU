@@ -17,7 +17,6 @@ import me.weishu.kernelsu.data.modulestore.KernelSuStoreSource
 class ModuleRepositoryImpl : ModuleRepository {
 
     companion object {
-        private const val TAG = "ModuleRepository"
     }
 
     override suspend fun getModules(): Result<List<Module>> = withContext(Dispatchers.IO) {

@@ -8,14 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.data.repository.TemplateRepository
 import me.weishu.kernelsu.data.repository.TemplateRepositoryImpl
-import me.weishu.kernelsu.profile.Capabilities
-import me.weishu.kernelsu.profile.Groups
 import me.weishu.kernelsu.ui.screen.template.TemplateUiState
 import me.weishu.kernelsu.ui.util.getAppProfileTemplate
-import org.json.JSONArray
 import org.json.JSONObject
 import java.text.Collator
 import java.util.Locale
@@ -86,22 +82,4 @@ fun getTemplateInfoById(id: String): me.weishu.kernelsu.data.model.TemplateInfo?
     }.onFailure {
         Log.e(TAG, "ignore invalid template: $it", it)
     }.getOrNull()
-}
-
-@Suppress("unused")
-fun generateTemplates() {
-    val templateJson = JSONObject()
-    templateJson.put("id", "com.example")
-    templateJson.put("name", "Example")
-    templateJson.put("description", "This is an example template")
-    templateJson.put("local", true)
-    templateJson.put("namespace", Natives.Profile.Namespace.INHERITED.name)
-    templateJson.put("uid", 0)
-    templateJson.put("gid", 0)
-
-    templateJson.put("groups", JSONArray().apply { put(Groups.INET.name) })
-    templateJson.put("capabilities", JSONArray().apply { put(Capabilities.CAP_NET_RAW.name) })
-    templateJson.put("context", "u:r:ksu:s0")
-    templateJson.put("flags", JSONArray().apply { put(Natives.Profile.RootProfileFlag.NO_NEW_PRIVS.name) })
-    Log.i(TAG, "$templateJson")
 }

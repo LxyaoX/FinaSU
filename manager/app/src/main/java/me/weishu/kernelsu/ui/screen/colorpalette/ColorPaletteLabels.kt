@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import me.weishu.kernelsu.R
 
 @StringRes
@@ -22,5 +21,3 @@ internal fun paletteStyleLabelRes(style: PaletteStyle): Int = when (style) {
 
 @Composable
 internal fun paletteStyleLabel(style: PaletteStyle): String = stringResource(paletteStyleLabelRes(style))
-
-internal fun colorSpecLabel(spec: ColorSpec.SpecVersion): String = spec.name.removePrefix("SPEC_")

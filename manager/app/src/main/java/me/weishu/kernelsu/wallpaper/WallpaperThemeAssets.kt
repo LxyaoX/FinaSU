@@ -6,7 +6,6 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.wallpaper.surface.SurfaceDescriptor
 import me.weishu.kernelsu.wallpaper.surface.SurfaceField
-import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
 import me.weishu.kernelsu.wallpaper.surface.isToggle
 import me.weishu.kernelsu.ui.theme.FontConfig
@@ -350,7 +349,3 @@ internal object HomeLayoutAsset : ThemedAsset {
         SettingsRepositoryImpl().homeLayoutStyle = HomeLayoutStyle.DEFAULT
     }
 }
-
-/** The file-name stem of a zip entry: `nav_icon_Home.png` -> `nav_icon_Home`. */
-internal fun zipStem(entryName: String): String =
-    entryName.substringBefore('.').substringAfterLast('/')

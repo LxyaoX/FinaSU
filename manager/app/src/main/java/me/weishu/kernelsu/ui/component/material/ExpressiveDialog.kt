@@ -3,7 +3,6 @@ package me.weishu.kernelsu.ui.component.material
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -48,26 +47,4 @@ fun ExpressiveDialog(
             properties = properties,
         )
     }
-}
-
-@Composable
-fun ExpressiveConfirmDialog(
-    title: String,
-    confirmText: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-    message: String? = null,
-    dismissText: String? = null,
-) {
-    ExpressiveDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = message?.let { { Text(it) } },
-        confirmButton = {
-            FolkTextButton(onClick = onConfirm) { Text(confirmText) }
-        },
-        dismissButton = dismissText?.let {
-            { FolkTextButton(onClick = onDismiss) { Text(it) } }
-        },
-    )
 }

@@ -20,12 +20,6 @@ const val KERNELSU_REGISTRY_URL = "https://modules.kernelsu.org/"
 /** Registry index that advertises the module list document. */
 const val KERNELSU_INDEX_PATH = "api/v1/index.json"
 
-/** Module list document used when the registry index cannot be read. */
-const val KERNELSU_MODULES_PATH = "api/v1/modules.json"
-
-/** Directory holding one detail document per module. */
-const val KERNELSU_MODULE_DETAIL_PREFIX = "api/v1/modules/"
-
 /** Returns `true` when the receiver is an absolute http(s) URL. */
 internal fun String.isHttpUrl(): Boolean =
     startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true)

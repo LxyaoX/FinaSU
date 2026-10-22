@@ -29,7 +29,6 @@ import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.data.modulestore.VerifiedDownloads
 import me.weishu.kernelsu.data.modulestore.copyForInstall
 import okhttp3.OkHttpClient
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.nio.ByteBuffer
@@ -195,11 +194,6 @@ fun getRootShell(globalMnt: Boolean = false): Shell {
  */
 suspend fun awaitRootShell(globalMnt: Boolean = false): Shell = RootShell.awaitRoot(globalMnt)
 
-/** Re-probe the cached root shell in the background (recovery entry point). */
-fun probeRootShell(globalMnt: Boolean = false) {
-    RootShell.probe(globalMnt)
-}
-
 inline fun <T> withNewRootShell(
     globalMnt: Boolean = false,
     block: Shell.() -> T
@@ -300,14 +294,6 @@ fun listModules(): String {
     return out.joinToString("\n").ifBlank { "[]" }
 }
 
-fun getModuleCount(): Int {
-    val result = listModules()
-    runCatching {
-        val array = JSONArray(result)
-        return array.length()
-    }.getOrElse { return 0 }
-}
-
 fun getSuperuserCount(): Int {
     return Natives.getSuperuserCount()
 }
@@ -388,14 +374,6 @@ fun flashAnyKernel(
     } finally {
         file?.delete()
     }
-}
-
-suspend fun flashModule(
-    uri: Uri,
-    onStdout: (String) -> Unit,
-    onStderr: (String) -> Unit
-): FlashResult {
-    return flashModuleBatch(listOf(uri), onStdout, onStderr)
 }
 
 /** Install every selected archive in order, stopping at the first failure. */
