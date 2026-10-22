@@ -58,8 +58,6 @@ fn configure_bindgen() {
 
     // Write the bindings to the $OUT_DIR/bindings.rs file.
     let out_path = std::path::PathBuf::from(env::var("OUT_DIR").unwrap());
-    // for debug, uncomment below
-    // let out_path = std::path::PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
