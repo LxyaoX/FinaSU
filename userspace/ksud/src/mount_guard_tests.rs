@@ -6,9 +6,13 @@ use super::*;
 fn a_step_that_outlived_its_boot_is_reported_as_died() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("mount_inflight");
+    let epoch = crate::startup_epoch::StartupEpoch {
+        boot_id: current_boot_id(),
+        generation: 3,
+    };
 
     // Nothing recorded: every step is free to run.
-    assert!(!died(&path));
+    assert!(!died_at(&path, &epoch));
     assert!(read(&path).is_none());
 
     // A step recorded in this boot is in flight, not a failure.
@@ -18,9 +22,10 @@ fn a_step_that_outlived_its_boot_is_reported_as_died() {
         "nomount",
         "mode=nomount",
         &current_boot_id(),
+        epoch.generation,
     )
     .unwrap();
-    assert!(!died(&path));
+    assert!(!died_at(&path, &epoch));
     let record = read(&path).unwrap();
     assert_eq!(record.stage, Stage::Inject);
     assert_eq!(record.provider, "nomount");
@@ -33,7 +38,7 @@ fn a_step_that_outlived_its_boot_is_reported_as_died() {
 
     // A step that came back clears its own record.
     clear(&path);
-    assert!(!died(&path));
+    assert!(!died_at(&path, &epoch));
 
     // A record that survived its boot means the step never finished.
     std::fs::write(
@@ -42,20 +47,46 @@ fn a_step_that_outlived_its_boot_is_reported_as_died() {
          detail=android12-5.10\ntime=7\n",
     )
     .unwrap();
-    assert!(died(&path));
+    assert!(died_at(&path, &epoch));
     assert_eq!(read(&path).unwrap().provider, "nomount");
 
     // Junk cannot be told apart from a step that is still running, so it must
     // not disable a provider.
     std::fs::write(&path, "provider=nomount\n").unwrap();
-    assert!(!died(&path));
+    assert!(!died_at(&path, &epoch));
     assert!(read(&path).is_none());
+}
+
+#[test]
+fn a_soft_reboot_makes_an_unfinished_step_from_the_previous_cycle_stale() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("mount_inflight");
+    let boot_id = current_boot_id();
+    begin(&path, Stage::Inject, "nomount", "", &boot_id, 4).unwrap();
+    assert!(!died_at(
+        &path,
+        &crate::startup_epoch::StartupEpoch {
+            boot_id: boot_id.clone(),
+            generation: 4,
+        }
+    ));
+    assert!(died_at(
+        &path,
+        &crate::startup_epoch::StartupEpoch {
+            boot_id,
+            generation: 5,
+        }
+    ));
 }
 
 #[test]
 fn a_stale_record_survives_boot_completed_and_our_own_does_not() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("mount_inflight");
+    let epoch = crate::startup_epoch::StartupEpoch {
+        boot_id: current_boot_id(),
+        generation: 3,
+    };
 
     // Safe mode or a different provider ran: the record from the earlier boot
     // is the evidence that a provider has to be skipped, so it stays.
@@ -65,13 +96,21 @@ fn a_stale_record_survives_boot_completed_and_our_own_does_not() {
          detail=\ntime=7\n",
     )
     .unwrap();
-    clear_if_ours(&path);
-    assert!(died(&path), "a stale record must survive");
+    clear_if_ours_at(&path, &epoch);
+    assert!(died_at(&path, &epoch), "a stale record must survive");
 
     // This boot's own record is dropped: the step it describes just finished.
     clear(&path);
-    begin(&path, Stage::Inject, "builtin", "", &current_boot_id()).unwrap();
-    clear_if_ours(&path);
+    begin(
+        &path,
+        Stage::Inject,
+        "builtin",
+        "",
+        &current_boot_id(),
+        epoch.generation,
+    )
+    .unwrap();
+    clear_if_ours_at(&path, &epoch);
     assert!(read(&path).is_none());
 }
 

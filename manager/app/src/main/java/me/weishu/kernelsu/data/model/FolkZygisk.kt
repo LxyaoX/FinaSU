@@ -12,6 +12,9 @@ data class FolkZygiskStatus(
     val rebootRequired: Boolean?,
     val startupFailures: Long,
     val startupBlocked: Boolean,
+    val startupFailureCode: String?,
+    val startupFailureDetail: String?,
+    val startupGeneration: Long,
 ) {
     /**
      * Whether anything is actually injecting through Zygisk, the same test the home card uses to
@@ -34,6 +37,10 @@ data class FolkZygiskStatus(
                     array.get(index) as? String ?: error("Invalid FolkZygisk $key")
                 }
             }
+            fun nullableString(key: String): String? {
+                if (!json.has(key) || json.isNull(key)) return null
+                return (json.get(key) as? String)?.takeIf(String::isNotBlank)
+            }
             val state = json.get("injection_state") as? String
                 ?: error("Invalid FolkZygisk injection_state")
             check(state in setOf("unverified", "failed", "starting", "injected", "partial")) {
@@ -53,6 +60,9 @@ data class FolkZygiskStatus(
                     else boolean("reboot_required"),
                 startupFailures = count,
                 startupBlocked = boolean("startup_blocked"),
+                startupFailureCode = nullableString("startup_failure_code"),
+                startupFailureDetail = nullableString("startup_failure_detail"),
+                startupGeneration = json.optLong("startup_generation", 0),
             )
         }
     }

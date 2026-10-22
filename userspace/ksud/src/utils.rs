@@ -382,6 +382,7 @@ fn create_daemon_impl<F: FnOnce() -> Result<()>>(
             return Ok(false);
         }
     }
+    crate::startup_epoch::close_inherited_operation_lock();
 
     let do_configure = || -> Result<()> {
         detach_process_group(use_init_pgrp);

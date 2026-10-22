@@ -71,6 +71,8 @@ impl Stage {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Inflight {
     pub boot_id: String,
+    /// Android userspace startup generation within the kernel boot.
+    pub generation: u64,
     pub stage: Stage,
     /// Provider the step belonged to (`builtin`, `metamodule`, `nomount`).
     pub provider: String,
@@ -88,10 +90,11 @@ impl Inflight {
             format!(" ({})", self.detail)
         };
         format!(
-            "{} {}{detail} in boot {}",
+            "{} {}{detail} in boot {} generation {}",
             self.stage.as_str(),
             self.provider,
-            self.boot_id
+            self.boot_id,
+            self.generation,
         )
     }
 }
@@ -111,7 +114,14 @@ pub fn current_boot_id() -> String {
 ///
 /// # Errors
 /// Returns an error when the record cannot be written or synced.
-pub fn begin(path: &Path, stage: Stage, provider: &str, detail: &str, boot_id: &str) -> Result<()> {
+pub fn begin(
+    path: &Path,
+    stage: Stage,
+    provider: &str,
+    detail: &str,
+    boot_id: &str,
+    generation: u64,
+) -> Result<()> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
     }
@@ -122,7 +132,7 @@ pub fn begin(path: &Path, stage: Stage, provider: &str, detail: &str, boot_id: &
         std::fs::File::create(path).with_context(|| format!("create {}", path.display()))?;
     file.write_all(
         format!(
-            "boot_id={boot_id}\nstage={}\nprovider={}\ndetail={}\ntime={stamp}\n",
+            "boot_id={boot_id}\ngeneration={generation}\nstage={}\nprovider={}\ndetail={}\ntime={stamp}\n",
             stage.as_str(),
             sanitize(provider),
             sanitize(detail),
@@ -139,6 +149,7 @@ pub fn begin(path: &Path, stage: Stage, provider: &str, detail: &str, boot_id: &
 pub fn read(path: &Path) -> Option<Inflight> {
     let content = std::fs::read_to_string(path).ok()?;
     let mut boot_id = None;
+    let mut generation = None;
     let mut stage = None;
     let mut provider = None;
     let mut detail = None;
@@ -148,6 +159,7 @@ pub fn read(path: &Path) -> Option<Inflight> {
         };
         match key {
             "boot_id" => boot_id = Some(value.to_string()),
+            "generation" => generation = value.parse().ok(),
             "stage" => stage = Stage::parse(value),
             "provider" => provider = Some(value.to_string()),
             "detail" => detail = Some(value.to_string()),
@@ -156,6 +168,7 @@ pub fn read(path: &Path) -> Option<Inflight> {
     }
     Some(Inflight {
         boot_id: boot_id?,
+        generation: generation.unwrap_or(0),
         stage: stage?,
         provider: provider?,
         detail: detail.unwrap_or_default(),
@@ -169,7 +182,17 @@ pub fn read(path: &Path) -> Option<Inflight> {
 /// than an automatic part of the next boot.
 #[must_use]
 pub fn died(path: &Path) -> bool {
-    read(path).is_some_and(|record| record.boot_id != current_boot_id())
+    let Ok(epoch) = crate::startup_epoch::current_or_create() else {
+        return false;
+    };
+    died_at(path, &epoch)
+}
+
+fn died_at(path: &Path, epoch: &crate::startup_epoch::StartupEpoch) -> bool {
+    read(path).is_some_and(|record| {
+        record.boot_id != epoch.boot_id
+            || (record.generation != 0 && record.generation != epoch.generation)
+    })
 }
 
 /// Drop the record; failures only warn.
@@ -184,7 +207,17 @@ pub fn clear(path: &Path) {
 /// a step that stopped an earlier one (booting into safe mode, for instance,
 /// skips mounting and must not swallow the evidence).
 pub fn clear_if_ours(path: &Path) {
-    let ours = read(path).is_none_or(|record| record.boot_id == current_boot_id());
+    let Ok(epoch) = crate::startup_epoch::current_or_create() else {
+        return;
+    };
+    clear_if_ours_at(path, &epoch);
+}
+
+pub fn clear_if_ours_at(path: &Path, epoch: &crate::startup_epoch::StartupEpoch) {
+    let ours = read(path).is_none_or(|record| {
+        record.boot_id == epoch.boot_id
+            && (record.generation == 0 || record.generation == epoch.generation)
+    });
     if ours {
         clear(path);
     }

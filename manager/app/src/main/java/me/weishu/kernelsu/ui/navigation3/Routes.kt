@@ -122,6 +122,10 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
+    data object KernelModules : Route
+
+    @Parcelize
+    @Serializable
     data object PluginStore : Route
 
     @Parcelize

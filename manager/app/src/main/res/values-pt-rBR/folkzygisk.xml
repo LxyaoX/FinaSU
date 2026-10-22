@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">mecanismo não instalado</string>
     <string name="folkzygisk_startup_protection">proteção de inicialização ativa</string>
     <string name="folkzygisk_unknown_gate">restrição não reconhecida</string>
+    <string name="folkzygisk_recover">Recuperar e tentar novamente após reiniciar</string>
+    <string name="folkzygisk_recover_summary">Limpe a pausa de inicialização e permita uma nova tentativa após o próximo reinício completo ou reinício suave. Nada será iniciado agora.</string>
+    <string name="folkzygisk_recovery_restart_required">A recuperação do FolkZygisk foi salva. Reinicie ou faça um reinício suave para tentar novamente.</string>
+    <string name="folkzygisk_startup_paused">A inicialização automática foi pausada após %1$d tentativas de inicialização malsucedidas.</string>
+    <string name="folkzygisk_failure_engine_missing">Último problema: o mecanismo integrado está ausente ou incompleto.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Último problema: o diretório de execução ou o bloqueio não eram seguros para reutilização.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Último problema: não foi possível iniciar o monitor.</string>
+    <string name="folkzygisk_failure_monitor_exited">Último problema: o monitor encerrou antes de ficar pronto.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Último problema: o monitor não ficou pronto a tempo.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Último problema: a injeção completa no zygote não foi confirmada.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Último problema: o status de execução era inválido.</string>
+    <string name="folkzygisk_failure_unknown">Último problema: motivo da falha de inicialização não reconhecido.</string>
 </resources>

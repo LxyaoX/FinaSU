@@ -8,6 +8,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
@@ -16,10 +17,11 @@ fun TopBarBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
+    horizontalPadding: Dp = 10.dp,
 ) {
     val tokens = LocalFolkWallpaperTokens.current
     FolkIconButton(
-        modifier = modifier.padding(horizontal = 10.dp),
+        modifier = modifier.padding(horizontal = horizontalPadding),
         onClick = onClick,
         colors = IconButtonDefaults.iconButtonColors(
             containerColor = tokens

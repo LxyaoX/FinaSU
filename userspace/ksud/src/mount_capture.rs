@@ -7,6 +7,7 @@
 //! boot completion, the helper asks the kernel what is blocked and writes it to
 //! a bounded log that a bug report carries off the device.
 
+use std::os::fd::RawFd;
 use std::path::Path;
 use std::process::Command;
 use std::time::Duration;
@@ -58,8 +59,13 @@ pub fn command(action: &str, seconds: u64) -> Result<()> {
 /// The helper has to survive the boot stage it was started from: init kills the
 /// process group of a finished `post-fs-data`, so the capture runs in its own
 /// daemon (`init`'s process group, which is what makes it outlive the stage).
-pub fn spawn() {
-    if !utils::create_daemon(true).unwrap_or(false) {
+pub fn spawn(lock_fd: RawFd) {
+    if !utils::create_daemon_with(true, || {
+        unsafe { libc::close(lock_fd) };
+        Ok(())
+    })
+    .unwrap_or(false)
+    {
         return;
     }
     let boot_id = mount_guard::current_boot_id();

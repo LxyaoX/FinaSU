@@ -39,15 +39,18 @@ pub enum Previous {
 #[cfg(target_os = "android")]
 #[must_use]
 pub fn previous(boot_id: &str) -> Previous {
-    previous_at(Path::new(defs::MOUNT_UI_PENDING), boot_id)
+    let generation = crate::startup_epoch::current_or_create().map_or(0, |epoch| epoch.generation);
+    previous_at(Path::new(defs::MOUNT_UI_PENDING), boot_id, generation)
 }
 
 #[cfg(any(target_os = "android", test))]
-fn previous_at(path: &std::path::Path, boot_id: &str) -> Previous {
+fn previous_at(path: &std::path::Path, boot_id: &str, generation: u64) -> Previous {
     let Some(record) = crate::mount_guard::read(path) else {
         return Previous::None;
     };
-    if record.boot_id == boot_id || record.provider != "nomount" {
+    if (record.boot_id == boot_id && (record.generation == 0 || record.generation == generation))
+        || record.provider != "nomount"
+    {
         return Previous::None;
     }
     if record.detail == "ui-failed" {
@@ -78,7 +81,7 @@ pub fn clear() {
 }
 
 #[cfg(target_os = "android")]
-pub fn arm(boot_id: &str, lock_fd: std::os::fd::RawFd) {
+pub fn arm(boot_id: &str, generation: u64, lock_fd: std::os::fd::RawFd) {
     let content = std::fs::read_to_string(defs::MOUNT_UI_CONFIG).unwrap_or_default();
     let Some(seconds) = delay(&content) else {
         return;
@@ -89,6 +92,7 @@ pub fn arm(boot_id: &str, lock_fd: std::os::fd::RawFd) {
         "nomount",
         "ui-pending",
         boot_id,
+        generation,
     ) {
         log::warn!("nomount: cannot arm UI guard: {error:#}");
         return;
@@ -110,9 +114,9 @@ pub fn arm(boot_id: &str, lock_fd: std::os::fd::RawFd) {
     let boot = utils::getprop("sys.boot_completed");
     let surface = utils::getprop("init.svc.surfaceflinger");
     let animation = utils::getprop("init.svc.bootanim");
-    if mount_guard::read(Path::new(defs::MOUNT_UI_PENDING))
-        .is_some_and(|record| record.boot_id == boot_id)
-    {
+    if mount_guard::read(Path::new(defs::MOUNT_UI_PENDING)).is_some_and(|record| {
+        record.boot_id == boot_id && (record.generation == 0 || record.generation == generation)
+    }) {
         let healthy = ready(boot.as_deref(), surface.as_deref(), animation.as_deref());
         let message = format!(
             "UI observation after {seconds}s: boot_completed={boot:?} surfaceflinger={surface:?} bootanim={animation:?}; {}",
@@ -139,8 +143,9 @@ pub fn arm(boot_id: &str, lock_fd: std::os::fd::RawFd) {
                 "nomount",
                 "ui-failed",
                 boot_id,
+                generation,
             );
-            crate::magic_mount::record_ui_warning(boot_id, &message);
+            crate::magic_mount::record_ui_warning(boot_id, generation, &message);
         }
     }
     unsafe { libc::_exit(0) };
@@ -172,6 +177,10 @@ mod tests {
         let pending = temp.path().join("ui");
         let inflight = temp.path().join("inflight");
         let boot_id = crate::mount_guard::current_boot_id();
+        let epoch = crate::startup_epoch::StartupEpoch {
+            boot_id: boot_id.clone(),
+            generation: 1,
+        };
         for path in [&pending, &inflight] {
             crate::mount_guard::begin(
                 path,
@@ -179,21 +188,22 @@ mod tests {
                 "nomount",
                 "ui-pending",
                 &boot_id,
+                1,
             )
             .unwrap();
         }
-        crate::mount_guard::clear_if_ours(&inflight);
+        crate::mount_guard::clear_if_ours_at(&inflight, &epoch);
         assert!(!inflight.exists());
         // This boot's own marker is not a verdict about an earlier boot.
-        assert_eq!(previous_at(&pending, &boot_id), Previous::None);
+        assert_eq!(previous_at(&pending, &boot_id, 1), Previous::None);
         // A marker that still says `ui-pending` means the observation never ran
         // (the device rebooted before the deadline), so NoMount keeps its turn.
-        let Previous::Inconclusive(note) = previous_at(&pending, "new") else {
+        let Previous::Inconclusive(note) = previous_at(&pending, "new", 2) else {
             panic!("a pending observation must not be read as a failure");
         };
         assert!(note.contains("keeping NoMount"));
         crate::mount_guard::clear(&pending);
-        assert_eq!(previous_at(&pending, "new"), Previous::None);
+        assert_eq!(previous_at(&pending, "new", 2), Previous::None);
     }
 
     #[test]
@@ -207,11 +217,12 @@ mod tests {
             "nomount",
             "ui-failed",
             &boot_id,
+            1,
         )
         .unwrap();
         // The same boot that wrote the verdict is not affected by it.
-        assert_eq!(previous_at(&pending, &boot_id), Previous::None);
-        let Previous::Failed(note) = previous_at(&pending, "next-boot") else {
+        assert_eq!(previous_at(&pending, &boot_id, 1), Previous::None);
+        let Previous::Failed(note) = previous_at(&pending, "next-boot", 2) else {
             panic!("a recorded ui-failed verdict must block the next boot");
         };
         assert!(note.contains("builtin"));

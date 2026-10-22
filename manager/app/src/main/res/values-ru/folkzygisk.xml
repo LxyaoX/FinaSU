@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">движок не установлен</string>
     <string name="folkzygisk_startup_protection">активна защита при запуске</string>
     <string name="folkzygisk_unknown_gate">нераспознанное ограничение</string>
+    <string name="folkzygisk_recover">Восстановить и повторить после перезагрузки</string>
+    <string name="folkzygisk_recover_summary">Сбросьте паузу запуска и разрешите одну новую попытку после следующей полной перезагрузки или мягкого перезапуска. Сейчас ничего не запускается.</string>
+    <string name="folkzygisk_recovery_restart_required">Восстановление FolkZygisk сохранено. Перезагрузите устройство или выполните мягкий перезапуск, чтобы повторить попытку.</string>
+    <string name="folkzygisk_startup_paused">Автоматический запуск приостановлен после %1$d неудачных попыток запуска.</string>
+    <string name="folkzygisk_failure_engine_missing">Последняя проблема: встроенный движок отсутствует или неполон.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Последняя проблема: каталог среды выполнения или блокировка небезопасны для повторного использования.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Последняя проблема: не удалось запустить монитор.</string>
+    <string name="folkzygisk_failure_monitor_exited">Последняя проблема: монитор завершился до готовности.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Последняя проблема: монитор не стал готов вовремя.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Последняя проблема: полная инъекция в zygote не подтверждена.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Последняя проблема: состояние среды выполнения недопустимо.</string>
+    <string name="folkzygisk_failure_unknown">Последняя проблема: причина сбоя запуска не распознана.</string>
 </resources>

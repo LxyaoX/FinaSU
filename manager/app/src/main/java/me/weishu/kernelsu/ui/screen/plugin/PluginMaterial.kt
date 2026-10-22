@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -42,15 +44,19 @@ import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -118,7 +124,6 @@ import me.weishu.kernelsu.ui.navigation3.NavOrigin
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navThemeSignature
 import me.weishu.kernelsu.ui.screen.module.ExpandableDescriptionText
-import me.weishu.kernelsu.ui.screen.module.ModuleButtonStyle
 import me.weishu.kernelsu.ui.screen.module.rememberModuleCardVisual
 import me.weishu.kernelsu.ui.theme.LocalModuleDescriptionMaxLines
 
@@ -340,9 +345,9 @@ fun PluginPagerMaterial(
         }
     }
 
-    PluginLogDialog(uiState = uiState, actions = actions)
+    PluginLogSheet(uiState = uiState, actions = actions)
     PluginUninstallDialog(uiState = uiState, actions = actions)
-    PluginConfigDialog(uiState = uiState, actions = actions)
+    PluginConfigSheet(uiState = uiState, actions = actions)
 }
 
 @Composable
@@ -436,34 +441,59 @@ private fun PluginList(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PluginLogDialog(
+private fun PluginLogSheet(
     uiState: PluginUiState,
     actions: PluginActions,
 ) {
     val pluginId = uiState.logPlugin ?: return
+    val pluginName = uiState.plugins
+        .firstOrNull { it.id == pluginId }
+        ?.name
+        ?.ifBlank { pluginId }
+        ?: pluginId
     val emptyLog = stringResource(R.string.plugin_log_empty)
 
-    ExpressiveDialog(
+    ModalBottomSheet(
         onDismissRequest = actions.onDismissLog,
-        title = { Text(pluginId) },
-        text = {
+        sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(pluginName, style = MaterialTheme.typography.titleLarge)
+            Text(
+                stringResource(R.string.plugin_log),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Text(
                 text = uiState.logText.ifBlank { emptyLog },
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 360.dp)
+                    .heightIn(max = 520.dp)
                     .verticalScroll(rememberScrollState()),
             )
-        },
-        confirmButton = {
-            FolkTextButton(onClick = actions.onDismissLog) {
-                Text(stringResource(android.R.string.ok))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                FolkTextButton(onClick = actions.onDismissLog) {
+                    Text(stringResource(R.string.close))
+                }
             }
-        },
-    )
+        }
+    }
 }
 
 @Composable
@@ -501,8 +531,9 @@ private fun PluginUninstallDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PluginConfigDialog(
+private fun PluginConfigSheet(
     uiState: PluginUiState,
     actions: PluginActions,
 ) {
@@ -510,13 +541,34 @@ private fun PluginConfigDialog(
     val fields = plugin.config
     if (fields.isEmpty()) return
 
-    ExpressiveDialog(
+    ModalBottomSheet(
         onDismissRequest = actions.onDismissConfig,
-        title = { Text(plugin.name.ifBlank { plugin.id }) },
-        text = {
+        sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .navigationBarsPadding()
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                plugin.name.ifBlank { plugin.id },
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                stringResource(R.string.plugin_config),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Column(
                 modifier = Modifier
-                    .heightIn(max = 420.dp)
+                    .fillMaxWidth()
+                    .heightIn(max = 520.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
                 val rows: List<@Composable () -> Unit> = fields.map { field ->
@@ -534,22 +586,23 @@ private fun PluginConfigDialog(
                 }
                 SegmentedColumn(content = rows)
             }
-        },
-        confirmButton = {
-            FolkTextButton(
-                enabled = uiState.configValues != uiState.savedConfigValues ||
-                    uiState.configDeleted.isNotEmpty(),
-                onClick = actions.onSaveConfig,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
             ) {
-                Text(stringResource(R.string.plugin_save))
+                FolkTextButton(onClick = actions.onDismissConfig) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+                FolkFilledTonalButton(
+                    enabled = uiState.configValues != uiState.savedConfigValues ||
+                        uiState.configDeleted.isNotEmpty(),
+                    onClick = actions.onSaveConfig,
+                ) {
+                    Text(stringResource(R.string.plugin_save))
+                }
             }
-        },
-        dismissButton = {
-            FolkTextButton(onClick = actions.onDismissConfig) {
-                Text(stringResource(android.R.string.cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 /**

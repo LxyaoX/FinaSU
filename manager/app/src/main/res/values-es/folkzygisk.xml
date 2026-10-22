@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">motor no instalado</string>
     <string name="folkzygisk_startup_protection">protección de arranque activa</string>
     <string name="folkzygisk_unknown_gate">restricción no reconocida</string>
+    <string name="folkzygisk_recover">Recuperar y reintentar tras reiniciar</string>
+    <string name="folkzygisk_recover_summary">Borra la pausa de inicio y permite un nuevo intento después del próximo reinicio completo o reinicio suave. Ahora no se inicia nada.</string>
+    <string name="folkzygisk_recovery_restart_required">Se guardó la recuperación de FolkZygisk. Reinicia o haz un reinicio suave para volver a intentarlo.</string>
+    <string name="folkzygisk_startup_paused">El inicio automático se pausó tras %1$d intentos de inicio fallidos.</string>
+    <string name="folkzygisk_failure_engine_missing">Último problema: el motor integrado falta o está incompleto.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Último problema: el directorio de ejecución o el bloqueo no eran seguros para reutilizarlos.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Último problema: no se pudo iniciar el monitor.</string>
+    <string name="folkzygisk_failure_monitor_exited">Último problema: el monitor salió antes de estar listo.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Último problema: el monitor no estuvo listo a tiempo.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Último problema: no se confirmó la inyección completa en zygote.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Último problema: el estado de ejecución no era válido.</string>
+    <string name="folkzygisk_failure_unknown">Último problema: no se reconoce el motivo del fallo de inicio.</string>
 </resources>

@@ -147,6 +147,7 @@ impl std::error::Error for MountFailure {
 #[derive(Debug, Clone, Default)]
 struct RuntimeRecord {
     boot_id: String,
+    generation: u64,
     provider: Option<String>,
     result: String,
     target_count: Option<usize>,
@@ -296,8 +297,9 @@ fn sanitize(value: &str) -> String {
 
 fn write_runtime(record: &RuntimeRecord) -> Result<()> {
     let contents = format!(
-        "boot_id={}\nprovider={}\nresult={}\ntarget_count={}\nerror={}\nwarning={}\n",
+        "boot_id={}\ngeneration={}\nprovider={}\nresult={}\ntarget_count={}\nerror={}\nwarning={}\n",
         record.boot_id,
+        record.generation,
         record.provider.as_deref().unwrap_or(""),
         record.result,
         record
@@ -318,6 +320,7 @@ fn read_runtime() -> Option<RuntimeRecord> {
         };
         match key {
             "boot_id" => record.boot_id = value.to_string(),
+            "generation" => record.generation = value.parse().unwrap_or(0),
             "provider" => record.provider = (!value.is_empty()).then(|| value.to_string()),
             "result" => record.result = value.to_string(),
             "target_count" => record.target_count = value.parse().ok(),
@@ -331,9 +334,10 @@ fn read_runtime() -> Option<RuntimeRecord> {
 
 /// Best-effort record that this boot did not mount modules.
 fn record_skipped() {
-    let boot_id = current_boot_id().unwrap_or_default();
+    let epoch = crate::startup_epoch::current_or_create().unwrap_or_default();
     let record = RuntimeRecord {
-        boot_id,
+        boot_id: epoch.boot_id,
+        generation: epoch.generation,
         provider: None,
         result: "skipped".to_string(),
         target_count: None,
@@ -347,11 +351,19 @@ fn record_skipped() {
 
 /// Refuse a second run in the same boot and diagnose a `mounting` residue
 /// without trying to clean unknown old mounts.
-fn guard_reentrancy(boot_id: &str, provider: Provider) -> Result<()> {
+fn guard_reentrancy(boot_id: &str, generation: u64, provider: Provider) -> Result<()> {
     let Some(record) = read_runtime() else {
         return Ok(());
     };
     if boot_id.is_empty() || record.boot_id != boot_id {
+        return Ok(());
+    }
+    if record.generation != generation {
+        if record.result == "mounting" {
+            bail!(
+                "Folk Mount left a 'mounting' record for boot {boot_id}; refusing to repeat the incomplete step"
+            );
+        }
         return Ok(());
     }
     if record.result == "mounting" {
@@ -768,17 +780,19 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         return Ok(MountOutcome::empty(Provider::Builtin));
     }
 
+    crate::nomount::preserve_legacy_load_guard()
+        .context("Folk Mount refused to overwrite an unfinished NoMount load record")?;
     let configured = resolve_provider()?;
     let mut provider = configured;
+    let epoch = crate::startup_epoch::current_or_create()?;
     if provider == Provider::None {
         info!("folk mount: mounting is disabled (mode=off)");
-        let boot_id = current_boot_id().unwrap_or_default();
-        finish_runtime(&boot_id, provider, "disabled", None, None, None, None);
+        finish_runtime(&epoch, provider, "disabled", None, None, None, None);
         return Ok(MountOutcome::empty(Provider::None));
     }
     ensure_init_mnt_ns()?;
 
-    let boot_id = current_boot_id().unwrap_or_default();
+    let boot_id = epoch.boot_id.clone();
 
     // A provider that stopped an earlier boot does not get to run again on its
     // own: the boot would stop the same way. NoMount and the metamodule step
@@ -787,6 +801,25 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     // there is nothing safer left to fall back to.
     let mut guard_note = None;
     let mut ui_fallback = false;
+    // Driver bootstrap is independent of rule injection. An earlier failed
+    // injection may make this cycle fall back to builtin, but it must not leave
+    // the configured NoMount provider without a driver to diagnose or retry.
+    if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
+        match crate::nomount::ensure_driver() {
+            Ok(probe) => {
+                info!(
+                    "nomount: driver ready before injection (version {})",
+                    probe.version.as_deref().unwrap_or("unknown")
+                );
+            }
+            Err(error) => {
+                let note = format!("NoMount driver could not be prepared ({error:#})");
+                warn!("folk mount: {note}");
+                guard_note = Some(note);
+                provider = Provider::Builtin;
+            }
+        }
+    }
     if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
         match crate::mount_ui::previous(&boot_id) {
             crate::mount_ui::Previous::Failed(note) => {
@@ -804,7 +837,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         }
     }
     if let Some(record) = mount_guard::read(inflight_path())
-        && record.boot_id != boot_id
+        && mount_guard::died(inflight_path())
         && record.provider == provider.as_str()
     {
         guard_note = Some(format!(
@@ -820,10 +853,11 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     }
 
     let lock = MountLock::acquire()?;
-    guard_reentrancy(&boot_id, provider)?;
+    guard_reentrancy(&boot_id, epoch.generation, provider)?;
 
     write_runtime(&RuntimeRecord {
         boot_id: boot_id.clone(),
+        generation: epoch.generation,
         provider: Some(provider.as_str().to_string()),
         result: "mounting".to_string(),
         target_count: None,
@@ -844,6 +878,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
             configured.as_str()
         ),
         &boot_id,
+        epoch.generation,
     ) {
         warn!("folk mount: could not record the injection step: {e:#}");
     }
@@ -852,10 +887,10 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     // this boot stage and dumps what the kernel was blocked on (see
     // `mount_capture`).
     if crate::mount_capture::enabled().is_some() {
-        crate::mount_capture::spawn();
+        crate::mount_capture::spawn(lock.file.as_raw_fd());
     }
     if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
-        crate::mount_ui::arm(&boot_id, lock.file.as_raw_fd());
+        crate::mount_ui::arm(&boot_id, epoch.generation, lock.file.as_raw_fd());
     }
 
     // A driver that cannot be made usable must not leave the modules
@@ -890,7 +925,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 .or(fallback)
                 .or_else(|| outcome.warnings.first().cloned());
             finish_runtime(
-                &boot_id,
+                &epoch,
                 provider,
                 result,
                 // The metamodule is a black box; the built-in engine and the
@@ -913,7 +948,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 outcome.residue
             );
             finish_runtime(
-                &boot_id,
+                &epoch,
                 provider,
                 result,
                 (provider != Provider::Metamodule).then_some(outcome.target_count),
@@ -931,9 +966,10 @@ fn inflight_path() -> &'static Path {
     Path::new(defs::MOUNT_INFLIGHT)
 }
 
-pub fn record_ui_warning(boot_id: &str, message: &str) {
+pub fn record_ui_warning(boot_id: &str, generation: u64, message: &str) {
     if let Some(mut record) = read_runtime()
         && record.boot_id == boot_id
+        && record.generation == generation
         && record.provider.as_deref() == Some("nomount")
     {
         record.warning = Some(message.to_string());
@@ -942,7 +978,7 @@ pub fn record_ui_warning(boot_id: &str, message: &str) {
 }
 
 fn finish_runtime(
-    boot_id: &str,
+    epoch: &crate::startup_epoch::StartupEpoch,
     provider: Provider,
     result: &str,
     target_count: Option<usize>,
@@ -951,7 +987,8 @@ fn finish_runtime(
     configured: Option<Provider>,
 ) {
     let record = RuntimeRecord {
-        boot_id: boot_id.to_string(),
+        boot_id: epoch.boot_id.clone(),
+        generation: epoch.generation,
         provider: Some(provider.as_str().to_string()),
         result: result.to_string(),
         target_count,
@@ -968,8 +1005,9 @@ fn finish_runtime(
 /// provider ran, what it published and why it degraded.
 fn log_mount(record: &RuntimeRecord, configured: Option<Provider>) {
     let mut body = format!(
-        "--- folk mount boot={} stage=inject provider={} result={}",
+        "--- folk mount boot={} generation={} stage=inject provider={} result={}",
         record.boot_id,
+        record.generation,
         record.provider.as_deref().unwrap_or("none"),
         record.result
     );

@@ -209,8 +209,40 @@ class SettingsViewModel(
                     folkZygiskReadError = status.isFailure,
                     folkZygiskRebootPending = it.folkZygiskRebootPending || result.isSuccess)
             }
-            Toast.makeText(ksuApp, if (result.isSuccess) R.string.folkzygisk_reboot_required
-                else R.string.folkzygisk_write_failed, Toast.LENGTH_LONG).show()
+            val message = if (result.isSuccess) {
+                ksuApp.getString(R.string.folkzygisk_reboot_required)
+            } else {
+                result.exceptionOrNull()?.message
+                    ?.takeIf { it.isNotBlank() }
+                    ?: ksuApp.getString(R.string.folkzygisk_write_failed)
+            }
+            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun recoverFolkZygisk() {
+        if (_uiState.value.isFolkZygiskWriting || _uiState.value.isFolkZygiskLoading) return
+        ++refreshGeneration
+        _uiState.update { it.copy(isFolkZygiskWriting = true) }
+        viewModelScope.launch {
+            val result = repo.recoverFolkZygisk()
+            val status = repo.getFolkZygiskStatus()
+            _uiState.update {
+                it.copy(
+                    isFolkZygiskWriting = false,
+                    folkZygiskStatus = status.getOrNull(),
+                    folkZygiskReadError = status.isFailure,
+                    folkZygiskRebootPending = it.folkZygiskRebootPending || result.isSuccess,
+                )
+            }
+            val message = if (result.isSuccess) {
+                ksuApp.getString(R.string.folkzygisk_recovery_restart_required)
+            } else {
+                result.exceptionOrNull()?.message
+                    ?.takeIf { it.isNotBlank() }
+                    ?: ksuApp.getString(R.string.folkzygisk_write_failed)
+            }
+            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
         }
     }
 

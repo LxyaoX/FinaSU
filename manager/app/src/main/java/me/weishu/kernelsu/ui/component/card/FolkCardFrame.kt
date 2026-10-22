@@ -48,6 +48,7 @@ fun FolkCardFrame(
     expanded: Boolean,
     onClick: () -> Unit,
     onLongPress: () -> Unit,
+    onClickLabel: String? = null,
     modifier: Modifier = Modifier,
     bannerCacheKey: String? = null,
     content: @Composable () -> Unit,
@@ -87,6 +88,7 @@ fun FolkCardFrame(
         .combinedClickable(
             interactionSource = interactionSource,
             indication = null,
+            onClickLabel = onClickLabel,
             onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()

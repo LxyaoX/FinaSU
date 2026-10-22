@@ -55,6 +55,21 @@ val DEFAULT_BACKUP_PARTITIONS = setOf("boot", "init_boot", "vendor_boot")
  */
 private fun shellQuote(value: String): String = "'" + value.replace("'", "'\"'\"'") + "'"
 
+private fun ksudFailure(result: com.topjohnwu.superuser.Shell.Result, fallback: String): String {
+    return (result.err + result.out)
+        .asSequence()
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .lastOrNull()
+        ?.removePrefix("Error: ")
+        ?.takeIf(String::isNotEmpty)
+        ?: "$fallback (exit ${result.code})"
+}
+
+private fun requireKsud(result: com.topjohnwu.superuser.Shell.Result, fallback: String) {
+    check(result.isSuccess) { ksudFailure(result, fallback) }
+}
+
 fun isSoftRebootPreferred(): Boolean =
     Natives.isLateLoadMode || ksuApp.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE)
         .getBoolean(KEY_USE_SOFT_REBOOT, false)
@@ -372,13 +387,28 @@ class SettingsRepositoryImpl : SettingsRepository {
                 if (enabled) {
                     val status = getFolkZygiskStatus().getOrThrow()
                     if (!status.engineAvailable) {
-                        check(execKsudResult("zygisk install-engine").isSuccess) { "Engine installation failed" }
+                        requireKsud(
+                            execKsudResult("zygisk install-engine"),
+                            "Engine installation failed",
+                        )
                     }
                 }
                 val command = if (enabled) "enable" else "disable"
-                check(execKsudResult("zygisk $command").isSuccess) { "FolkZygisk configuration failed" }
+                requireKsud(
+                    execKsudResult("zygisk $command"),
+                    "FolkZygisk configuration failed",
+                )
             }
         }
+
+    override suspend fun recoverFolkZygisk(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            requireKsud(
+                execKsudResult("zygisk recover"),
+                "FolkZygisk recovery failed",
+            )
+        }
+    }
 
     override suspend fun getSuiStatus(): Result<SuiStatus> = withContext(Dispatchers.IO) {
         runCatching {

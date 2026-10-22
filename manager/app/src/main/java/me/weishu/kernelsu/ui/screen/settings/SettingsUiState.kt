@@ -136,6 +136,7 @@ data class SettingsScreenActions(
     val onOpenNomount: () -> Unit,
     val onSetRekernelXEnabled: (Boolean) -> Unit,
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
+    val onRecoverFolkZygisk: () -> Unit,
     val onSetSuiEnabled: (Boolean) -> Unit,
     val onRepairSui: () -> Unit,
     val onManageSuiPermissions: () -> Unit,

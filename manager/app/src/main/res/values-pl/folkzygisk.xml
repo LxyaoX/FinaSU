@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">silnik nie jest zainstalowany</string>
     <string name="folkzygisk_startup_protection">ochrona rozruchu aktywna</string>
     <string name="folkzygisk_unknown_gate">nierozpoznane ograniczenie</string>
+    <string name="folkzygisk_recover">Odzyskaj i ponów próbę po restarcie</string>
+    <string name="folkzygisk_recover_summary">Wyczyść wstrzymanie rozruchu i zezwól na jedną nową próbę po następnym pełnym ponownym uruchomieniu lub miękkim restarcie. Teraz nic nie zostanie uruchomione.</string>
+    <string name="folkzygisk_recovery_restart_required">Zapisano odzyskiwanie FolkZygisk. Uruchom ponownie lub wykonaj miękki restart, aby spróbować ponownie.</string>
+    <string name="folkzygisk_startup_paused">Automatyczny rozruch został wstrzymany po %1$d nieudanych próbach uruchomienia.</string>
+    <string name="folkzygisk_failure_engine_missing">Ostatni problem: osadzony silnik jest nieobecny lub niekompletny.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">Ostatni problem: katalog środowiska uruchomieniowego lub blokada nie były bezpieczne do ponownego użycia.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">Ostatni problem: nie można uruchomić monitora.</string>
+    <string name="folkzygisk_failure_monitor_exited">Ostatni problem: monitor zakończył się przed osiągnięciem gotowości.</string>
+    <string name="folkzygisk_failure_readiness_timeout">Ostatni problem: monitor nie osiągnął gotowości na czas.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">Ostatni problem: nie potwierdzono pełnej iniekcji do zygote.</string>
+    <string name="folkzygisk_failure_runtime_invalid">Ostatni problem: stan środowiska uruchomieniowego był nieprawidłowy.</string>
+    <string name="folkzygisk_failure_unknown">Ostatni problem: nie rozpoznano przyczyny niepowodzenia rozruchu.</string>
 </resources>

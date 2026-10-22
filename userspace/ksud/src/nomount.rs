@@ -16,8 +16,10 @@ use std::io::Write;
 
 use anyhow::{Context, Result, bail, ensure};
 
-#[cfg(target_os = "android")]
+#[cfg(any(target_os = "android", test))]
 use crate::mount_guard;
+#[cfg(any(target_os = "android", test))]
+use std::{fs::OpenOptions, os::fd::AsRawFd, os::unix::fs::OpenOptionsExt, path::Path};
 
 /// Kernel/userspace payload size; the kernel maps exactly one page.
 pub const PAGE_SIZE: usize = 4096;
@@ -1034,10 +1036,7 @@ pub fn apply_current_plan() -> Result<InjectionResult> {
         bail!("nomount: module {owner} owns NoMount injection; not writing rules as well");
     }
     let driver = Driver::kernel();
-    let (probe, loaded) = probe_or_load()?;
-    if let Some(loaded) = loaded {
-        log::info!("nomount: driver loaded from {loaded}");
-    }
+    let probe = ensure_driver()?;
     let plan = collect_plan()?;
     let (applied, removed) = driver.reconcile_rules(&plan.rules)?;
 
@@ -1085,6 +1084,23 @@ pub fn apply_current_plan() -> Result<InjectionResult> {
         isolated_blocked,
         warnings,
     })
+}
+
+/// Probe the runtime driver and load the embedded KMI module when needed.
+///
+/// This is separate from rule injection so a later mount-provider safety
+/// fallback cannot suppress driver loading and diagnostics.
+///
+/// # Errors
+/// Returns an error when a load is needed and fails, or the resulting API is
+/// unusable.
+#[cfg(target_os = "android")]
+pub fn ensure_driver() -> Result<DriverProbe> {
+    let (probe, loaded) = probe_or_load()?;
+    if let Some(loaded) = loaded {
+        log::info!("nomount: driver loaded from {loaded}");
+    }
+    Ok(probe)
 }
 
 /// Append what this boot injected to the shared mount log.
@@ -1621,8 +1637,8 @@ pub fn owns_injection() -> Result<bool> {
 ///
 /// A load that never returns cannot be observed from userspace at all — the
 /// kernel is already gone when the call would come back — so the attempt is
-/// recorded first and the next boot refuses to repeat it (see
-/// [`load_attempt_died`]) instead of hanging the same way again.
+/// recorded first and later calls refuse to repeat it (see
+/// [`reject_unfinished_load`]) instead of hanging the same way again.
 ///
 /// # Errors
 /// Returns an error when the KMI cannot be determined, this build carries no
@@ -1630,35 +1646,30 @@ pub fn owns_injection() -> Result<bool> {
 /// recorded, or the loader refuses the module.
 #[cfg(target_os = "android")]
 pub fn load_embedded_driver() -> Result<String> {
-    let attempt = inflight_path();
+    let attempt = load_attempt_path();
+    let _lock = load_lock()?;
     if module_loaded(&std::fs::read_to_string("/proc/modules").unwrap_or_default()) {
         // Something already loaded it, so no load is in flight any more.
         mount_guard::clear(attempt);
+        clear_legacy_load_record();
         return Ok("already loaded".to_string());
     }
-    if mount_guard::died(attempt) {
-        let earlier = mount_guard::read(attempt).map_or_else(
-            || "an earlier load".to_string(),
-            |record| format!("the {}", record.describe()),
-        );
-        bail!(
-            "{earlier} never returned, so this boot keeps the built-in engine instead of loading the \
-             module again; select NoMount again, or delete {}, to retry",
-            crate::defs::MOUNT_INFLIGHT
-        );
-    }
+    preserve_legacy_load_record(attempt, Path::new(crate::defs::MOUNT_INFLIGHT))?;
+    reject_unfinished_load(attempt)?;
     let kmi = crate::boot_patch::get_current_kmi()
         .context("nomount: cannot determine the running KMI")?;
     let name = format!("{kmi}{ASSET_SUFFIX}");
     let data = crate::assets::get_asset_data(&name)
         .with_context(|| format!("nomount: this build has no module for {kmi}"))?;
     let params = std::ffi::CString::new("").context("nomount: empty module parameters")?;
+    let epoch = crate::startup_epoch::current_or_create()?;
     mount_guard::begin(
         attempt,
         mount_guard::Stage::Load,
         "nomount",
         &kmi,
-        &mount_guard::current_boot_id(),
+        &epoch.boot_id,
+        epoch.generation,
     )
     .context("nomount: cannot record the load attempt")?;
     let loaded = ksuinit::load_module(&data, &params);
@@ -1670,10 +1681,96 @@ pub fn load_embedded_driver() -> Result<String> {
     Ok(name)
 }
 
-/// Where the in-flight step record lives on a device.
+/// Where the in-flight module-load step record lives on a device.
 #[cfg(target_os = "android")]
-fn inflight_path() -> &'static std::path::Path {
-    std::path::Path::new(crate::defs::MOUNT_INFLIGHT)
+fn load_attempt_path() -> &'static std::path::Path {
+    std::path::Path::new(crate::defs::NOMOUNT_LOAD_INFLIGHT)
+}
+
+/// Pre-split builds used one file for both loading and rule injection. Only a
+/// legacy record for the load stage may suppress another module load.
+#[cfg(any(target_os = "android", test))]
+fn preserve_legacy_load_record(attempt: &Path, legacy: &Path) -> Result<()> {
+    let Some(record) = mount_guard::read(legacy) else {
+        return Ok(());
+    };
+    if record.stage != mount_guard::Stage::Load || mount_guard::read(attempt).is_some() {
+        return Ok(());
+    }
+    mount_guard::begin(
+        attempt,
+        mount_guard::Stage::Load,
+        &record.provider,
+        &record.detail,
+        &record.boot_id,
+        record.generation,
+    )
+    .context("nomount: cannot preserve the legacy unfinished load record")
+}
+
+#[cfg(any(target_os = "android", test))]
+fn reject_unfinished_load(attempt: &Path) -> Result<()> {
+    let Some(record) = mount_guard::read(attempt) else {
+        return Ok(());
+    };
+    bail!(
+        "the {} is unfinished, so this boot keeps the built-in engine instead of loading the module again; \
+         select NoMount again, or delete {}, to retry",
+        record.describe(),
+        attempt.display()
+    )
+}
+
+#[cfg(target_os = "android")]
+fn clear_legacy_load_record() {
+    let path = Path::new(crate::defs::MOUNT_INFLIGHT);
+    if mount_guard::read(path).is_some_and(|record| record.stage == mount_guard::Stage::Load) {
+        mount_guard::clear(path);
+    }
+}
+
+#[cfg(target_os = "android")]
+pub fn preserve_legacy_load_guard() -> Result<()> {
+    preserve_legacy_load_guard_at(
+        Path::new(crate::defs::MOUNT_INFLIGHT),
+        load_attempt_path(),
+        Path::new(crate::defs::NOMOUNT_LOAD_LOCK),
+    )
+}
+
+#[cfg(any(target_os = "android", test))]
+fn preserve_legacy_load_guard_at(legacy: &Path, attempt: &Path, lock_path: &Path) -> Result<()> {
+    if !mount_guard::read(legacy).is_some_and(|record| record.stage == mount_guard::Stage::Load)
+        || mount_guard::read(attempt).is_some()
+    {
+        return Ok(());
+    }
+    let _lock = load_lock_at(lock_path)?;
+    preserve_legacy_load_record(attempt, legacy)
+}
+
+#[cfg(any(target_os = "android", test))]
+fn load_lock_at(path: &Path) -> Result<std::fs::File> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .mode(0o600)
+        .open(path)?;
+    // SAFETY: the returned file owns a valid descriptor for the lock lifetime.
+    if unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } != 0 {
+        bail!("nomount: module loading is already in progress");
+    }
+    Ok(file)
+}
+
+#[cfg(target_os = "android")]
+fn load_lock() -> Result<std::fs::File> {
+    load_lock_at(Path::new(crate::defs::NOMOUNT_LOAD_LOCK))
 }
 
 /// Forget the recorded step.
@@ -1682,7 +1779,24 @@ fn inflight_path() -> &'static std::path::Path {
 /// record has to go before the next load or injection can run.
 #[cfg(target_os = "android")]
 pub fn forget_inflight() {
-    mount_guard::clear(inflight_path());
+    match forget_inflight_at(
+        load_attempt_path(),
+        Path::new(crate::defs::MOUNT_INFLIGHT),
+        Path::new(crate::defs::NOMOUNT_LOAD_LOCK),
+    ) {
+        Ok(()) => {}
+        Err(error) => {
+            log::warn!("nomount: refusing to clear an active load guard: {error:#}");
+        }
+    }
+}
+
+#[cfg(any(target_os = "android", test))]
+fn forget_inflight_at(attempt: &Path, legacy: &Path, lock_path: &Path) -> Result<()> {
+    let _lock = load_lock_at(lock_path)?;
+    mount_guard::clear(attempt);
+    mount_guard::clear(legacy);
+    Ok(())
 }
 
 /// Probe the driver, loading the embedded module first when there is none.

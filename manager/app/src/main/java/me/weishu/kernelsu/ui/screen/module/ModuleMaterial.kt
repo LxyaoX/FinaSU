@@ -58,6 +58,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -109,6 +110,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -331,6 +333,39 @@ fun ModulePagerMaterial(
                     }
                 },
                 actions = {
+                    val scope = rememberCoroutineScope()
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .combinedClickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = LocalIndication.current,
+                                onClickLabel = stringResource(R.string.kernel_modules_entry),
+                                onLongClickLabel = stringResource(R.string.kernel_modules_entry_hint),
+                                onLongClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    scope.launch {
+                                        snackBarHost.showSnackbar(
+                                            resource.getString(R.string.kernel_modules_entry_long_press)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    actions.onOpenKernelModules()
+                                },
+                            )
+                            .semantics {
+                                this.contentDescription = resource.getString(R.string.kernel_modules_entry)
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Memory,
+                            contentDescription = null,
+                        )
+                    }
                     FolkIconButton(
                         onClick = { showSortSheet = true }
                     ) {

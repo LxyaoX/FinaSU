@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">尚未安裝引擎</string>
     <string name="folkzygisk_startup_protection">啟動保護已啟用</string>
     <string name="folkzygisk_unknown_gate">無法辨識的限制</string>
+    <string name="folkzygisk_recover">復原並在重新啟動後重試</string>
+    <string name="folkzygisk_recover_summary">清除啟動暫停狀態，並在下次完整重新啟動或軟重啟後允許再嘗試一次。目前不會立即啟動。</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk 已復原。請重新啟動或軟重啟後再試。</string>
+    <string name="folkzygisk_startup_paused">連續 %1$d 次啟動未成功，內建引擎已暫停自動啟動。</string>
+    <string name="folkzygisk_failure_engine_missing">最近問題：內嵌引擎缺失或不完整。</string>
+    <string name="folkzygisk_failure_runtime_unsafe">最近問題：執行目錄或鎖定狀態不安全，未自動重複使用。</string>
+    <string name="folkzygisk_failure_monitor_start_failed">最近問題：monitor 無法啟動。</string>
+    <string name="folkzygisk_failure_monitor_exited">最近問題：monitor 在就緒前結束。</string>
+    <string name="folkzygisk_failure_readiness_timeout">最近問題：monitor 未在時限內就緒。</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">最近問題：未確認完成 zygote 注入。</string>
+    <string name="folkzygisk_failure_runtime_invalid">最近問題：執行狀態資料無效。</string>
+    <string name="folkzygisk_failure_unknown">最近問題：無法辨識啟動失敗原因。</string>
 </resources>

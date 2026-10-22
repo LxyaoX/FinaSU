@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">法门尚未炼入</string>
     <string name="folkzygisk_startup_protection">启道护持已动</string>
     <string name="folkzygisk_unknown_gate">未知之限</string>
+    <string name="folkzygisk_recover">归元复启，重铸之后再试</string>
+    <string name="folkzygisk_recover_summary">解启道停滞，待下一次完整重铸或软重启后，再许一试。此刻不会即刻启道。</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk 已复元铭录。请重铸或行软重启后再试。</string>
+    <string name="folkzygisk_startup_paused">连续 %1$d 次启道未成，法门已暂止自行启道。</string>
+    <string name="folkzygisk_failure_engine_missing">最近异象：内嵌法门缺失或残缺。</string>
+    <string name="folkzygisk_failure_runtime_unsafe">最近异象：运行法域或封印不稳，未敢复用。</string>
+    <string name="folkzygisk_failure_monitor_start_failed">最近异象：监守法灵未能启醒。</string>
+    <string name="folkzygisk_failure_monitor_exited">最近异象：监守法灵未及就绪便已消散。</string>
+    <string name="folkzygisk_failure_readiness_timeout">最近异象：监守法灵未在时限内就绪。</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">最近异象：尚未确认 zygote 完整注入。</string>
+    <string name="folkzygisk_failure_runtime_invalid">最近异象：运行状态之录失效。</string>
+    <string name="folkzygisk_failure_unknown">最近异象：无法辨明启道败陨之因。</string>
 </resources>

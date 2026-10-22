@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">المحرّك غير مثبّت</string>
     <string name="folkzygisk_startup_protection">حماية الإقلاع مفعّلة</string>
     <string name="folkzygisk_unknown_gate">قيد غير معروف</string>
+    <string name="folkzygisk_recover">استعادة وإعادة المحاولة بعد إعادة التشغيل</string>
+    <string name="folkzygisk_recover_summary">امسح إيقاف بدء التشغيل المؤقت واسمح بمحاولة جديدة بعد إعادة التشغيل الكاملة أو الناعمة التالية. لن يبدأ أي شيء الآن.</string>
+    <string name="folkzygisk_recovery_restart_required">تم حفظ استعادة FolkZygisk. أعد التشغيل أو استخدم إعادة التشغيل الناعمة للمحاولة مجددًا.</string>
+    <string name="folkzygisk_startup_paused">تم إيقاف البدء التلقائي بعد %1$d محاولات بدء غير ناجحة.</string>
+    <string name="folkzygisk_failure_engine_missing">آخر مشكلة: المحرّك المضمّن مفقود أو غير مكتمل.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">آخر مشكلة: دليل التشغيل أو القفل لم يكن آمنًا لإعادة استخدامه.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">آخر مشكلة: تعذّر بدء المراقب.</string>
+    <string name="folkzygisk_failure_monitor_exited">آخر مشكلة: خرج المراقب قبل أن يصبح جاهزًا.</string>
+    <string name="folkzygisk_failure_readiness_timeout">آخر مشكلة: لم يصبح المراقب جاهزًا في الوقت المحدد.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">آخر مشكلة: لم يتم تأكيد اكتمال حقن zygote.</string>
+    <string name="folkzygisk_failure_runtime_invalid">آخر مشكلة: حالة التشغيل غير صالحة.</string>
+    <string name="folkzygisk_failure_unknown">آخر مشكلة: سبب فشل البدء غير معروف.</string>
 </resources>

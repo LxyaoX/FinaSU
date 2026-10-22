@@ -32,6 +32,8 @@ mod feature_id;
 mod hot_install;
 #[cfg(target_os = "android")]
 mod init_event;
+#[cfg(any(target_os = "android", test))]
+mod kernel_module;
 #[cfg(target_os = "android")]
 mod ksucalls;
 #[cfg(target_os = "android")]
@@ -50,6 +52,8 @@ mod metamodule;
 mod module;
 #[cfg(target_os = "android")]
 mod module_config;
+#[cfg(target_os = "android")]
+mod module_loader;
 #[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod module_markers;
@@ -81,6 +85,8 @@ mod restorecon;
 mod sepolicy;
 #[cfg(target_os = "android")]
 mod soft_reboot;
+#[cfg(any(target_os = "android", test))]
+mod startup_epoch;
 #[cfg(target_os = "android")]
 mod su;
 #[cfg(any(target_os = "android", test))]

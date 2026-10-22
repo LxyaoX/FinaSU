@@ -21,4 +21,16 @@
     <string name="folkzygisk_engine_missing">엔진이 설치되지 않음</string>
     <string name="folkzygisk_startup_protection">시작 보호 활성화됨</string>
     <string name="folkzygisk_unknown_gate">인식할 수 없는 제한</string>
+    <string name="folkzygisk_recover">복구하고 다시 시작한 후 재시도</string>
+    <string name="folkzygisk_recover_summary">시작 일시 중지를 해제하고 다음 전체 다시 시작 또는 소프트 재시작 후 새 시도를 한 번 허용합니다. 지금은 아무것도 시작하지 않습니다.</string>
+    <string name="folkzygisk_recovery_restart_required">FolkZygisk 복구가 저장되었습니다. 다시 시작하거나 소프트 재시작한 후 재시도하세요.</string>
+    <string name="folkzygisk_startup_paused">시작 시도가 %1$d회 연속 실패하여 자동 시작이 일시 중지되었습니다.</string>
+    <string name="folkzygisk_failure_engine_missing">마지막 문제: 내장 엔진이 없거나 불완전합니다.</string>
+    <string name="folkzygisk_failure_runtime_unsafe">마지막 문제: 런타임 디렉터리 또는 잠금을 안전하게 다시 사용할 수 없습니다.</string>
+    <string name="folkzygisk_failure_monitor_start_failed">마지막 문제: 모니터를 시작할 수 없습니다.</string>
+    <string name="folkzygisk_failure_monitor_exited">마지막 문제: 모니터가 준비되기 전에 종료되었습니다.</string>
+    <string name="folkzygisk_failure_readiness_timeout">마지막 문제: 모니터가 제한 시간 내에 준비되지 않았습니다.</string>
+    <string name="folkzygisk_failure_injection_unconfirmed">마지막 문제: zygote 전체 주입을 확인하지 못했습니다.</string>
+    <string name="folkzygisk_failure_runtime_invalid">마지막 문제: 런타임 상태가 유효하지 않습니다.</string>
+    <string name="folkzygisk_failure_unknown">마지막 문제: 시작 실패 원인을 인식할 수 없습니다.</string>
 </resources>

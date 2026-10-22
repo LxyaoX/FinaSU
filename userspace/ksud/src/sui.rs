@@ -1024,6 +1024,9 @@ mod tests {
             runtime: None,
             startup_failures: 0,
             startup_blocked: false,
+            startup_failure_code: None,
+            startup_failure_detail: None,
+            startup_generation: 1,
         }
     }
 

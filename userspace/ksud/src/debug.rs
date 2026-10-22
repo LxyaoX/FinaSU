@@ -1,7 +1,5 @@
 use anyhow::{Context, Ok, Result, bail, ensure};
 use std::{
-    ffi::CString,
-    fs,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -52,24 +50,7 @@ pub fn set_manager(pkg: &str) -> Result<()> {
 }
 
 pub fn insmod(module: &Path, params: &[String]) -> Result<()> {
-    let module = module
-        .canonicalize()
-        .with_context(|| format!("resolve module path failed: {}", module.display()))?;
-    let module_data =
-        fs::read(&module).with_context(|| format!("read module failed: {}", module.display()))?;
-    let cparams = CString::new(params.join(" "))?;
-
-    ksuinit::load_module_with_resolver(&module_data, &cparams, |names| {
-        if ksucalls::get_info().uapi_version >= 6 {
-            ksucalls::lookup_symbols(names).or_else(|e| {
-                log::warn!("kernel symbol lookup failed: {e:#}; using /proc/kallsyms");
-                ksuinit::resolve_kallsyms(names)
-            })
-        } else {
-            ksuinit::resolve_kallsyms(names)
-        }
-    })
-    .with_context(|| format!("load module failed: {}", module.display()))?;
+    crate::module_loader::load_module(module, &params.join(" "))?;
 
     println!("Loaded kernel module: {}", module.display());
     Ok(())
