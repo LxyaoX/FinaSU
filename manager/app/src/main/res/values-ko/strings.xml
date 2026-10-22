@@ -286,7 +286,7 @@
     <string name="settings_folk_mount_unavailable_summary">사용할 수 없습니다. 루트 권한이 필요하며 ksud가 최신 상태여야 합니다.</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">마운트 끄기</string>
-    <string name="settings_folk_mount_mode_nomount_summary">NoMount VFS 드라이버를 통해 모듈을 주입합니다. 드라이버를 사용할 수 없으면 내장 엔진으로 대체합니다.</string>
+    <string name="settings_folk_mount_mode_nomount_summary">NoMount VFS 드라이버를 통해 모듈을 주입합니다.</string>
     <string name="settings_folk_mount_mode_off_summary">아무것도 주입하지 않습니다. 설치된 모듈은 백엔드를 선택할 때까지 비활성 상태로 유지됩니다.</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
     <string name="settings_folk_mount_provider_metamodule">메타모듈</string>
@@ -295,7 +295,7 @@
     <string name="settings_folk_mount_boot_provider">이번 부팅: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">이번 부팅에서는 아직 마운트되지 않음</string>
     <string name="settings_folk_mount_reboot_hint">재부팅 후 적용됩니다.</string>
-    <string name="settings_folk_mount_nomount_unavailable_hint">NoMount 드라이버가 응답하지 않습니다. 이번 부팅에서는 내장 엔진으로 대체합니다.</string>
+    <string name="settings_folk_mount_nomount_unavailable_hint">NoMount 드라이버가 응답하지 않아 이번 부팅에서는 아무것도 주입되지 않았습니다.</string>
     <string name="settings_folk_mount_write_failed">Folk Mount 모드를 변경하지 못했습니다.</string>
     <string name="settings_nomount">NoMount</string>
     <string name="nomount_section_driver">드라이버</string>
@@ -307,7 +307,7 @@
     <string name="nomount_driver_ready">준비됨</string>
     <string name="nomount_driver_kind_builtin">커널 내장</string>
     <string name="nomount_driver_kind_module">커널 모듈</string>
-    <string name="nomount_unavailable_no_asset">이 패키지에는 %1$s용 NoMount 모듈이 포함되어 있지 않습니다. 자동 또는 내장 Folk Mount를 사용하세요.</string>
+    <string name="nomount_unavailable_no_asset">이 패키지에는 %1$s용 NoMount 모듈이 없어 이 커널에서는 모듈을 주입할 수 없습니다.</string>
     <string name="nomount_unavailable_outdated">커널에 NoMount %1$s이(가) 포함되어 있지만 이 빌드에는 API 21 이상이 필요합니다. 커널을 업데이트하세요.</string>
     <string name="nomount_unavailable_not_loaded">드라이버가 아직 로드되지 않았습니다. 재부팅하거나 한 번 주입하여 로드하세요.</string>
     <string name="nomount_unavailable_unknown_kmi">커널 버전을 NoMount 모듈과 일치시킬 수 없습니다.</string>
@@ -323,8 +323,10 @@
     <string name="nomount_uid_exclusions_value">%1$d개 앱이 순정 파일 시스템을 볼 수 있습니다</string>
     <string name="nomount_uid_exclusions_none">모든 앱이 주입된 파일을 볼 수 있습니다. 숨길 앱을 아래에서 선택하세요</string>
     <string name="nomount_visibility_model">기본 가시성</string>
-    <string name="nomount_visibility_model_hint">내장 Folk Mount는 프로필이 "모듈 마운트 해제"인 앱(기본적으로 모든 비 root 앱)에서 주입된 파일을 숨깁니다. NoMount는 제외 항목 없이 시작하므로 여기에서 선택할 때까지 해당 앱에서 파일이 보입니다.</string>
-    <string name="settings_folk_mount_nomount_confirm">NoMount는 처음에 모든 앱에 주입된 파일을 표시합니다. 내장 Folk Mount는 프로필이 "모듈 마운트 해제"인 앱(기본적으로 모든 비 root 앱)에서 이를 숨깁니다.\n\n전환은 재부팅 후 적용됩니다. 기존 동작을 유지하려면 NoMount → 제외된 앱에서 앱을 선택하세요.</string>
+    <string name="nomount_visibility_model_hint">NoMount는 제외 항목 없이 시작하므로, 여기서 선택하기 전까지 모든 앱이 주입된 파일을 볼 수 있습니다.</string>
+    <string name="settings_folk_mount_nomount_confirm">NoMount는 모든 앱에 주입된 파일을 표시합니다.
+
+전환은 재부팅 후 적용됩니다. 특정 앱에서 숨기려면 NoMount → 제외할 앱에서 선택하세요.</string>
     <string name="settings_folk_mount_nomount_confirm_ok">전환하고 나중에 재부팅</string>
     <string name="nomount_uid_source_hint">필요 시 앱 프로필에서 복사됨</string>
     <string name="nomount_block_isolated">격리된 프로세스에서 숨기기</string>

@@ -287,7 +287,7 @@
     <string name="settings_folk_mount_unavailable_summary">無法使用。需要 Root 權限，且 ksud 必須為最新版本。</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">關閉掛載</string>
-    <string name="settings_folk_mount_mode_nomount_summary">透過 NoMount VFS 驅動程式注入模組；驅動程式無法使用時會退回內建引擎。</string>
+    <string name="settings_folk_mount_mode_nomount_summary">透過 NoMount VFS 驅動程式注入模組。</string>
     <string name="settings_folk_mount_mode_off_summary">不注入任何內容；在選擇後端之前，已安裝的模組都會維持未生效。</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
     <string name="settings_folk_mount_provider_metamodule">Metamodule</string>
@@ -296,7 +296,7 @@
     <string name="settings_folk_mount_boot_provider">本次開機：%1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">本次開機尚未掛載</string>
     <string name="settings_folk_mount_reboot_hint">重新啟動後生效。</string>
-    <string name="settings_folk_mount_nomount_unavailable_hint">NoMount 驅動程式沒有回應；本次開機已退回內建引擎。</string>
+    <string name="settings_folk_mount_nomount_unavailable_hint">NoMount 驅動程式沒有回應，本次開機未注入任何模組。</string>
     <string name="settings_folk_mount_write_failed">變更 Folk Mount 模式失敗。</string>
     <string name="settings_nomount">NoMount</string>
     <string name="nomount_section_driver">驅動程式</string>
@@ -308,7 +308,7 @@
     <string name="nomount_driver_ready">就緒</string>
     <string name="nomount_driver_kind_builtin">核心內建</string>
     <string name="nomount_driver_kind_module">核心模組</string>
-    <string name="nomount_unavailable_no_asset">本安裝套件沒有 %1$s 對應的 NoMount 模組；請改用「自動」或「內建 Folk Mount」。</string>
+    <string name="nomount_unavailable_no_asset">本安裝套件沒有 %1$s 對應的 NoMount 模組，因此在此核心上無法注入模組。</string>
     <string name="nomount_unavailable_outdated">核心搭載的是 NoMount %1$s，但本版本需要 API 21 以上；請更新核心。</string>
     <string name="nomount_unavailable_not_loaded">驅動程式尚未載入；請重新啟動或執行一次注入來載入。</string>
     <string name="nomount_unavailable_unknown_kmi">無法將目前的核心版本對應到 NoMount 模組。</string>
@@ -324,8 +324,10 @@
     <string name="nomount_uid_exclusions_value">%1$d 個應用程式看到原廠檔案系統</string>
     <string name="nomount_uid_exclusions_none">所有應用程式都能看到注入的檔案；在下方選取應用程式即可隱藏</string>
     <string name="nomount_visibility_model">預設可見性</string>
-    <string name="nomount_visibility_model_hint">內建 Folk Mount 會依 Profile 中的「解除掛載模組功能」，向應用程式隱藏注入的檔案（預設對所有非 root 應用程式生效）。NoMount 一開始沒有任何例外，因此在這裡勾選之前，這些應用程式都看得到注入的檔案。</string>
-    <string name="settings_folk_mount_nomount_confirm">NoMount 一開始會讓所有應用程式看到注入的檔案；內建 Folk Mount 則會依 Profile 中的「解除掛載模組功能」，向應用程式隱藏這些檔案（預設涵蓋所有非 root 應用程式）。\n\n切換會在重新啟動後生效。若要保留原本的行為，請在「NoMount → 例外應用程式」中勾選對應的應用程式。</string>
+    <string name="nomount_visibility_model_hint">NoMount 一開始沒有任何例外，因此在勾選之前所有應用程式都能看到注入的檔案。</string>
+    <string name="settings_folk_mount_nomount_confirm">NoMount 會讓所有應用程式看到注入的檔案。
+
+切換在重新開機後生效。若要對某個應用程式隱藏，請在 NoMount → 排除的應用程式裡勾選它。</string>
     <string name="settings_folk_mount_nomount_confirm_ok">切換，稍後重新啟動</string>
     <string name="nomount_uid_source_hint">依需求從應用程式 Profile 複製</string>
     <string name="nomount_block_isolated">對隔離處理序隱藏</string>

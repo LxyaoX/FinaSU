@@ -286,7 +286,7 @@
     <string name="settings_folk_mount_unavailable_summary">利用できません。root 権限が必要で、ksud が最新である必要があります。</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">マウントオフ</string>
-    <string name="settings_folk_mount_mode_nomount_summary">NoMount VFS ドライバーを通じてモジュールを注入します。ドライバーが利用できない場合は内蔵エンジンにフォールバックします。</string>
+    <string name="settings_folk_mount_mode_nomount_summary">NoMount VFS ドライバーを通じてモジュールを注入します。</string>
     <string name="settings_folk_mount_mode_off_summary">何も注入しません。インストール済みのモジュールは、バックエンドが選択されるまで非アクティブのままになります。</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
     <string name="settings_folk_mount_provider_metamodule">メタモジュール</string>
@@ -295,7 +295,7 @@
     <string name="settings_folk_mount_boot_provider">今回の起動: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">今回の起動ではまだマウントされていません</string>
     <string name="settings_folk_mount_reboot_hint">再起動後に有効になります。</string>
-    <string name="settings_folk_mount_nomount_unavailable_hint">NoMount ドライバーが応答していません。今回の起動では内蔵エンジンにフォールバックします。</string>
+    <string name="settings_folk_mount_nomount_unavailable_hint">NoMount ドライバーが応答していないため、今回の起動では何も注入されていません。</string>
     <string name="settings_folk_mount_write_failed">Folk Mount モードの変更に失敗しました。</string>
     <string name="settings_nomount">NoMount</string>
     <string name="nomount_section_driver">ドライバー</string>
@@ -307,7 +307,7 @@
     <string name="nomount_driver_ready">準備完了</string>
     <string name="nomount_driver_kind_builtin">カーネル内蔵</string>
     <string name="nomount_driver_kind_module">カーネルモジュール</string>
-    <string name="nomount_unavailable_no_asset">このパッケージには %1$s 用の NoMount モジュールが含まれていません。自動または内蔵 Folk Mount を使用してください。</string>
+    <string name="nomount_unavailable_no_asset">このパッケージには %1$s 用の NoMount モジュールがないため、このカーネルではモジュールを注入できません。</string>
     <string name="nomount_unavailable_outdated">カーネルには NoMount %1$s が含まれていますが、このビルドには API 21 以降が必要です。カーネルを更新してください。</string>
     <string name="nomount_unavailable_not_loaded">ドライバーがまだ読み込まれていません。再起動するか、一度注入して読み込んでください。</string>
     <string name="nomount_unavailable_unknown_kmi">カーネルのバージョンを NoMount モジュールに一致させられませんでした。</string>
@@ -323,8 +323,10 @@
     <string name="nomount_uid_exclusions_value">%1$d 個のアプリがストックファイルシステムを参照します</string>
     <string name="nomount_uid_exclusions_none">すべてのアプリが注入されたファイルを参照できます。非表示にするアプリを以下から選択してください</string>
     <string name="nomount_visibility_model">デフォルトの可視性</string>
-    <string name="nomount_visibility_model_hint">内蔵 Folk Mount は、プロファイルが "モジュールのアンマウント" になっているアプリ (デフォルトではすべての非 root アプリ) から注入されたファイルを隠します。NoMount は除外なしで開始するため、ここでチェックを入れるまでそれらのアプリにファイルが見えます。</string>
-    <string name="settings_folk_mount_nomount_confirm">NoMount は最初、すべてのアプリに注入されたファイルを表示します。内蔵 Folk Mount は、プロファイルが "モジュールのアンマウント" になっているアプリ (デフォルトではすべての非 root アプリ) からそれらを隠します。\n\n切り替えは再起動後に有効になります。以前の動作を維持するには、NoMount → 除外するアプリ でアプリにチェックを入れてください。</string>
+    <string name="nomount_visibility_model_hint">NoMount は例外なしで開始するため、ここで選択するまではすべてのアプリが注入されたファイルを参照できます。</string>
+    <string name="settings_folk_mount_nomount_confirm">NoMount はすべてのアプリに注入されたファイルを表示します。
+
+切り替えは再起動後に有効になります。特定のアプリから隠すには、NoMount → 除外するアプリ で選択してください。</string>
     <string name="settings_folk_mount_nomount_confirm_ok">切り替えて後で再起動</string>
     <string name="nomount_uid_source_hint">必要に応じてアプリプロファイルからコピー</string>
     <string name="nomount_block_isolated">分離プロセスから隠す</string>

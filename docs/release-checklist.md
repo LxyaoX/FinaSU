@@ -94,7 +94,8 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
   `ksud.yml`, Sui in `sui.yml` plus `userspace/sui/package.py`. Whatever is not staged is silently
   absent from the APK.
 - riscv64 has no LKM, NoMount, FolkZygisk or Sui payload upstream. The manager reports the missing
-  module or driver instead of failing, and NoMount falls back to the built-in Folk Mount engine.
+  module or driver instead of failing, and nothing is injected on that ABI (there is no second
+  mount engine to fall back to any more).
 - Only the APK is a release asset. `lkm-*.ko`, `ksud-*`, `ksuinit-*` and the FolkZygisk source tarball
   stay on the run page as workflow artifacts, and GitHub attaches the tag's source archives, which
   also keeps the source available for the licenses bundled into the payload.

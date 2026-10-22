@@ -1,16 +1,18 @@
 //! Folk Mount: built-in module mounting.
 //!
 //! Only two modes are offered: `nomount`, which injects through the NoMount VFS
-//! driver, and `off`. The magic-mount engine and the metamodule provider are no
-//! longer selectable - the engine survives only as the automatic fallback for a
-//! device whose NoMount driver is not installed, which is the one case where the
-//! alternative is injecting nothing at all.
+//! driver, and `off`. The magic-mount engine (tmpfs staging plus bind mounts,
+//! its planner and the metamodule mount provider) has been removed: it was the
+//! only thing the retired `auto`/`builtin`/`metamodule` modes ever selected, and
+//! keeping it as a fallback meant two injection paths to reason about.
 //!
-//! This module owns the configuration file, the provider decision and the
-//! `ksud mount status` / `set-mode` protocol, plus the fallback engine
-//! (tmpfs+bind executor delegated to the host-testable planner in `mount_plan`,
-//! metadata/SELinux cloning, transaction rollback, unmount registration and the
-//! per-boot runtime record).
+//! A device whose NoMount driver cannot be loaded therefore injects nothing this
+//! boot and says so, in the runtime record and in `ksud mount status`, instead
+//! of quietly mounting through a path nobody wants any more.
+//!
+//! What is left here is the configuration file, the mode decision, the per-boot
+//! runtime record, the guards that stop a boot from repeating a step that killed
+//! the previous one, and the `ksud mount status` / `set-mode` protocol.
 
 use std::fmt::Write as _;
 use std::fs;
@@ -20,16 +22,11 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use log::{info, warn};
-use rustix::fs::{FlockOperation, Gid, MetadataExt, Mode, Uid, chmod, chown, flock};
-use rustix::mount::{
-    MountFlags, MountPropagationFlags, UnmountFlags, mount, mount_bind, mount_change, mount_move,
-    unmount,
-};
+use rustix::fs::{FlockOperation, flock};
 use serde_json::json;
 
 use crate::defs;
 use crate::mount_guard;
-use crate::mount_plan::{self, FileMeta, MountOps, Node, NodeFileType, RealDirEntry};
 
 /// User-visible mount mode stored in [`defs::FOLK_MOUNT_CONFIG`].
 ///
@@ -71,13 +68,14 @@ impl MountMode {
     }
 }
 
-/// The provider that performs the next boot's module mounting.
+/// What performed this boot's module injection.
+///
+/// Only two values can be written now. `builtin` and `metamodule` are accepted
+/// when reading a record left by an older build, but nothing produces them.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Provider {
-    Builtin,
-    Metamodule,
     Nomount,
-    /// No provider runs this boot.
+    /// Nothing was injected this boot.
     None,
 }
 
@@ -85,8 +83,6 @@ impl Provider {
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Builtin => "builtin",
-            Self::Metamodule => "metamodule",
             Self::Nomount => "nomount",
             Self::None => "none",
         }
@@ -130,25 +126,6 @@ impl MountOutcome {
             noop: false,
             ..Self::empty(provider)
         }
-    }
-}
-
-/// Error carrying the partial outcome of a built-in mount that failed.
-#[derive(Debug)]
-struct MountFailure {
-    outcome: MountOutcome,
-    source: anyhow::Error,
-}
-
-impl std::fmt::Display for MountFailure {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:#}", self.source)
-    }
-}
-
-impl std::error::Error for MountFailure {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        Some(self.source.root_cause())
     }
 }
 
@@ -268,8 +245,9 @@ fn write_mount_mode_at(path: &Path, mode: MountMode) -> Result<()> {
 
 /// Return `(id, enabled)` for the installed metamodule, if any.
 ///
-/// A metamodule marked with `disable` or `remove` is reported but disabled, so
-/// `auto` does not select a provider that would be a no-op.
+/// Nothing selects a metamodule as a mount backend any more; this only feeds
+/// the `metamodule_id` / `metamodule_enabled` fields of `ksud mount status` and
+/// the install-time warning in `module.rs`.
 fn metamodule_state() -> (Option<String>, bool) {
     let Some(path) = crate::metamodule::get_metamodule_path() else {
         return (None, false);
@@ -418,12 +396,13 @@ impl MountLock {
 }
 
 // ---------------------------------------------------------------------------
-// Android executor
+// Helpers shared with the NoMount planner
 // ---------------------------------------------------------------------------
 
-/// Executor primitives backed by std/std::fs, rustix, extattr and ksucalls.
-struct AndroidOps;
-
+/// Whether `path` carries the overlayfs "opaque" xattr, i.e. its upper layer
+/// replaces the lower entries instead of merging with them. The NoMount planner
+/// asks this before it decides between merging and replacing a directory, so it
+/// lives here even though nothing in this module mounts anything any more.
 pub fn read_opaque(path: &Path) -> Result<bool> {
     const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
     match extattr::lgetxattr(path, REPLACE_DIR_XATTR) {
@@ -432,259 +411,6 @@ pub fn read_opaque(path: &Path) -> Result<bool> {
         Err(e) if e.0 == libc::ENODATA => Ok(false),
         Err(e) => Err(e).with_context(|| format!("read {REPLACE_DIR_XATTR} of {}", path.display())),
     }
-}
-
-impl MountOps for AndroidOps {
-    fn read_dir(&self, path: &Path) -> Result<Vec<RealDirEntry>> {
-        let mut entries = Vec::new();
-        for entry in fs::read_dir(path).with_context(|| format!("read dir {}", path.display()))? {
-            let entry = entry.with_context(|| format!("read entry in {}", path.display()))?;
-            let meta = entry
-                .metadata()
-                .with_context(|| format!("stat {}", entry.path().display()))?;
-            if let Some(file_type) = NodeFileType::from_entry_meta(mount_plan::entry_meta(&meta)) {
-                entries.push(RealDirEntry {
-                    name: entry.file_name().to_string_lossy().into_owned(),
-                    file_type,
-                });
-            } else {
-                warn!(
-                    "folk mount: ignoring unsupported entry {}",
-                    entry.path().display()
-                );
-            }
-        }
-        Ok(entries)
-    }
-
-    fn symlink_metadata(&self, path: &Path) -> Result<mount_plan::EntryMeta> {
-        let meta =
-            fs::symlink_metadata(path).with_context(|| format!("stat {}", path.display()))?;
-        Ok(mount_plan::entry_meta(&meta))
-    }
-
-    fn metadata(&self, path: &Path) -> Result<FileMeta> {
-        let meta = fs::metadata(path).with_context(|| format!("stat {}", path.display()))?;
-        Ok(FileMeta {
-            mode: meta.mode(),
-            uid: meta.uid(),
-            gid: meta.gid(),
-        })
-    }
-
-    fn read_link(&self, path: &Path) -> Result<PathBuf> {
-        fs::read_link(path).with_context(|| format!("read link {}", path.display()))
-    }
-
-    fn exists(&self, path: &Path) -> bool {
-        path.exists()
-    }
-
-    fn is_dir(&self, path: &Path) -> bool {
-        path.is_dir()
-    }
-
-    fn create_dir_all(&self, path: &Path) -> Result<()> {
-        fs::create_dir_all(path).with_context(|| format!("create dir {}", path.display()))
-    }
-
-    fn create_file(&self, path: &Path) -> Result<()> {
-        fs::File::create(path).with_context(|| format!("create file {}", path.display()))?;
-        Ok(())
-    }
-
-    fn symlink(&self, target: &Path, link: &Path) -> Result<()> {
-        std::os::unix::fs::symlink(target, link)
-            .with_context(|| format!("symlink {} -> {}", link.display(), target.display()))
-    }
-
-    fn chmod(&self, path: &Path, mode: u32) -> Result<()> {
-        chmod(path, Mode::from_raw_mode(mode)).with_context(|| format!("chmod {}", path.display()))
-    }
-
-    fn chown(&self, path: &Path, uid: u32, gid: u32) -> Result<()> {
-        chown(path, Some(Uid::from_raw(uid)), Some(Gid::from_raw(gid)))
-            .with_context(|| format!("chown {}", path.display()))
-    }
-
-    fn lgetfilecon(&self, path: &Path) -> Result<String> {
-        crate::restorecon::lgetfilecon(path)
-    }
-
-    fn lsetfilecon(&self, path: &Path, con: &str) -> Result<()> {
-        crate::restorecon::lsetfilecon(path, con)
-    }
-
-    fn mount_tmpfs(&self, name: &str, target: &Path) -> Result<()> {
-        mount(name, target, "tmpfs", MountFlags::empty(), None)
-            .with_context(|| format!("mount tmpfs on {}", target.display()))
-    }
-
-    fn mount_bind(&self, source: &Path, target: &Path) -> Result<()> {
-        mount_bind(source, target)
-            .with_context(|| format!("bind {} -> {}", source.display(), target.display()))
-    }
-
-    fn mount_move(&self, source: &Path, target: &Path) -> Result<()> {
-        mount_move(source, target)
-            .with_context(|| format!("move {} -> {}", source.display(), target.display()))
-    }
-
-    fn make_private(&self, path: &Path) -> Result<()> {
-        // Recursive on purpose: privatise the whole subtree so every bind clone
-        // we created below `path` leaves its source mount's peer group as well.
-        mount_change(
-            path,
-            MountPropagationFlags::PRIVATE | MountPropagationFlags::REC,
-        )
-        .with_context(|| format!("make {} private", path.display()))
-    }
-
-    fn unmount_detach(&self, path: &Path) -> Result<()> {
-        unmount(path, UnmountFlags::DETACH).with_context(|| format!("detach {}", path.display()))
-    }
-
-    fn register_umount(&self, path: &Path) -> Result<()> {
-        let path = path
-            .to_str()
-            .with_context(|| format!("umount target {} is not valid UTF-8", path.display()))?;
-        crate::ksucalls::umount_list_add(path, libc::MNT_DETACH as u32)
-    }
-
-    fn unregister_umount(&self, path: &Path) -> Result<()> {
-        let path = path
-            .to_str()
-            .with_context(|| format!("umount target {} is not valid UTF-8", path.display()))?;
-        crate::ksucalls::umount_list_del(path)
-    }
-
-    fn report_mounted(&self) -> Result<()> {
-        crate::ksucalls::report_module_mounted();
-        Ok(())
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Orchestration
-// ---------------------------------------------------------------------------
-
-/// Build the merged plan from the real module directory, or `None` when no
-/// module contributes any file.
-fn collect_plan() -> Result<Option<Node>> {
-    let cfg = mount_plan::PlanConfig::new(
-        Path::new(defs::MODULE_DIR),
-        Path::new("/"),
-        Path::new("/system"),
-    );
-    let fs = mount_plan::StdFs::new(read_opaque as fn(&Path) -> Result<bool>);
-    mount_plan::collect_module_files(&fs, &cfg, |path| {
-        crate::module::read_module_prop(path)
-            .is_ok_and(|props| crate::metamodule::is_metamodule(&props))
-    })
-}
-
-/// Reject a symlinked or already-mounted work dir and make it root-only.
-fn prepare_work_dir(work_dir: &Path) -> Result<()> {
-    if work_dir.is_symlink() {
-        bail!(
-            "Folk Mount work dir {} is a symlink, refusing",
-            work_dir.display()
-        );
-    }
-    if is_mount_point(work_dir) {
-        bail!(
-            "Folk Mount work dir {} is already a mount point, refusing",
-            work_dir.display()
-        );
-    }
-    fs::create_dir_all(work_dir)
-        .with_context(|| format!("failed to create {}", work_dir.display()))?;
-    chmod(work_dir, Mode::from_raw_mode(0o700))
-        .with_context(|| format!("chmod {}", work_dir.display()))?;
-    chown(work_dir, Some(Uid::from_raw(0)), Some(Gid::from_raw(0)))
-        .with_context(|| format!("chown {}", work_dir.display()))?;
-    Ok(())
-}
-
-fn is_mount_point(path: &Path) -> bool {
-    let Ok(canonical) = path.canonicalize() else {
-        return false;
-    };
-    let Ok(mounts) = fs::read_to_string("/proc/self/mounts") else {
-        return false;
-    };
-    mounts.lines().any(|line| {
-        let mut fields = line.split_whitespace();
-        let _source = fields.next();
-        fields
-            .next()
-            .is_some_and(|mount_point| Path::new(mount_point) == canonical)
-    })
-}
-
-/// Ensure the process shares PID 1's mount namespace so mounts are visible to
-/// the rest of the system. Failing to compare namespaces only warns; failing to
-/// switch aborts the mount.
-fn ensure_init_mnt_ns() -> Result<()> {
-    let self_ns = fs::read_link("/proc/self/ns/mnt");
-    let init_ns = fs::read_link("/proc/1/ns/mnt");
-    match (self_ns, init_ns) {
-        (Ok(current), Ok(init)) if current == init => Ok(()),
-        (Ok(_), Ok(_)) => {
-            info!("folk mount: switching to PID 1 mount namespace");
-            crate::utils::switch_mnt_ns(1)
-        }
-        _ => {
-            warn!("folk mount: cannot compare mount namespaces, continuing");
-            Ok(())
-        }
-    }
-}
-
-/// Run the built-in executor and preserve the partial outcome on error.
-fn run_builtin() -> (MountOutcome, Option<anyhow::Error>) {
-    let plan = match collect_plan() {
-        Ok(plan) => plan,
-        Err(e) => return (MountOutcome::failed(Provider::Builtin), Some(e)),
-    };
-    if plan.is_none() {
-        info!("folk mount: no modules to mount, skipping");
-        return (MountOutcome::empty(Provider::Builtin), None);
-    }
-
-    let work_dir = Path::new(defs::FOLK_MOUNT_WORK_DIR);
-    if let Err(e) = prepare_work_dir(work_dir) {
-        return (MountOutcome::failed(Provider::Builtin), Some(e));
-    }
-
-    let report = mount_plan::run_mount(
-        plan,
-        Path::new("/"),
-        work_dir,
-        defs::FOLK_MOUNT_FS_NAME,
-        &AndroidOps,
-    );
-    let outcome = MountOutcome {
-        provider: Provider::Builtin,
-        target_count: report.outcome.target_count,
-        skipped_count: report.outcome.skipped_count,
-        partial: report.outcome.partial,
-        residue: report.outcome.residue,
-        noop: report.error.is_none() && report.outcome.target_count == 0,
-        warnings: Vec::new(),
-    };
-    (outcome, report.error)
-}
-
-/// Run the selected metamodule's mount script. A disabled metamodule or a
-/// missing script is a no-op; the provider is never switched to builtin.
-fn run_metamodule() -> Result<MountOutcome> {
-    let has_script = crate::metamodule::get_metamodule_path()
-        .is_some_and(|path| path.join(defs::METAMODULE_MOUNT_SCRIPT).exists());
-    crate::metamodule::exec_mount_script(defs::MODULE_DIR)?;
-    let mut outcome = MountOutcome::empty(Provider::Metamodule);
-    outcome.noop = !has_script;
-    Ok(outcome)
 }
 
 /// Run the built-in NoMount backend.
@@ -698,11 +424,7 @@ fn run_nomount() -> Result<MountOutcome> {
     // own rules as well would make the two writers race on the same paths.
     if let Some(owner) = crate::nomount::installed_driver_module() {
         warn!("nomount: module {owner} owns NoMount injection; deferring to it");
-        let mut outcome = run_metamodule()?;
-        outcome.warnings.push(format!(
-            "Deferred to the installed NoMount module {owner} (it drives the same driver)"
-        ));
-        return Ok(outcome);
+        return defer_to_installed_module(&owner);
     }
     let result = crate::nomount::apply_current_plan()?;
     for warning in &result.warnings {
@@ -719,17 +441,23 @@ fn run_nomount() -> Result<MountOutcome> {
     })
 }
 
-/// Android built-in executor entry point.
+/// Let an installed NoMount module drive injection instead of us.
+///
+/// Upstream distributes NoMount as a metamodule whose own `metamount.sh` loads
+/// the driver and applies its rules; running our plan on top would make the two
+/// writers race on the same paths, so the module keeps ownership and this boot
+/// only records that it stepped aside.
 ///
 /// # Errors
-/// Returns an error carrying the partial outcome when any final target bind,
-/// move, PRIVATE or unmount registration fails.
-pub fn mount_modules() -> Result<MountOutcome> {
-    let (outcome, error) = run_builtin();
-    match error {
-        Some(source) => Err(MountFailure { outcome, source }.into()),
-        None => Ok(outcome),
-    }
+/// Returns an error when the module's mount script fails.
+fn defer_to_installed_module(owner: &str) -> Result<MountOutcome> {
+    crate::metamodule::exec_mount_script(defs::MODULE_DIR)?;
+    let mut outcome = MountOutcome::empty(Provider::Nomount);
+    outcome.noop = true;
+    outcome.warnings.push(format!(
+        "Deferred to the installed NoMount module {owner} (it drives the same driver)"
+    ));
+    Ok(outcome)
 }
 
 enum ProviderRun {
@@ -742,23 +470,6 @@ enum ProviderRun {
 
 fn run_provider(provider: Provider) -> ProviderRun {
     match provider {
-        Provider::Metamodule => match run_metamodule() {
-            Ok(outcome) => ProviderRun::Ok(outcome),
-            Err(error) => ProviderRun::Failed {
-                outcome: MountOutcome::failed(Provider::Metamodule),
-                error,
-            },
-        },
-        Provider::Builtin => match mount_modules() {
-            Ok(outcome) => ProviderRun::Ok(outcome),
-            Err(error) => {
-                let outcome = error.downcast_ref::<MountFailure>().map_or_else(
-                    || MountOutcome::failed(Provider::Builtin),
-                    |failure| failure.outcome.clone(),
-                );
-                ProviderRun::Failed { outcome, error }
-            }
-        },
         Provider::Nomount => match run_nomount() {
             Ok(outcome) => ProviderRun::Ok(outcome),
             Err(error) => ProviderRun::Failed {
@@ -766,7 +477,7 @@ fn run_provider(provider: Provider) -> ProviderRun {
                 error,
             },
         },
-        // Handled before this point: mounting is disabled for this boot.
+        // Handled before this point: injection is disabled for this boot.
         Provider::None => ProviderRun::Ok(MountOutcome::empty(Provider::None)),
     }
 }
@@ -774,8 +485,8 @@ fn run_provider(provider: Provider) -> ProviderRun {
 /// Execute the provider selected by [`resolve_provider`].
 ///
 /// Used by both cold boot (`on_post_fs_data`) and late-load. Guards against
-/// concurrent runs and a second run in the same boot, validates the UAPI,
-/// rejects Magisk/safe mode, and switches to PID 1's mount namespace.
+/// concurrent runs and a second run in the same boot, validates the UAPI and
+/// rejects Magisk/safe mode.
 ///
 /// # Errors
 /// Returns an error when the configuration cannot be read, the environment
@@ -784,44 +495,35 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     if crate::utils::has_magisk() {
         warn!("folk mount: Magisk detected, skip module mount");
         record_skipped();
-        return Ok(MountOutcome::empty(Provider::Builtin));
+        return Ok(MountOutcome::empty(Provider::None));
     }
     if crate::utils::is_safe_mode() {
         warn!("folk mount: safe mode, skip module mount");
         record_skipped();
-        return Ok(MountOutcome::empty(Provider::Builtin));
+        return Ok(MountOutcome::empty(Provider::None));
     }
     if let Err(e) = crate::ksucalls::ensure_uapi_version_matched() {
         warn!("folk mount: {e:#}, skip module mount");
         record_skipped();
-        return Ok(MountOutcome::empty(Provider::Builtin));
+        return Ok(MountOutcome::empty(Provider::None));
     }
 
     crate::nomount::preserve_legacy_load_guard()
         .context("Folk Mount refused to overwrite an unfinished NoMount load record")?;
-    let configured = resolve_provider()?;
-    let mut provider = configured;
+    let provider = resolve_provider()?;
     let epoch = crate::startup_epoch::current_or_create()?;
     if provider == Provider::None {
         info!("folk mount: mounting is disabled (mode=off)");
         finish_runtime(&epoch, provider, "disabled", None, None, None, None);
         return Ok(MountOutcome::empty(Provider::None));
     }
-    ensure_init_mnt_ns()?;
 
     let boot_id = epoch.boot_id.clone();
 
-    // A provider that stopped an earlier boot does not get to run again on its
-    // own: the boot would stop the same way. NoMount and the metamodule step
-    // aside for one boot and the built-in engine mounts in their place; a
-    // recorded failure of the built-in engine itself only gets reported, since
-    // there is nothing safer left to fall back to.
-    let mut guard_note = None;
-    let mut ui_fallback = false;
-    // Driver bootstrap is independent of rule injection. An earlier failed
-    // injection may make this cycle fall back to builtin, but it must not leave
-    // the configured NoMount provider without a driver to diagnose or retry.
-    if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
+    // Driver bootstrap runs before the rules and reports on its own: without a
+    // second engine there is nothing to fall back to, so a driver that will not
+    // load has to fail this boot loudly instead of being papered over.
+    if crate::nomount::installed_driver_module().is_none() {
         match crate::nomount::ensure_driver() {
             Ok(probe) => {
                 info!(
@@ -830,43 +532,44 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 );
             }
             Err(error) => {
-                let note = format!("NoMount driver could not be prepared ({error:#})");
+                let note =
+                    format!("NoMount driver could not be prepared ({error:#}); nothing injected");
                 warn!("folk mount: {note}");
-                guard_note = Some(note);
-                provider = Provider::Builtin;
+                finish_runtime(
+                    &epoch,
+                    provider,
+                    "failed",
+                    None,
+                    Some(format!("{error:#}")),
+                    Some(note),
+                    Some(provider),
+                );
+                return Ok(MountOutcome::empty(Provider::None));
             }
         }
     }
-    if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
-        match crate::mount_ui::previous(&boot_id) {
-            crate::mount_ui::Previous::Failed(note) => {
-                guard_note = Some(note);
-                provider = Provider::Builtin;
-                ui_fallback = true;
-            }
-            crate::mount_ui::Previous::Inconclusive(note) => {
-                // A boot that ended before the observation window says nothing
-                // about the UI: drop the stale marker and let NoMount run.
-                crate::mount_ui::clear();
-                crate::mount_ui::note(&note);
-            }
-            crate::mount_ui::Previous::None => {}
-        }
-    }
+
+    // A step that stopped an earlier boot does not get to run again on its own:
+    // the boot would stop the same way, and nothing can take its place now.
     if let Some(record) = mount_guard::read(inflight_path())
         && mount_guard::died(inflight_path())
         && record.provider == provider.as_str()
     {
-        guard_note = Some(format!(
-            "the {} never finished, so this boot does not repeat it",
+        let note = format!(
+            "the {} never finished, so this boot injects nothing",
             record.describe()
-        ));
-        if let Some(note) = &guard_note {
-            warn!("folk mount: {note}");
-        }
-        if provider != Provider::Builtin {
-            provider = Provider::Builtin;
-        }
+        );
+        warn!("folk mount: {note}");
+        finish_runtime(
+            &epoch,
+            provider,
+            "skipped",
+            None,
+            None,
+            Some(note),
+            Some(provider),
+        );
+        return Ok(MountOutcome::empty(Provider::None));
     }
 
     let lock = MountLock::acquire()?;
@@ -889,11 +592,7 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
         inflight_path(),
         mount_guard::Stage::Inject,
         provider.as_str(),
-        &format!(
-            "mode={} configured={}",
-            provider.as_str(),
-            configured.as_str()
-        ),
+        &format!("mode={}", provider.as_str()),
         &boot_id,
         epoch.generation,
     ) {
@@ -906,31 +605,10 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
     if crate::mount_capture::enabled().is_some() {
         crate::mount_capture::spawn(lock.file.as_raw_fd());
     }
-    if provider == Provider::Nomount && crate::nomount::installed_driver_module().is_none() {
-        crate::mount_ui::arm(&boot_id, epoch.generation, lock.file.as_raw_fd());
-    }
-
-    // A driver that cannot be made usable must not leave the modules
-    // unmounted: fall back to the built-in engine and say why.
-    let (provider, run, fallback) = match run_provider(provider) {
-        ProviderRun::Failed { error, .. } if provider == Provider::Nomount => {
-            crate::mount_ui::clear();
-            warn!("nomount: {error:#}; falling back to the built-in engine");
-            let note = format!("NoMount unavailable ({error:#}); mounted with the built-in engine");
-            (
-                Provider::Builtin,
-                run_provider(Provider::Builtin),
-                Some(note),
-            )
-        }
-        run => (provider, run, None),
-    };
+    let run = run_provider(provider);
 
     match run {
         ProviderRun::Ok(outcome) => {
-            if ui_fallback {
-                crate::mount_ui::clear();
-            }
             let result = if outcome.noop { "noop" } else { "mounted" };
             log::debug!(
                 "folk mount: provider={} targets={} skipped={}",
@@ -938,19 +616,14 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 outcome.target_count,
                 outcome.skipped_count
             );
-            let warning = guard_note
-                .or(fallback)
-                .or_else(|| outcome.warnings.first().cloned());
             finish_runtime(
                 &epoch,
                 provider,
                 result,
-                // The metamodule is a black box; the built-in engine and the
-                // NoMount backend both know how many targets they published.
-                (provider != Provider::Metamodule).then_some(outcome.target_count),
+                Some(outcome.target_count),
                 None,
-                warning,
-                Some(configured),
+                outcome.warnings.first().cloned(),
+                Some(provider),
             );
             Ok(outcome)
         }
@@ -968,10 +641,10 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
                 &epoch,
                 provider,
                 result,
-                (provider != Provider::Metamodule).then_some(outcome.target_count),
+                Some(outcome.target_count),
                 Some(format!("{error:#}")),
-                guard_note.or(fallback),
-                Some(configured),
+                None,
+                Some(provider),
             );
             Err(error)
         }
@@ -981,17 +654,6 @@ pub fn mount_selected_provider() -> Result<MountOutcome> {
 /// Where the in-flight step record lives on a device.
 fn inflight_path() -> &'static Path {
     Path::new(defs::MOUNT_INFLIGHT)
-}
-
-pub fn record_ui_warning(boot_id: &str, generation: u64, message: &str) {
-    if let Some(mut record) = read_runtime()
-        && record.boot_id == boot_id
-        && record.generation == generation
-        && record.provider.as_deref() == Some("nomount")
-    {
-        record.warning = Some(message.to_string());
-        let _ = write_runtime(&record);
-    }
 }
 
 fn finish_runtime(

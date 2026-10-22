@@ -46,7 +46,7 @@ FinaSU 提供：
 
 ### KernelSU 模块
 
-标准 KernelSU 模块由管理器管理。同一时间只允许一个 metamodule 提供挂载后端；当已启用的 metamodule 与内置引擎不兼容时，FinaSU 会给出提示。
+标准 KernelSU 模块由管理器管理。模块通过内置的 NoMount VFS 后端注入，不再需要 metamodule；已安装的 metamodule 仍会被识别并列出。
 
 ### FolkZygisk
 
@@ -70,11 +70,9 @@ Folk-Mount 是内置的模块挂载引擎，只有 NoMount（VFS，默认）和�
 
 NoMount 是内建的 VFS 路径重定向后端：不产生任何挂载，而是由内核模块直接接管路径解析与目录遍历，因此不会污染 `/proc/mounts`。内核模块随 ksud 一起分发（按 KMI 内嵌，由本仓库自行编译），后端本身不依赖模块或 `nm` 二进制。
 
-管理器提供驱动状态、注入规则数、可见性例外与「关闭挂载」；挂载模式只有 `NoMount`（默认）与 `关闭`。选择 NoMount 时若驱动不可用会自动回退到内建引擎，并在设置页说明原因。ksud 还会在装载与注入之前先落一份「进行中」记录：如果某次 NoMount（或 metamodule）注入之后没能走完启动，下次开机会跳过它、改用内建引擎把模块挂上，并把原因写进 `/data/adb/ksu/log/mount.log`；同一份日志（有体积上限、会自动轮转）也会记下每次注入的规则数与命中的顶层目录，方便从 bug 报告里判断注入到底碰了哪些路径。要查"卡住时内核在等什么"，可以先 `ksud mount capture on`（默认卡过 150 秒就取证，`ksud mount capture on 60` 可以改时长，`off` 关掉）：取证结果同样落在 `/data/adb/ksu/log/mount_capture.log`，包含 `sysrq w` 打印的全部阻塞任务栈、内核日志结尾、D 状态任务与 pstore。可见性是一份由 ksud 保存的例外名单：名单内的应用看到原厂文件系统，其余应用都能看到注入的文件；NoMount 页可以按需把各应用 Profile 的「卸载模块」判定复制进这份名单，改动 Profile 后需要再复制一次。
+管理器提供驱动状态、注入规则数、可见性例外与「关闭挂载」；挂载模式只有 `NoMount`（默认）与 `关闭`。它后面已经没有第二个引擎：驱动装载不起来时，那次开机就不注入任何模块，设置页会直接说明，而不会换一种方式挂载。ksud 还会在装载与注入之前先落一份「进行中」记录：如果某次 NoMount 注入之后没能走完启动，下次开机会直接跳过注入，并把原因写进 `/data/adb/ksu/log/mount.log`；同一份日志（有体积上限、会自动轮转）也会记下每次注入的规则数与命中的顶层目录，方便从 bug 报告里判断注入到底碰了哪些路径。要查"卡住时内核在等什么"，可以先 `ksud mount capture on`（默认卡过 150 秒就取证，`ksud mount capture on 60` 可以改时长，`off` 关掉）：取证结果同样落在 `/data/adb/ksu/log/mount_capture.log`，包含 `sysrq w` 打印的全部阻塞任务栈、内核日志结尾、D 状态任务与 pstore。可见性是一份由 ksud 保存的例外名单：名单内的应用看到原厂文件系统，其余应用都能看到注入的文件；NoMount 页可以按需把各应用 Profile 的「卸载模块」判定复制进这份名单，改动 Profile 后需要再复制一次。
 
 目录型符号链接会被当作目录递归遍历并**逐文件合并**（带环路检测与按模块去重）；`.replace` 标记或 opaque 目录同样默认降级为逐文件合并，只有白名单里的 `/product/fonts`、且其原目录不存在或为空时才允许整目录替换。分区根目录，以及名为 `lib64`、`lib`、`bin`、`etc` 的目录，**永远不会**被整目录替换。降级会写进日志：`mount.log` 里带 `dir_replace=N`，`ksud nomount inject --dry-run --verbose` 也会分别标注文件重定向与目录替换。
-
-内建 NoMount 还会启动一个独立的 UI 就绪观察者（默认 180 秒）：它要求 `sys.boot_completed=1`、SurfaceFlinger 正在运行、开机动画已结束，而不只是收到 boot-completed 回调。**观察跑完但没能确认**时会留下一个持久标记，下一次开机会改用内建挂载引擎并记录一条 warning；如果观察**根本没来得及跑**（设备在时限内就重启，或助手进程被结束），则判为「不确定」，标记会被丢弃、NoMount 照常启用。这些信号不保证显示真的可用，它也不是内核装载器的超时。把 `/data/adb/ksu/mount_ui_guard` 写成 `delay=300` 可以改观察时长（30–900 秒），写 `off` 则停止新的观察；「已确认失败」的标记会在下一次用内建引擎成功挂载后自动清除，所以重试之前请先把那次失败开机的 `/data/adb/ksu/log/mount.log` 取走。
 
 ## 安全提示
 

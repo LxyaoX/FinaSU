@@ -287,7 +287,7 @@
     <string name="settings_folk_mount_unavailable_summary">Unavailable. Root access is required and ksud must be up to date.</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">Mounting off</string>
-    <string name="settings_folk_mount_mode_nomount_summary">Inject modules through the NoMount VFS driver. Falls back to the built-in engine when the driver is unavailable.</string>
+    <string name="settings_folk_mount_mode_nomount_summary">Inject modules through the NoMount VFS driver.</string>
     <string name="settings_folk_mount_mode_off_summary">Inject nothing. Installed modules stay inactive until a backend is selected.</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
     <string name="settings_folk_mount_provider_metamodule">Metamodule</string>
@@ -296,7 +296,7 @@
     <string name="settings_folk_mount_boot_provider">This boot: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">Not mounted yet this boot</string>
     <string name="settings_folk_mount_reboot_hint">Takes effect after reboot.</string>
-    <string name="settings_folk_mount_nomount_unavailable_hint">The NoMount driver is not answering; this boot falls back to the built-in engine.</string>
+    <string name="settings_folk_mount_nomount_unavailable_hint">The NoMount driver is not answering, so nothing was injected this boot.</string>
     <string name="settings_folk_mount_write_failed">Failed to change the Folk Mount mode.</string>
     <string name="settings_nomount">NoMount</string>
     <string name="nomount_section_driver">Driver</string>
@@ -308,7 +308,7 @@
     <string name="nomount_driver_ready">Ready</string>
     <string name="nomount_driver_kind_builtin">kernel built-in</string>
     <string name="nomount_driver_kind_module">kernel module</string>
-    <string name="nomount_unavailable_no_asset">This package ships no NoMount module for %1$s; use Automatic or Built-in Folk Mount.</string>
+    <string name="nomount_unavailable_no_asset">This package ships no NoMount module for %1$s, so modules cannot be injected on this kernel.</string>
     <string name="nomount_unavailable_outdated">The kernel carries NoMount %1$s but this build needs API 21 or newer; update the kernel.</string>
     <string name="nomount_unavailable_not_loaded">The driver is not loaded yet; reboot or inject once to load it.</string>
     <string name="nomount_unavailable_unknown_kmi">The kernel version could not be matched to a NoMount module.</string>
@@ -324,8 +324,10 @@
     <string name="nomount_uid_exclusions_value">%1$d apps see the stock filesystem</string>
     <string name="nomount_uid_exclusions_none">Every app can see the injected files; pick apps below to hide them</string>
     <string name="nomount_visibility_model">Default visibility</string>
-    <string name="nomount_visibility_model_hint">The built-in Folk Mount hides injected files from apps whose profile says "unmount modules" (every non-root app by default). NoMount starts with no exclusions, so those apps see the files until you tick them here.</string>
-    <string name="settings_folk_mount_nomount_confirm">NoMount shows the injected files to every app at first; the built-in Folk Mount hides them from apps whose profile says "unmount modules" (every non-root app by default).\n\nSwitching takes effect after a reboot. To keep the old behaviour, tick the apps in NoMount → Excluded apps.</string>
+    <string name="nomount_visibility_model_hint">NoMount starts with no exclusions, so every app sees the injected files until you tick it here.</string>
+    <string name="settings_folk_mount_nomount_confirm">NoMount shows the injected files to every app.
+
+Switching takes effect after a reboot. To hide them from an app, tick it in NoMount → Excluded apps.</string>
     <string name="settings_folk_mount_nomount_confirm_ok">Switch and reboot later</string>
     <string name="nomount_uid_source_hint">Copied from app profiles on demand</string>
     <string name="nomount_block_isolated">Hide from isolated processes</string>

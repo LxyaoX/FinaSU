@@ -72,8 +72,6 @@ mod android {
 
     // Folk Mount (built-in module mounting)
     pub const FOLK_MOUNT_CONFIG: &str = concatcp!(WORKING_DIR, "mount_mode");
-    pub const FOLK_MOUNT_WORK_DIR: &str = concatcp!(WORKING_DIR, "workdir/");
-    pub const FOLK_MOUNT_FS_NAME: &str = "FolkMount";
     // Per-boot runtime record and the concurrency lock for the built-in executor.
     pub const FOLK_MOUNT_RUNTIME: &str = concatcp!(WORKING_DIR, "mount_runtime");
     pub const FOLK_MOUNT_LOCK: &str = concatcp!(WORKING_DIR, "mount.lock");
@@ -93,8 +91,6 @@ mod android {
     pub const MOUNT_INFLIGHT: &str = concatcp!(WORKING_DIR, "mount_inflight");
     pub const NOMOUNT_LOAD_INFLIGHT: &str = concatcp!(WORKING_DIR, "nomount_load_inflight");
     pub const NOMOUNT_LOAD_LOCK: &str = concatcp!(WORKING_DIR, "nomount_load.lock");
-    pub const MOUNT_UI_PENDING: &str = concatcp!(WORKING_DIR, "mount_ui_pending");
-    pub const MOUNT_UI_CONFIG: &str = concatcp!(WORKING_DIR, "mount_ui_guard");
     /// Per-boot mount log, kept small enough to ride along in a bug report.
     pub const MOUNT_LOG: &str = concatcp!(LOG_DIR, "mount.log");
     /// Size the mount log may reach before the previous one is rotated aside.

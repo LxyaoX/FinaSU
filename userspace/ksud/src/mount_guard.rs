@@ -74,7 +74,8 @@ pub struct Inflight {
     /// Android userspace startup generation within the kernel boot.
     pub generation: u64,
     pub stage: Stage,
-    /// Provider the step belonged to (`builtin`, `metamodule`, `nomount`).
+    /// Provider token the step belonged to: `nomount`, or one of the retired
+    /// names when an older build wrote the record.
     pub provider: String,
     /// What the step was about: a KMI, a module id or a mount mode.
     pub detail: String,

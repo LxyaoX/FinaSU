@@ -764,7 +764,7 @@ fn install_module_to_system(zip: &str) -> Result<String> {
             println!("│ would both own the same paths.");
             println!("│");
             println!("│ To install this metamodule:");
-            println!("│   1. Set the mount mode to auto, builtin or off");
+            println!("│   1. Set the mount mode to off");
             println!("│   2. Reboot your device");
             println!("│   3. Install the new metamodule");
             println!("└─────────────────────────────────\n");
