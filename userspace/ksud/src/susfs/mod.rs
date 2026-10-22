@@ -273,16 +273,6 @@ pub fn restore_uname_provider(snapshot: &UnameTakeoverSnapshot) -> Result<()> {
 }
 
 #[cfg(target_os = "android")]
-fn lock_uts_provider() -> Result<Option<crate::uts_view::ConfigLock>> {
-    Ok(Some(crate::uts_view::provider_lock()?))
-}
-
-#[cfg(not(target_os = "android"))]
-fn lock_uts_provider() -> Result<Option<()>> {
-    Ok(None)
-}
-
-#[cfg(target_os = "android")]
 fn uts_provider_active() -> Result<bool> {
     crate::uts_view::provider_active()
 }
@@ -299,6 +289,14 @@ fn uname_conflicts(config: &Config, uts_active: bool) -> bool {
         .as_ref()
         .is_some_and(|uname| !uname.is_default())
         && uts_active
+}
+
+fn uts_arbitration_active(config: &Config, query: impl FnOnce() -> Result<bool>) -> Result<bool> {
+    if config.settings.uname.is_some() {
+        query()
+    } else {
+        Ok(false)
+    }
 }
 
 fn apply_with_uts_arbitration(
@@ -364,10 +362,12 @@ pub fn run(command: Command) -> Result<()> {
             );
         }
         Command::Apply => {
-            let _uts_lock = lock_uts_provider()?;
+            // UTS transactions take this store lock before changing either
+            // provider. Holding it here serializes arbitration without making
+            // unrelated SUSFS operations depend on UTS config storage.
             let _lock = store::lock()?;
             let config = store::read_config()?;
-            let uts_active = config.settings.uname.is_some() && uts_provider_active()?;
+            let uts_active = uts_arbitration_active(&config, uts_provider_active)?;
             let result =
                 apply_with_uts_arbitration(&config, &detect(), apply::Stage::Live, uts_active)?;
             println!("{}", serde_json::to_string(&result)?);
@@ -384,13 +384,15 @@ pub fn boot(stage: &str) {
         _ => return,
     };
     let result = (|| -> Result<()> {
-        let _uts_lock = lock_uts_provider()?;
+        // Keep the shared provider state stable for this transaction. UTS
+        // commits take the same lock, so a separate UTS config lock would only
+        // duplicate serialization and couple SUSFS to UTS file permissions.
         let _lock = store::lock()?;
         let config = store::read_config()?;
         if !config.automatic || safe_mode() {
             return Ok(());
         }
-        let uts_active = config.settings.uname.is_some() && uts_provider_active()?;
+        let uts_active = uts_arbitration_active(&config, uts_provider_active)?;
         let report = apply_with_uts_arbitration(&config, &detect(), stage, uts_active)?;
         log::info!("SUSFS: {}", serde_json::to_string(&report)?);
         Ok(())
@@ -479,6 +481,19 @@ mod tests {
         });
         assert!(uname_conflicts(&config, true));
         assert!(!uname_conflicts(&config, false));
+    }
+
+    #[test]
+    fn susfs_without_uname_does_not_query_uts_provider_state() {
+        let mut queried = false;
+        let active = uts_arbitration_active(&Config::default(), || {
+            queried = true;
+            Ok(true)
+        })
+        .unwrap();
+
+        assert!(!queried);
+        assert!(!active);
     }
 
     #[test]

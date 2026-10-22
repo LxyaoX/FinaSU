@@ -36,7 +36,7 @@ pub enum Command {
     TakeOver,
 }
 
-pub struct ConfigLock(File);
+struct ConfigLock(File);
 
 impl Drop for ConfigLock {
     fn drop(&mut self) {
@@ -97,10 +97,6 @@ fn acquire_lock() -> Result<ConfigLock> {
         bail!("UTS View is busy; retry later");
     }
     Ok(ConfigLock(file))
-}
-
-pub fn provider_lock() -> Result<ConfigLock> {
-    acquire_lock()
 }
 
 fn read_config_snapshot() -> Result<Option<ConfigSnapshot>> {
