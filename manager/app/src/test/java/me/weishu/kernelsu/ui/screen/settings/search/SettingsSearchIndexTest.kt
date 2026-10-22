@@ -2,6 +2,7 @@ package me.weishu.kernelsu.ui.screen.settings.search
 
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
+import me.weishu.kernelsu.ui.navigation3.Route
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -48,5 +49,13 @@ class SettingsSearchIndexTest {
                 assertNotEquals(null, entry.category)
                 assertEquals(entry.category?.key, target.key)
             }
+    }
+
+    @Test
+    fun `UTS View is searchable from functions`() {
+        val entry = settingsSearchIndex.single {
+            it.target == SettingsSearchTarget.Page(Route.UtsView)
+        }
+        assertEquals(SettingsCategory.FUNCTION, entry.category)
     }
 }

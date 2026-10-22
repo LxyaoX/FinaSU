@@ -760,6 +760,19 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
                         },
                     )
+                },
+                {
+                    // UTS View has enough configuration that a switch in the
+                    // settings list would misrepresent it as a single toggle.
+                    SegmentedListItem(
+                        headlineContent = { Text(stringResource(id = R.string.settings_uts_view)) },
+                        supportingContent = { Text(stringResource(id = R.string.settings_uts_view_summary)) },
+                        leadingContent = { Icon(Icons.Rounded.TextFields, null) },
+                        onClick = actions.onOpenUtsView,
+                        trailingContent = {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                        },
+                    )
                 }
             )
         )

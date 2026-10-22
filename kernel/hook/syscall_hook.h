@@ -34,6 +34,10 @@ void ksu_unregister_syscall_hook(int nr);
 // Check if a handler is registered in the dispatcher for syscall @nr.
 bool ksu_has_syscall_hook(int nr);
 
+// Pin the module before redirecting a syscall. Once known syscalls are being
+// routed through module code, hot unload is intentionally disabled until reboot.
+bool ksu_syscall_redirect_pin_module(void);
+
 // --- Direct syscall table patching API (hook/unhook) ---
 // Directly overwrite syscall_table[@nr] with @fn using fixmap + stop_machine.
 // Saves the original handler to *@old (if non-NULL) and records the entry

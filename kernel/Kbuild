@@ -4,6 +4,7 @@ kernelsu-objs += feature/kernel_umount.o
 kernelsu-objs += feature/module_blacklist.o
 kernelsu-objs += feature/sulog.o
 kernelsu-objs += feature/sucompat.o
+kernelsu-objs += feature/uts_view.o
 
 kernelsu-objs += hook/lsm_hook.o
 kernelsu-objs += hook/setuid_hook.o

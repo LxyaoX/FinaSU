@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">加个条目喵</string>
     <string name="susfs_module_hint">模块名字得是 1–63 个 ASCII 字母、数字或者下划线喵。不会加载或者卸载模块哦</string>
     <string name="susfs_prefix_hint">通过开放的 LKM 控制节点隐藏挂载前缀喵；不会全局清空已有的规则哦</string>
+    <string name="susfs_deferred">UTS 视图开着，先等等喵</string>
+    <string name="susfs_uts_apply_confirm_title">应用 SUSFS uname 吗喵？</string>
+    <string name="susfs_uts_apply_confirm_message">应用 SUSFS uname 的时候，UTS 视图会先关掉喵，但设置会留着。只有 SUSFS 确认 uname 真的生效，UTS 视图才会继续关着；不然会自己恢复哦。</string>
+    <string name="susfs_uts_apply_confirm_action">应用 SUSFS 喵</string>
 </resources>

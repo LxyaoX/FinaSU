@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">召唤条目</string>
     <string name="susfs_module_hint">圣光阵名：1–63 位 ASCII 字母、数字或下划线。不加载亦不卸载圣光阵。</string>
     <string name="susfs_prefix_hint">借所现之 LKM 掌理隐匿圣引圣缀。不全域涤净现行之圣律。</string>
+    <string name="susfs_deferred">UTS 圣视正蒙恩，暂缓施行</string>
+    <string name="susfs_uts_apply_confirm_title">欲施展 SUSFS uname 乎？</string>
+    <string name="susfs_uts_apply_confirm_message">施展 SUSFS uname 时，UTS 圣视将暂熄，然圣设仍存。唯 SUSFS 勘验 uname 已应验后，UTS 圣视方续熄；否则自当归元。</string>
+    <string name="susfs_uts_apply_confirm_action">施展 SUSFS</string>
 </resources>

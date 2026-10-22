@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">添加条目</string>
     <string name="susfs_module_hint">魔法阵名称须为 1–63 个 ASCII 字母、数字或下划线。不会加载或卸载魔法阵。</string>
     <string name="susfs_prefix_hint">经由开放的 LKM 控制节点隐遁挂载前缀；不会全域清空已有法则。</string>
+    <string name="susfs_deferred">UTS 幻化生效中，已暂时封印</string>
+    <string name="susfs_uts_apply_confirm_title">要施展 SUSFS uname 吗？</string>
+    <string name="susfs_uts_apply_confirm_message">施展 SUSFS uname 期间，UTS 幻化会暂时熄灭，但会保留设定。唯 SUSFS 确认 uname 已实际生效后，UTS 幻化才会保持熄灭；否则会自动复原。</string>
+    <string name="susfs_uts_apply_confirm_action">施展 SUSFS</string>
 </resources>

@@ -5,6 +5,7 @@
 #include <linux/types.h>
 
 #include "uapi/app_profile.h"
+#include "uapi/uts_view.h"
 
 // 2: allowlist v4 root profile flags
 // 3: scoped su-session driver fd
@@ -243,5 +244,7 @@ static const __u32 KSU_IOCTL_LOOKUP_SYMBOLS = _IOW('K', 22, struct ksu_lookup_sy
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGERS = _IOC(_IOC_WRITE, 'K', 22, 0);
 static const __u32 KSU_IOCTL_GET_DYNAMIC_MANAGERS = _IOWR('K', 23, struct ksu_get_dynamic_managers_cmd);
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS = _IOC(_IOC_WRITE, 'K', 24, 0);
+static const __u32 KSU_IOCTL_GET_UTS_VIEW_CONFIG = _IOWR('K', 25, struct ksu_uts_view_config);
+static const __u32 KSU_IOCTL_SET_UTS_VIEW_CONFIG = _IOW('K', 26, struct ksu_uts_view_config);
 
 #endif

@@ -16,6 +16,7 @@
     <string name="susfs_applied">本次启动已应用</string>
     <string name="susfs_failed">应用失败</string>
     <string name="susfs_pending">待重启</string>
+    <string name="susfs_deferred">UTS 视图生效中，已暂缓</string>
     <string name="susfs_probe">正在检测 SUSFS…</string>
     <string name="susfs_absent">未检测到 SUSFS</string>
     <string name="susfs_readonly">未知协议 · 只读</string>
@@ -76,6 +77,9 @@
     <string name="susfs_restore_hint">将两个字段保存为 default。需要立即应用才会恢复；仅删除保存值不会还原内核。</string>
     <string name="susfs_uname_hint">使用 default 保留对应的真实内核字段。两个字段均不能为空。这里显示保存目标，而非实时内核值。</string>
     <string name="susfs_uname_invalid">每个字段均须非空、少于 65 个 UTF-8 字节，且不能包含控制字符。</string>
+    <string name="susfs_uts_apply_confirm_title">应用 SUSFS uname？</string>
+    <string name="susfs_uts_apply_confirm_message">应用期间会暂时关闭 UTS 视图，但保留其设置。只有 SUSFS 确认 uname 已实际生效后，UTS 视图才会保持关闭；否则会自动恢复。</string>
+    <string name="susfs_uts_apply_confirm_action">应用 SUSFS</string>
     <string name="susfs_cmdline_hint">仅显示保存的替换内容，不读取当前内核值；删除配置不会恢复已生效的伪装。</string>
     <string name="susfs_text_invalid">请输入非空内容，少于 8192 个 UTF-8 字节，且不含控制字符。</string>
     <string name="susfs_path_rules">隐藏路径</string>

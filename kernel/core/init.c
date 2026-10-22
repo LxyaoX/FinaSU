@@ -29,6 +29,7 @@
 #include "feature/adb_root.h"
 #include "feature/selinux_hide.h"
 #include "feature/avc_spoof.h"
+#include "feature/uts_view.h"
 #include "infra/symbol_resolver.h"
 #include "preinit/preinit.h"
 
@@ -147,6 +148,8 @@ int __init kernelsu_init(void)
     ksu_selinux_hide_init();
     ksu_shell_su_adb_only_init();
     ksu_avc_spoof_init();
+    if (ksu_uts_view_init())
+        pr_info("uts_view: feature unavailable\n");
 
     ksu_supercalls_init();
     ksu_app_profile_init();
@@ -244,6 +247,7 @@ void __exit kernelsu_exit(void)
     ksu_lsm_hook_exit();
     ksu_adb_root_exit();
     ksu_sulog_exit();
+    ksu_uts_view_exit();
     ksu_feature_exit();
     ksu_module_blacklist_exit();
 

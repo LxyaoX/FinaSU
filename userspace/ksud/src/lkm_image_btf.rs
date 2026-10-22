@@ -450,6 +450,32 @@ impl<'a> BtfCandidate<'a> {
         Ok(())
     }
 
+    fn validate_loading_module_enum(&self) -> Result<()> {
+        let mut values = BTreeSet::new();
+        for enumeration in self.types.iter().filter(|btf_type| {
+            btf_type.kind == BTF_KIND_ENUM
+                && self.string(btf_type.name_offset) == Some("kernel_load_data_id")
+        }) {
+            for index in 0..usize::from(enumeration.vlen) {
+                let offset = enumeration.payload_offset + index * 8;
+                let Some(name) = read_u32(self.data, offset).and_then(|name| self.string(name))
+                else {
+                    continue;
+                };
+                if name == "LOADING_MODULE" {
+                    let value = read_u32(self.data, offset + 4)
+                        .ok_or_else(|| anyhow::anyhow!("BTF LOADING_MODULE value is truncated"))?;
+                    values.insert(value);
+                }
+            }
+        }
+        ensure!(
+            values.len() <= 1,
+            "BTF contains conflicting LOADING_MODULE values"
+        );
+        Ok(())
+    }
+
     pub const fn file_offset(&self) -> usize {
         self.file_offset
     }
@@ -461,6 +487,7 @@ impl<'a> BtfCandidate<'a> {
     pub fn to_kernel_btf(&self) -> Result<KernelBtf> {
         let load_info = self.load_info_layout()?;
         self.validate_function_abis()?;
+        self.validate_loading_module_enum()?;
         Ok(KernelBtf {
             file_offset: self.file_offset,
             size: self.size(),

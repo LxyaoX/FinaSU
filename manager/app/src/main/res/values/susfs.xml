@@ -16,6 +16,7 @@
     <string name="susfs_applied">Applied this boot</string>
     <string name="susfs_failed">Application failed</string>
     <string name="susfs_pending">Pending reboot</string>
+    <string name="susfs_deferred">Deferred while UTS View is active</string>
     <string name="susfs_probe">Checking SUSFS…</string>
     <string name="susfs_absent">SUSFS not detected</string>
     <string name="susfs_readonly">Unknown protocol · read-only</string>
@@ -76,6 +77,9 @@
     <string name="susfs_restore_hint">Saves default for both fields. Apply now to restore; merely removing a saved value does not restore the kernel.</string>
     <string name="susfs_uname_hint">Use default to keep each real kernel field. Both fields are required. These are saved targets, not live kernel readings.</string>
     <string name="susfs_uname_invalid">Each field must be nonempty, under 65 UTF-8 bytes, and contain no control characters.</string>
+    <string name="susfs_uts_apply_confirm_title">Apply SUSFS uname?</string>
+    <string name="susfs_uts_apply_confirm_message">UTS View will be turned off while SUSFS uname is applied. Its settings are kept. UTS View stays off only after SUSFS confirms uname took effect; otherwise it is restored.</string>
+    <string name="susfs_uts_apply_confirm_action">Apply SUSFS</string>
     <string name="susfs_cmdline_hint">Saved replacement only. No live value is read here; removing the configuration does not restore an active spoof.</string>
     <string name="susfs_text_invalid">Enter nonempty text under 8192 UTF-8 bytes, without control characters.</string>
     <string name="susfs_path_rules">Hidden paths</string>

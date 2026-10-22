@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">Girdi ekle</string>
     <string name="susfs_module_hint">Bir modül adı: 1–63 ASCII harf, rakam veya alt çizgi. Modülleri yüklemez veya kaldırmaz.</string>
     <string name="susfs_prefix_hint">Sunulan LKM kontrolleri aracılığıyla bir bağlama öneki gizle. Mevcut kuralların genel temizliği yok.</string>
+    <string name="susfs_deferred">UTS View etkinken ertelendi</string>
+    <string name="susfs_uts_apply_confirm_title">SUSFS uname uygulansın mı?</string>
+    <string name="susfs_uts_apply_confirm_message">SUSFS uname uygulanırken UTS View kapatılır ancak ayarları korunur. UTS View yalnızca SUSFS uname\'in etkinleştiğini doğruladıktan sonra kapalı kalır; aksi halde geri yüklenir.</string>
+    <string name="susfs_uts_apply_confirm_action">SUSFS\'i uygula</string>
 </resources>

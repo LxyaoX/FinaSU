@@ -142,8 +142,12 @@ pub fn unload() -> Result<()> {
 
     // 4. delete_module("kernelsu")
     info!("unload: removing kernelsu module...");
+    let mut unload_failed = false;
     if let Err(e) = rustix::system::delete_module(c"kernelsu", 0) {
-        warn!("unload: delete_module kernelsu failed: {e}");
+        unload_failed = true;
+        warn!(
+            "unload: delete_module kernelsu failed: {e}; module remains loaded and a reboot is required"
+        );
     }
 
     // 5. start (Android init start command - restarts all services)
@@ -151,6 +155,6 @@ pub fn unload() -> Result<()> {
     let _ = Command::new("start").status();
 
     // 6. Exit
-    info!("unload: done, exiting ksud");
-    std::process::exit(0);
+    info!("unload: done, exiting ksud (success={})", !unload_failed);
+    std::process::exit(i32::from(unload_failed));
 }

@@ -18,6 +18,9 @@ data class SusfsStatus(
     val procNodes: List<String> = emptyList(),
     val management: String = "saved",
     val automatic: Boolean = false,
+    val unameApplied: Boolean = false,
+    val unameScheduled: Boolean = false,
+    val unameUncertain: Boolean = false,
     val error: String? = null,
 ) {
     val detected get() = protocol == "compatible" || protocol == "unknown_protocol"
@@ -40,14 +43,26 @@ data class SusfsStatus(
                 variant = detection.getString("variant"),
                 features = strings("features"), procNodes = strings("proc_nodes"),
                 management = json.getString("management"), automatic = json.getBoolean("automatic"),
+                unameApplied = json.optBoolean("uname_applied", false),
+                unameScheduled = json.optBoolean("uname_scheduled", false),
+                unameUncertain = json.optBoolean("uname_uncertain", false),
                 error = if (json.isNull("config_error")) null else json.getString("config_error"),
             )
         }
     }
 }
 
+interface SusfsDataSource {
+    suspend fun status(): SusfsStatus
+    suspend fun export(): String
+    suspend fun save(text: String)
+    suspend fun apply(): String
+}
+
 /** Only trusted fixed subcommands; imported JSON is stdin, never executable shell text. */
-class SusfsRepository(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+class SusfsRepository(
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : SusfsDataSource {
     private suspend fun command(action: String, input: String? = null): String = withContext(dispatcher) {
         require(action in setOf("status", "export", "import", "apply"))
         require(input == null || input.toByteArray().size <= 128 * 1024)
@@ -67,8 +82,10 @@ class SusfsRepository(private val dispatcher: CoroutineDispatcher = Dispatchers.
         output.joinToString("\n")
     }
 
-    suspend fun status() = SusfsStatus.parse(command("status"))
-    suspend fun export() = command("export")
-    suspend fun save(text: String) = command("import", text)
-    suspend fun apply() = command("apply")
+    override suspend fun status() = SusfsStatus.parse(command("status"))
+    override suspend fun export() = command("export")
+    override suspend fun save(text: String) {
+        command("import", text)
+    }
+    override suspend fun apply() = command("apply")
 }

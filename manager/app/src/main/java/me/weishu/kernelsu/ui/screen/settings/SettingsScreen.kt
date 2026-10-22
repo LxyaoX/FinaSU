@@ -103,6 +103,7 @@ fun rememberSettingsActions(
         onManageSuiPermissions = { navigator.push(Route.SuiPermissions) },
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,
+        onOpenUtsView = { navigator.push(Route.UtsView) },
         onSetDefaultUmountModules = viewModel::setDefaultUmountModules,
         onSetEnableWebDebugging = viewModel::setEnableWebDebugging,
         onSetHomeLayoutStyle = viewModel::setHomeLayoutStyle,

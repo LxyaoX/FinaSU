@@ -161,6 +161,23 @@ fun SusfsScreen() {
                 onClick = { vm.save(text); draft = null }) { Text(stringResource(R.string.susfs_save)) } },
             dismissButton = { TextButton(onClick = { draft = null }) { Text(stringResource(R.string.susfs_cancel)) } })
     }
+    if (state.pendingUnameApply) {
+        AlertDialog(
+            onDismissRequest = vm::dismissPendingUnameApply,
+            title = { Text(stringResource(R.string.susfs_uts_apply_confirm_title)) },
+            text = { Text(stringResource(R.string.susfs_uts_apply_confirm_message)) },
+            confirmButton = {
+                TextButton(enabled = !state.busy, onClick = vm::confirmPendingUnameApply) {
+                    Text(stringResource(R.string.susfs_uts_apply_confirm_action))
+                }
+            },
+            dismissButton = {
+                TextButton(enabled = !state.busy, onClick = vm::dismissPendingUnameApply) {
+                    Text(stringResource(R.string.susfs_cancel))
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -261,6 +278,9 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
             report.failures.forEach { (key, error) -> item(key = "error:$key") { SegmentedListItem(
                 headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(error, color = MaterialTheme.colorScheme.error) },
                 leadingContent = { Icon(Icons.Rounded.ErrorOutline, null) }) } }
+            report.deferred.forEach { key -> item(key = "deferred:$key") { SegmentedListItem(
+                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_deferred)) },
+                leadingContent = { Icon(Icons.Rounded.Schedule, null) }) } }
             report.pendingReboot.forEach { key -> item(key = "pending:$key") { SegmentedListItem(
                 headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_pending)) },
                 leadingContent = { Icon(Icons.Rounded.Schedule, null) }) } }

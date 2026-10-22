@@ -851,6 +851,16 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             aliases = listOf("nomount", "no mount", "exclusion", "injection"),
         )
     )
+    add(
+        SettingsCategory.FUNCTION.page(
+            id = "function.uts_view",
+            titleRes = R.string.settings_uts_view,
+            summaryRes = R.string.settings_uts_view_summary,
+            icon = Icons.Rounded.TextFields,
+            route = Route.UtsView,
+            aliases = listOf("uts", "uname", "kernel version", "内核版本", "伪装"),
+        )
+    )
 
     // Security
     add(

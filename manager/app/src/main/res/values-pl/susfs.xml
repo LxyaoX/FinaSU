@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">Dodaj wpis</string>
     <string name="susfs_module_hint">Nazwa modułu: 1–63 liter ASCII, cyfr lub podkreśleń. Nie wczytuje ani nie wyładowuje modułów.</string>
     <string name="susfs_prefix_hint">Ukryj prefiks montowania przez udostępnione mechanizmy kontroli LKM. Brak globalnego czyszczenia istniejących reguł.</string>
+    <string name="susfs_deferred">Wstrzymano, ponieważ UTS View jest aktywny</string>
+    <string name="susfs_uts_apply_confirm_title">Zastosować uname SUSFS?</string>
+    <string name="susfs_uts_apply_confirm_message">Podczas stosowania uname SUSFS funkcja UTS View zostanie wyłączona, ale jej ustawienia zostaną zachowane. UTS View pozostanie wyłączona tylko po potwierdzeniu przez SUSFS, że uname zaczął obowiązywać; w przeciwnym razie zostanie przywrócona.</string>
+    <string name="susfs_uts_apply_confirm_action">Zastosuj SUSFS</string>
 </resources>

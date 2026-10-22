@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">添条目</string>
     <string name="susfs_module_hint">仙符名讳须为 1–63 个 ASCII 字母、数字或下划线。不载亦不卸仙符。</string>
     <string name="susfs_prefix_hint">借开放之 LKM 控制节点隐遁悬挂前缀；不全域涤除已有规则。</string>
+    <string name="susfs_deferred">UTS 法眼正启，暂缓施行</string>
+    <string name="susfs_uts_apply_confirm_title">欲施 SUSFS uname 乎？</string>
+    <string name="susfs_uts_apply_confirm_message">施 SUSFS uname 时，UTS 法眼将暂阖，法设仍存。唯 SUSFS 勘验 uname 已应验，UTS 法眼方续阖；否则自当归元。</string>
+    <string name="susfs_uts_apply_confirm_action">施行 SUSFS</string>
 </resources>

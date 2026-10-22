@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">添条目</string>
     <string name="susfs_module_hint">招牌菜名儿得是 1–63 个 ASCII 字母、数字或下划线。可不会挂上或撤下招牌菜。</string>
     <string name="susfs_prefix_hint">借开着的 LKM 控制节点藏起挂载前缀；可不会把现成规矩一锅清空。</string>
+    <string name="susfs_deferred">UTS 视图正上桌，先压着</string>
+    <string name="susfs_uts_apply_confirm_title">要套上 SUSFS uname 吗？</string>
+    <string name="susfs_uts_apply_confirm_message">套 SUSFS uname 时，UTS 视图会先收火，但配方留着。只有 SUSFS 确认 uname 真上了桌，UTS 视图才继续收着火；不然会自动恢复。</string>
+    <string name="susfs_uts_apply_confirm_action">套上 SUSFS</string>
 </resources>

@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">Tambah entri</string>
     <string name="susfs_module_hint">Nama modul: 1–63 huruf ASCII, angka, atau garis bawah. Tidak memuat atau membongkar modul.</string>
     <string name="susfs_prefix_hint">Sembunyikan prefiks mount melalui kontrol LKM yang tersedia. Tidak ada penghapusan global aturan yang ada.</string>
+    <string name="susfs_deferred">Ditunda saat UTS View aktif</string>
+    <string name="susfs_uts_apply_confirm_title">Terapkan uname SUSFS?</string>
+    <string name="susfs_uts_apply_confirm_message">UTS View akan dimatikan saat uname SUSFS diterapkan. Pengaturannya tetap disimpan. UTS View hanya tetap mati setelah SUSFS mengonfirmasi uname telah berlaku; jika tidak, UTS View akan dipulihkan.</string>
+    <string name="susfs_uts_apply_confirm_action">Terapkan SUSFS</string>
 </resources>
