@@ -285,14 +285,8 @@
     <string name="settings_folk_mount">Folk Mount</string>
     <string name="settings_folk_mount_summary">Choose how modules are mounted on boot.</string>
     <string name="settings_folk_mount_unavailable_summary">Unavailable. Root access is required and ksud must be up to date.</string>
-    <string name="settings_folk_mount_mode_auto">Automatic</string>
-    <string name="settings_folk_mount_mode_builtin">Built-in (Magic Mount)</string>
-    <string name="settings_folk_mount_mode_metamodule">Metamodule only</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">Mounting off</string>
-    <string name="settings_folk_mount_mode_auto_summary">Use the metamodule when one is enabled, otherwise the built-in engine.</string>
-    <string name="settings_folk_mount_mode_builtin_summary">Always use the built-in Folk Mount engine.</string>
-    <string name="settings_folk_mount_mode_metamodule_summary">Always let the metamodule handle mounting.</string>
     <string name="settings_folk_mount_mode_nomount_summary">Inject modules through the NoMount VFS driver. Falls back to the built-in engine when the driver is unavailable.</string>
     <string name="settings_folk_mount_mode_off_summary">Inject nothing. Installed modules stay inactive until a backend is selected.</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
@@ -302,7 +296,6 @@
     <string name="settings_folk_mount_boot_provider">This boot: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">Not mounted yet this boot</string>
     <string name="settings_folk_mount_reboot_hint">Takes effect after reboot.</string>
-    <string name="settings_folk_mount_metamodule_compat_hint">An enabled metamodule is present; its scripts may not work with the built-in engine.</string>
     <string name="settings_folk_mount_nomount_unavailable_hint">The NoMount driver is not answering; this boot falls back to the built-in engine.</string>
     <string name="settings_folk_mount_write_failed">Failed to change the Folk Mount mode.</string>
     <string name="settings_nomount">NoMount</string>

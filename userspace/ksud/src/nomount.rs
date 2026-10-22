@@ -1256,7 +1256,7 @@ impl Status {
             error: None,
         };
         status.owns_injection = matches!(
-            crate::magic_mount::read_mount_mode().unwrap_or(crate::magic_mount::MountMode::Auto),
+            crate::magic_mount::read_mount_mode().unwrap_or(crate::magic_mount::MountMode::Nomount),
             crate::magic_mount::MountMode::Nomount
         ) && status.deferred_to.is_none()
             && status.probe.ready();

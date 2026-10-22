@@ -284,14 +284,8 @@
     <string name="settings_folk_mount">Folk Mount</string>
     <string name="settings_folk_mount_summary">부팅 시 모듈이 마운트되는 방식을 선택합니다.</string>
     <string name="settings_folk_mount_unavailable_summary">사용할 수 없습니다. 루트 권한이 필요하며 ksud가 최신 상태여야 합니다.</string>
-    <string name="settings_folk_mount_mode_auto">자동</string>
-    <string name="settings_folk_mount_mode_builtin">Built-in (Magic Mount)</string>
-    <string name="settings_folk_mount_mode_metamodule">메타모듈만</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">마운트 끄기</string>
-    <string name="settings_folk_mount_mode_auto_summary">메타모듈이 활성화되어 있으면 메타모듈을, 그렇지 않으면 내장 엔진을 사용합니다.</string>
-    <string name="settings_folk_mount_mode_builtin_summary">항상 내장 Folk Mount 엔진을 사용합니다.</string>
-    <string name="settings_folk_mount_mode_metamodule_summary">항상 메타모듈이 마운트를 처리하도록 합니다.</string>
     <string name="settings_folk_mount_mode_nomount_summary">NoMount VFS 드라이버를 통해 모듈을 주입합니다. 드라이버를 사용할 수 없으면 내장 엔진으로 대체합니다.</string>
     <string name="settings_folk_mount_mode_off_summary">아무것도 주입하지 않습니다. 설치된 모듈은 백엔드를 선택할 때까지 비활성 상태로 유지됩니다.</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
@@ -301,7 +295,6 @@
     <string name="settings_folk_mount_boot_provider">이번 부팅: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">이번 부팅에서는 아직 마운트되지 않음</string>
     <string name="settings_folk_mount_reboot_hint">재부팅 후 적용됩니다.</string>
-    <string name="settings_folk_mount_metamodule_compat_hint">활성화된 메타모듈이 있습니다. 해당 스크립트가 내장 엔진과 호환되지 않을 수 있습니다.</string>
     <string name="settings_folk_mount_nomount_unavailable_hint">NoMount 드라이버가 응답하지 않습니다. 이번 부팅에서는 내장 엔진으로 대체합니다.</string>
     <string name="settings_folk_mount_write_failed">Folk Mount 모드를 변경하지 못했습니다.</string>
     <string name="settings_nomount">NoMount</string>

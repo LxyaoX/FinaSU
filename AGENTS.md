@@ -61,7 +61,7 @@ expects users to install as modules are vendored into this repository and driven
   - **Sui** (`userspace/sui/`, Shizuku API backend) - payload embedded by ksud, lifecycle owned by `userspace/ksud/src/sui.rs` under the module id `finasu-sui`.
   - **NoMount** (`userspace/nomount/kernel/src/`) - compiled per KMI into `<kmi>_nomount.ko` and embedded; the userspace rule path lives in `userspace/ksud/src/nomount.rs` and `nomount_plan.rs`.
   - **SUSFS** - `userspace/ksud/src/susfs/` configures an existing kernel-side SUSFS installation only; this repository neither patches nor implements SUSFS.
-  - **Folk Mount** - built-in module mount engine and provider selection in `userspace/ksud/src/magic_mount.rs` (planner in `mount_plan.rs`).
+  - **Folk Mount** - built-in module mount engine and provider selection in `userspace/ksud/src/magic_mount.rs` (planner in `mount_plan.rs`). Only `nomount` and `off` are selectable; the magic-mount engine and the metamodule provider remain solely as the automatic fallback.
   - **Lua plugins** - `userspace/ksud/src/plugin/`.
 
 ## Build & Packaging (`build.sh`)

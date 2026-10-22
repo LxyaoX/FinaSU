@@ -496,9 +496,6 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     val available = folkMountStatus != null && !uiState.folkMountReadError
                     val mode = folkMountStatus?.configuredMode
                     val modeItems = listOf(
-                        stringResource(id = R.string.settings_folk_mount_mode_auto),
-                        stringResource(id = R.string.settings_folk_mount_mode_builtin),
-                        stringResource(id = R.string.settings_folk_mount_mode_metamodule),
                         stringResource(id = R.string.settings_folk_mount_mode_nomount),
                         stringResource(id = R.string.settings_folk_mount_mode_off),
                     )
@@ -512,9 +509,6 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> {
                             val base = stringResource(
                                 id = when (mode) {
-                                    FolkMountMode.AUTO -> R.string.settings_folk_mount_mode_auto_summary
-                                    FolkMountMode.BUILTIN -> R.string.settings_folk_mount_mode_builtin_summary
-                                    FolkMountMode.METAMODULE -> R.string.settings_folk_mount_mode_metamodule_summary
                                     FolkMountMode.NOMOUNT -> R.string.settings_folk_mount_mode_nomount_summary
                                     FolkMountMode.OFF -> R.string.settings_folk_mount_mode_off_summary
                                     null -> R.string.settings_folk_mount_summary
@@ -542,10 +536,9 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
 
                                 null -> stringResource(id = R.string.settings_folk_mount_boot_provider_unknown)
                             }
+                            // The magic-mount engine is no longer selectable, so the only hint
+                            // left is the one that explains a VFS fallback.
                             val compatHint = when {
-                                mode == FolkMountMode.BUILTIN && folkMountStatus.metamoduleEnabled ->
-                                    stringResource(id = R.string.settings_folk_mount_metamodule_compat_hint)
-
                                 mode == FolkMountMode.NOMOUNT && uiState.nomountStatus?.apiOk == false ->
                                     stringResource(id = R.string.settings_folk_mount_nomount_unavailable_hint)
 

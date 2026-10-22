@@ -1,10 +1,16 @@
 //! Folk Mount: built-in module mounting.
 //!
-//! Phase 1 provided the configuration file, the `auto | builtin | metamodule`
-//! provider decision and the `ksud mount status` / `set-mode` protocol. Phase 2
-//! adds the tmpfs+bind executor (delegated to the host-testable planner in
-//! `mount_plan`), metadata/SELinux cloning, transaction rollback, unmount
-//! registration and the per-boot runtime record.
+//! Only two modes are offered: `nomount`, which injects through the NoMount VFS
+//! driver, and `off`. The magic-mount engine and the metamodule provider are no
+//! longer selectable - the engine survives only as the automatic fallback for a
+//! device whose NoMount driver is not installed, which is the one case where the
+//! alternative is injecting nothing at all.
+//!
+//! This module owns the configuration file, the provider decision and the
+//! `ksud mount status` / `set-mode` protocol, plus the fallback engine
+//! (tmpfs+bind executor delegated to the host-testable planner in `mount_plan`,
+//! metadata/SELinux cloning, transaction rollback, unmount registration and the
+//! per-boot runtime record).
 
 use std::fmt::Write as _;
 use std::fs;
@@ -26,13 +32,17 @@ use crate::mount_guard;
 use crate::mount_plan::{self, FileMeta, MountOps, Node, NodeFileType, RealDirEntry};
 
 /// User-visible mount mode stored in [`defs::FOLK_MOUNT_CONFIG`].
+///
+/// `auto`, `builtin` and `metamodule` were removed: every one of them ended in
+/// the magic-mount engine, and the VFS driver is what actually injects modules
+/// now. [`MountMode::parse`] still accepts the old tokens so a device upgrading
+/// from an older build migrates instead of failing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MountMode {
-    Auto,
-    Builtin,
-    Metamodule,
+    /// Inject through the NoMount VFS driver (falls back to the built-in engine
+    /// when that driver is not installed).
     Nomount,
-    /// Inject nothing: modules stay inert until a provider is chosen.
+    /// Inject nothing: modules stay inert until a mode is chosen.
     Off,
 }
 
@@ -40,22 +50,21 @@ impl MountMode {
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Auto => "auto",
-            Self::Builtin => "builtin",
-            Self::Metamodule => "metamodule",
             Self::Nomount => "nomount",
             Self::Off => "off",
         }
     }
 
     /// Parse a config/CLI token; surrounding whitespace is ignored.
+    ///
+    /// The retired `auto` / `builtin` / `metamodule` tokens resolve to
+    /// [`MountMode::Nomount`]: an old configuration file, or an old manager that
+    /// still sends one of them, must not leave the device unmounted or on an
+    /// engine that can no longer be chosen.
     #[must_use]
     pub fn parse(value: &str) -> Option<Self> {
         match value.trim() {
-            "auto" => Some(Self::Auto),
-            "builtin" => Some(Self::Builtin),
-            "metamodule" => Some(Self::Metamodule),
-            "nomount" => Some(Self::Nomount),
+            "nomount" | "auto" | "builtin" | "metamodule" => Some(Self::Nomount),
             "off" => Some(Self::Off),
             _ => None,
         }
@@ -158,14 +167,12 @@ struct RuntimeRecord {
 
 /// Read the configured mount mode from [`defs::FOLK_MOUNT_CONFIG`].
 ///
-/// A missing file selects [`MountMode::Auto`] for a fresh install and an upgrade
-/// alike: the built-in engine injects the modules unless an enabled metamodule
-/// asks for the mount stage, which is what every device did before NoMount
-/// existed. NoMount is the one provider that has to load an embedded kernel
-/// module, and a load that wedges the kernel cannot be undone from userspace, so
-/// it stays a deliberate choice. An unrecognised value falls back to
-/// [`MountMode::Auto`] with a warning. Other I/O errors are returned so an
-/// unreadable configuration never silently selects a provider.
+/// A missing file selects [`MountMode::Nomount`] and records it, so the default
+/// applies once. A file holding a retired mode (`auto`/`builtin`/`metamodule`)
+/// is migrated in place: the returned mode is what the next boot uses, and the
+/// file is rewritten so the manager reads the same value. An unrecognised value
+/// falls back to [`MountMode::Nomount`] with a warning. Other I/O errors are
+/// returned so an unreadable configuration never silently selects a provider.
 ///
 /// # Errors
 /// Returns an error when the configuration file exists but cannot be read.
@@ -176,23 +183,44 @@ pub fn read_mount_mode() -> Result<MountMode> {
 /// [`read_mount_mode`], against a path the caller owns.
 fn read_mount_mode_at(path: &Path) -> Result<MountMode> {
     match fs::read_to_string(path) {
-        Ok(content) => Ok(MountMode::parse(&content).unwrap_or_else(|| {
-            warn!(
-                "invalid mount mode {:?} in {}, falling back to auto",
-                content.trim(),
-                path.display()
-            );
-            MountMode::Auto
-        })),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            let mode = MountMode::Auto;
-            // Record the decision so the default only applies once.
-            if let Err(e) = write_mount_mode_at(path, mode) {
-                warn!("folk mount: could not persist the default mode: {e:#}");
+        Ok(content) => {
+            let stored = content.trim();
+            let Some(mode) = MountMode::parse(stored) else {
+                warn!(
+                    "invalid mount mode {stored:?} in {}, falling back to {}",
+                    path.display(),
+                    MountMode::Nomount.as_str()
+                );
+                persist_migration(path, MountMode::Nomount);
+                return Ok(MountMode::Nomount);
+            };
+            // A retired token parses to a different spelling: rewrite the file so
+            // the stored setting and the next boot agree.
+            if mode.as_str() != stored {
+                warn!(
+                    "mount mode {stored:?} in {} is no longer offered, migrating to {}",
+                    path.display(),
+                    mode.as_str()
+                );
+                persist_migration(path, mode);
             }
             Ok(mode)
         }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            let mode = MountMode::Nomount;
+            // Record the decision so the default only applies once.
+            persist_migration(path, mode);
+            Ok(mode)
+        }
         Err(e) => Err(e).with_context(|| format!("failed to read {}", path.display())),
+    }
+}
+
+/// Best effort rewrite after a default or a migration: an unwritable path must
+/// not fail the boot, because the mode in hand is already the right one.
+fn persist_migration(path: &Path, mode: MountMode) {
+    if let Err(e) = write_mount_mode_at(path, mode) {
+        warn!("folk mount: could not write {}: {e:#}", path.display());
     }
 }
 
@@ -255,30 +283,19 @@ fn metamodule_state() -> (Option<String>, bool) {
     (id, enabled)
 }
 
-const fn provider_for(mode: MountMode, metamodule_enabled: bool) -> Provider {
+const fn provider_for(mode: MountMode) -> Provider {
     match mode {
-        MountMode::Off => Provider::None,
-        MountMode::Metamodule => Provider::Metamodule,
         MountMode::Nomount => Provider::Nomount,
-        MountMode::Auto if metamodule_enabled => Provider::Metamodule,
-        MountMode::Builtin | MountMode::Auto => Provider::Builtin,
+        MountMode::Off => Provider::None,
     }
 }
 
 /// Resolve which provider the next boot should use.
 ///
-/// In `auto` mode an enabled metamodule wins; a disabled or removal-marked
-/// metamodule is ignored so Folk Mount can take over. An enabled metamodule
-/// without a `metamount.sh` is still selected (the script is a no-op) so the
-/// provider never silently switches away from the user's metamodule. `builtin`
-/// and `metamodule` force their provider.
-///
 /// # Errors
 /// Returns an error when the configuration file exists but cannot be read.
 pub fn resolve_provider() -> Result<Provider> {
-    let mode = read_mount_mode()?;
-    let (_, metamodule_enabled) = metamodule_state();
-    Ok(provider_for(mode, metamodule_enabled))
+    Ok(provider_for(read_mount_mode()?))
 }
 
 // ---------------------------------------------------------------------------
@@ -1049,7 +1066,7 @@ pub fn print_status(json: bool) -> Result<()> {
         Ok(mode) => (Some(mode), None),
         Err(e) => (None, Some(format!("{e:#}"))),
     };
-    let next_provider = configured_mode.map(|mode| provider_for(mode, metamodule_enabled));
+    let next_provider = configured_mode.map(provider_for);
 
     let boot_id = current_boot_id();
     let runtime = read_runtime();
@@ -1148,9 +1165,7 @@ pub fn print_status(json: bool) -> Result<()> {
 /// Returns an error for an unknown mode token or a failed atomic write.
 pub fn set_mode(mode: &str) -> Result<()> {
     let Some(parsed) = MountMode::parse(mode) else {
-        bail!(
-            "invalid mount mode {mode:?}; expected one of: auto, builtin, metamodule, nomount, off"
-        );
+        bail!("invalid mount mode {mode:?}; expected one of: nomount, off");
     };
     // Asking for NoMount by hand is also the retry that the guards are waiting
     // for, so a record of a step that stopped an earlier boot must not outlive

@@ -285,14 +285,8 @@
     <string name="settings_folk_mount">Folk Mount</string>
     <string name="settings_folk_mount_summary">選擇開機時掛載模組的方式。</string>
     <string name="settings_folk_mount_unavailable_summary">無法使用。需要 Root 權限，且 ksud 必須為最新版本。</string>
-    <string name="settings_folk_mount_mode_auto">自動</string>
-    <string name="settings_folk_mount_mode_builtin">Built-in (Magic Mount)</string>
-    <string name="settings_folk_mount_mode_metamodule">僅 metamodule</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">關閉掛載</string>
-    <string name="settings_folk_mount_mode_auto_summary">啟用 metamodule 時使用 metamodule，否則使用內建引擎。</string>
-    <string name="settings_folk_mount_mode_builtin_summary">一律使用內建 Folk Mount 引擎。</string>
-    <string name="settings_folk_mount_mode_metamodule_summary">一律交由 metamodule 負責掛載。</string>
     <string name="settings_folk_mount_mode_nomount_summary">透過 NoMount VFS 驅動程式注入模組；驅動程式無法使用時會退回內建引擎。</string>
     <string name="settings_folk_mount_mode_off_summary">不注入任何內容；在選擇後端之前，已安裝的模組都會維持未生效。</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
@@ -302,7 +296,6 @@
     <string name="settings_folk_mount_boot_provider">本次開機：%1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">本次開機尚未掛載</string>
     <string name="settings_folk_mount_reboot_hint">重新啟動後生效。</string>
-    <string name="settings_folk_mount_metamodule_compat_hint">偵測到已啟用的 metamodule；其指令碼可能與內建引擎不相容。</string>
     <string name="settings_folk_mount_nomount_unavailable_hint">NoMount 驅動程式沒有回應；本次開機已退回內建引擎。</string>
     <string name="settings_folk_mount_write_failed">變更 Folk Mount 模式失敗。</string>
     <string name="settings_nomount">NoMount</string>

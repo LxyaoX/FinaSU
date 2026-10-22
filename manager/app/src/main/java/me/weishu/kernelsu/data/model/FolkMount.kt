@@ -9,15 +9,26 @@ import org.json.JSONObject
  * ever written to the command line.
  */
 enum class FolkMountMode(val token: String) {
-    AUTO("auto"),
-    BUILTIN("builtin"),
-    METAMODULE("metamodule"),
+    /** Inject through the NoMount VFS driver. */
     NOMOUNT("nomount"),
+
+    /** Inject nothing; modules stay inert until a mode is chosen. */
     OFF("off");
 
     companion object {
-        fun fromToken(token: String?): FolkMountMode? =
-            entries.firstOrNull { it.token == token }
+        /**
+         * Decode the stored mode.
+         *
+         * `auto`, `builtin` and `metamodule` are retired: every one of them ended in the
+         * magic-mount engine, and ksud migrates a stored one to the VFS driver when it reads the
+         * file. Reporting such a device as [NOMOUNT] is therefore what it will actually do on the
+         * next boot - the row below reports the provider that really ran separately.
+         */
+        fun fromToken(token: String?): FolkMountMode? = when (token?.trim()) {
+            "nomount", "auto", "builtin", "metamodule" -> NOMOUNT
+            "off" -> OFF
+            else -> null
+        }
     }
 }
 

@@ -572,9 +572,9 @@ enum Mount {
         json: bool,
     },
 
-    /// Set mount mode: auto | builtin | metamodule | nomount | off
+    /// Set mount mode: nomount | off
     SetMode {
-        /// one of: auto, builtin, metamodule, nomount, off
+        /// one of: nomount, off (retired auto/builtin/metamodule map to nomount)
         mode: String,
     },
 

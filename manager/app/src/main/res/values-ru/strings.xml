@@ -286,14 +286,8 @@
     <string name="settings_folk_mount">Folk Mount</string>
     <string name="settings_folk_mount_summary">Выберите способ монтирования модулей при загрузке.</string>
     <string name="settings_folk_mount_unavailable_summary">Недоступно. Требуется root-доступ, а ksud должен быть обновлён.</string>
-    <string name="settings_folk_mount_mode_auto">Автоматически</string>
-    <string name="settings_folk_mount_mode_builtin">Built-in (Magic Mount)</string>
-    <string name="settings_folk_mount_mode_metamodule">Только метамодуль</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">Монтирование отключено</string>
-    <string name="settings_folk_mount_mode_auto_summary">Использовать метамодуль, если он включён, иначе встроенный движок.</string>
-    <string name="settings_folk_mount_mode_builtin_summary">Всегда использовать встроенный движок Folk Mount.</string>
-    <string name="settings_folk_mount_mode_metamodule_summary">Всегда позволять метамодулю выполнять монтирование.</string>
     <string name="settings_folk_mount_mode_nomount_summary">Внедрять модули через драйвер NoMount VFS. Если драйвер недоступен, используется встроенный движок.</string>
     <string name="settings_folk_mount_mode_off_summary">Ничего не внедрять. Установленные модули остаются неактивными, пока не будет выбран бэкенд.</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
@@ -303,7 +297,6 @@
     <string name="settings_folk_mount_boot_provider">Эта загрузка: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">Ещё не смонтировано при этой загрузке</string>
     <string name="settings_folk_mount_reboot_hint">Вступит в силу после перезагрузки.</string>
-    <string name="settings_folk_mount_metamodule_compat_hint">Присутствует включённый метамодуль; его скрипты могут не работать со встроенным движком.</string>
     <string name="settings_folk_mount_nomount_unavailable_hint">Драйвер NoMount не отвечает; в этой загрузке используется встроенный движок.</string>
     <string name="settings_folk_mount_write_failed">Не удалось изменить режим Folk Mount.</string>
     <string name="settings_nomount">NoMount</string>

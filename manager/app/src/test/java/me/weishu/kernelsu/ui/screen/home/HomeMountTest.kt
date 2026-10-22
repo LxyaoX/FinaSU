@@ -50,7 +50,7 @@ class HomeMountTest {
         bootProvider: FolkMountProvider?,
         bootResult: String = "success",
     ) = FolkMountStatus(
-        configuredMode = FolkMountMode.AUTO,
+        configuredMode = FolkMountMode.NOMOUNT,
         nextProvider = nextProvider,
         metamoduleId = null,
         metamoduleEnabled = false,
