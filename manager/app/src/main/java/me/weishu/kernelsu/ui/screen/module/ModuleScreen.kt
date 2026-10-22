@@ -23,9 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.ui.component.SearchStatus
-import me.weishu.kernelsu.ui.component.security.LocalAppAuthenticator
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.screen.flash.FlashIt
@@ -45,7 +43,6 @@ fun ModulePager(
     val lifecycleOwner = LocalLifecycleOwner.current
     val viewModel = viewModel<ModuleViewModel>()
     val scope = rememberCoroutineScope()
-    val authenticator = LocalAppAuthenticator.current
     val rawUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val webUILauncher = rememberLauncherForActivityResult(
@@ -162,15 +159,10 @@ fun ModulePager(
             )
         },
         onToggleModule = { module ->
-            scope.launch {
-                if (module.enabled && !authenticator.require(SecurityTarget.MODULE_DISABLE)) return@launch
-                viewModel.toggleModule(module)
-            }
+            viewModel.toggleModule(module)
         },
         onUninstallModule = { module ->
-            scope.launch {
-                if (authenticator.require(SecurityTarget.MODULE_UNINSTALL)) viewModel.uninstallModule(module)
-            }
+            viewModel.uninstallModule(module)
         },
         onUndoUninstallModule = { module ->
             viewModel.undoUninstallModule(module)

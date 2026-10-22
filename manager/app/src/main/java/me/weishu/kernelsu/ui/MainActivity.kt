@@ -91,12 +91,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
-import me.weishu.kernelsu.ksuApp
-import me.weishu.kernelsu.ui.component.security.AuthenticationHost
-import me.weishu.kernelsu.ui.component.security.AppLockGate
-import me.weishu.kernelsu.ui.component.security.LocalAppUnlocked
-import me.weishu.kernelsu.ui.component.security.LocalAppAuthenticator
-import me.weishu.kernelsu.ui.component.security.rememberAuthenticationSession
 import me.weishu.kernelsu.ui.component.bottombar.BottomBar
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarDestination
 import me.weishu.kernelsu.ui.component.bottombar.FloatingBar
@@ -218,7 +212,7 @@ open class MainActivity : FragmentActivity() {
         CapabilityRepository.refresh()
 
         @Suppress("DEPRECATION")
-        val queuedIntents = savedInstanceState?.getParcelableArrayList<Intent>("authentication_pending_intents")
+        val queuedIntents = savedInstanceState?.getParcelableArrayList<Intent>("pending_intents")
         if (queuedIntents != null) {
             queuedIntents.forEach { intentChannel.trySend(it) }
         } else if (savedInstanceState == null) {
@@ -276,7 +270,6 @@ open class MainActivity : FragmentActivity() {
             }
 
             val capability by CapabilityRepository.state.collectAsStateWithLifecycle()
-            val authenticationSession = rememberAuthenticationSession(this@MainActivity, ksuApp.securityRepository)
             // Deterministic entry for verification: am start ... --es route sui_permissions
             val requestedRoute = intent.getStringExtra("route")
             val fakeRequest = intent.getStringExtra("fake_request")
@@ -299,11 +292,9 @@ open class MainActivity : FragmentActivity() {
                 LocalHomeLayoutStyle provides uiState.homeLayoutStyle,
                 LocalWallpaperPage provides selectedMainPage,
                 LocalCapabilityState provides capability,
-                LocalAppAuthenticator provides authenticationSession.authenticator,
             ) {
                 KernelSUTheme(appSettings = appSettings) {
-                    AppLockGate(authenticationSession, onCancel = { finish() }) {
-                    if (LocalAppUnlocked.current) IntentDispatcher(intentChannel = intentChannel)
+                    IntentDispatcher(intentChannel = intentChannel)
                     val flashRoute = navigator.current() as? Route.Flash
                     var flashBackEnabled by remember(flashRoute) { mutableStateOf(false) }
                     val navigateBack: () -> Unit = {
@@ -480,9 +471,7 @@ open class MainActivity : FragmentActivity() {
                             }
                         ) { navDisplay() }
                     }
-                    }
                     SideEffect { contentReady = true }
-                    AuthenticationHost(authenticationSession)
                 }
             }
         }
@@ -495,14 +484,14 @@ open class MainActivity : FragmentActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        // Snapshot only unconsumed intents. An unlocked dispatcher has already removed its intents.
+        // Snapshot only unconsumed intents; a dispatcher that already ran has removed its own.
         val queued = arrayListOf<Intent>()
         while (true) {
             val pending = intentChannel.tryReceive().getOrNull() ?: break
             queued.add(pending)
         }
         queued.forEach { intentChannel.trySend(it) }
-        outState.putParcelableArrayList("authentication_pending_intents", queued)
+        outState.putParcelableArrayList("pending_intents", queued)
         super.onSaveInstanceState(outState)
     }
 

@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.FontDownload
-import androidx.compose.material.icons.filled.Gesture
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -36,7 +35,6 @@ import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Repeat
@@ -79,7 +77,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalResources
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
@@ -846,46 +843,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             aliases = listOf("shell", "su", "adb", "terminal"),
         )
     )
-
-    // Authentication
-    add(
-        SettingsCategory.AUTHENTICATION.row(
-            id = "authentication.default_method",
-            titleRes = R.string.security_default_method,
-            summaryRes = R.string.security_default_method_summary,
-            icon = Icons.Filled.Fingerprint,
-            aliases = listOf("authentication", "biometric", "fingerprint", "method"),
-        )
-    )
-    add(
-        SettingsCategory.AUTHENTICATION.row(
-            id = "authentication.pin",
-            titleRes = R.string.security_pin_set,
-            summaryRes = R.string.security_pin_configured,
-            icon = Icons.Filled.Password,
-            aliases = listOf("pin", "password", "code", "change pin", "set pin"),
-        )
-    )
-    add(
-        SettingsCategory.AUTHENTICATION.row(
-            id = "authentication.pattern",
-            titleRes = R.string.security_pattern_set,
-            summaryRes = R.string.security_pattern_configured,
-            icon = Icons.Filled.Gesture,
-            aliases = listOf("pattern", "gesture", "change pattern", "set pattern"),
-        )
-    )
-    SecurityTarget.entries.forEach { target ->
-        add(
-            SettingsCategory.AUTHENTICATION.row(
-                id = "authentication.target.${target.key}",
-                titleRes = target.titleRes,
-                summaryRes = R.string.security_target_protected_summary,
-                icon = Icons.Filled.Lock,
-                aliases = listOf("authentication", "protect", target.key.replace('_', ' ')),
-            )
-        )
-    }
 
     // Multimedia
     add(

@@ -11,9 +11,7 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
-import me.weishu.kernelsu.ui.component.security.LocalAppAuthenticator
 import me.weishu.kernelsu.ui.util.reboot
 
 data class RebootListOption(
@@ -47,21 +45,16 @@ fun rememberRebootAction(): (String) -> Unit {
     val title = stringResource(R.string.reboot)
     val message = stringResource(R.string.jailbreak_reboot_warning)
     val scope = rememberCoroutineScope()
-    val authenticator = LocalAppAuthenticator.current
     val confirmDialog = rememberConfirmDialog(onConfirm = {
-        scope.launch {
-            if (authenticator.require(SecurityTarget.REBOOT)) reboot()
-        }
+        scope.launch { reboot() }
     })
 
-    return remember(title, message, confirmDialog, authenticator) {
+    return remember(title, message, confirmDialog) {
         { reason ->
             if (Natives.isLateLoadMode && reason.isEmpty()) {
                 confirmDialog.showConfirm(title = title, content = message)
             } else {
-                scope.launch {
-                    if (authenticator.require(SecurityTarget.REBOOT)) reboot(reason)
-                }
+                scope.launch { reboot(reason) }
             }
         }
     }

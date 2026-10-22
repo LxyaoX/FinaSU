@@ -203,7 +203,7 @@ fun IntentDispatcher(intentChannel: ReceiveChannel<Intent>) {
     )
 
     // Theme packages only touch app-local state, so safe mode (which disables modules) does not
-    // gate them; authentication and the confirm dialog come from the shared request helper.
+    // gate them; the confirm dialog comes from the shared request helper.
     val requestThemeImport = rememberThemeImportRequest { result ->
         val message = resources.getString(
             if (result.isSuccess) R.string.wallpaper_import_success else R.string.wallpaper_import_failed
