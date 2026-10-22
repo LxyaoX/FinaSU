@@ -143,8 +143,10 @@ object TeesimInstaller {
             return
         }
         if (!status().installed) install()
-        writeScript(BOOT_SCRIPT, bootScriptContent)
+        // Policy first: if it cannot be applied, leave the switch off instead of reporting an
+        // enabled runtime whose hook would be denied by SELinux.
         applyPolicy()
+        writeScript(BOOT_SCRIPT, bootScriptContent)
         startDaemon()
     }
 
