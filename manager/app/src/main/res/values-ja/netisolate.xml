@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">ネットワーク分離</string>
+    <string name="settings_netisolate_summary">選択したアプリの新しいインターネット接続をブロックします</string>
+    <string name="netisolate_title">ネットワーク分離</string>
+    <string name="netisolate_loading">ネットワーク分離の状態を読み込み中…</string>
+    <string name="netisolate_enable">ネットワーク分離を有効にする</string>
+    <string name="netisolate_enter_targets">少なくとも 1 つのアプリを選択してください</string>
+    <string name="netisolate_apps_failed">インストール済みアプリを読み込めませんでした</string>
+    <string name="netisolate_status_failed">ネットワーク分離の状態を読み取れませんでした</string>
+    <string name="netisolate_operation_failed">ネットワーク分離の操作に失敗しました</string>
+    <string name="netisolate_enabled_summary">選択したアプリは新しいインターネット接続やループバック接続を開けません</string>
+    <string name="netisolate_disabled_summary">オフです。有効にすると選択したアプリの新しい送信接続をブロックします</string>
+    <string name="netisolate_unsupported">このカーネルはネットワーク分離に対応していません</string>
+    <string name="netisolate_unsupported_summary">カーネルを更新するか、ネットワーク分離に対応したビルドを使用してください</string>
+    <string name="netisolate_target_apps">分離するアプリ</string>
+    <string name="netisolate_no_targets">アプリが選択されていません</string>
+    <string name="netisolate_target_count">%1$d / %2$d 件選択中</string>
+    <string name="netisolate_existing_connections">確立済みの接続は切断されません</string>
+    <string name="netisolate_loopback">ループバック IPv4 および IPv6 接続もブロックされます</string>
+    <string name="netisolate_manager_exempt">マネージャーはワークプロファイル内も含めて常に除外されます</string>
+    <string name="netisolate_compat_supported">32 ビットと 64 ビットの両方のアプリに対応します</string>
+    <string name="netisolate_compat_unsupported">このカーネルは 32 ビットアプリに対応していません</string>
+    <string name="netisolate_clear">設定を消去</string>
+    <string name="netisolate_clear_summary">分離をオフにし、アプリ一覧を消去して保存済み設定を削除します</string>
+</resources>

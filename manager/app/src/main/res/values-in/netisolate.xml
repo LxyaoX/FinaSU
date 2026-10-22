@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">Isolasi jaringan</string>
+    <string name="settings_netisolate_summary">Blokir koneksi internet baru untuk aplikasi terpilih</string>
+    <string name="netisolate_title">Isolasi jaringan</string>
+    <string name="netisolate_loading">Memuat status isolasi jaringan…</string>
+    <string name="netisolate_enable">Aktifkan isolasi jaringan</string>
+    <string name="netisolate_enter_targets">Pilih setidaknya satu aplikasi terlebih dahulu</string>
+    <string name="netisolate_apps_failed">Gagal memuat aplikasi yang terpasang</string>
+    <string name="netisolate_status_failed">Gagal membaca status isolasi jaringan</string>
+    <string name="netisolate_operation_failed">Tindakan isolasi jaringan gagal</string>
+    <string name="netisolate_enabled_summary">Aplikasi terpilih tidak dapat membuka koneksi internet atau loopback baru</string>
+    <string name="netisolate_disabled_summary">Nonaktif. Mengaktifkannya akan memblokir koneksi keluar baru dari aplikasi terpilih</string>
+    <string name="netisolate_unsupported">Kernel ini tidak mendukung isolasi jaringan</string>
+    <string name="netisolate_unsupported_summary">Perbarui kernel atau gunakan build dengan dukungan isolasi jaringan</string>
+    <string name="netisolate_target_apps">Aplikasi terisolasi</string>
+    <string name="netisolate_no_targets">Belum ada aplikasi yang dipilih</string>
+    <string name="netisolate_target_count">%1$d dari %2$d dipilih</string>
+    <string name="netisolate_existing_connections">Koneksi yang sudah ada tidak akan diputus</string>
+    <string name="netisolate_loopback">Koneksi loopback IPv4 dan IPv6 juga diblokir</string>
+    <string name="netisolate_manager_exempt">Manajer selalu dikecualikan, termasuk di profil kerja</string>
+    <string name="netisolate_compat_supported">Mencakup aplikasi 32-bit dan 64-bit</string>
+    <string name="netisolate_compat_unsupported">Kernel ini tidak mencakup aplikasi 32-bit</string>
+    <string name="netisolate_clear">Hapus setelan</string>
+    <string name="netisolate_clear_summary">Matikan isolasi, kosongkan daftar aplikasi, dan hapus setelan tersimpan</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">断网天幕</string>
+    <string name="settings_netisolate_summary">为所选凡器降下天幕，隔绝新启之外界通路</string>
+    <string name="netisolate_title">网络隔离</string>
+    <string name="netisolate_loading">正窥断网天幕之况…</string>
+    <string name="netisolate_enable">展开断网天幕</string>
+    <string name="netisolate_enter_targets">请先择定至少一件凡器</string>
+    <string name="netisolate_apps_failed">已装凡器名录未能显现</string>
+    <string name="netisolate_status_failed">断网天幕之况未能读取</string>
+    <string name="netisolate_operation_failed">断网天幕之术未成</string>
+    <string name="netisolate_enabled_summary">所选凡器不得再开外界新路，亦不可窥探本机回环</string>
+    <string name="netisolate_disabled_summary">天幕尚未展开。开启后将封住所选凡器的新出站通路</string>
+    <string name="netisolate_unsupported">此道核尚无断网天幕之能</string>
+    <string name="netisolate_unsupported_summary">请更新道核，或寻来蕴含网络隔离之力的版本</string>
+    <string name="netisolate_target_apps">受天幕封锁的凡器</string>
+    <string name="netisolate_no_targets">尚未择定凡器</string>
+    <string name="netisolate_target_count">已择 %1$d / %2$d</string>
+    <string name="netisolate_existing_connections">已筑成的通路不会骤然崩断</string>
+    <string name="netisolate_loopback">IPv4 与 IPv6 的回环通路亦会被天幕封住</string>
+    <string name="netisolate_manager_exempt">管理器永得天幕豁免，工作资料中的管理器亦然</string>
+    <string name="netisolate_compat_supported">32 位与 64 位凡器皆在天幕之下</string>
+    <string name="netisolate_compat_unsupported">此道核无法笼罩 32 位凡器</string>
+    <string name="netisolate_clear">撤去天幕</string>
+    <string name="netisolate_clear_summary">收起天幕、清空凡器名录，并抹去所存的禁制</string>
+</resources>

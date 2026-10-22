@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">Сетевая изоляция</string>
+    <string name="settings_netisolate_summary">Блокировать новые интернет-подключения выбранных приложений</string>
+    <string name="netisolate_title">Сетевая изоляция</string>
+    <string name="netisolate_loading">Загрузка состояния сетевой изоляции…</string>
+    <string name="netisolate_enable">Включить сетевую изоляцию</string>
+    <string name="netisolate_enter_targets">Сначала выберите хотя бы одно приложение</string>
+    <string name="netisolate_apps_failed">Не удалось загрузить установленные приложения</string>
+    <string name="netisolate_status_failed">Не удалось прочитать состояние сетевой изоляции</string>
+    <string name="netisolate_operation_failed">Не удалось выполнить действие сетевой изоляции</string>
+    <string name="netisolate_enabled_summary">Выбранные приложения не могут открывать новые интернет- и loopback-подключения</string>
+    <string name="netisolate_disabled_summary">Выключено. При включении блокируются новые исходящие подключения выбранных приложений</string>
+    <string name="netisolate_unsupported">Это ядро не поддерживает сетевую изоляцию</string>
+    <string name="netisolate_unsupported_summary">Обновите ядро или используйте сборку с поддержкой сетевой изоляции</string>
+    <string name="netisolate_target_apps">Изолированные приложения</string>
+    <string name="netisolate_no_targets">Приложения не выбраны</string>
+    <string name="netisolate_target_count">Выбрано %1$d из %2$d</string>
+    <string name="netisolate_existing_connections">Существующие подключения не разрываются</string>
+    <string name="netisolate_loopback">Loopback-подключения IPv4 и IPv6 также блокируются</string>
+    <string name="netisolate_manager_exempt">Менеджер всегда исключён, включая рабочие профили</string>
+    <string name="netisolate_compat_supported">Поддерживаются 32- и 64-битные приложения</string>
+    <string name="netisolate_compat_unsupported">Это ядро не покрывает 32-битные приложения</string>
+    <string name="netisolate_clear">Очистить настройки</string>
+    <string name="netisolate_clear_summary">Выключить изоляцию, очистить список приложений и удалить сохранённые настройки</string>
+</resources>

@@ -64,6 +64,8 @@ mod mount_capture;
 mod mount_guard;
 mod mount_plan;
 mod mount_ui;
+#[cfg(target_os = "android")]
+mod netisolate;
 #[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod nomount;

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">网络屏障</string>
+    <string name="settings_netisolate_summary">让选中的应用无法生成新的外部网络连接</string>
+    <string name="netisolate_title">网络隔离</string>
+    <string name="netisolate_loading">正在读取网络屏障状态…</string>
+    <string name="netisolate_enable">激活网络屏障</string>
+    <string name="netisolate_enter_targets">请先选择至少一个应用</string>
+    <string name="netisolate_apps_failed">已安装应用加载失败</string>
+    <string name="netisolate_status_failed">网络屏障状态读取失败</string>
+    <string name="netisolate_operation_failed">网络屏障操作失败</string>
+    <string name="netisolate_enabled_summary">选中的应用无法生成新的互联网或回环连接</string>
+    <string name="netisolate_disabled_summary">屏障已关闭。激活后将拦截选中的应用生成的新出站连接</string>
+    <string name="netisolate_unsupported">当前核心没有网络隔离能力</string>
+    <string name="netisolate_unsupported_summary">更新核心，或使用带有网络隔离支持的构建</string>
+    <string name="netisolate_target_apps">被隔离的应用</string>
+    <string name="netisolate_no_targets">还没有选择应用</string>
+    <string name="netisolate_target_count">已选择 %1$d / %2$d</string>
+    <string name="netisolate_existing_connections">已经生成的连接不会断开</string>
+    <string name="netisolate_loopback">IPv4 与 IPv6 回环连接也会被拦截</string>
+    <string name="netisolate_manager_exempt">管理器始终豁免，包括工作资料中的管理器</string>
+    <string name="netisolate_compat_supported">32 位与 64 位应用均可覆盖</string>
+    <string name="netisolate_compat_unsupported">当前核心无法覆盖 32 位应用</string>
+    <string name="netisolate_clear">清除设置</string>
+    <string name="netisolate_clear_summary">关闭隔离、清空应用列表并删除已保存的设置</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">Izolacja sieci</string>
+    <string name="settings_netisolate_summary">Blokuj nowe połączenia internetowe wybranym aplikacjom</string>
+    <string name="netisolate_title">Izolacja sieci</string>
+    <string name="netisolate_loading">Wczytywanie stanu izolacji sieci…</string>
+    <string name="netisolate_enable">Włącz izolację sieci</string>
+    <string name="netisolate_enter_targets">Najpierw wybierz co najmniej jedną aplikację</string>
+    <string name="netisolate_apps_failed">Nie udało się wczytać zainstalowanych aplikacji</string>
+    <string name="netisolate_status_failed">Nie udało się odczytać stanu izolacji sieci</string>
+    <string name="netisolate_operation_failed">Operacja izolacji sieci nie powiodła się</string>
+    <string name="netisolate_enabled_summary">Wybrane aplikacje nie mogą otwierać nowych połączeń internetowych ani lokalnych</string>
+    <string name="netisolate_disabled_summary">Wyłączone. Włączenie zablokuje nowe połączenia wychodzące wybranych aplikacji</string>
+    <string name="netisolate_unsupported">To jądro nie obsługuje izolacji sieci</string>
+    <string name="netisolate_unsupported_summary">Zaktualizuj jądro lub użyj kompilacji z obsługą izolacji sieci</string>
+    <string name="netisolate_target_apps">Izolowane aplikacje</string>
+    <string name="netisolate_no_targets">Nie wybrano aplikacji</string>
+    <string name="netisolate_target_count">Wybrano %1$d z %2$d</string>
+    <string name="netisolate_existing_connections">Istniejące połączenia nie zostaną rozłączone</string>
+    <string name="netisolate_loopback">Połączenia lokalne IPv4 i IPv6 również są blokowane</string>
+    <string name="netisolate_manager_exempt">Menedżer jest zawsze wyjątkiem, także w profilach służbowych</string>
+    <string name="netisolate_compat_supported">Obsługiwane są aplikacje 32- i 64-bitowe</string>
+    <string name="netisolate_compat_unsupported">To jądro nie obsługuje aplikacji 32-bitowych</string>
+    <string name="netisolate_clear">Wyczyść ustawienia</string>
+    <string name="netisolate_clear_summary">Wyłącz izolację, wyczyść listę aplikacji i usuń zapisane ustawienia</string>
+</resources>

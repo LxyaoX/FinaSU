@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">網界玄關</string>
+    <string name="settings_netisolate_summary">於蒙選凡器之外立界，絕其新啟網途</string>
+    <string name="netisolate_title">網路隔絕</string>
+    <string name="netisolate_loading">方探網路玄關之況…</string>
+    <string name="netisolate_enable">開網界玄關</string>
+    <string name="netisolate_enter_targets">請先蒙選至少一件凡器</string>
+    <string name="netisolate_apps_failed">已裝凡器之錄未能顯現</string>
+    <string name="netisolate_status_failed">網路玄關之況未能探知</string>
+    <string name="netisolate_operation_failed">網路禁制之術未成</string>
+    <string name="netisolate_enabled_summary">蒙選凡器不得新闢外網，亦不得通本機回環</string>
+    <string name="netisolate_disabled_summary">玄關未啟。開之則斷蒙選凡器之新出網途</string>
+    <string name="netisolate_unsupported">此核不足以立網界玄關</string>
+    <string name="netisolate_unsupported_summary">請易新核，或用含網路隔絕之核</string>
+    <string name="netisolate_target_apps">受界凡器</string>
+    <string name="netisolate_no_targets">尚未擇器</string>
+    <string name="netisolate_target_count">已擇 %1$d / %2$d</string>
+    <string name="netisolate_existing_connections">已成之網途不絕</string>
+    <string name="netisolate_loopback">IPv4 與 IPv6 之回環網途亦阻</string>
+    <string name="netisolate_manager_exempt">管理器永蒙豁免，工作資料亦然</string>
+    <string name="netisolate_compat_supported">32 位與 64 位凡器皆受此界</string>
+    <string name="netisolate_compat_unsupported">此核不能覆 32 位凡器</string>
+    <string name="netisolate_clear">散此玄關</string>
+    <string name="netisolate_clear_summary">收網界、清器錄，並毀所存之禁制</string>
+</resources>

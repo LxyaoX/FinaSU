@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">Cô lập mạng</string>
+    <string name="settings_netisolate_summary">Chặn kết nối internet mới của các ứng dụng đã chọn</string>
+    <string name="netisolate_title">Cô lập mạng</string>
+    <string name="netisolate_loading">Đang tải trạng thái cô lập mạng…</string>
+    <string name="netisolate_enable">Bật cô lập mạng</string>
+    <string name="netisolate_enter_targets">Trước tiên hãy chọn ít nhất một ứng dụng</string>
+    <string name="netisolate_apps_failed">Không thể tải các ứng dụng đã cài</string>
+    <string name="netisolate_status_failed">Không thể đọc trạng thái cô lập mạng</string>
+    <string name="netisolate_operation_failed">Thao tác cô lập mạng thất bại</string>
+    <string name="netisolate_enabled_summary">Các ứng dụng đã chọn không thể mở kết nối internet hoặc loopback mới</string>
+    <string name="netisolate_disabled_summary">Đang tắt. Khi bật, các kết nối đi ra mới từ ứng dụng đã chọn sẽ bị chặn</string>
+    <string name="netisolate_unsupported">Kernel này không hỗ trợ cô lập mạng</string>
+    <string name="netisolate_unsupported_summary">Cập nhật kernel hoặc dùng bản dựng có hỗ trợ cô lập mạng</string>
+    <string name="netisolate_target_apps">Ứng dụng bị cô lập</string>
+    <string name="netisolate_no_targets">Chưa chọn ứng dụng</string>
+    <string name="netisolate_target_count">Đã chọn %1$d trên %2$d</string>
+    <string name="netisolate_existing_connections">Các kết nối hiện có không bị ngắt</string>
+    <string name="netisolate_loopback">Kết nối loopback IPv4 và IPv6 cũng bị chặn</string>
+    <string name="netisolate_manager_exempt">Trình quản lý luôn được miễn trừ, kể cả trong hồ sơ công việc</string>
+    <string name="netisolate_compat_supported">Bao phủ ứng dụng 32 bit và 64 bit</string>
+    <string name="netisolate_compat_unsupported">Kernel này không bao phủ ứng dụng 32 bit</string>
+    <string name="netisolate_clear">Xóa cài đặt</string>
+    <string name="netisolate_clear_summary">Tắt cô lập, xóa danh sách ứng dụng và xóa cài đặt đã lưu</string>
+</resources>

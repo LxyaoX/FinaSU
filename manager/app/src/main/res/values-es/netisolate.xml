@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">Aislamiento de red</string>
+    <string name="settings_netisolate_summary">Bloquea nuevas conexiones a internet en las apps seleccionadas</string>
+    <string name="netisolate_title">Aislamiento de red</string>
+    <string name="netisolate_loading">Cargando el estado del aislamiento de red…</string>
+    <string name="netisolate_enable">Activar aislamiento de red</string>
+    <string name="netisolate_enter_targets">Selecciona primero al menos una app</string>
+    <string name="netisolate_apps_failed">No se pudieron cargar las apps instaladas</string>
+    <string name="netisolate_status_failed">No se pudo leer el estado del aislamiento de red</string>
+    <string name="netisolate_operation_failed">La acción de aislamiento de red falló</string>
+    <string name="netisolate_enabled_summary">Las apps seleccionadas no pueden abrir nuevas conexiones a internet ni de loopback</string>
+    <string name="netisolate_disabled_summary">Desactivado. Al activarlo se bloquean las nuevas conexiones salientes de las apps seleccionadas</string>
+    <string name="netisolate_unsupported">Este kernel no admite el aislamiento de red</string>
+    <string name="netisolate_unsupported_summary">Actualiza el kernel o usa una compilación con compatibilidad de aislamiento de red</string>
+    <string name="netisolate_target_apps">Apps aisladas</string>
+    <string name="netisolate_no_targets">No hay apps seleccionadas</string>
+    <string name="netisolate_target_count">%1$d de %2$d seleccionadas</string>
+    <string name="netisolate_existing_connections">Las conexiones existentes no se desconectan</string>
+    <string name="netisolate_loopback">También se bloquean las conexiones de loopback IPv4 e IPv6</string>
+    <string name="netisolate_manager_exempt">El gestor siempre queda exento, incluso en perfiles de trabajo</string>
+    <string name="netisolate_compat_supported">Se cubren apps de 32 y 64 bits</string>
+    <string name="netisolate_compat_unsupported">Este kernel no cubre apps de 32 bits</string>
+    <string name="netisolate_clear">Borrar ajustes</string>
+    <string name="netisolate_clear_summary">Desactiva el aislamiento, borra la lista de apps y elimina los ajustes guardados</string>
+</resources>

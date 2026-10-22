@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">断网关店</string>
+    <string name="settings_netisolate_summary">给点单应用拉闸，不许它们新开外网通道</string>
+    <string name="netisolate_title">网络隔离</string>
+    <string name="netisolate_loading">正在查网络闸门…</string>
+    <string name="netisolate_enable">拉下网络闸门</string>
+    <string name="netisolate_enter_targets">先点至少一道应用</string>
+    <string name="netisolate_apps_failed">已装应用名单没端出来</string>
+    <string name="netisolate_status_failed">网络闸门状态没读出来</string>
+    <string name="netisolate_operation_failed">网络闸门操作翻车了</string>
+    <string name="netisolate_enabled_summary">点单应用连不了新外网，也连不了本机回环</string>
+    <string name="netisolate_disabled_summary">闸门还开着。拉闸后会拦住点单应用的新出站连接</string>
+    <string name="netisolate_unsupported">这口内核没有网络闸门</string>
+    <string name="netisolate_unsupported_summary">换口新内核，或者用带网络隔离的版本</string>
+    <string name="netisolate_target_apps">被拉闸的应用</string>
+    <string name="netisolate_no_targets">还没有点单</string>
+    <string name="netisolate_target_count">已点 %1$d / %2$d</string>
+    <string name="netisolate_existing_connections">已经开着的连接不会突然断货</string>
+    <string name="netisolate_loopback">IPv4 和 IPv6 的回环通道也会关掉</string>
+    <string name="netisolate_manager_exempt">管理器始终免单，工作资料里的也算</string>
+    <string name="netisolate_compat_supported">32 位和 64 位应用都照看</string>
+    <string name="netisolate_compat_unsupported">这口内核照看不了 32 位应用</string>
+    <string name="netisolate_clear">清空店规</string>
+    <string name="netisolate_clear_summary">关掉隔离、清空应用名单，再把保存的店规删掉</string>
+</resources>

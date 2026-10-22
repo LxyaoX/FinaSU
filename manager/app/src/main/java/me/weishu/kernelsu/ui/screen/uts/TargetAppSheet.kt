@@ -40,15 +40,16 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 
-private const val MAX_TARGETS = 128
-
 @Composable
-fun UtsTargetAppSheet(
+fun TargetAppSheet(
     apps: List<UtsTargetApp>,
     selectedTargets: List<UtsTarget>,
     loading: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (List<UtsTarget>) -> Unit,
+    maxTargets: Int,
+    title: String,
+    countText: @Composable (Int, Int) -> String,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var showSystemApps by rememberSaveable { mutableStateOf(false) }
@@ -100,11 +101,11 @@ fun UtsTargetAppSheet(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.uts_view_targets_title),
+                        text = title,
                         style = MaterialTheme.typography.titleLarge,
                     )
                     Text(
-                        text = stringResource(R.string.uts_view_targets_count, selected.size, MAX_TARGETS),
+                        text = countText(selected.size, maxTargets),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -142,14 +143,14 @@ fun UtsTargetAppSheet(
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(visible, key = { it.uid }) { app ->
                         val checked = selected.containsKey(app.uid)
-                        val canSelect = checked || selected.size < MAX_TARGETS
+                        val canSelect = checked || selected.size < maxTargets
                         SegmentedListItem(
                             enabled = canSelect,
                             onClick = {
                                 selected = selected.toMutableMap().apply {
                                     if (checked) {
                                         remove(app.uid)
-                                    } else if (size < MAX_TARGETS) {
+                                    } else if (size < maxTargets) {
                                         put(
                                             app.uid,
                                             UtsTarget(

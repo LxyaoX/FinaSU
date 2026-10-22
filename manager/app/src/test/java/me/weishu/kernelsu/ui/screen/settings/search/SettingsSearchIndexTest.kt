@@ -58,4 +58,12 @@ class SettingsSearchIndexTest {
         }
         assertEquals(SettingsCategory.FUNCTION, entry.category)
     }
+
+    @Test
+    fun `network isolation is searchable from functions`() {
+        val entry = settingsSearchIndex.single {
+            it.target == SettingsSearchTarget.Page(Route.NetIsolate)
+        }
+        assertEquals(SettingsCategory.FUNCTION, entry.category)
+    }
 }

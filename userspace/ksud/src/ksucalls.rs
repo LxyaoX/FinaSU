@@ -151,7 +151,7 @@ fn ksuctl<T>(request: u32, arg: *mut T) -> Result<i32> {
     unsafe {
         let ret = libc::ioctl(fd as libc::c_int, request as i32, arg);
         if ret < 0 {
-            bail!("ksuctl failed: {}", io::Error::last_os_error())
+            return Err(anyhow::Error::new(io::Error::last_os_error()).context("ksuctl failed"));
         }
         Ok(ret)
     }
@@ -318,6 +318,18 @@ pub fn get_uts_view_config() -> Result<ksu_uapi::ksu_uts_view_config> {
 pub fn set_uts_view_config(config: &ksu_uapi::ksu_uts_view_config) -> Result<()> {
     let mut cmd = *config;
     ksuctl(ksu_uapi::KSU_IOCTL_SET_UTS_VIEW_CONFIG, &raw mut cmd)?;
+    Ok(())
+}
+
+pub fn get_netisolate_config() -> Result<ksu_uapi::ksu_netisolate_config> {
+    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_config>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_CONFIG, &raw mut cmd)?;
+    Ok(cmd)
+}
+
+pub fn set_netisolate_config(config: &ksu_uapi::ksu_netisolate_config) -> Result<()> {
+    let mut cmd = *config;
+    ksuctl(ksu_uapi::KSU_IOCTL_SET_NETISOLATE_CONFIG, &raw mut cmd)?;
     Ok(())
 }
 

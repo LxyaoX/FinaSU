@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">网络围墙喵</string>
+    <string name="settings_netisolate_summary">把选中的应用关进网络小房间，不许它们偷偷上网喵</string>
+    <string name="netisolate_title">网络隔离喵</string>
+    <string name="netisolate_loading">正在看网络隔离状态喵…</string>
+    <string name="netisolate_enable">打开网络隔离喵</string>
+    <string name="netisolate_enter_targets">先选至少一个应用喵</string>
+    <string name="netisolate_apps_failed">应用列表没读出来喵…</string>
+    <string name="netisolate_status_failed">网络隔离状态没读出来喵…</string>
+    <string name="netisolate_operation_failed">网络隔离操作失败了喵…</string>
+    <string name="netisolate_enabled_summary">选中的应用连不了新网络，也连不了本机回环喵</string>
+    <string name="netisolate_disabled_summary">现在是关闭状态喵。打开后会拦住选中应用的新出站连接</string>
+    <string name="netisolate_unsupported">这个内核不会网络隔离喵</string>
+    <string name="netisolate_unsupported_summary">更新内核，或者换成支持网络隔离的版本喵</string>
+    <string name="netisolate_target_apps">要被隔离的应用喵</string>
+    <string name="netisolate_no_targets">还没有选中应用喵</string>
+    <string name="netisolate_target_count">已经选了 %1$d / %2$d 个喵</string>
+    <string name="netisolate_existing_connections">已经连上的连接不会突然断掉喵</string>
+    <string name="netisolate_loopback">IPv4 和 IPv6 的回环连接也会被拦住喵</string>
+    <string name="netisolate_manager_exempt">管理器永远可以上网，工作资料里的也一样喵</string>
+    <string name="netisolate_compat_supported">32 位和 64 位应用都管得住喵</string>
+    <string name="netisolate_compat_unsupported">这个内核管不住 32 位应用喵</string>
+    <string name="netisolate_clear">清除设置喵</string>
+    <string name="netisolate_clear_summary">关闭隔离、清空应用，再把保存的设置删掉喵</string>
+</resources>

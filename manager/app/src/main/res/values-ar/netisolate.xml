@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">عزل الشبكة</string>
+    <string name="settings_netisolate_summary">حظر اتصالات الإنترنت الجديدة للتطبيقات المحددة</string>
+    <string name="netisolate_title">عزل الشبكة</string>
+    <string name="netisolate_loading">جارٍ تحميل حالة عزل الشبكة…</string>
+    <string name="netisolate_enable">تمكين عزل الشبكة</string>
+    <string name="netisolate_enter_targets">حدّد تطبيقًا واحدًا على الأقل أولًا</string>
+    <string name="netisolate_apps_failed">تعذّر تحميل التطبيقات المثبّتة</string>
+    <string name="netisolate_status_failed">تعذّرت قراءة حالة عزل الشبكة</string>
+    <string name="netisolate_operation_failed">فشلت عملية عزل الشبكة</string>
+    <string name="netisolate_enabled_summary">لا يمكن للتطبيقات المحددة فتح اتصالات إنترنت أو اتصالات استرجاع جديدة</string>
+    <string name="netisolate_disabled_summary">متوقف. عند التمكين تُحظر اتصالات الخروج الجديدة من التطبيقات المحددة</string>
+    <string name="netisolate_unsupported">هذه النواة لا تدعم عزل الشبكة</string>
+    <string name="netisolate_unsupported_summary">حدّث النواة أو استخدم إصدارًا يدعم عزل الشبكة</string>
+    <string name="netisolate_target_apps">التطبيقات المعزولة</string>
+    <string name="netisolate_no_targets">لم يتم تحديد أي تطبيق</string>
+    <string name="netisolate_target_count">تم تحديد %1$d من %2$d</string>
+    <string name="netisolate_existing_connections">لا يتم قطع الاتصالات القائمة</string>
+    <string name="netisolate_loopback">تُحظر أيضًا اتصالات الاسترجاع IPv4 وIPv6</string>
+    <string name="netisolate_manager_exempt">مدير التطبيق معفى دائمًا، بما في ذلك في ملفات العمل</string>
+    <string name="netisolate_compat_supported">تغطي التطبيقات 32 بت و64 بت</string>
+    <string name="netisolate_compat_unsupported">هذه النواة لا تغطي تطبيقات 32 بت</string>
+    <string name="netisolate_clear">مسح الإعدادات</string>
+    <string name="netisolate_clear_summary">إيقاف العزل ومسح قائمة التطبيقات وحذف الإعدادات المحفوظة</string>
+</resources>

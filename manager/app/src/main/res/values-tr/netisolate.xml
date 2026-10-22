@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_netisolate">Ağ yalıtımı</string>
+    <string name="settings_netisolate_summary">Seçili uygulamaların yeni internet bağlantılarını engelle</string>
+    <string name="netisolate_title">Ağ yalıtımı</string>
+    <string name="netisolate_loading">Ağ yalıtımı durumu yükleniyor…</string>
+    <string name="netisolate_enable">Ağ yalıtımını etkinleştir</string>
+    <string name="netisolate_enter_targets">Önce en az bir uygulama seçin</string>
+    <string name="netisolate_apps_failed">Yüklü uygulamalar yüklenemedi</string>
+    <string name="netisolate_status_failed">Ağ yalıtımı durumu okunamadı</string>
+    <string name="netisolate_operation_failed">Ağ yalıtımı işlemi başarısız oldu</string>
+    <string name="netisolate_enabled_summary">Seçili uygulamalar yeni internet veya yerel geri döngü bağlantıları açamaz</string>
+    <string name="netisolate_disabled_summary">Kapalı. Etkinleştirildiğinde seçili uygulamaların yeni giden bağlantıları engellenir</string>
+    <string name="netisolate_unsupported">Bu çekirdek ağ yalıtımını desteklemiyor</string>
+    <string name="netisolate_unsupported_summary">Çekirdeği güncelleyin veya ağ yalıtımı destekli bir derleme kullanın</string>
+    <string name="netisolate_target_apps">Yalıtılmış uygulamalar</string>
+    <string name="netisolate_no_targets">Uygulama seçilmedi</string>
+    <string name="netisolate_target_count">%2$d uygulamadan %1$d tanesi seçildi</string>
+    <string name="netisolate_existing_connections">Mevcut bağlantılar kesilmez</string>
+    <string name="netisolate_loopback">IPv4 ve IPv6 geri döngü bağlantıları da engellenir</string>
+    <string name="netisolate_manager_exempt">Yönetici, iş profilleri dahil her zaman hariç tutulur</string>
+    <string name="netisolate_compat_supported">32 ve 64 bit uygulamalar kapsanır</string>
+    <string name="netisolate_compat_unsupported">Bu çekirdek 32 bit uygulamaları kapsamaz</string>
+    <string name="netisolate_clear">Ayarları temizle</string>
+    <string name="netisolate_clear_summary">Yalıtımı kapat, uygulama listesini temizle ve kayıtlı ayarları sil</string>
+</resources>

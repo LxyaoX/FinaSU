@@ -373,6 +373,9 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.UtsView> {
                                     me.weishu.kernelsu.ui.screen.uts.UtsViewScreen()
                                 }
+                                entry<Route.NetIsolate> {
+                                    me.weishu.kernelsu.ui.screen.netisolate.NetIsolateScreen()
+                                }
                                 entry<Route.Nomount> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountScreen()
                                 }

@@ -1,0 +1,158 @@
+package me.weishu.kernelsu.ui.viewmodel
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
+import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
+import me.weishu.kernelsu.data.uts.UtsTarget
+import me.weishu.kernelsu.data.uts.UtsTargetApp
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class NetIsolateViewModelTest {
+    private val dispatcher = StandardTestDispatcher()
+    private val repository = FakeNetIsolateDataSource()
+
+    @Before
+    fun setUp() = Dispatchers.setMain(dispatcher)
+
+    @After
+    fun tearDown() = Dispatchers.resetMain()
+
+    private fun model() = NetIsolateViewModel(
+        repository = repository,
+        shellGeneration = { 1L },
+        getString = { "message" },
+    )
+
+    @Test
+    fun `refresh exposes kernel capability and selected uids`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            compatSupported = true,
+            uids = listOf(10123),
+        )
+
+        val model = model()
+        advanceUntilIdle()
+
+        assertTrue(model.uiState.value.hasLoaded)
+        assertTrue(model.uiState.value.status.enabled)
+        assertTrue(model.uiState.value.status.compatSupported)
+        assertEquals(listOf(10123), model.uiState.value.status.uids)
+    }
+
+    @Test
+    fun `enable is rejected when no uid is selected`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, uids = emptyList())
+        val model = model()
+        advanceUntilIdle()
+
+        model.setEnabled(true)
+        advanceUntilIdle()
+
+        assertEquals(0, repository.saves.size)
+        assertEquals("message", model.uiState.value.message)
+    }
+
+    @Test
+    fun `changing apps preserves enabled state and deduplicates uids`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, enabled = true, uids = listOf(10123))
+        val model = model()
+        advanceUntilIdle()
+
+        model.setTargets(
+            listOf(
+                UtsTarget("com.example.two", 10200),
+                UtsTarget("com.example.one", 10100),
+                UtsTarget("com.example.one.again", 10100),
+            ),
+        )
+        advanceUntilIdle()
+
+        assertEquals(listOf(true to listOf(10100, 10200)), repository.saves)
+        assertEquals(listOf(10100, 10200), model.uiState.value.status.uids)
+    }
+
+    @Test
+    fun `disabling uses the dedicated command`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, enabled = true, uids = listOf(10123))
+        val model = model()
+        advanceUntilIdle()
+
+        model.setEnabled(false)
+        advanceUntilIdle()
+
+        assertEquals(1, repository.disableCalls)
+        assertTrue(repository.saves.isEmpty())
+        assertFalse(model.uiState.value.status.enabled)
+    }
+
+    @Test
+    fun `operation failure releases busy and shows the failure`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, enabled = true, uids = listOf(10123))
+        val model = model()
+        advanceUntilIdle()
+
+        repository.operationError = IllegalStateException("disable failed")
+        model.setEnabled(false)
+        advanceUntilIdle()
+
+        assertFalse(model.uiState.value.busy)
+        assertEquals("disable failed", model.uiState.value.message)
+    }
+
+    @Test
+    fun `clear removes persisted selection`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, enabled = true, uids = listOf(10123))
+        val model = model()
+        advanceUntilIdle()
+
+        model.clear()
+        advanceUntilIdle()
+
+        assertEquals(1, repository.clearCalls)
+        assertFalse(model.uiState.value.status.enabled)
+        assertTrue(model.uiState.value.status.uids.isEmpty())
+    }
+
+    private class FakeNetIsolateDataSource : NetIsolateDataSource {
+        var current = NetIsolateStatus()
+        val saves = mutableListOf<Pair<Boolean, List<Int>>>()
+        var operationError: Throwable? = null
+        var disableCalls = 0
+        var clearCalls = 0
+
+        override suspend fun status(): NetIsolateStatus = current
+
+        override suspend fun loadApps(): List<UtsTargetApp> = emptyList()
+
+        override suspend fun save(enabled: Boolean, uids: List<Int>) {
+            val normalized = uids.distinct().sorted()
+            saves += enabled to normalized
+            current = current.copy(enabled = enabled, uids = normalized)
+        }
+
+        override suspend fun disable() {
+            disableCalls++
+            operationError?.let { throw it }
+            current = current.copy(enabled = false)
+        }
+
+        override suspend fun clear() {
+            clearCalls++
+            current = NetIsolateStatus(supported = true)
+        }
+    }
+}

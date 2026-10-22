@@ -16,6 +16,7 @@
 #include "ksu.h"
 #include "runtime/ksud_boot.h"
 #include "feature/kernel_umount.h"
+#include "feature/netisolate.h"
 #include "feature/uts_view.h"
 #include "manager/dynamic_manager.h"
 #include "manager/manager_identity.h"
@@ -488,6 +489,28 @@ static int do_set_uts_view_config(void __user *arg)
     if (copy_from_user(&config, arg, sizeof(config)))
         return -EFAULT;
     return ksu_uts_view_set_config(&config);
+}
+
+static int do_get_netisolate_config(void __user *arg)
+{
+    struct ksu_netisolate_config config;
+    int ret;
+
+    ret = ksu_netisolate_get_config(&config);
+    if (ret)
+        return ret;
+    if (copy_to_user(arg, &config, sizeof(config)))
+        return -EFAULT;
+    return 0;
+}
+
+static int do_set_netisolate_config(void __user *arg)
+{
+    struct ksu_netisolate_config config;
+
+    if (copy_from_user(&config, arg, sizeof(config)))
+        return -EFAULT;
+    return ksu_netisolate_set_config(&config);
 }
 
 static int do_get_wrapper_fd(void __user *arg)
@@ -1108,6 +1131,18 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .cmd = KSU_IOCTL_SET_UTS_VIEW_CONFIG,
         .name = "SET_UTS_VIEW_CONFIG",
         .handler = do_set_uts_view_config,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_GET_NETISOLATE_CONFIG,
+        .name = "GET_NETISOLATE_CONFIG",
+        .handler = do_get_netisolate_config,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_SET_NETISOLATE_CONFIG,
+        .name = "SET_NETISOLATE_CONFIG",
+        .handler = do_set_netisolate_config,
         .perm_check = manager_or_root
     },
     {
