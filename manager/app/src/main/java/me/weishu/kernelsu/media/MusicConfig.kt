@@ -55,7 +55,8 @@ object MusicConfig {
 
     fun getMusicDir(context: Context): File {
         val dir = File(context.filesDir, "music")
-        // 同名普通文件占位会导致 mkdirs 静默失败，后续写入报 ENOTDIR，需清理后重建
+        // A plain file squatting on this path makes mkdirs() fail silently and later writes
+        // fail with ENOTDIR, so drop it and create the directory again.
         if (!dir.isDirectory) {
             if (dir.exists()) dir.delete()
             dir.mkdirs()

@@ -19,7 +19,7 @@ enum class BottomBarLayout {
     /** Today's full-width bar pinned to the bottom edge. */
     Docked,
 
-    /** Reserved for the upcoming floating bar (悬浮底栏). */
+    /** Reserved for the upcoming floating bar. */
     Floating,
 
     /** The side navigation rail hugging the start edge. */
