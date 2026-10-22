@@ -1,6 +1,5 @@
 package me.weishu.kernelsu.ui.screen.teesim
 
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -32,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -48,11 +45,8 @@ import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
-import me.weishu.kernelsu.ui.screen.module.ShortcutType
-import me.weishu.kernelsu.ui.util.module.Shortcut
 import me.weishu.kernelsu.ui.viewmodel.TeesimUiState
 import me.weishu.kernelsu.ui.viewmodel.TeesimViewModel
-import me.weishu.kernelsu.ui.webui.WebUIActivity
 
 /**
  * TEESimulator settings.
@@ -68,7 +62,6 @@ fun TeesimScreen() {
     val viewModel = viewModel<TeesimViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = LocalNavigator.current
-    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults
         .exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     var confirmUninstall by remember { mutableStateOf(false) }
@@ -80,12 +73,8 @@ fun TeesimScreen() {
     ) { uri ->
         if (uri != null) viewModel.importKeybox(uri)
     }
-    val webUiLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) { /* The module keeps its own state; nothing to refresh here. */ }
-
-    // The target picker and the module WebUI are separate screens with their own state, so the
-    // counts above go stale while they are on top; re-read on the way back.
+    // The target picker is a separate screen with its own state, so the counts above go stale
+    // while it is on top; re-read on the way back.
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         onPauseOrDispose { }
@@ -114,17 +103,10 @@ fun TeesimScreen() {
                     SegmentedListItem(
                         headlineContent = {
                             Text(
-                                when {
-                                    status == null -> stringResource(
-                                        R.string.teesim_bundled_version,
-                                        TeesimInstaller.VERSION,
-                                    )
-
-                                    status.installed -> status.version.ifBlank {
-                                        TeesimInstaller.VERSION
-                                    }
-
-                                    else -> stringResource(
+                                if (status?.installed == true) {
+                                    TeesimInstaller.VERSION
+                                } else {
+                                    stringResource(
                                         R.string.teesim_bundled_version,
                                         TeesimInstaller.VERSION,
                                     )
@@ -199,42 +181,6 @@ fun TeesimScreen() {
                         leadingContent = { Icon(Icons.Filled.Apps, null) },
                         enabled = state.status?.installed == true && !state.writing,
                         onClick = { navigator.push(Route.TeesimTargets) },
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
-                    )
-                }
-                item {
-                    val status = state.status
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.teesim_open_webui)) },
-                        supportingContent = {
-                            Text(
-                                stringResource(
-                                    if (status?.webUiAvailable == true) {
-                                        R.string.teesim_open_webui_summary
-                                    } else {
-                                        R.string.teesim_webui_unavailable
-                                    }
-                                )
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Language, null) },
-                        enabled = status != null &&
-                            status.installed &&
-                            status.webUiAvailable &&
-                            !state.writing,
-                        onClick = {
-                            webUiLauncher.launch(
-                                Intent(context, WebUIActivity::class.java)
-                                    .setData(
-                                        Shortcut.buildShortcutUri(
-                                            TeesimInstaller.MODULE_ID,
-                                            ShortcutType.WebUI,
-                                        )
-                                    )
-                            )
-                        },
                         trailingContent = {
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
                         },

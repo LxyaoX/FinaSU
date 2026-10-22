@@ -10,16 +10,14 @@ class TeesimStatusTest {
     private fun probe(vararg lines: String) = lines.joinToString("\n")
 
     @Test
-    fun `probe reports an enabled module with a keybox and a live daemon`() {
+    fun `probe reports a staged runtime that is on, with a keybox and a live daemon`() {
         val status = TeesimStatus.fromProbe(
             probe(
                 "tee:installed=1",
-                "tee:disabled=0",
+                "tee:enabled=1",
                 "tee:running=1",
                 "tee:keybox=1",
                 "tee:keyboxbytes=41234",
-                "tee:webui=1",
-                "tee:version=v4.0 (75-fcf1738-release)",
             )
         )
 
@@ -27,29 +25,25 @@ class TeesimStatusTest {
         assertTrue(status.enabled)
         assertTrue(status.daemonRunning)
         assertTrue(status.keyboxPresent)
-        assertTrue(status.webUiAvailable)
         assertEquals(41234L, status.keyboxBytes)
-        assertEquals("v4.0 (75-fcf1738-release)", status.version)
     }
 
     @Test
-    fun `disable marker and missing keybox are reported separately`() {
+    fun `a staged runtime without the boot hook is installed but off`() {
         val status = TeesimStatus.fromProbe(
             probe(
                 "tee:installed=1",
-                "tee:disabled=1",
+                "tee:enabled=0",
                 "tee:running=0",
                 "tee:keybox=0",
                 "tee:keyboxbytes=0",
-                "tee:webui=1",
             )
         )
 
         assertTrue(status.installed)
-        // A disabled module is not "enabled" even though its directory exists.
+        // The hook is the persisted on/off state, not the payload on disk.
         assertFalse(status.enabled)
         assertFalse(status.keyboxPresent)
-        assertEquals("", status.version)
     }
 
     @Test
@@ -67,12 +61,12 @@ class TeesimStatusTest {
                 "some unrelated output",
                 "tee:installed=1",
                 "tee:garbage",
-                "tee:version=",
+                "tee:keyboxbytes=",
             )
         )
 
         assertTrue(status.installed)
-        assertEquals("", status.version)
+        assertEquals(0L, status.keyboxBytes)
     }
 
     @Test

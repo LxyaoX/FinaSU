@@ -12,43 +12,55 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Installs and drives the TEESimulator module bundled in `assets/teesim`.
+ * Runs the TEESimulator payload bundled in `assets/teesim` without installing a module.
  *
- * Upstream ships the module as a flashable zip; carrying it in the APK lets the settings page do
- * the same work without a reboot into recovery or a trip through the module installer:
+ * Upstream ships a flashable module: `module.prop`, `service.sh` and a `sepolicy.rule` that ksud
+ * only reads from `/data/adb/modules`. Having a second module in the list is exactly what bundling
+ * it was supposed to avoid, so the payload is staged as plain data under
+ * `/data/adb/teesim/runtime` and the two things the module wrapper used to provide are done here:
  *
- * 1. extract `teesim-arm64.zip` into the app cache (no root needed);
- * 2. copy the tree to `/data/adb/modules/teesim` as root with the permissions upstream's
- *    `customize.sh` would have set, disabling a competing TrickyStore the same way it does;
- * 3. seed `/data/adb/teesim/config.json` once and keep it across updates.
+ * * `sepolicy.rule` is applied through `ksud sepolicy apply` - live when the switch is turned on,
+ *   and again from a `post-fs-data.d` script at boot (ksud runs that directory for every install,
+ *   no module needed);
+ * * the daemon is started from that same script: it waits for keystore2 (there is nothing to hook
+ *   before the main class starts), then runs the respawn loop upstream's `service.sh` used to run.
  *
- * The module itself is unchanged, so its own WebUI and its daemon keep working, and a later flash
- * of the upstream zip updates the same directory. Runtime state is split the way upstream expects:
- * the module directory holds the code, `/data/adb/teesim` holds the configuration and the keybox.
+ * Nothing is written to `/data/adb/modules`, so the manager's module list stays clean and the whole
+ * runtime goes away with one toggle.
  */
 object TeesimInstaller {
     /** Upstream build carried in the assets; keep in sync with the archive and its NOTICE. */
     const val VERSION = "v4.0 (75-fcf1738-release)"
 
-    /** Module id, i.e. the directory name under `/data/adb/modules` and the WebUI key. */
-    const val MODULE_ID = "teesim"
-
-    const val MODULE_DIR = "/data/adb/modules/teesim"
     const val DATA_DIR = "/data/adb/teesim"
+    const val RUNTIME_DIR = "/data/adb/teesim/runtime"
     const val CONFIG_PATH = "/data/adb/teesim/config.json"
     const val KEYBOX_NAME = "keybox.xml"
     const val KEYBOX_PATH = "/data/adb/teesim/keybox.xml"
 
+    /** Upstream's policy rule, applied live and at boot instead of by the module loader. */
+    const val POLICY_PATH = "/data/adb/teesim/sepolicy.rule"
+
+    /** The respawn loop; also the handle used to stop it. */
+    const val RUN_SCRIPT = "/data/adb/teesim/run.sh"
+
+    /** Boot hook: ksud runs every executable in this directory, module or not. */
+    const val BOOT_SCRIPT = "/data/adb/post-fs-data.d/neosu_teesim.sh"
+
     private const val ASSET_ZIP = "teesim/teesim-arm64.zip"
     private const val STAGE_DIR = "teesim-stage"
+
+    /** Directories an earlier build of this manager installed as a module; removed on install. */
+    private const val LEGACY_MODULE_DIR = "/data/adb/modules/teesim"
+    private const val LEGACY_UPDATE_DIR = "/data/adb/modules_update/teesim"
 
     /**
      * One fact per line, so [TeesimStatus.fromProbe] never has to guess which output answers which
      * question, and a missing file degrades to an empty value instead of an error.
      */
     private val probeCommands = arrayOf(
-        "if [ -d $MODULE_DIR ]; then echo tee:installed=1; else echo tee:installed=0; fi",
-        "if [ -e $MODULE_DIR/disable ]; then echo tee:disabled=1; else echo tee:disabled=0; fi",
+        "if [ -x $RUNTIME_DIR/daemon ]; then echo tee:installed=1; else echo tee:installed=0; fi",
+        "if [ -f $BOOT_SCRIPT ]; then echo tee:enabled=1; else echo tee:enabled=0; fi",
         // `pidof` matches the short process name; `pgrep -f` covers a kernel where the nice name
         // was truncated, so a live daemon is never reported as stopped.
         "if pidof teesim >/dev/null 2>&1 || pgrep -f org.matrix.teesim.App >/dev/null 2>&1; " +
@@ -56,12 +68,9 @@ object TeesimInstaller {
         "if [ -s $KEYBOX_PATH ]; then echo tee:keybox=1; else echo tee:keybox=0; fi",
         "if [ -f $KEYBOX_PATH ]; then echo \"tee:keyboxbytes=\$(stat -c %s $KEYBOX_PATH)\"; " +
             "else echo tee:keyboxbytes=0; fi",
-        "if [ -d $MODULE_DIR/webroot ]; then echo tee:webui=1; else echo tee:webui=0; fi",
-        "sed -n 's/^version=//p' $MODULE_DIR/module.prop 2>/dev/null | head -n 1 " +
-            "| sed 's/^/tee:version=/'",
     )
 
-    /** Current state of the module, its daemon and the configuration the manager edits. */
+    /** Current state of the payload, its daemon and the configuration the manager edits. */
     fun status(): TeesimStatus {
         val probe = TeesimStatus.fromProbe(output(*probeCommands))
         if (!probe.installed) return probe
@@ -69,39 +78,41 @@ object TeesimInstaller {
     }
 
     /**
-     * Copies the bundled module over whatever is installed and clears the `disable` marker.
+     * Stages the payload under [RUNTIME_DIR] and seeds the data directory.
      *
-     * Reinstalling keeps `/data/adb/teesim` untouched, so an update never costs the user their
-     * keybox or their profile assignments.
+     * Reinstalling leaves the configuration and the keybox alone, so an update never costs the user
+     * their profiles. It stops the daemon first: replacing the tree under a running `app_process`
+     * leaves it serving from deleted files until it is restarted.
      */
     fun install() {
-        // Replacing the tree under a live daemon would leave it running from deleted inodes, i.e.
-        // on the previous build until the next reboot. Stop it first, then bring the boot script
-        // back only if it had been running: a fresh install must keep waiting for the boot
-        // sepolicy rule instead of starting a hook that cannot inject yet.
-        val wasRunning = status().daemonRunning
-        if (wasRunning) stopDaemon()
+        stopDaemon()
 
         val stage = File(ksuApp.cacheDir, STAGE_DIR)
         stage.deleteRecursively()
         check(stage.mkdirs() || stage.isDirectory) { "could not create ${stage.absolutePath}" }
         extract(stage)
 
-        // `cp -R` per entry instead of `cp -R stage/. dest` so the copy does not depend on how the
-        // shell treats a trailing "/." — the archive has no dotfiles either way.
         val result = run(
-            "rm -rf $MODULE_DIR",
-            "mkdir -p $MODULE_DIR",
-            "for f in '${stage.absolutePath}'/*; do cp -R \"\$f\" $MODULE_DIR/; done",
-            "chown -R 0:0 $MODULE_DIR",
-            // `X` gives the execute bit to directories only, so the tree stays readable without
-            // turning every asset into an executable. The real entry points are fixed below.
-            "chmod -R u+rwX,go+rX $MODULE_DIR",
-            "chmod 0755 $MODULE_DIR/daemon $MODULE_DIR/customize.sh $MODULE_DIR/service.sh",
-            "chmod 0755 $MODULE_DIR/arm64-v8a/inject $MODULE_DIR/arm64-v8a/teesim-uds",
+            // A module from the previous build would run a second daemon alongside this one.
+            "rm -rf $LEGACY_MODULE_DIR $LEGACY_UPDATE_DIR",
+            "mkdir -p $RUNTIME_DIR",
+            "rm -rf $RUNTIME_DIR/*",
+            "for f in '${stage.absolutePath}'/*; do cp -R \"\$f\" $RUNTIME_DIR/; done",
+            // The module wrapper and its WebUI are only useful when flashed; the manager replaces
+            // both, so they are dead weight in the runtime.
+            "rm -rf $RUNTIME_DIR/webroot $RUNTIME_DIR/module.prop $RUNTIME_DIR/customize.sh " +
+                "$RUNTIME_DIR/service.sh $RUNTIME_DIR/update.json $RUNTIME_DIR/changelog.md",
+            "chown -R 0:0 $RUNTIME_DIR",
+            // `X` gives the execute bit to directories only; the real entry points are fixed below.
+            "chmod -R u+rwX,go+rX $RUNTIME_DIR",
+            "chmod 0755 $RUNTIME_DIR/daemon $RUNTIME_DIR/arm64-v8a/inject " +
+                "$RUNTIME_DIR/arm64-v8a/teesim-uds",
             "mkdir -p $DATA_DIR",
             "chmod 0700 $DATA_DIR",
-            "if [ ! -f $CONFIG_PATH ]; then cp $MODULE_DIR/config.default.json $CONFIG_PATH; fi",
+            // The rule lives beside the config now; the boot script feeds it to ksud.
+            "mv -f $RUNTIME_DIR/sepolicy.rule $POLICY_PATH",
+            "chmod 0600 $POLICY_PATH",
+            "if [ ! -f $CONFIG_PATH ]; then cp $RUNTIME_DIR/config.default.json $CONFIG_PATH; fi",
             "chmod 0600 $CONFIG_PATH",
             // Adopt a keybox the user already had for TrickyStore, like upstream customize.sh.
             "if [ ! -f $KEYBOX_PATH ] && [ -f /data/adb/tricky_store/keybox.xml ]; " +
@@ -110,50 +121,46 @@ object TeesimInstaller {
             // TrickyStore hooks the same keystore path; upstream disables it rather than share it.
             "for ts in /data/adb/modules/tricky_store /data/adb/modules_update/tricky_store; " +
                 "do if [ -d \"\$ts\" ] && [ ! -e \"\$ts/disable\" ]; then touch \"\$ts/disable\"; fi; done",
-            "rm -f $MODULE_DIR/disable $MODULE_DIR/remove",
-            // Guard against a wrong bundled archive: the daemon only works under this id.
-            "grep -q '^id=teesim' $MODULE_DIR/module.prop",
+            // Guard against a wrong bundled archive: this daemon only works from that entry point.
+            "grep -q 'org.matrix.teesim.App' $RUNTIME_DIR/classes.dex",
         )
         stage.deleteRecursively()
-        check(result.isSuccess) { "could not install the TEESimulator module into $MODULE_DIR" }
-        if (wasRunning) startDaemon()
+        check(result.isSuccess) { "could not stage the TEESimulator runtime in $RUNTIME_DIR" }
+        writeScript(RUN_SCRIPT, runScriptContent)
     }
 
     /**
-     * Enables or disables the module through the marker ksud reads at boot.
+     * Turns the payload on or off.
      *
-     * Enabling installs the bundled copy when nothing is there yet. The daemon injects into
-     * `keystore2` under a policy rule that is applied at boot, so a fresh enable is reported as
-     * pending instead of pretending the hook is live; disabling stops the daemon at once.
+     * Enabling installs the bundled copy when nothing is staged, writes the boot hook, applies the
+     * policy rule live and starts the daemon - no reboot, because the rule is patched into the
+     * running policy instead of being loaded by the module system at boot.
      */
     fun setEnabled(enabled: Boolean) {
-        val current = status()
-        if (!current.installed) {
-            // Enabling has to install the bundled copy first; disabling an absent module is
-            // already the state the caller asked for.
-            if (enabled) install()
+        if (!enabled) {
+            run("rm -f $BOOT_SCRIPT")
+            stopDaemon()
             return
         }
-        if (enabled) {
-            val result = run("rm -f $MODULE_DIR/disable $MODULE_DIR/remove")
-            check(result.isSuccess) { "could not clear the module markers" }
-            return
-        }
-        check(run("touch $MODULE_DIR/disable").isSuccess) {
-            "could not write $MODULE_DIR/disable"
-        }
-        stopDaemon()
+        if (!status().installed) install()
+        writeScript(BOOT_SCRIPT, bootScriptContent)
+        applyPolicy()
+        startDaemon()
     }
 
-    /** Removes the module directory; the configuration and the keybox stay in [DATA_DIR]. */
+    /** Removes the runtime and the boot hook; the configuration and the keybox stay in [DATA_DIR]. */
     fun uninstall() {
+        run("rm -f $BOOT_SCRIPT")
         stopDaemon()
-        val result = run("rm -rf $MODULE_DIR", "rm -f $DATA_DIR/teesim-uds")
-        check(result.isSuccess) { "could not remove $MODULE_DIR" }
+        val result = run(
+            "rm -rf $RUNTIME_DIR",
+            "rm -f $RUN_SCRIPT $DATA_DIR/teesim-uds $POLICY_PATH",
+        )
+        check(result.isSuccess) { "could not remove $RUNTIME_DIR" }
     }
 
     /**
-     * Writes a keybox over the current one and fixes its permissions.
+     * Writes a keybox over the current one and points the default profile at it.
      *
      * [base64] is the file content, not a path: the daemon runs as root and only ever reads
      * `/data/adb/teesim/keybox.xml`, so the manager hands the bytes over the shell it already has
@@ -203,7 +210,7 @@ object TeesimInstaller {
      * Makes the `default` profile sign with [KEYBOX_NAME] after an import through the manager.
      *
      * Best effort on a missing profile: the configuration was edited into something the manager
-     * does not understand, and the file itself is still there for the WebUI to fix up.
+     * does not understand, and the file itself is still there to be fixed up by hand.
      */
     private fun pointDefaultProfileAtManagerKeybox() {
         val root = readConfig() ?: return
@@ -234,23 +241,82 @@ object TeesimInstaller {
         check(result.isSuccess) { "could not write $CONFIG_PATH" }
     }
 
-    /**
-     * Stops the daemon the way a reboot would.
-     *
-     * `service.sh` respawns the daemon every two seconds, so killing the daemon alone leaves it
-     * running again a moment later; the respawn loop itself has to go first. Both commands are
-     * best effort - a module that never started has neither process.
-     */
-    private fun stopDaemon() {
+    /** Boot hook; its presence is also the persisted "on" state the switch reads. */
+    private val bootScriptContent = """
+#!/system/bin/sh
+# Generated by FinaSU: runs TEESimulator from /data/adb/teesim/runtime without a module.
+# Delete this file (or turn the switch off in FinaSU) to stop loading it.
+DATA=/data/adb/teesim
+# The module loader applies sepolicy.rule for flashed modules only, so apply it here instead.
+[ -x /data/adb/ksud ] && /data/adb/ksud sepolicy apply ${'$'}DATA/sepolicy.rule >/dev/null 2>&1
+chmod 0700 ${'$'}DATA 2>/dev/null
+chmod 0600 ${'$'}DATA/admin.token 2>/dev/null
+# The admin client is staged at a fixed path so it does not depend on the runtime location.
+for f in ${'$'}DATA/runtime/*/teesim-uds; do
+  [ -f "${'$'}f" ] || continue
+  cp "${'$'}f" ${'$'}DATA/teesim-uds
+  chmod 0700 ${'$'}DATA/teesim-uds
+  break
+done
+if command -v setsid >/dev/null 2>&1; then
+  setsid sh ${'$'}DATA/run.sh >/dev/null 2>&1 &
+else
+  sh ${'$'}DATA/run.sh >/dev/null 2>&1 &
+fi
+""".trimIndent()
+
+    /** Respawn loop, replacing upstream's `service.sh`. */
+    private val runScriptContent = """
+#!/system/bin/sh
+# Generated by FinaSU: waits for keystore2, then keeps the TEESimulator daemon alive.
+DATA=/data/adb/teesim
+DIR=${'$'}DATA/runtime
+# keystore2 only exists once the main class starts; there is nothing to hook before that.
+while [ -z "${'$'}(pidof keystore2)" ] && [ -z "${'$'}(pidof keystore)" ]; do sleep 1; done
+while true; do
+  "${'$'}DIR/daemon" "${'$'}DIR"
+  sleep 2
+done
+""".trimIndent()
+
+    private fun writeScript(path: String, content: String) {
+        val file = File(ksuApp.cacheDir, File(path).name)
+        file.writeText(content)
+        val result = run(
+            "cp '${file.absolutePath}' '$path'",
+            "chmod 0755 '$path'",
+            "chown 0:0 '$path'",
+        )
+        check(result.isSuccess) { "could not write $path" }
+    }
+
+    /** Applies the rule to the running policy; the hook needs it before the daemon starts. */
+    private fun applyPolicy() {
+        val result = run("/data/adb/ksud sepolicy apply '$POLICY_PATH'")
+        check(result.isSuccess) { "could not apply $POLICY_PATH" }
+    }
+
+    /** Starts the respawn loop once; a second copy would run a second daemon. */
+    private fun startDaemon() {
         run(
-            "pkill -f '$MODULE_DIR/service.sh'",
-            "kill \$(pidof teesim) 2>/dev/null",
+            "if ! pgrep -f '$RUN_SCRIPT' >/dev/null 2>&1; then " +
+                "if command -v setsid >/dev/null 2>&1; then setsid sh $RUN_SCRIPT " +
+                ">/dev/null 2>&1 & else sh $RUN_SCRIPT >/dev/null 2>&1 & fi; fi",
         )
     }
 
-    /** Relaunches the boot script detached, the way ksud starts it at late_start. */
-    private fun startDaemon() {
-        run("nohup sh $MODULE_DIR/service.sh >/dev/null 2>&1 &")
+    /**
+     * Stops the daemon the way a reboot would.
+     *
+     * The respawn loop restarts the daemon every two seconds, so killing the daemon alone leaves it
+     * running again a moment later; the loop itself has to go first. Both commands are best effort
+     * - a runtime that never started has neither process.
+     */
+    private fun stopDaemon() {
+        run(
+            "pkill -f '$RUN_SCRIPT'",
+            "kill \$(pidof teesim) 2>/dev/null",
+        )
     }
 
     private fun extract(stage: File) {

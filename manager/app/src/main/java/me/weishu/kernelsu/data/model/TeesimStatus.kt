@@ -4,27 +4,23 @@ import androidx.compose.runtime.Immutable
 import org.json.JSONObject
 
 /**
- * State of the TEESimulator module the manager carries in `assets/teesim`.
+ * State of the TEESimulator runtime the manager carries in `assets/teesim`.
  *
  * TEESimulator (GPL-3.0) answers key attestation for the selected apps from a reference KeyMint
  * trusted application that runs inside the real keystore daemon, signing the chain with a
  * user-supplied keybox; keys of every other app still go to the real hardware. Upstream ships it
- * as a flashable module, so "bundled" here means the manager installs that module itself into
- * `/data/adb/modules/teesim` and the settings page owns the switch.
+ * as a flashable module; here the payload runs from `/data/adb/teesim/runtime` with a
+ * `post-fs-data.d` hook, so nothing shows up in the module list.
  */
 @Immutable
 data class TeesimStatus(
     val installed: Boolean = false,
-    /** The module is installed and carries no `disable` marker. */
+    /** The boot hook is in `post-fs-data.d`, i.e. the daemon starts at the next boot. */
     val enabled: Boolean = false,
-    /** `version=` of the installed `module.prop`, empty when nothing is installed. */
-    val version: String = "",
     /** A process named `teesim` (the control daemon) is alive in this boot. */
     val daemonRunning: Boolean = false,
     val keyboxPresent: Boolean = false,
     val keyboxBytes: Long = 0L,
-    /** The installed module carries a `webroot`, so its WebUI can be opened. */
-    val webUiAvailable: Boolean = false,
     val config: TeesimConfig = TeesimConfig(),
 ) {
     /** Packages the simulator serves, i.e. the `default` profile. */
@@ -52,15 +48,12 @@ data class TeesimStatus(
                 }
                 .toMap()
 
-            val installed = values["installed"] == "1"
             return TeesimStatus(
-                installed = installed,
-                enabled = installed && values["disabled"] != "1",
-                version = values["version"].orEmpty(),
+                installed = values["installed"] == "1",
+                enabled = values["enabled"] == "1",
                 daemonRunning = values["running"] == "1",
                 keyboxPresent = values["keybox"] == "1",
                 keyboxBytes = values["keyboxbytes"]?.toLongOrNull() ?: 0L,
-                webUiAvailable = values["webui"] == "1",
             )
         }
     }

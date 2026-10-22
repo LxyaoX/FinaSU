@@ -91,7 +91,9 @@ class TeesimViewModel(
                     // enable cannot be reported as live just because the marker is gone.
                     !enabled -> R.string.teesim_disabled_toast
                     status.getOrNull()?.daemonRunning == true -> R.string.teesim_enabled_toast
-                    else -> R.string.teesim_reboot_required
+                    // The rule is applied live, so a daemon that did not come up is a real fault,
+                    // not something a reboot fixes.
+                    else -> R.string.teesim_state_pending
                 }
             )
         }
