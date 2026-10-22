@@ -2,8 +2,6 @@ package me.weishu.kernelsu.ui.screen.home
 
 import androidx.compose.foundation.layout.only
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 
 @Composable

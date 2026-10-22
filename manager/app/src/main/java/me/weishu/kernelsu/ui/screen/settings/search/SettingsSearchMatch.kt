@@ -1,7 +1,6 @@
 package me.weishu.kernelsu.ui.screen.settings.search
 
 import java.text.Normalizer
-import java.util.Locale
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
 
 /** The group key the hub's own rows share; they have no category to group under. */

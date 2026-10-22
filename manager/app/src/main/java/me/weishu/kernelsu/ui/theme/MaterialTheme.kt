@@ -13,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.core.view.WindowInsetsControllerCompat
 import com.materialkolor.PaletteStyle
 import me.weishu.kernelsu.ui.webui.MonetColorsProvider

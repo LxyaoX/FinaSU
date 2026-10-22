@@ -48,7 +48,6 @@ import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.viewmodel.SusfsUiState
 import me.weishu.kernelsu.ui.viewmodel.SusfsViewModel
-import org.json.JSONArray
 import org.json.JSONObject
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 

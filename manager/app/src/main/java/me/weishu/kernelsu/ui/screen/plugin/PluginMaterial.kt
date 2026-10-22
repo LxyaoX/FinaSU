@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,16 +35,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.RestartAlt
-import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -84,8 +78,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -102,7 +94,6 @@ import me.weishu.kernelsu.ui.component.card.CardBannerDialog
 import me.weishu.kernelsu.ui.component.card.CardSubject
 import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
-import me.weishu.kernelsu.ui.component.material.ExpressiveSwitch
 import me.weishu.kernelsu.ui.component.material.FolkFilledTonalButton
 import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.FolkSmallExtendedFloatingActionButton
@@ -114,16 +105,12 @@ import me.weishu.kernelsu.ui.component.material.SegmentedItemContainer
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
-import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
-import me.weishu.kernelsu.ui.navigation3.NavOrigin
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navThemeSignature
-import me.weishu.kernelsu.ui.screen.module.ExpandableDescriptionText
 import me.weishu.kernelsu.ui.screen.module.rememberModuleCardVisual
-import me.weishu.kernelsu.ui.theme.LocalModuleDescriptionMaxLines
 
 @Composable
 fun PluginPagerMaterial(

@@ -25,7 +25,6 @@ import me.weishu.kernelsu.ui.theme.ContinuousCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale

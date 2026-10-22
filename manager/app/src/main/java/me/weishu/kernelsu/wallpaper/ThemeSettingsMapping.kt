@@ -2,7 +2,6 @@ package me.weishu.kernelsu.wallpaper
 
 import android.app.LocaleManager
 import android.os.Build
-import android.os.LocaleList
 import me.weishu.kernelsu.ksuApp
 import com.materialkolor.PaletteStyle
 import me.weishu.kernelsu.data.repository.SettingsRepository

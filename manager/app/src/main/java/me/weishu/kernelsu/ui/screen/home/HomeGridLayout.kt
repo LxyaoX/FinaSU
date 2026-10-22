@@ -1,8 +1,5 @@
 package me.weishu.kernelsu.ui.screen.home
 
-import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,33 +25,20 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import java.io.File
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.SurfaceOptionsDialog
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.theme.FolkType
-import me.weishu.kernelsu.ui.theme.isInDarkTheme
-import me.weishu.kernelsu.wallpaper.AnimatedFileImage
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
-import me.weishu.kernelsu.wallpaper.WallpaperManager
-import me.weishu.kernelsu.wallpaper.isAnimatedImageFile
 import me.weishu.kernelsu.wallpaper.surface.SurfaceBounds
-import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
 import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceFlag
 

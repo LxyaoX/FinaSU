@@ -1,6 +1,5 @@
 package me.weishu.kernelsu.data.repository
 
-import me.weishu.kernelsu.data.model.KernelModule
 import me.weishu.kernelsu.data.model.KernelModuleCollection
 import me.weishu.kernelsu.data.model.KernelModuleLastResult
 

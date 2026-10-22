@@ -57,7 +57,6 @@ import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.viewmodel.WallpaperGalleryViewModel
-import me.weishu.kernelsu.wallpaper.gallery.WallpaperDevice
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperDownloader
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperItem
 
