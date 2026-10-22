@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">管理器永蒙豁免，工作資料亦然</string>
     <string name="netisolate_compat_supported">32 位與 64 位凡器皆受此界</string>
     <string name="netisolate_compat_unsupported">此核不能覆 32 位凡器</string>
+    <string name="netisolate_strict_socket">嚴鎖新生網竅</string>
+    <string name="netisolate_strict_socket_summary">禁蒙選凡器新闢 IPv4/IPv6 網竅；已成網途仍可通行</string>
+    <string name="netisolate_strict_socket_unsupported">此核尚無嚴鎖網竅之能</string>
     <string name="netisolate_clear">散此玄關</string>
     <string name="netisolate_clear_summary">收網界、清器錄，並毀所存之禁制</string>
 </resources>

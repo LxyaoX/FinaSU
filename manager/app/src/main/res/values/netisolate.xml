@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">The Manager is always exempt, including work profiles</string>
     <string name="netisolate_compat_supported">32-bit and 64-bit apps are covered</string>
     <string name="netisolate_compat_unsupported">32-bit apps are not covered by this kernel</string>
+    <string name="netisolate_strict_socket">Strictly block new sockets</string>
+    <string name="netisolate_strict_socket_summary">Prevent selected apps from creating IPv4/IPv6 sockets; existing connections stay open</string>
+    <string name="netisolate_strict_socket_unsupported">This kernel does not support strict socket blocking</string>
     <string name="netisolate_clear">Clear settings</string>
     <string name="netisolate_clear_summary">Turn isolation off, clear the app list, and delete saved settings</string>
 </resources>

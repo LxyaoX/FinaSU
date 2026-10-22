@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">管理器始终豁免，包括工作资料中的管理器</string>
     <string name="netisolate_compat_supported">同时覆盖 32 位和 64 位应用</string>
     <string name="netisolate_compat_unsupported">当前内核无法覆盖 32 位应用</string>
+    <string name="netisolate_strict_socket">严格阻止新建 socket</string>
+    <string name="netisolate_strict_socket_summary">阻止所选应用创建 IPv4/IPv6 socket；已建立的连接不会中断</string>
+    <string name="netisolate_strict_socket_unsupported">当前内核不支持严格阻止新建 socket</string>
     <string name="netisolate_clear">清除设置</string>
     <string name="netisolate_clear_summary">关闭隔离、清空应用列表并删除已保存的设置</string>
 </resources>

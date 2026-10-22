@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">管理器永得天幕豁免，工作资料中的管理器亦然</string>
     <string name="netisolate_compat_supported">32 位与 64 位凡器皆在天幕之下</string>
     <string name="netisolate_compat_unsupported">此道核无法笼罩 32 位凡器</string>
+    <string name="netisolate_strict_socket">严封新生网窍</string>
+    <string name="netisolate_strict_socket_summary">禁所选凡器新辟 IPv4/IPv6 网窍；已筑通路仍可通行</string>
+    <string name="netisolate_strict_socket_unsupported">此道核尚无严封网窍之能</string>
     <string name="netisolate_clear">撤去天幕</string>
     <string name="netisolate_clear_summary">收起天幕、清空凡器名录，并抹去所存的禁制</string>
 </resources>

@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">O gerenciador é sempre isento, inclusive em perfis de trabalho</string>
     <string name="netisolate_compat_supported">Cobre apps de 32 e 64 bits</string>
     <string name="netisolate_compat_unsupported">Este kernel não cobre apps de 32 bits</string>
+    <string name="netisolate_strict_socket">Bloquear rigorosamente sockets novos</string>
+    <string name="netisolate_strict_socket_summary">Impede que os apps selecionados criem sockets IPv4/IPv6; conexões existentes continuam abertas</string>
+    <string name="netisolate_strict_socket_unsupported">Este kernel não oferece suporte ao bloqueio rigoroso de sockets</string>
     <string name="netisolate_clear">Limpar configurações</string>
     <string name="netisolate_clear_summary">Desative o isolamento, limpe a lista de apps e exclua as configurações salvas</string>
 </resources>

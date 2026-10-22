@@ -74,7 +74,11 @@ class NetIsolateViewModel(
             return
         }
         operate {
-            if (enabled) repository.save(true, status.uids) else repository.disable()
+            if (enabled) {
+                repository.save(true, status.uids, status.strictSocket)
+            } else {
+                repository.disable()
+            }
         }
     }
 
@@ -85,7 +89,18 @@ class NetIsolateViewModel(
             _uiState.update { it.copy(message = getString(R.string.netisolate_enter_targets)) }
             return
         }
-        operate { repository.save(status.enabled, uids) }
+        operate { repository.save(status.enabled, uids, status.strictSocket) }
+    }
+
+    fun setStrictSocket(strictSocket: Boolean) {
+        val status = _uiState.value.status
+        if (strictSocket && !status.strictSocketSupported) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_strict_socket_unsupported))
+            }
+            return
+        }
+        operate { repository.save(status.enabled, status.uids, strictSocket) }
     }
 
     fun clear() {

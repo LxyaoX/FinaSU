@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">Trình quản lý luôn được miễn trừ, kể cả trong hồ sơ công việc</string>
     <string name="netisolate_compat_supported">Bao phủ ứng dụng 32 bit và 64 bit</string>
     <string name="netisolate_compat_unsupported">Kernel này không bao phủ ứng dụng 32 bit</string>
+    <string name="netisolate_strict_socket">Chặn nghiêm ngặt socket mới</string>
+    <string name="netisolate_strict_socket_summary">Ngăn ứng dụng đã chọn tạo socket IPv4/IPv6; các kết nối hiện có vẫn mở</string>
+    <string name="netisolate_strict_socket_unsupported">Kernel này không hỗ trợ chặn socket nghiêm ngặt</string>
     <string name="netisolate_clear">Xóa cài đặt</string>
     <string name="netisolate_clear_summary">Tắt cô lập, xóa danh sách ứng dụng và xóa cài đặt đã lưu</string>
 </resources>

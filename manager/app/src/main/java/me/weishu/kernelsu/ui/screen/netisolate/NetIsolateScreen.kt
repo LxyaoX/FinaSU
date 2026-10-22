@@ -172,6 +172,22 @@ fun NetIsolateScreen() {
                         onCheckedChange = viewModel::setEnabled,
                     )
                 }
+                item(visible = status.enabled) {
+                    SegmentedSwitchItem(
+                        icon = Icons.Filled.Security,
+                        title = stringResource(R.string.netisolate_strict_socket),
+                        summary = stringResource(
+                            if (status.strictSocketSupported) {
+                                R.string.netisolate_strict_socket_summary
+                            } else {
+                                R.string.netisolate_strict_socket_unsupported
+                            },
+                        ),
+                        checked = status.strictSocket,
+                        enabled = canEdit && status.strictSocketSupported,
+                        onCheckedChange = viewModel::setStrictSocket,
+                    )
+                }
                 item {
                     SegmentedListItem(
                         headlineContent = { Text(stringResource(R.string.netisolate_target_apps)) },

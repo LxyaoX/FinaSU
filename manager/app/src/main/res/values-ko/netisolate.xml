@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">관리자는 작업 프로필을 포함해 항상 예외입니다</string>
     <string name="netisolate_compat_supported">32비트 및 64비트 앱을 모두 지원합니다</string>
     <string name="netisolate_compat_unsupported">이 커널은 32비트 앱을 지원하지 않습니다</string>
+    <string name="netisolate_strict_socket">새 소켓 엄격 차단</string>
+    <string name="netisolate_strict_socket_summary">선택한 앱이 IPv4/IPv6 소켓을 만들지 못하게 합니다. 기존 연결은 유지됩니다</string>
+    <string name="netisolate_strict_socket_unsupported">이 커널은 엄격한 소켓 차단을 지원하지 않습니다</string>
     <string name="netisolate_clear">설정 지우기</string>
     <string name="netisolate_clear_summary">격리를 끄고 앱 목록과 저장된 설정을 삭제합니다</string>
 </resources>

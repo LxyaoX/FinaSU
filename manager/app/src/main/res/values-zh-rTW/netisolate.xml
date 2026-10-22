@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">管理員程式一律豁免，包括工作資料中的管理員程式</string>
     <string name="netisolate_compat_supported">同時涵蓋 32 位元與 64 位元應用程式</string>
     <string name="netisolate_compat_unsupported">目前核心無法涵蓋 32 位元應用程式</string>
+    <string name="netisolate_strict_socket">嚴格封鎖新建通訊端</string>
+    <string name="netisolate_strict_socket_summary">阻止所選應用程式建立 IPv4/IPv6 通訊端；既有連線不會中斷</string>
+    <string name="netisolate_strict_socket_unsupported">目前核心不支援嚴格封鎖通訊端</string>
     <string name="netisolate_clear">清除設定</string>
     <string name="netisolate_clear_summary">關閉隔離、清空應用程式清單並刪除已儲存的設定</string>
 </resources>

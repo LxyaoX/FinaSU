@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">Manajer selalu dikecualikan, termasuk di profil kerja</string>
     <string name="netisolate_compat_supported">Mencakup aplikasi 32-bit dan 64-bit</string>
     <string name="netisolate_compat_unsupported">Kernel ini tidak mencakup aplikasi 32-bit</string>
+    <string name="netisolate_strict_socket">Blokir socket baru secara ketat</string>
+    <string name="netisolate_strict_socket_summary">Cegah aplikasi terpilih membuat socket IPv4/IPv6; koneksi yang sudah ada tetap aktif</string>
+    <string name="netisolate_strict_socket_unsupported">Kernel ini tidak mendukung pemblokiran socket ketat</string>
     <string name="netisolate_clear">Hapus setelan</string>
     <string name="netisolate_clear_summary">Matikan isolasi, kosongkan daftar aplikasi, dan hapus setelan tersimpan</string>
 </resources>

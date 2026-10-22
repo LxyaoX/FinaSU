@@ -20,6 +20,8 @@ data class NetIsolateStatus(
     val supported: Boolean = false,
     val enabled: Boolean = false,
     val compatSupported: Boolean = false,
+    val strictSocketSupported: Boolean = false,
+    val strictSocket: Boolean = false,
     val uids: List<Int> = emptyList(),
 ) {
     companion object {
@@ -30,6 +32,8 @@ data class NetIsolateStatus(
                 supported = json.optBoolean("supported"),
                 enabled = json.optBoolean("enabled"),
                 compatSupported = json.optBoolean("compat_supported"),
+                strictSocketSupported = json.optBoolean("strict_socket_supported"),
+                strictSocket = json.optBoolean("strict_socket"),
                 uids = List(array.length()) { index -> array.getInt(index) },
             )
         }
@@ -39,7 +43,7 @@ data class NetIsolateStatus(
 interface NetIsolateDataSource {
     suspend fun status(): NetIsolateStatus
     suspend fun loadApps(): List<UtsTargetApp>
-    suspend fun save(enabled: Boolean, uids: List<Int>)
+    suspend fun save(enabled: Boolean, uids: List<Int>, strictSocket: Boolean)
     suspend fun disable()
     suspend fun clear()
 }
@@ -114,7 +118,7 @@ class NetIsolateRepository(
             .sortedBy { it.label.lowercase() }
     }
 
-    override suspend fun save(enabled: Boolean, uids: List<Int>) {
+    override suspend fun save(enabled: Boolean, uids: List<Int>, strictSocket: Boolean) {
         val array = JSONArray()
         uids.distinct().sorted().forEach(array::put)
         command(
@@ -122,6 +126,7 @@ class NetIsolateRepository(
             JSONObject()
                 .put("enabled", enabled)
                 .put("uids", array)
+                .put("strict_socket", strictSocket)
                 .toString(),
         )
     }

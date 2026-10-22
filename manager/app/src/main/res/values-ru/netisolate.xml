@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">Менеджер всегда исключён, включая рабочие профили</string>
     <string name="netisolate_compat_supported">Поддерживаются 32- и 64-битные приложения</string>
     <string name="netisolate_compat_unsupported">Это ядро не покрывает 32-битные приложения</string>
+    <string name="netisolate_strict_socket">Строго блокировать новые сокеты</string>
+    <string name="netisolate_strict_socket_summary">Запретить выбранным приложениям создавать сокеты IPv4/IPv6; существующие подключения остаются активными</string>
+    <string name="netisolate_strict_socket_unsupported">Это ядро не поддерживает строгую блокировку сокетов</string>
     <string name="netisolate_clear">Очистить настройки</string>
     <string name="netisolate_clear_summary">Выключить изоляцию, очистить список приложений и удалить сохранённые настройки</string>
 </resources>

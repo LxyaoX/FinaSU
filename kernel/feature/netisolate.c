@@ -23,16 +23,19 @@
 static_assert(sizeof(struct ksu_netisolate_config) == 1040, "netisolate ABI drift");
 
 #define NI_NATIVE_BASE 0
-#define NI_COMPAT_BASE 4
-#define NI_HOOK_COUNT 8
+#define NI_OPERATION_COUNT 5
+#define NI_COMPAT_BASE NI_OPERATION_COUNT
+#define NI_HOOK_COUNT (NI_OPERATION_COUNT * 2)
 #define NI_SYSCALL_LIMIT 1024
 #define NI_SENDMMSG_CHECK_MAX 16
+#define NI_SUPPORTED_FLAGS KSU_NETISOLATE_FLAG_STRICT_SOCKET
 
 enum ni_operation {
     NI_CONNECT,
     NI_SENDTO,
     NI_SENDMSG,
     NI_SENDMMSG,
+    NI_SOCKET,
 };
 
 struct ni_hook {
@@ -46,6 +49,7 @@ struct ni_hook {
 struct ni_state {
     u32 enabled;
     u32 count;
+    u32 flags;
     u32 uids[KSU_NETISOLATE_MAX_UIDS];
 };
 
@@ -62,12 +66,13 @@ static const int ni_native_nrs[] = {
     __NR_sendto,
     __NR_sendmsg,
     __NR_sendmmsg,
+    __NR_socket,
 };
 
 #if defined(__aarch64__)
-static const int ni_compat_nrs[] = { 283, 290, 296, 374 };
+static const int ni_compat_nrs[] = { 283, 290, 296, 374, 281 };
 #elif defined(__x86_64__)
-static const int ni_compat_nrs[] = { 362, 369, 370, 345 };
+static const int ni_compat_nrs[] = { 362, 369, 370, 345, 359 };
 #endif
 
 static syscall_fn_t ni_original(enum ni_operation op, bool compat)
@@ -128,12 +133,14 @@ static void __user *ni_user_ptr(const struct pt_regs *regs, unsigned int index, 
     return (void __user *)value;
 }
 
-static bool ni_uid_selected(uid_t uid)
+static bool ni_policy_match(uid_t uid, enum ni_operation op, u32 *policy_flags)
 {
     unsigned long flags;
     bool selected = false;
     u32 i;
 
+    if (op >= NI_OPERATION_COUNT)
+        return false;
     if (!READ_ONCE(ni_state.enabled))
         return false;
     if (uid == 0 || is_uid_manager(uid))
@@ -147,6 +154,8 @@ static bool ni_uid_selected(uid_t uid)
                 break;
             }
         }
+        if (selected)
+            *policy_flags = ni_state.flags;
     }
     spin_unlock_irqrestore(&ni_state_lock, flags);
     return selected;
@@ -256,9 +265,10 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool *tar
 
 static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operation op, bool compat)
 {
+    u32 policy_flags = 0;
     bool target = false;
 
-    if (!ni_uid_selected(current_uid().val))
+    if (!ni_policy_match(current_uid().val, op, &policy_flags))
         return false;
 
     switch (op) {
@@ -278,6 +288,12 @@ static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operati
         if (ni_sendmmsg_target(regs, compat, &target))
             return false;
         break;
+    case NI_SOCKET:
+        if (!(policy_flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET))
+            return false;
+        target = ni_arg(regs, 0, compat) == AF_INET ||
+                 ni_arg(regs, 0, compat) == AF_INET6;
+        break;
     }
     return target;
 }
@@ -286,7 +302,7 @@ static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operati
     static long __nocfi name(const struct pt_regs *regs)                                                              \
     {                                                                                                                  \
         if (ni_should_refuse(regs, op, compat))                                                                        \
-            return -ECONNREFUSED;                                                                                      \
+            return op == NI_SOCKET ? -EACCES : -ECONNREFUSED;                                                         \
         return ni_original(op, compat)(regs);                                                                          \
     }
 
@@ -294,12 +310,14 @@ NI_WRAPPER(ni_connect, NI_CONNECT, false)
 NI_WRAPPER(ni_sendto, NI_SENDTO, false)
 NI_WRAPPER(ni_sendmsg, NI_SENDMSG, false)
 NI_WRAPPER(ni_sendmmsg, NI_SENDMMSG, false)
+NI_WRAPPER(ni_socket, NI_SOCKET, false)
 
 #if defined(__aarch64__) || defined(__x86_64__)
 NI_WRAPPER(ni_connect_compat, NI_CONNECT, true)
 NI_WRAPPER(ni_sendto_compat, NI_SENDTO, true)
 NI_WRAPPER(ni_sendmsg_compat, NI_SENDMSG, true)
 NI_WRAPPER(ni_sendmmsg_compat, NI_SENDMMSG, true)
+NI_WRAPPER(ni_socket_compat, NI_SOCKET, true)
 #endif
 
 #undef NI_WRAPPER
@@ -309,6 +327,7 @@ static const syscall_fn_t ni_native_replacements[] = {
     ni_sendto,
     ni_sendmsg,
     ni_sendmmsg,
+    ni_socket,
 };
 
 #if defined(__aarch64__) || defined(__x86_64__)
@@ -317,6 +336,7 @@ static const syscall_fn_t ni_compat_replacements[] = {
     ni_sendto_compat,
     ni_sendmsg_compat,
     ni_sendmmsg_compat,
+    ni_socket_compat,
 };
 #endif
 
@@ -461,6 +481,7 @@ static void ni_publish_locked(const struct ksu_netisolate_config *config)
     spin_lock_irqsave(&ni_state_lock, flags);
     ni_state.enabled = config->enabled ? 1 : 0;
     ni_state.count = config->count;
+    ni_state.flags = config->reserved & KSU_NETISOLATE_FLAG_MASK;
     for (i = 0; i < config->count; i++)
         ni_state.uids[i] = config->uids[i];
     spin_unlock_irqrestore(&ni_state_lock, flags);
@@ -471,7 +492,7 @@ static int ni_validate_config(const struct ksu_netisolate_config *config)
     u32 i;
     u32 j;
 
-    if (config->reserved)
+    if (config->reserved & ~NI_SUPPORTED_FLAGS)
         return -EINVAL;
     if (config->count > KSU_NETISOLATE_MAX_UIDS)
         return -EINVAL;
@@ -506,7 +527,8 @@ int __init ksu_netisolate_init(void)
     ni_fill_compat_hooks();
     ni_supported = true;
     mutex_unlock(&ni_lifecycle_lock);
-    pr_info("netisolate: event=init result=ok compat=%u\n", ni_compat_supported);
+    pr_info("netisolate: event=init result=ok compat=%u flags=0x%x\n",
+            ni_compat_supported, NI_SUPPORTED_FLAGS);
     return 0;
 }
 
@@ -542,10 +564,13 @@ int ksu_netisolate_get_config(struct ksu_netisolate_config *config)
     spin_lock_irqsave(&ni_state_lock, flags);
     config->enabled = ni_state.enabled;
     config->count = ni_state.count;
+    config->reserved = ni_state.flags & KSU_NETISOLATE_FLAG_MASK;
     for (i = 0; i < ni_state.count; i++)
         config->uids[i] = ni_state.uids[i];
     spin_unlock_irqrestore(&ni_state_lock, flags);
     config->compat_supported = ni_compat_supported;
+    config->reserved |=
+        (NI_SUPPORTED_FLAGS & KSU_NETISOLATE_FLAG_MASK) << KSU_NETISOLATE_SUPPORTED_SHIFT;
     mutex_unlock(&ni_lifecycle_lock);
     return 0;
 }

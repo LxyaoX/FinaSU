@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">مدير التطبيق معفى دائمًا، بما في ذلك في ملفات العمل</string>
     <string name="netisolate_compat_supported">تغطي التطبيقات 32 بت و64 بت</string>
     <string name="netisolate_compat_unsupported">هذه النواة لا تغطي تطبيقات 32 بت</string>
+    <string name="netisolate_strict_socket">حظر المقابس الجديدة بصرامة</string>
+    <string name="netisolate_strict_socket_summary">منع التطبيقات المحددة من إنشاء مقابس IPv4/IPv6؛ تبقى الاتصالات الحالية مفتوحة</string>
+    <string name="netisolate_strict_socket_unsupported">هذه النواة لا تدعم الحظر الصارم للمقابس</string>
     <string name="netisolate_clear">مسح الإعدادات</string>
     <string name="netisolate_clear_summary">إيقاف العزل ومسح قائمة التطبيقات وحذف الإعدادات المحفوظة</string>
 </resources>

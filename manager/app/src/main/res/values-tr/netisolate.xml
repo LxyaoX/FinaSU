@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">Yönetici, iş profilleri dahil her zaman hariç tutulur</string>
     <string name="netisolate_compat_supported">32 ve 64 bit uygulamalar kapsanır</string>
     <string name="netisolate_compat_unsupported">Bu çekirdek 32 bit uygulamaları kapsamaz</string>
+    <string name="netisolate_strict_socket">Yeni soketleri kesin olarak engelle</string>
+    <string name="netisolate_strict_socket_summary">Seçili uygulamaların IPv4/IPv6 soketleri oluşturmasını engeller; mevcut bağlantılar açık kalır</string>
+    <string name="netisolate_strict_socket_unsupported">Bu çekirdek kesin soket engellemeyi desteklemiyor</string>
     <string name="netisolate_clear">Ayarları temizle</string>
     <string name="netisolate_clear_summary">Yalıtımı kapat, uygulama listesini temizle ve kayıtlı ayarları sil</string>
 </resources>

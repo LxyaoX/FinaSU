@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">管理器始终免单，工作资料里的也算</string>
     <string name="netisolate_compat_supported">32 位和 64 位应用都照看</string>
     <string name="netisolate_compat_unsupported">这口内核照看不了 32 位应用</string>
+    <string name="netisolate_strict_socket">新接口一律不许多开</string>
+    <string name="netisolate_strict_socket_summary">点单应用不能再开 IPv4/IPv6 接口，已经开着的照旧</string>
+    <string name="netisolate_strict_socket_unsupported">这口内核锁不了新接口</string>
     <string name="netisolate_clear">清空店规</string>
     <string name="netisolate_clear_summary">关掉隔离、清空应用名单，再把保存的店规删掉</string>
 </resources>

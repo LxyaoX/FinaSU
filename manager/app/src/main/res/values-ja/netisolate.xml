@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">マネージャーはワークプロファイル内も含めて常に除外されます</string>
     <string name="netisolate_compat_supported">32 ビットと 64 ビットの両方のアプリに対応します</string>
     <string name="netisolate_compat_unsupported">このカーネルは 32 ビットアプリに対応していません</string>
+    <string name="netisolate_strict_socket">新しいソケットを厳格にブロック</string>
+    <string name="netisolate_strict_socket_summary">選択したアプリの IPv4/IPv6 ソケット作成を防ぎます。既存の接続は維持されます</string>
+    <string name="netisolate_strict_socket_unsupported">このカーネルは厳格なソケットブロックに対応していません</string>
     <string name="netisolate_clear">設定を消去</string>
     <string name="netisolate_clear_summary">分離をオフにし、アプリ一覧を消去して保存済み設定を削除します</string>
 </resources>

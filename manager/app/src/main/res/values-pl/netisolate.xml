@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">Menedżer jest zawsze wyjątkiem, także w profilach służbowych</string>
     <string name="netisolate_compat_supported">Obsługiwane są aplikacje 32- i 64-bitowe</string>
     <string name="netisolate_compat_unsupported">To jądro nie obsługuje aplikacji 32-bitowych</string>
+    <string name="netisolate_strict_socket">Rygorystycznie blokuj nowe sockety</string>
+    <string name="netisolate_strict_socket_summary">Blokuj wybranym aplikacjom tworzenie socketów IPv4/IPv6; istniejące połączenia pozostają otwarte</string>
+    <string name="netisolate_strict_socket_unsupported">To jądro nie obsługuje rygorystycznego blokowania socketów</string>
     <string name="netisolate_clear">Wyczyść ustawienia</string>
     <string name="netisolate_clear_summary">Wyłącz izolację, wyczyść listę aplikacji i usuń zapisane ustawienia</string>
 </resources>

@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">契约管理器永远通行，工作资料中的管理器亦然</string>
     <string name="netisolate_compat_supported">32 位与 64 位应用都被结界覆盖</string>
     <string name="netisolate_compat_unsupported">此心之契约无法覆盖 32 位应用</string>
+    <string name="netisolate_strict_socket">严锁新生界门</string>
+    <string name="netisolate_strict_socket_summary">禁止契约应用开辟 IPv4/IPv6 界门；已建立的通路仍可沿用</string>
+    <string name="netisolate_strict_socket_unsupported">此心之契约尚无严锁界门之力</string>
     <string name="netisolate_clear">解除结界</string>
     <string name="netisolate_clear_summary">收起结界、解除全部应用契约并抹除已保存的结界记录</string>
 </resources>

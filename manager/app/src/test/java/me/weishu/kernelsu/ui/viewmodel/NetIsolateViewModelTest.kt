@@ -41,6 +41,8 @@ class NetIsolateViewModelTest {
             supported = true,
             enabled = true,
             compatSupported = true,
+            strictSocketSupported = true,
+            strictSocket = true,
             uids = listOf(10123),
         )
 
@@ -50,6 +52,8 @@ class NetIsolateViewModelTest {
         assertTrue(model.uiState.value.hasLoaded)
         assertTrue(model.uiState.value.status.enabled)
         assertTrue(model.uiState.value.status.compatSupported)
+        assertTrue(model.uiState.value.status.strictSocketSupported)
+        assertTrue(model.uiState.value.status.strictSocket)
         assertEquals(listOf(10123), model.uiState.value.status.uids)
     }
 
@@ -81,8 +85,40 @@ class NetIsolateViewModelTest {
         )
         advanceUntilIdle()
 
-        assertEquals(listOf(true to listOf(10100, 10200)), repository.saves)
+        assertEquals(listOf(Triple(true, listOf(10100, 10200), false)), repository.saves)
         assertEquals(listOf(10100, 10200), model.uiState.value.status.uids)
+    }
+
+    @Test
+    fun `strict socket toggle preserves the isolation state`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setStrictSocket(true)
+        advanceUntilIdle()
+
+        assertEquals(listOf(Triple(true, listOf(10123), true)), repository.saves)
+        assertTrue(model.uiState.value.status.strictSocket)
+    }
+
+    @Test
+    fun `strict socket is rejected when the kernel cannot support it`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, uids = listOf(10123))
+        val model = model()
+        advanceUntilIdle()
+
+        model.setStrictSocket(true)
+        advanceUntilIdle()
+
+        assertTrue(repository.saves.isEmpty())
+        assertEquals("message", model.uiState.value.message)
+        assertFalse(model.uiState.value.status.strictSocket)
     }
 
     @Test
@@ -129,7 +165,7 @@ class NetIsolateViewModelTest {
 
     private class FakeNetIsolateDataSource : NetIsolateDataSource {
         var current = NetIsolateStatus()
-        val saves = mutableListOf<Pair<Boolean, List<Int>>>()
+        val saves = mutableListOf<Triple<Boolean, List<Int>, Boolean>>()
         var operationError: Throwable? = null
         var disableCalls = 0
         var clearCalls = 0
@@ -138,10 +174,14 @@ class NetIsolateViewModelTest {
 
         override suspend fun loadApps(): List<UtsTargetApp> = emptyList()
 
-        override suspend fun save(enabled: Boolean, uids: List<Int>) {
+        override suspend fun save(enabled: Boolean, uids: List<Int>, strictSocket: Boolean) {
             val normalized = uids.distinct().sorted()
-            saves += enabled to normalized
-            current = current.copy(enabled = enabled, uids = normalized)
+            saves += Triple(enabled, normalized, strictSocket)
+            current = current.copy(
+                enabled = enabled,
+                uids = normalized,
+                strictSocket = strictSocket,
+            )
         }
 
         override suspend fun disable() {

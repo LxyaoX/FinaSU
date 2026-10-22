@@ -21,6 +21,9 @@
     <string name="netisolate_manager_exempt">管理器永远可以上网，工作资料里的也一样喵</string>
     <string name="netisolate_compat_supported">32 位和 64 位应用都管得住喵</string>
     <string name="netisolate_compat_unsupported">这个内核管不住 32 位应用喵</string>
+    <string name="netisolate_strict_socket">严格锁住新接口喵</string>
+    <string name="netisolate_strict_socket_summary">不许选中的应用新建 IPv4/IPv6 接口喵，已经连上的连接还能继续用喵</string>
+    <string name="netisolate_strict_socket_unsupported">这个内核还不会严格锁接口喵</string>
     <string name="netisolate_clear">清除设置喵</string>
     <string name="netisolate_clear_summary">关闭隔离、清空应用，再把保存的设置删掉喵</string>
 </resources>
