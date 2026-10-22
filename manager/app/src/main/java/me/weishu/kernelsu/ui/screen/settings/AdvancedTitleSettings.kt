@@ -10,13 +10,8 @@ import androidx.compose.material.icons.rounded.FileOpen
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.SwapHoriz
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,10 +19,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.media.TitleTextMode
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
-import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 
@@ -54,29 +47,7 @@ fun AdvancedTitleSettings(modifier: Modifier = Modifier) {
     val enabled = VisualMediaConfig.titleEnabled
     val title = stringResource(R.string.media_title_image)
     val filename = VisualMediaConfig.titleFilename
-    var showCustomTitle by remember { mutableStateOf(false) }
-    val appTitle = stringResource(R.string.app_name)
-    val titleModes = TitleTextMode.entries
-    val titleLabels = listOf(appTitle, stringResource(R.string.home_title_kernelsu), stringResource(R.string.settings_home_title_custom))
     SegmentedColumn(modifier = modifier) {
-        item {
-            SegmentedDropdownItem(
-                icon = Icons.Rounded.TextFields,
-                title = stringResource(R.string.settings_home_title),
-                summary = stringResource(R.string.settings_home_title_summary),
-                items = titleLabels,
-                selectedIndex = titleModes.indexOf(VisualMediaConfig.titleTextMode),
-                onItemSelected = { index ->
-                    val mode = titleModes[index]
-                    if (mode == TitleTextMode.CUSTOM) {
-                        showCustomTitle = true
-                    } else {
-                        VisualMediaConfig.titleTextMode = mode
-                        VisualMediaConfig.save(context)
-                    }
-                },
-            )
-        }
         item {
             SegmentedSwitchItem(
                 icon = Icons.Rounded.Image,
@@ -131,18 +102,4 @@ fun AdvancedTitleSettings(modifier: Modifier = Modifier) {
         item(visible = filename != null) { ClearMediaRow { scope.launch { VisualMediaConfig.clear(context, false) } } }
     }
 
-    if (showCustomTitle) {
-        TextInputDialog(
-            title = stringResource(R.string.settings_home_title_custom),
-            label = stringResource(R.string.settings_home_title_custom_hint),
-            initialValue = VisualMediaConfig.customTitleText.ifBlank { appTitle },
-            onConfirm = { value ->
-                VisualMediaConfig.customTitleText = value
-                VisualMediaConfig.titleTextMode = TitleTextMode.CUSTOM
-                VisualMediaConfig.save(context)
-                showCustomTitle = false
-            },
-            onDismiss = { showCustomTitle = false },
-        )
-    }
 }

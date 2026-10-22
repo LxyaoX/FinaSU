@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">В безопасном режиме установка модулей отключена</string>
     <string name="reboot_to_apply">Перезагрузите, чтобы изменения вступили в силу</string>
     <string name="module_magisk_conflict">Модули недоступны из-за конфликта с Magisk!</string>
-    <string name="home_learn_kernelsu">Узнайте о KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/ru_RU/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">Узнайте, как установить KernelSU и использовать модули.</string>
-    <string name="home_learn_finasu">Узнайте о FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">Откройте для себя возможности и модули FinaSU.</string>
-    <string name="home_support_title">Поддержите нас</string>
-    <string name="home_support_content">KernelSU был и всегда будет бесплатным и открытым проектом. Однако Вы всегда можете поддержать нас, отправив небольшое пожертвование.</string>
     <string name="home_gki_warning">Начиная с версии 3.0.0, режим работы GKI будет использоваться только в тестовых средах. Мы не рекомендуем его для ежедневного использования, а image файлы больше предоставляться не будут.</string>
     <string name="about_source_code"><![CDATA[Посмотреть исходный код на %1$s<br/>Присоединяйтесь к нашему %2$s каналу]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -394,11 +386,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">Нижняя карточка главной</string>
-    <string name="settings_support_links_summary">Выберите, что показывать внизу главного экрана.</string>
-    <string name="settings_support_links_finasu">Узнайте о FinaSU</string>
-    <string name="settings_support_links_legacy">Поддержка и KernelSU</string>
-    <string name="settings_support_links_hidden">Скрыто</string>
     <string name="settings_theme_store_mode">Режим магазина тем</string>
     <string name="settings_theme_store_mode_summary">Выберите, скачивать темы в приложении или в браузере.</string>
     <string name="plugin_search_hint">Поиск плагинов</string>

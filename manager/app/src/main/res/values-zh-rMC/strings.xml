@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">处于和平难度下，禁止合成模组</string>
     <string name="reboot_to_apply">重生生效</string>
     <string name="module_magisk_conflict">因与 Magisk 有冲突，所有模组不可用！</string>
-    <string name="home_learn_kernelsu">了解 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_CN/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">了解如何合成 KernelSU 以及如何开发模组</string>
-    <string name="home_learn_finasu">了解 FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">了解如何合成 FinaSU 以及如何开发模组</string>
-    <string name="home_support_title">给绿宝石</string>
-    <string name="home_support_content">KernelSU 永远免费开源，往合成台投喂绿宝石就是最好的支持</string>
     <string name="home_gki_warning">自 v3.0.0 起 GKI 工作模式将仅用于测试环境，我们不建议用于日常使用，也不再提供镜像文件</string>
     <string name="about_source_code"><![CDATA[在 %1$s 查看源码<br/>加入我们的 %2$s 频道]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -393,19 +385,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">布局</string>
-    <string name="settings_support_links">首页底部合成台</string>
-    <string name="settings_support_links_summary">选择首页底部展示的物品。</string>
-    <string name="settings_support_links_finasu">了解 FinaSU</string>
-    <string name="settings_support_links_legacy">给绿宝石与 KernelSU</string>
-    <string name="settings_support_links_hidden">隐藏</string>
-    <string name="settings_support_links_custom">自定义</string>
-    <string name="settings_support_links_custom_title">卡片标题</string>
-    <string name="settings_support_links_custom_title_summary">卡片上加粗的那行。</string>
-    <string name="settings_support_links_custom_subtitle">卡片副标题</string>
-    <string name="settings_support_links_custom_subtitle_summary">显示在标题下方。</string>
-    <string name="settings_support_links_custom_url">链接地址</string>
-    <string name="settings_support_links_custom_url_summary">点击卡片时打开。</string>
-    <string name="settings_support_links_custom_url_invalid">请输入 http 或 https 地址。</string>
     <string name="settings_theme_store_mode">主世界主题商店模式</string>
     <string name="settings_theme_store_mode_summary">选择在主世界内下载主题，还是交给浏览器下载。</string>
     <string name="plugin_search_hint">搜索插件</string>

@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">La instalación de módulos está desactivada en el modo seguro</string>
     <string name="reboot_to_apply">Reinicia para aplicar los cambios</string>
     <string name="module_magisk_conflict">¡Los módulos no están disponibles debido a un conflicto con Magisk!</string>
-    <string name="home_learn_kernelsu">Aprende KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">Aprende a instalar KernelSU y a usar módulos.</string>
-    <string name="home_learn_finasu">Aprende sobre FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">Descubre las funciones y los módulos de FinaSU.</string>
-    <string name="home_support_title">Apóyanos</string>
-    <string name="home_support_content">KernelSU es, y siempre será, gratuito y de código abierto. Sin embargo, puedes demostrarnos que te importamos haciendo una donación.</string>
     <string name="home_gki_warning">A partir de la v3.0.0, el modo de trabajo GKI solo se usará en entornos de prueba. No lo recomendamos para el uso diario, y ya no se proporcionarán archivos de imagen.</string>
     <string name="about_source_code"><![CDATA[Ver código fuente en %1$s<br/>Únete a nuestro canal %2$s]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -392,11 +384,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">Tarjeta inferior de inicio</string>
-    <string name="settings_support_links_summary">Elige qué mostrar en la parte inferior de la pantalla de inicio.</string>
-    <string name="settings_support_links_finasu">Aprende sobre FinaSU</string>
-    <string name="settings_support_links_legacy">Apoyo y KernelSU</string>
-    <string name="settings_support_links_hidden">Oculto</string>
     <string name="settings_theme_store_mode">Modo de la tienda de temas</string>
     <string name="settings_theme_store_mode_summary">Elige si los temas se descargan en la aplicacion o en el navegador.</string>
     <string name="plugin_search_hint">Buscar complementos</string>

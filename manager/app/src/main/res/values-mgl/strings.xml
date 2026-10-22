@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">处于安全变身模式下，禁止结下魔法阵</string>
     <string name="reboot_to_apply">重新觉醒后生效</string>
     <string name="module_magisk_conflict">因与 Magisk 冲突，所有魔法阵皆被冻结！</string>
-    <string name="home_learn_kernelsu">了解 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_CN/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">了解如何安装 KernelSU 以及如何缔造魔法阵</string>
-    <string name="home_learn_finasu">了解 FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">了解 FinaSU 的魔法与缔造魔法阵之术</string>
-    <string name="home_support_title">支持缔造者</string>
-    <string name="home_support_content">KernelSU 将永远免费开源，向缔造者献上心意以表支持</string>
     <string name="home_gki_warning">自 v3.0.0 起 GKI 工作模式仅用于测试结界，不建议日常使用，也不再提供镜像咒式</string>
     <string name="about_source_code"><![CDATA[在 %1$s 查阅魔法书<br/>加入我们的 %2$s 频道]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -392,11 +384,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">首页底部魔法阵</string>
-    <string name="settings_support_links_summary">选择首页底部要缔造的魔法。</string>
-    <string name="settings_support_links_finasu">了解 FinaSU</string>
-    <string name="settings_support_links_legacy">支持缔造者与 KernelSU</string>
-    <string name="settings_support_links_hidden">隐匿</string>
     <string name="settings_theme_store_mode">Сэдвийн дэлгүүрийн горим</string>
     <string name="settings_theme_store_mode_summary">Сэдвийг апп дотор эсвэл хөтөч дээр татахыг сонгоно.</string>
     <string name="plugin_search_hint">搜索魔导器</string>

@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">Việc cài đặt module bị vô hiệu hoá ở chế độ an toàn</string>
     <string name="reboot_to_apply">Khởi động lại để có hiệu lực</string>
     <string name="module_magisk_conflict">Các module bị vô hiệu hoá do xung đột với Magisk!</string>
-    <string name="home_learn_kernelsu">Tìm hiểu về KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">Tìm hiểu cách cài đặt KernelSU và sử dụng các module.</string>
-    <string name="home_learn_finasu">Tìm hiểu về FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">Khám phá các tính năng và mô-đun của FinaSU.</string>
-    <string name="home_support_title">Ủng hộ chúng tôi</string>
-    <string name="home_support_content">KernelSU sẽ luôn là miễn phí và mã nguồn mở. Tuy nhiên, bạn có thể cho chúng tôi thấy rằng bạn quan tâm bằng cách quyên góp!</string>
     <string name="home_gki_warning">Bắt đầu từ v3.0.0, chế độ GKI sẽ chỉ được sử dụng trong môi trường thử nghiệm. Chúng tôi không khuyến nghị sử dụng chế độ này và các file image sẽ không còn được cung cấp nữa.</string>
     <string name="about_source_code"><![CDATA[Xem mã nguồn tại %1$s<br/>Tham gia kênh %2$s của chúng tôi]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -392,11 +384,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">Thẻ dưới cùng trang chủ</string>
-    <string name="settings_support_links_summary">Chọn nội dung hiển thị ở cuối màn hình trang chủ.</string>
-    <string name="settings_support_links_finasu">Tìm hiểu về FinaSU</string>
-    <string name="settings_support_links_legacy">Ủng hộ và KernelSU</string>
-    <string name="settings_support_links_hidden">Ẩn</string>
     <string name="settings_theme_store_mode">Chế độ cửa hàng chủ đề</string>
     <string name="settings_theme_store_mode_summary">Chọn tải chủ đề trong ứng dụng hay trên trình duyệt.</string>
     <string name="plugin_search_hint">Tìm plugin</string>

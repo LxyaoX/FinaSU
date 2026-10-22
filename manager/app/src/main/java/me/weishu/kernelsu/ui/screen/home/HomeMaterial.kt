@@ -117,7 +117,6 @@ fun HomePagerMaterial(
             if (layout == HomeLayoutStyle.CIRCLE || layout == HomeLayoutStyle.GRID) {
                 InfoCard(systemInfo = state.systemInfo, susfs = state.susfs, zygiskProvider = state.zygiskProvider, mount = state.mount, onSusfs = actions.onSusfs)
             }
-            SupportLinks(onOpenUrl = actions.onOpenUrl)
             Spacer(
                 Modifier.height(
                     bottomInnerPadding + if (!useFullFeaturedLayout())

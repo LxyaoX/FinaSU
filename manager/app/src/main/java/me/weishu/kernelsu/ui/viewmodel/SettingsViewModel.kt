@@ -17,7 +17,6 @@ import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.data.susfs.SusfsRepository
@@ -58,10 +57,6 @@ class SettingsViewModel(
             val moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines
             val enableWebDebugging = repo.enableWebDebugging
             val homeLayoutStyle = repo.homeLayoutStyle
-            val supportLinksStyle = repo.supportLinksStyle
-            val supportLinksCustomTitle = repo.supportLinksCustomTitle
-            val supportLinksCustomSubtitle = repo.supportLinksCustomSubtitle
-            val supportLinksCustomUrl = repo.supportLinksCustomUrl
             val themeStoreMode = repo.themeStoreMode
             val colorStyle = repo.colorStyle
             val colorSpec = repo.colorSpec
@@ -138,10 +133,6 @@ class SettingsViewModel(
                     moduleDescriptionMaxLines = moduleDescriptionMaxLines,
                     enableWebDebugging = enableWebDebugging,
                     homeLayoutStyle = homeLayoutStyle,
-                    supportLinksStyle = supportLinksStyle,
-                    supportLinksCustomTitle = supportLinksCustomTitle,
-                    supportLinksCustomSubtitle = supportLinksCustomSubtitle,
-                    supportLinksCustomUrl = supportLinksCustomUrl,
                     themeStoreMode = themeStoreMode,
                     hideHomeFingerprint = repo.hideHomeFingerprint,
                     hideHomeZygisk = repo.hideHomeZygisk,
@@ -396,27 +387,6 @@ class SettingsViewModel(
         val normalized = HomeLayoutStyle.fromValue(style)
         repo.homeLayoutStyle = normalized
         _uiState.update { it.copy(homeLayoutStyle = normalized) }
-    }
-
-    fun setSupportLinksStyle(style: String) {
-        val normalized = SupportLinksStyle.fromValue(style)
-        repo.supportLinksStyle = normalized
-        _uiState.update { it.copy(supportLinksStyle = normalized) }
-    }
-
-    fun setSupportLinksCustomTitle(title: String) {
-        repo.supportLinksCustomTitle = title
-        _uiState.update { it.copy(supportLinksCustomTitle = title) }
-    }
-
-    fun setSupportLinksCustomSubtitle(subtitle: String) {
-        repo.supportLinksCustomSubtitle = subtitle
-        _uiState.update { it.copy(supportLinksCustomSubtitle = subtitle) }
-    }
-
-    fun setSupportLinksCustomUrl(url: String) {
-        repo.supportLinksCustomUrl = url
-        _uiState.update { it.copy(supportLinksCustomUrl = url) }
     }
 
     fun setThemeStoreMode(mode: String) {

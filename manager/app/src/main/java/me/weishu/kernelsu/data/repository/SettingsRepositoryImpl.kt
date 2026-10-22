@@ -24,7 +24,6 @@ import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.sui.SuiBridge
 import me.weishu.kernelsu.data.model.ModuleSortPriorityStore
-import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 import me.weishu.kernelsu.data.themestore.ThemeStoreMode
 import me.weishu.kernelsu.ksuApp
@@ -169,24 +168,6 @@ class SettingsRepositoryImpl : SettingsRepository {
             prefs.getString("home_layout_style", HomeLayoutStyle.DEFAULT)
         )
         set(value) = prefs.edit { putString("home_layout_style", HomeLayoutStyle.fromValue(value)) }
-
-    override var supportLinksStyle: String
-        get() = SupportLinksStyle.fromValue(
-            prefs.getString("support_links_style", SupportLinksStyle.DEFAULT)
-        )
-        set(value) = prefs.edit { putString("support_links_style", SupportLinksStyle.fromValue(value)) }
-
-    override var supportLinksCustomTitle: String
-        get() = prefs.getString("support_links_custom_title", "") ?: ""
-        set(value) = prefs.edit { putString("support_links_custom_title", value) }
-
-    override var supportLinksCustomSubtitle: String
-        get() = prefs.getString("support_links_custom_subtitle", "") ?: ""
-        set(value) = prefs.edit { putString("support_links_custom_subtitle", value) }
-
-    override var supportLinksCustomUrl: String
-        get() = prefs.getString("support_links_custom_url", "") ?: ""
-        set(value) = prefs.edit { putString("support_links_custom_url", value) }
 
     override var themeStoreMode: String
         get() = prefs.getString("theme_store_mode", ThemeStoreMode.UNSET) ?: ThemeStoreMode.UNSET

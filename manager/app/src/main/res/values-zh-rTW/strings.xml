@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">處於安全模式下，禁止安裝模組</string>
     <string name="reboot_to_apply">將在重新啟動時生效</string>
     <string name="module_magisk_conflict">與 Magisk 發生衝突，無法使用模組功能！</string>
-    <string name="home_learn_kernelsu">深入瞭解 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_TW/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">知曉安裝、使用 KernelSU 本體與其模組功能的方法</string>
-    <string name="home_learn_finasu">深入瞭解 FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">認識 FinaSU 的功能與模組</string>
-    <string name="home_support_title">協助發展</string>
-    <string name="home_support_content">KernelSU 一向以免費與開放原始碼自居，矢志不渝。若想協助我們，可以用小額捐款表達你對專案發展的大力支持。</string>
     <string name="home_gki_warning">自 v3.0.0 起，GKI 工作模式將僅用於測試環境。我們不建議日常使用，也不再提供映像檔。</string>
     <string name="about_source_code"><![CDATA[前往 %1$s 檢閱原始碼<br/>前往 %2$s 加入頻道]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -394,19 +386,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">版面</string>
-    <string name="settings_support_links">首頁底部卡片</string>
-    <string name="settings_support_links_summary">選擇首頁底部顯示的內容。</string>
-    <string name="settings_support_links_finasu">深入瞭解 FinaSU</string>
-    <string name="settings_support_links_legacy">協助發展與 KernelSU</string>
-    <string name="settings_support_links_hidden">隱藏</string>
-    <string name="settings_support_links_custom">自訂</string>
-    <string name="settings_support_links_custom_title">卡片標題</string>
-    <string name="settings_support_links_custom_title_summary">卡片上的粗體標題列。</string>
-    <string name="settings_support_links_custom_subtitle">卡片副標題</string>
-    <string name="settings_support_links_custom_subtitle_summary">顯示在標題下方。</string>
-    <string name="settings_support_links_custom_url">連結網址</string>
-    <string name="settings_support_links_custom_url_summary">點擊卡片時開啟。</string>
-    <string name="settings_support_links_custom_url_invalid">請輸入 http 或 https 網址。</string>
     <string name="settings_theme_store_mode">主題商店模式</string>
     <string name="settings_theme_store_mode_summary">選擇在應用程式內下載主題，還是交給瀏覽器下載。</string>
     <string name="plugin_search_hint">搜尋外掛</string>

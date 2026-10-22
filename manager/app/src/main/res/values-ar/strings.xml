@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">تثبيت الوحدات معطّل في الوضع الآمن</string>
     <string name="reboot_to_apply">إعادة التشغيل لتطبيق التغييرات</string>
     <string name="module_magisk_conflict">الوحدات غير متاحة بسبب تعارضها مع Magisk!</string>
-    <string name="home_learn_kernelsu">تعلم KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">تعرف على كيفية تثبيت KernelSU واستخدام الإضافات</string>
-    <string name="home_learn_finasu">تعرّف على FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">اكتشف ميزات FinaSU ووحداته.</string>
-    <string name="home_support_title">إدعمنا</string>
-    <string name="home_support_content">KernelSU سيظل دائماً مجانياً ومفتوح المصدر. مع ذلك، يمكنك متى ما استطعت أن تظهر لنا أنك تهتم بالتبرع.</string>
     <string name="home_gki_warning">بدءًا من الإصدار 3.0.0، سيُستخدم وضع عمل GKI في بيئات الاختبار فقط. لا نوصي باستخدامه يوميًا، ولن تُوفَّر ملفات الصور بعد الآن.</string>
     <string name="about_source_code"><![CDATA[أنظر إلى مصدر البرمجة في %1$s<br/>إنضم إلى قناتنا في %2$s ]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -394,11 +386,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">بطاقة أسفل الرئيسية</string>
-    <string name="settings_support_links_summary">اختر ما يظهر أسفل الشاشة الرئيسية.</string>
-    <string name="settings_support_links_finasu">تعرّف على FinaSU</string>
-    <string name="settings_support_links_legacy">الدعم وKernelSU</string>
-    <string name="settings_support_links_hidden">مخفي</string>
     <string name="settings_theme_store_mode">وضع متجر السمات</string>
     <string name="settings_theme_store_mode_summary">اختر تنزيل السمات داخل التطبيق أو في المتصفح.</string>
     <string name="plugin_search_hint">ابحث عن الملحقات</string>

@@ -9,7 +9,6 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
-import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Adb
 import androidx.compose.material.icons.filled.Apps
@@ -66,7 +65,6 @@ import androidx.compose.material.icons.rounded.Brightness7
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Opacity
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.RoundedCorner
@@ -74,7 +72,6 @@ import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.SwipeUp
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.runtime.Composable
@@ -82,7 +79,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalResources
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
@@ -306,54 +302,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_home_layout_summary,
             icon = Icons.Filled.GridView,
             aliases = listOf("home", "layout", "grid", "dashboard", "circle", "focus"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
-            id = "appearance.support_links",
-            titleRes = R.string.settings_support_links,
-            summaryRes = R.string.settings_support_links_summary,
-            icon = Icons.Filled.Info,
-            aliases = listOf("support", "links", "card"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
-            id = "appearance.support_links_title",
-            titleRes = R.string.settings_support_links_custom_title,
-            summaryRes = R.string.settings_support_links_custom_title_summary,
-            icon = Icons.Rounded.TextFields,
-            aliases = listOf("support", "title", "custom"),
-            available = { it.supportLinksStyle == SupportLinksStyle.CUSTOM },
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
-            id = "appearance.support_links_subtitle",
-            titleRes = R.string.settings_support_links_custom_subtitle,
-            summaryRes = R.string.settings_support_links_custom_subtitle_summary,
-            icon = Icons.AutoMirrored.Rounded.Notes,
-            aliases = listOf("support", "subtitle", "custom"),
-            available = { it.supportLinksStyle == SupportLinksStyle.CUSTOM },
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
-            id = "appearance.support_links_url",
-            titleRes = R.string.settings_support_links_custom_url,
-            summaryRes = R.string.settings_support_links_custom_url_summary,
-            icon = Icons.Rounded.Link,
-            aliases = listOf("support", "url", "link", "custom"),
-            available = { it.supportLinksStyle == SupportLinksStyle.CUSTOM },
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
-            id = "appearance.title_text",
-            titleRes = R.string.settings_home_title,
-            summaryRes = R.string.settings_home_title_summary,
-            icon = Icons.Rounded.TextFields,
-            aliases = listOf("title", "text", "name", "header"),
         )
     )
     add(

@@ -9,7 +9,6 @@ import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
-import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.data.themestore.ThemeStoreMode
 
@@ -27,10 +26,6 @@ data class SettingsUiState(
     val moduleDescriptionMaxLines: Int = 4,
     val enableWebDebugging: Boolean = false,
     val homeLayoutStyle: String = HomeLayoutStyle.DEFAULT,
-    val supportLinksStyle: String = SupportLinksStyle.DEFAULT,
-    val supportLinksCustomTitle: String = "",
-    val supportLinksCustomSubtitle: String = "",
-    val supportLinksCustomUrl: String = "",
     val themeStoreMode: String = ThemeStoreMode.UNSET,
     val hideHomeFingerprint: Boolean = false,
     val hideHomeZygisk: Boolean = false,
@@ -143,10 +138,6 @@ data class SettingsScreenActions(
     val onSetDefaultUmountModules: (Boolean) -> Unit,
     val onSetEnableWebDebugging: (Boolean) -> Unit,
     val onSetHomeLayoutStyle: (String) -> Unit,
-    val onSetSupportLinksStyle: (String) -> Unit,
-    val onSetSupportLinksCustomTitle: (String) -> Unit,
-    val onSetSupportLinksCustomSubtitle: (String) -> Unit,
-    val onSetSupportLinksCustomUrl: (String) -> Unit,
     val onSetThemeStoreMode: (String) -> Unit,
     val onSetHideHomeFingerprint: (Boolean) -> Unit,
     val onSetHideHomeZygisk: (Boolean) -> Unit,

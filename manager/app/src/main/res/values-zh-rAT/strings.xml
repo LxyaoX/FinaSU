@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">圣域守护模式下，禁止圣光阵蒙恩</string>
     <string name="reboot_to_apply">神翼再生后生效</string>
     <string name="module_magisk_conflict">与 Magisk 圣光阵相冲，诸圣光阵皆不可用！</string>
-    <string name="home_learn_kernelsu">探寻 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">探寻如何蒙恩 KernelSU 与铸造圣光阵之法</string>
-    <string name="home_learn_finasu">探寻 FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">领略 FinaSU 的功能与恩典</string>
-    <string name="home_support_title">圣光援助</string>
-    <string name="home_support_content">KernelSU 永为自由开源，愿以捐赠献上圣光</string>
     <string name="home_gki_warning">自 v3.0.0 起，GKI 运转模式仅用于试炼之境，不荐于日常；镜像圣匣亦不再降下。</string>
     <string name="about_source_code"><![CDATA[在 %1$s 仰望圣光神典<br/>加入我们的 %2$s 圣殿]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -393,19 +385,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">格局</string>
-    <string name="settings_support_links">首页底部圣牌</string>
-    <string name="settings_support_links_summary">择首页底端所显之圣物。</string>
-    <string name="settings_support_links_finasu">探寻 FinaSU</string>
-    <string name="settings_support_links_legacy">圣光援助与 KernelSU</string>
-    <string name="settings_support_links_hidden">隐匿</string>
-    <string name="settings_support_links_custom">自定</string>
-    <string name="settings_support_links_custom_title">圣牌题铭</string>
-    <string name="settings_support_links_custom_title_summary">牌上之粗体铭文。</string>
-    <string name="settings_support_links_custom_subtitle">圣牌副铭</string>
-    <string name="settings_support_links_custom_subtitle_summary">铭于题铭之下。</string>
-    <string name="settings_support_links_custom_url">圣路之链</string>
-    <string name="settings_support_links_custom_url_summary">触牌则启其路。</string>
-    <string name="settings_support_links_custom_url_invalid">请书 http 或 https 之路。</string>
     <string name="settings_theme_store_mode">圣光主题集市模式</string>
     <string name="settings_theme_store_mode_summary">择定圣光主题是于圣殿内降下，还是交由下界之窗承接。</string>
     <string name="plugin_search_hint">搜寻圣符</string>

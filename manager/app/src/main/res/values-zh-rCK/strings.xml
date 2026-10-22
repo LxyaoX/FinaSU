@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">安全开火模式下，招牌菜一律不许挂</string>
     <string name="reboot_to_apply">重新开火才认</string>
     <string name="module_magisk_conflict">跟 Magisk 撞了车，招牌菜全歇菜了！</string>
-    <string name="home_learn_kernelsu">瞧瞧 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">瞧瞧 KernelSU 咋上灶、招牌菜咋研发。</string>
-    <string name="home_learn_finasu">瞧瞧 FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">尝尝 FinaSU 的招牌菜和新菜式</string>
-    <string name="home_support_title">给大厨捧个场</string>
-    <string name="home_support_content">KernelSU 一直免费开源，打赏一下就是最大的支持。</string>
     <string name="home_gki_warning">打 v3.0.0 起，GKI 干活模式只在试菜时用，不推荐日常下厨，镜像文件也不再供了。</string>
     <string name="about_source_code"><![CDATA[在 %1$s 翻阅菜谱源码<br/>加入我们的 %2$s 频道]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -393,19 +385,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">摆盘</string>
-    <string name="settings_support_links">首页底部小灶</string>
-    <string name="settings_support_links_summary">挑挑首页底下摆哪道菜。</string>
-    <string name="settings_support_links_finasu">瞧瞧 FinaSU</string>
-    <string name="settings_support_links_legacy">给大厨捧个场与 KernelSU</string>
-    <string name="settings_support_links_hidden">收起来</string>
-    <string name="settings_support_links_custom">自选配料</string>
-    <string name="settings_support_links_custom_title">菜名牌</string>
-    <string name="settings_support_links_custom_title_summary">卡片上那行粗体大字。</string>
-    <string name="settings_support_links_custom_subtitle">副菜名</string>
-    <string name="settings_support_links_custom_subtitle_summary">摆在菜名牌下面。</string>
-    <string name="settings_support_links_custom_url">跳转链接</string>
-    <string name="settings_support_links_custom_url_summary">点一下卡片就开灶。</string>
-    <string name="settings_support_links_custom_url_invalid">请填 http 或 https 的地址。</string>
     <string name="settings_theme_store_mode">门面铺子进货模式</string>
     <string name="settings_theme_store_mode_summary">选在店里自己进货，还是交给外头的浏览器去进。</string>
     <string name="plugin_search_hint">翻找配菜</string>

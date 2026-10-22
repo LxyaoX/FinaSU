@@ -109,7 +109,6 @@ private fun HomeScreenPreviewContent(
                 )
             }
             InfoCard(previewSystemInfo.copy(selinuxStatus = selinuxStatus))
-            SupportLinks(onOpenUrl = {})
         }
     }
 }

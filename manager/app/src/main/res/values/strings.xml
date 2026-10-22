@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">Module installation is disabled in safe mode</string>
     <string name="reboot_to_apply">Reboot to take effect</string>
     <string name="module_magisk_conflict">Modules are unavailable due to a conflict with Magisk!</string>
-    <string name="home_learn_kernelsu">Learn KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">Learn how to install KernelSU and use modules.</string>
-    <string name="home_learn_finasu">Learn about FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">Discover FinaSU\'s features and modules.</string>
-    <string name="home_support_title">Support Us</string>
-    <string name="home_support_content">KernelSU is, and always will be, free, and open source. However, you can show us that you care by making a donation.</string>
     <string name="home_gki_warning">Starting from v3.0.0, the GKI work mode will be used only in testing environments. We do not recommend it for daily use, and image files will no longer be provided.</string>
     <string name="about_source_code"><![CDATA[View source code at %1$s<br/>Join our %2$s channel]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -395,19 +387,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">Layout</string>
-    <string name="settings_support_links">Home bottom card</string>
-    <string name="settings_support_links_summary">Choose what appears at the bottom of the home screen.</string>
-    <string name="settings_support_links_finasu">Learn about FinaSU</string>
-    <string name="settings_support_links_legacy">Support and KernelSU</string>
-    <string name="settings_support_links_custom">Custom</string>
-    <string name="settings_support_links_hidden">Hidden</string>
-    <string name="settings_support_links_custom_title">Card title</string>
-    <string name="settings_support_links_custom_title_summary">The card\'s bold line.</string>
-    <string name="settings_support_links_custom_subtitle">Card subtitle</string>
-    <string name="settings_support_links_custom_subtitle_summary">Shown under the title.</string>
-    <string name="settings_support_links_custom_url">Link URL</string>
-    <string name="settings_support_links_custom_url_summary">Opened when the card is tapped.</string>
-    <string name="settings_support_links_custom_url_invalid">Enter an http or https address.</string>
     <string name="settings_theme_store_mode">Theme store mode</string>
     <string name="settings_theme_store_mode_summary">Choose whether themes download in the app or in the browser.</string>
     <string name="plugin_search_hint">Search plugins</string>
@@ -866,10 +845,6 @@
     <string name="media_night_opacity">Night opacity</string>
     <string name="media_dim">Dimming</string>
     <string name="media_title_offset">Horizontal offset</string>
-    <string name="settings_home_title">Top bar title</string>
-    <string name="settings_home_title_summary">Text shown in the top bar while no title image is used.</string>
-    <string name="settings_home_title_custom">Custom</string>
-    <string name="settings_home_title_custom_hint">Enter a title</string>
     <string name="home_title_kernelsu" translatable="false">KernelSU</string>
     <string name="settings_app_language">Language</string>
     <string name="settings_app_language_summary">Choose the language used by the app.</string>

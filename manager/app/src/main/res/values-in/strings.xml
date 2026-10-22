@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">Pemasangan modul dinonaktifkan pada mode aman</string>
     <string name="reboot_to_apply">Mulai ulang untuk menerapkan</string>
     <string name="module_magisk_conflict">Modul tidak tersedia karena konflik dengan Magisk!</string>
-    <string name="home_learn_kernelsu">Pelajari KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/id_ID/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">Pelajari cara memasang KernelSU dan menggunakan modul</string>
-    <string name="home_learn_finasu">Pelajari FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">Jelajahi fitur dan modul FinaSU.</string>
-    <string name="home_support_title">Dukung Kami</string>
-    <string name="home_support_content">KernelSU gratis dan sumber terbuka, sekarang dan selamanya. Namun, Anda dapat menunjukkan kepedulian Anda kepada kami dengan memberikan donasi.</string>
     <string name="home_gki_warning">Mulai dari v3.0.0, fungsi mode GKI dibatasi untuk lingkungan pengujian. Kami tidak menyarankan untuk penggunaan harian, dan berkas image tidak akan lagi disediakan.</string>
     <string name="about_source_code"><![CDATA[Lihat kode sumber di %1$s<br/>Gabung saluran %2$s kami]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -392,11 +384,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">Kartu bawah beranda</string>
-    <string name="settings_support_links_summary">Pilih apa yang ditampilkan di bagian bawah layar beranda.</string>
-    <string name="settings_support_links_finasu">Pelajari FinaSU</string>
-    <string name="settings_support_links_legacy">Dukungan dan KernelSU</string>
-    <string name="settings_support_links_hidden">Disembunyikan</string>
     <string name="settings_theme_store_mode">Mode toko tema</string>
     <string name="settings_theme_store_mode_summary">Pilih apakah tema diunduh di aplikasi atau di browser.</string>
     <string name="plugin_search_hint">Cari plugin</string>

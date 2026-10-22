@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">避劫之境中，禁炼化仙符</string>
     <string name="reboot_to_apply">重铸仙躯乃显其效</string>
     <string name="module_magisk_conflict">因与 Magisk 魔符相戾，诸仙符皆不可用！</string>
-    <string name="home_learn_kernelsu">参悟 KernelSU</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/zh_CN/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">探 KernelSU 引仙入道之法，明炼化仙符之术。</string>
-    <string name="home_learn_finasu">参悟 FinaSU</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">探 FinaSU 引仙入道之法，明炼化仙符之术。</string>
-    <string name="home_support_title">道力支持</string>
-    <string name="home_support_content">KernelSU 恒久免费开源，向道门捐赠以表道心。</string>
     <string name="home_gki_warning">自 v3.0.0 起，GKI 修炼模式唯用于试炼之境；吾等不荐日常修持，亦不复供镜像卷宗。</string>
     <string name="about_source_code"><![CDATA[于 %1$s 观天书源典<br/>入吾 %2$s 仙音频道]]></string>
     <string name="profile" translatable="false">App Profile</string>
@@ -393,19 +385,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">格局</string>
-    <string name="settings_support_links">首页底下道牌</string>
-    <string name="settings_support_links_summary">择首页底端所现之道。</string>
-    <string name="settings_support_links_finasu">参悟 FinaSU</string>
-    <string name="settings_support_links_legacy">道力支持与 KernelSU</string>
-    <string name="settings_support_links_hidden">隐去</string>
-    <string name="settings_support_links_custom">自定</string>
-    <string name="settings_support_links_custom_title">道牌题名</string>
-    <string name="settings_support_links_custom_title_summary">道牌上之粗体题名。</string>
-    <string name="settings_support_links_custom_subtitle">道牌副题</string>
-    <string name="settings_support_links_custom_subtitle_summary">题于正名之下。</string>
-    <string name="settings_support_links_custom_url">道途之引</string>
-    <string name="settings_support_links_custom_url_summary">触之道牌则开其途。</string>
-    <string name="settings_support_links_custom_url_invalid">请填 http 或 https 之道引。</string>
     <string name="settings_theme_store_mode">道韵仙市模式</string>
     <string name="settings_theme_store_mode_summary">选择在洞天之内纳取道韵，还是借外域之窗承接。</string>
     <string name="plugin_search_hint">搜寻法宝</string>

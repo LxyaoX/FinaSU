@@ -139,14 +139,6 @@
     <string name="safe_mode_module_disabled">Güvenli modda modül yükleme devre dışı bırakılmıştır</string>
     <string name="reboot_to_apply">Değişikliklerin uygulanması için cihazı yeniden başlat</string>
     <string name="module_magisk_conflict">Magisk ile çakışma nedeniyle modüller kullanılamıyor!</string>
-    <string name="home_learn_kernelsu">KernelSU\'yu öğrenin</string>
-    <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
-    <string name="home_click_to_learn_kernelsu">KernelSU\'nun nasıl kurulacağını ve modüllerin nasıl kullanılacağını öğrenin.</string>
-    <string name="home_learn_finasu">FinaSU hakkında bilgi edinin</string>
-    <string name="home_learn_finasu_url">https://fina.mysqil.com/</string>
-    <string name="home_click_to_learn_finasu">FinaSU\'nun özelliklerini ve modüllerini keşfedin.</string>
-    <string name="home_support_title">Bizi Destekleyin</string>
-    <string name="home_support_content">KernelSU ücretsiz ve açık kaynaklı bir yazılımdır ve her zaman öyle kalacaktır. Ancak bağış yaparak bize destek olduğunuzu gösterebilirsiniz.</string>
     <string name="home_gki_warning">v3.0.0 sürümünden itibaren GKI çalışma modu yalnızca test ortamlarında kullanılacaktır. Günlük kullanım için tavsiye etmiyoruz ve imaj dosyaları artık sunulmayacaktır.</string>
     <string name="about_source_code"><![CDATA[%1$s adresinde kaynak kodunu görüntüleyin.<br/>%2$s kanalımıza katılın.]]></string>
     <string name="profile" translatable="false">Uygulama profili</string>
@@ -394,11 +386,6 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_support_links">Ana ekran alt kartı</string>
-    <string name="settings_support_links_summary">Ana ekranın altında neyin görüneceğini seçin.</string>
-    <string name="settings_support_links_finasu">FinaSU hakkında bilgi edinin</string>
-    <string name="settings_support_links_legacy">Destek ve KernelSU</string>
-    <string name="settings_support_links_hidden">Gizli</string>
     <string name="settings_theme_store_mode">Tema magazasi modu</string>
     <string name="settings_theme_store_mode_summary">Temalarin uygulamada mi yoksa tarayicida mi indirilecegini secin.</string>
     <string name="plugin_search_hint">Eklenti ara</string>

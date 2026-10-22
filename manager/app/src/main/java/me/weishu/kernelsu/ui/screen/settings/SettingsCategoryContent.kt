@@ -1,7 +1,5 @@
 package me.weishu.kernelsu.ui.screen.settings
 
-import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -16,7 +14,6 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
@@ -31,9 +28,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material.icons.automirrored.rounded.Notes
-import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -51,7 +45,6 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountDriverState
-import me.weishu.kernelsu.data.model.SupportLinksStyle
 import me.weishu.kernelsu.data.themestore.ThemeStoreMode
 import me.weishu.kernelsu.ui.component.KsuIsValid
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -71,12 +64,6 @@ import me.weishu.kernelsu.ui.util.LauncherIconUtils
 private val GroupModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
 
 /** Which text of the custom home card the shared text dialog is currently editing. */
-private enum class SupportLinksCustomField { TITLE, SUBTITLE, URL }
-
-/** Whether [value] is a link the home card can safely hand to the browser. */
-internal fun isSupportedLinkUrl(value: String): Boolean =
-    Uri.parse(value.trim()).scheme?.lowercase() in setOf("http", "https")
-
 @Composable
 fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActions) {
     KsuIsValid {
@@ -244,11 +231,7 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
         }
     )
 
-    // Layout gathers the home screen's shape, the search pages' title treatment and the bottom
-    // card, so everything that reshapes a page sits together. The three text rows below the card
-    // picker only apply to the custom card, so they appear alongside it.
-    var editingCustomField by remember { mutableStateOf<SupportLinksCustomField?>(null) }
-    val customCardSelected = uiState.supportLinksStyle == SupportLinksStyle.CUSTOM
+    // Layout gathers the home screen's shape and the search pages' title treatment.
     SegmentedColumn(
         modifier = GroupModifier,
         title = stringResource(R.string.settings_section_layout),
@@ -281,118 +264,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 }
             )
         }
-        item {
-            val supportedSupportLinks = SupportLinksStyle.supported
-            val supportLinksItems = supportedSupportLinks.map { style ->
-                stringResource(
-                    when (style) {
-                        SupportLinksStyle.LEGACY -> R.string.settings_support_links_legacy
-                        SupportLinksStyle.CUSTOM -> R.string.settings_support_links_custom
-                        SupportLinksStyle.HIDDEN -> R.string.settings_support_links_hidden
-                        else -> R.string.settings_support_links_finasu
-                    }
-                )
-            }
-            val selectedSupportLinks =
-                supportedSupportLinks.indexOf(uiState.supportLinksStyle).coerceAtLeast(0)
-            SegmentedDropdownItem(
-                icon = Icons.Filled.Info,
-                title = stringResource(id = R.string.settings_support_links),
-                summary = stringResource(id = R.string.settings_support_links_summary),
-                items = supportLinksItems,
-                selectedIndex = selectedSupportLinks,
-                onItemSelected = { index ->
-                    actions.onSetSupportLinksStyle(
-                        supportedSupportLinks.getOrElse(index) { SupportLinksStyle.DEFAULT }
-                    )
-                }
-            )
-        }
-        item(visible = customCardSelected) {
-            SegmentedListItem(
-                onClick = { editingCustomField = SupportLinksCustomField.TITLE },
-                headlineContent = { Text(stringResource(R.string.settings_support_links_custom_title)) },
-                supportingContent = {
-                    Text(
-                        uiState.supportLinksCustomTitle.ifBlank {
-                            stringResource(R.string.settings_support_links_custom_title_summary)
-                        }
-                    )
-                },
-                leadingContent = { Icon(Icons.Rounded.TextFields, null) },
-            )
-        }
-        item(visible = customCardSelected) {
-            SegmentedListItem(
-                onClick = { editingCustomField = SupportLinksCustomField.SUBTITLE },
-                headlineContent = { Text(stringResource(R.string.settings_support_links_custom_subtitle)) },
-                supportingContent = {
-                    Text(
-                        uiState.supportLinksCustomSubtitle.ifBlank {
-                            stringResource(R.string.settings_support_links_custom_subtitle_summary)
-                        }
-                    )
-                },
-                leadingContent = { Icon(Icons.AutoMirrored.Rounded.Notes, null) },
-            )
-        }
-        item(visible = customCardSelected) {
-            SegmentedListItem(
-                onClick = { editingCustomField = SupportLinksCustomField.URL },
-                headlineContent = { Text(stringResource(R.string.settings_support_links_custom_url)) },
-                supportingContent = {
-                    Text(
-                        uiState.supportLinksCustomUrl.ifBlank {
-                            stringResource(R.string.settings_support_links_custom_url_summary)
-                        }
-                    )
-                },
-                leadingContent = { Icon(Icons.Rounded.Link, null) },
-            )
-        }
-    }
-
-    when (editingCustomField) {
-        SupportLinksCustomField.TITLE -> TextInputDialog(
-            title = stringResource(R.string.settings_support_links_custom_title),
-            label = stringResource(R.string.settings_support_links_custom_title_summary),
-            initialValue = uiState.supportLinksCustomTitle,
-            onConfirm = { value ->
-                actions.onSetSupportLinksCustomTitle(value)
-                editingCustomField = null
-            },
-            onDismiss = { editingCustomField = null },
-        )
-        SupportLinksCustomField.SUBTITLE -> TextInputDialog(
-            title = stringResource(R.string.settings_support_links_custom_subtitle),
-            label = stringResource(R.string.settings_support_links_custom_subtitle_summary),
-            initialValue = uiState.supportLinksCustomSubtitle,
-            onConfirm = { value ->
-                actions.onSetSupportLinksCustomSubtitle(value)
-                editingCustomField = null
-            },
-            onDismiss = { editingCustomField = null },
-        )
-        SupportLinksCustomField.URL -> TextInputDialog(
-            title = stringResource(R.string.settings_support_links_custom_url),
-            label = stringResource(R.string.settings_support_links_custom_url_summary),
-            initialValue = uiState.supportLinksCustomUrl,
-            // A malformed link would silently do nothing on the home screen, so refuse it here.
-            onConfirm = { value ->
-                if (isSupportedLinkUrl(value)) {
-                    actions.onSetSupportLinksCustomUrl(value)
-                    editingCustomField = null
-                } else {
-                    Toast.makeText(
-                        context,
-                        R.string.settings_support_links_custom_url_invalid,
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
-            },
-            onDismiss = { editingCustomField = null },
-        )
-        null -> Unit
     }
 
     AdvancedTitleSettings(modifier = GroupModifier)
