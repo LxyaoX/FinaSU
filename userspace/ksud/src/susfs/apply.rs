@@ -3,7 +3,7 @@ use super::{
     model::Rule,
     store::{self, State},
 };
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 use serde::Serialize;
 use std::{collections::BTreeMap, fs, io::Write, os::unix::fs::MetadataExt};
 
@@ -20,6 +20,7 @@ pub struct Report {
     pub status: &'static str,
     pub applied: Vec<String>,
     pub failures: BTreeMap<String, String>,
+    pub deferred: Vec<String>,
     pub pending_reboot: Vec<String>,
 }
 
@@ -249,6 +250,7 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
         status: "saved",
         applied: Vec::new(),
         failures: BTreeMap::new(),
+        deferred: Vec::new(),
         pending_reboot: Vec::new(),
     };
     state.failures.retain(|key, _| desired.contains_key(key));
@@ -274,6 +276,11 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
         {
             report.pending_reboot.push(key.clone());
             continue;
+        }
+        state.uncertain.insert(key.clone(), value.clone());
+        if let Err(error) = store::write_state(&state) {
+            state.uncertain.remove(key);
+            return Err(error).context("Persist SUSFS write-ahead state");
         }
         let result = if key.starts_with("kstat:") {
             let parsed: Rule = serde_json::from_str(value)?;
@@ -301,12 +308,16 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
         };
         match result {
             Ok(true) => {
+                state.uncertain.remove(key);
                 state.applied.insert(key.clone(), value.clone());
                 state.failures.remove(key);
                 report.applied.push(key.clone());
             }
-            Ok(false) => {}
+            Ok(false) => {
+                state.uncertain.remove(key);
+            }
             Err(error) => {
+                state.uncertain.remove(key);
                 state.failures.insert(key.clone(), error.to_string());
             }
         }

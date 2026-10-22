@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">添加条目</string>
     <string name="susfs_module_hint">模组名称须为 1–63 个 ASCII 字母、数字或下划线。不会加载或卸载模组。</string>
     <string name="susfs_prefix_hint">通过开放的 LKM 控制节点藏起挂载前缀；不会全局清空已有规则。</string>
+    <string name="susfs_deferred">UTS 视图生效中，任务暂缓</string>
+    <string name="susfs_uts_apply_confirm_title">应用 SUSFS uname？</string>
+    <string name="susfs_uts_apply_confirm_message">应用 SUSFS uname 时，UTS 视图会暂时关闭，但设置会保留。只有 SUSFS 确认 uname 已经生效，UTS 视图才会保持关闭；否则会自动恢复。</string>
+    <string name="susfs_uts_apply_confirm_action">应用 SUSFS</string>
 </resources>

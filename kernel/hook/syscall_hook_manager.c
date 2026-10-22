@@ -1,4 +1,5 @@
 #include "linux/printk.h"
+#include <linux/module.h>
 #include <linux/spinlock.h>
 #include <linux/kprobes.h>
 #include <linux/tracepoint.h>
@@ -22,6 +23,21 @@
 #if defined(__riscv)
 #include "hook/riscv64/syscall_regs.h"
 #endif
+
+static bool syscall_redirects_pinned_module;
+
+bool ksu_syscall_redirect_pin_module(void)
+{
+#ifdef MODULE
+    if (READ_ONCE(syscall_redirects_pinned_module))
+        return true;
+    if (!try_module_get(THIS_MODULE))
+        return false;
+    WRITE_ONCE(syscall_redirects_pinned_module, true);
+    pr_info("hook_manager: hot unload disabled after first syscall redirect\n");
+#endif
+    return true;
+}
 
 #ifdef CONFIG_KRETPROBES
 
@@ -109,6 +125,8 @@ static void ksu_sys_enter_handler(void *data, struct pt_regs *regs, long id)
     if (ksu_has_syscall_hook(id)) {
         struct pt_regs *current_regs = task_pt_regs(current);
 
+        if (!ksu_syscall_redirect_pin_module())
+            return;
 #if defined(__x86_64__)
         // Stash the original syscall number in ax.
         // We use ax because it currently just holds -ENOSYS and is safe to overwrite.

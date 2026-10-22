@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -623,6 +624,19 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         supportingContent = { Text(stringResource(id = R.string.teesim_search_summary)) },
                         leadingContent = { Icon(Icons.Filled.VerifiedUser, null) },
                         onClick = actions.onOpenTeesim,
+                        trailingContent = {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                        },
+                    )
+                },
+                {
+                    // UTS View has enough configuration that a switch in the
+                    // settings list would misrepresent it as a single toggle.
+                    SegmentedListItem(
+                        headlineContent = { Text(stringResource(id = R.string.settings_uts_view)) },
+                        supportingContent = { Text(stringResource(id = R.string.settings_uts_view_summary)) },
+                        leadingContent = { Icon(Icons.Rounded.TextFields, null) },
+                        onClick = actions.onOpenUtsView,
                         trailingContent = {
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
                         },

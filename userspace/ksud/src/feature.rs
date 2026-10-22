@@ -15,6 +15,12 @@ const FEATURE_MAGIC: u32 = 0x7f4b5355;
 const FEATURE_VERSION: u32 = 1;
 
 fn set_kernel_feature(feature_id: FeatureId, value: u64) -> Result<()> {
+    if feature_id.has_dedicated_manager() {
+        bail!(
+            "Feature '{}' has a dedicated configuration; use `ksud uts-view`",
+            feature_id.name()
+        );
+    }
     crate::ksucalls::set_feature(feature_id as u32, value)
         .with_context(|| format!("Failed to set feature {} to {value}", feature_id.name()))?;
 
@@ -121,6 +127,10 @@ pub fn apply_config(features: &HashMap<u32, u64>) {
 
     let mut applied = 0;
     for (&id, &value) in features {
+        if FeatureId::from_u32(id).is_some_and(FeatureId::has_dedicated_manager) {
+            log::info!("Skip feature {id}: dedicated configuration is applied separately");
+            continue;
+        }
         if crate::ksucalls::get_feature(id).is_ok_and(|state| state.forced) {
             log::info!("Skip feature {id}: forced by boot config");
             continue;
@@ -152,6 +162,10 @@ pub fn apply_config(features: &HashMap<u32, u64>) {
 
 pub fn get_feature(id: &str) -> Result<()> {
     let feature_id = parse_feature_id(id)?;
+    if !feature_supported(feature_id)? {
+        println!("Feature '{id}' is not supported by kernel");
+        return Ok(());
+    }
     let state = crate::ksucalls::get_feature(feature_id as u32)
         .with_context(|| format!("Failed to get feature {id}"))?;
 
@@ -176,6 +190,15 @@ pub fn get_feature(id: &str) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn feature_supported(feature_id: FeatureId) -> Result<bool> {
+    if feature_id as u32 >= crate::ksucalls::get_info().features {
+        return Ok(false);
+    }
+    Ok(crate::ksucalls::get_feature(feature_id as u32)
+        .with_context(|| format!("Failed to query feature {}", feature_id.name()))?
+        .supported)
 }
 
 pub fn get_feature_config(id: &str) -> Result<()> {
@@ -275,6 +298,7 @@ pub fn list_features() {
         FeatureId::SelinuxHide,
         FeatureId::AvcSpoof,
         FeatureId::ShellSuAdbOnly,
+        FeatureId::UtsView,
     ];
 
     for feature_id in &all_features {
@@ -334,6 +358,7 @@ pub fn load_config_and_apply() -> Result<()> {
 pub fn save_config() -> Result<()> {
     // Preserve persisted values while boot config temporarily overrides them.
     let mut features = load_binary_config()?;
+    features.remove(&(FeatureId::UtsView as u32));
 
     let all_features = [
         FeatureId::SuCompat,
@@ -382,11 +407,7 @@ pub fn check_feature(id: &str) -> Result<()> {
         return Ok(());
     }
 
-    // Check if the feature is supported by kernel
-    let state = crate::ksucalls::get_feature(feature_id as u32)
-        .with_context(|| format!("Failed to get feature {id}"))?;
-
-    if state.supported {
+    if feature_supported(feature_id)? {
         println!("supported");
     } else {
         println!("unsupported");
@@ -409,6 +430,9 @@ pub fn init_features() -> Result<()> {
     log::info!("Initializing features from config...");
 
     let mut features = load_binary_config()?;
+    if features.remove(&(FeatureId::UtsView as u32)).is_some() {
+        log::info!("Removed UTS View from the generic feature config");
+    }
 
     // Get managed features from active modules and skip them during init
     if let Ok(managed_features_map) = crate::module::get_managed_features() {

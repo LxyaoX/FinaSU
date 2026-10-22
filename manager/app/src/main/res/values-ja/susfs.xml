@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">項目を追加</string>
     <string name="susfs_module_hint">モジュール名: ASCII 文字、数字、アンダースコア 1–63 文字です。モジュールの読み込みやアンロードは行いません。</string>
     <string name="susfs_prefix_hint">公開された LKM 制御を介してマウントプレフィックスを隠します。既存のルールをグローバルに消去しません。</string>
+    <string name="susfs_deferred">UTS View の有効中は保留</string>
+    <string name="susfs_uts_apply_confirm_title">SUSFS の uname を適用しますか？</string>
+    <string name="susfs_uts_apply_confirm_message">SUSFS の uname を適用する間、UTS View はオフになります。設定は保持されます。SUSFS が uname の反映を確認した場合に限り UTS View はオフのままになり、それ以外は復元されます。</string>
+    <string name="susfs_uts_apply_confirm_action">SUSFS を適用</string>
 </resources>

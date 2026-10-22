@@ -351,6 +351,9 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.About> { AboutScreen() }
                                 entry<Route.Sulog> { SulogScreen() }
                                 entry<Route.Susfs> { me.weishu.kernelsu.ui.screen.SusfsScreen() }
+                                entry<Route.UtsView> {
+                                    me.weishu.kernelsu.ui.screen.uts.UtsViewScreen()
+                                }
                                 entry<Route.Nomount> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountScreen()
                                 }

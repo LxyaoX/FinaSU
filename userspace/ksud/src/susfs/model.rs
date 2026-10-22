@@ -42,6 +42,12 @@ pub struct Uname {
     pub version: String,
 }
 
+impl Uname {
+    pub fn is_default(&self) -> bool {
+        self.release == "default" && self.version == "default"
+    }
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Lkm {

@@ -16,11 +16,13 @@ const DIR: &str = "/data/adb/ksu/folksu-susfs";
 const CONFIG: &str = "/data/adb/ksu/folksu-susfs/config.json";
 const STATE: &str = "/data/adb/ksu/folksu-susfs/state.json";
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct State {
     pub boot_id: String,
     pub applied: BTreeMap<String, String>,
+    #[serde(default)]
+    pub uncertain: BTreeMap<String, String>,
     pub kstat_pending: Vec<String>,
     #[serde(default)]
     pub snapshots: BTreeMap<String, String>,
@@ -158,7 +160,9 @@ pub fn summary(config: &Config) -> Result<&'static str> {
 }
 
 pub fn summarize(state: &State, desired: &BTreeMap<String, String>) -> &'static str {
-    if state.failures.keys().any(|key| desired.contains_key(key)) {
+    if state.uncertain.keys().any(|key| desired.contains_key(key))
+        || state.failures.keys().any(|key| desired.contains_key(key))
+    {
         "failed"
     } else if !state.kstat_pending.is_empty()
         || state.pending_reboot.iter().any(|k| desired.contains_key(k))
@@ -191,9 +195,34 @@ mod tests {
             .failures
             .insert("path:/x".to_owned(), "126".to_owned());
         assert_eq!(summarize(&state, &desired), "failed");
+        state.failures.clear();
+        state
+            .uncertain
+            .insert("path:/x".to_owned(), "hash".to_owned());
+        assert_eq!(summarize(&state, &desired), "failed");
+        state.uncertain.clear();
         state.applied.clear();
         assert_eq!(summarize(&state, &BTreeMap::new()), "saved");
         state.kstat_pending.push("kstat:/old".to_owned());
         assert_eq!(summarize(&state, &BTreeMap::new()), "pending_reboot");
+    }
+
+    #[test]
+    fn write_ahead_uncertainty_round_trips() {
+        let mut state = State {
+            boot_id: "boot".to_owned(),
+            ..State::default()
+        };
+        state
+            .uncertain
+            .insert("uname".to_owned(), "runtime".to_owned());
+
+        let encoded = serde_json::to_string(&state).unwrap();
+        let decoded: State = serde_json::from_str(&encoded).unwrap();
+
+        assert_eq!(
+            decoded.uncertain.get("uname").map(String::as_str),
+            Some("runtime")
+        );
     }
 }

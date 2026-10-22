@@ -101,4 +101,8 @@
     <string name="susfs_add_entry">新增項目</string>
     <string name="susfs_module_hint">模組名稱：1–63 個 ASCII 字母、數字或底線。不會載入或卸載模組。</string>
     <string name="susfs_prefix_hint">透過公開的 LKM 控制項隱藏掛載前綴。不會全域清除現有規則。</string>
+    <string name="susfs_deferred">UTS 檢視生效中，已暫緩</string>
+    <string name="susfs_uts_apply_confirm_title">套用 SUSFS uname？</string>
+    <string name="susfs_uts_apply_confirm_message">套用期間會暫時關閉 UTS 檢視，但保留其設定。只有 SUSFS 確認 uname 已實際生效後，UTS 檢視才會保持關閉；否則會自動還原。</string>
+    <string name="susfs_uts_apply_confirm_action">套用 SUSFS</string>
 </resources>

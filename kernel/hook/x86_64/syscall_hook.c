@@ -149,6 +149,8 @@ static int ksu_find_ni_syscall_slots(int *out_slots, int max_slots)
 // otherwise it's a spurious call — return -ENOSYS.
 static long __nocfi ksu_syscall_dispatcher(const struct pt_regs *regs)
 {
+    long ret = -ENOSYS;
+
     if (regs->orig_ax != ksu_dispatcher_nr)
         return -ENOSYS;
 
@@ -165,10 +167,10 @@ static long __nocfi ksu_syscall_dispatcher(const struct pt_regs *regs)
     if (likely(orig_nr >= 0 && orig_nr < __NR_syscalls)) {
         ksu_syscall_hook_fn fn = READ_ONCE(syscall_hooks[orig_nr]);
         if (likely(fn))
-            return fn(orig_nr, regs);
+            ret = fn(orig_nr, regs);
     }
 
-    return -ENOSYS;
+    return ret;
 }
 
 // Register a handler into the dispatcher's routing table.

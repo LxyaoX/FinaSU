@@ -71,6 +71,7 @@ import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.SwipeUp
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.runtime.Composable
@@ -822,6 +823,16 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.rekernel_x_search_summary,
             icon = Icons.Rounded.Bedtime,
             aliases = listOf("rekernel", "tombstone", "freeze", "frozen", "binder"),
+        )
+    )
+    add(
+        SettingsCategory.FUNCTION.page(
+            id = "function.uts_view",
+            titleRes = R.string.settings_uts_view,
+            summaryRes = R.string.settings_uts_view_summary,
+            icon = Icons.Rounded.TextFields,
+            route = Route.UtsView,
+            aliases = listOf("uts", "uname", "kernel version", "内核版本", "伪装"),
         )
     )
 

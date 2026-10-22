@@ -25,7 +25,7 @@ import me.weishu.kernelsu.ui.screen.settings.SettingsUiState
 import me.weishu.kernelsu.ui.theme.ColorMode
 
 class SettingsViewModel(
-    private val repo: SettingsRepository = SettingsRepositoryImpl()
+    private val repo: SettingsRepository = SettingsRepositoryImpl(),
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())

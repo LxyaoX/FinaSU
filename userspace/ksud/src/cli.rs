@@ -40,6 +40,11 @@ enum Commands {
         #[command(subcommand)]
         command: crate::susfs::Command,
     },
+    /// Manage the built-in UTS view (uname spoof)
+    UtsView {
+        #[command(subcommand)]
+        command: crate::uts_view::Command,
+    },
     /// Manage KernelSU modules
     Module {
         #[command(subcommand)]
@@ -763,6 +768,7 @@ pub fn run() -> Result<()> {
     let result = match cli.command {
         Commands::Anykernel3 { zip } => crate::anykernel3::flash(&zip),
         Commands::Susfs { command } => crate::susfs::run(command),
+        Commands::UtsView { command } => crate::uts_view::run(&command),
         Commands::Zygisk { command } => crate::zygisk::run(&command),
         Commands::Sui { command } => crate::sui::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
