@@ -154,7 +154,7 @@ fun TeesimScreen() {
                                 if (status != null && status.keyboxPresent) {
                                     stringResource(
                                         R.string.teesim_keybox_present,
-                                        status.keyboxBytes,
+                                        keyboxSize(status.keyboxBytes),
                                     )
                                 } else {
                                     stringResource(R.string.teesim_keybox_missing)
@@ -304,6 +304,10 @@ fun TeesimScreen() {
         )
     }
 }
+
+/** Human readable keybox size: a raw byte count says nothing about whether a keybox is real. */
+private fun keyboxSize(bytes: Long): String =
+    if (bytes >= 1024) "${bytes / 1024} KB" else "$bytes B"
 
 /** One line per fact that changes what the switch would do, most actionable first. */
 @Composable
