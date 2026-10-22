@@ -1,6 +1,8 @@
 #include <linux/compiler.h>
 #include <linux/cred.h>
 #include <linux/errno.h>
+#include <linux/in.h>
+#include <linux/in6.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/mutex.h>
@@ -28,7 +30,8 @@ static_assert(sizeof(struct ksu_netisolate_config) == 1040, "netisolate ABI drif
 #define NI_HOOK_COUNT (NI_OPERATION_COUNT * 2)
 #define NI_SYSCALL_LIMIT 1024
 #define NI_SENDMMSG_CHECK_MAX 16
-#define NI_SUPPORTED_FLAGS KSU_NETISOLATE_FLAG_STRICT_SOCKET
+#define NI_SUPPORTED_FLAGS \
+    (KSU_NETISOLATE_FLAG_STRICT_SOCKET | KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK)
 
 enum ni_operation {
     NI_CONNECT,
@@ -161,35 +164,86 @@ static bool ni_policy_match(uid_t uid, enum ni_operation op, u32 *policy_flags)
     return selected;
 }
 
-static int ni_sockaddr_target(const void __user *address, bool *target)
+static bool ni_ipv4_loopback(const struct in_addr *address)
+{
+    return ((const u8 *)&address->s_addr)[0] == 127;
+}
+
+static bool ni_ipv6_loopback(const struct in6_addr *address)
+{
+    const u8 *bytes = address->s6_addr;
+    u32 i;
+
+    for (i = 0; i < 10; i++) {
+        if (bytes[i])
+            return false;
+    }
+
+    if (!bytes[10] && !bytes[11]) {
+        for (i = 12; i < 15; i++) {
+            if (bytes[i])
+                return false;
+        }
+        return bytes[15] == 1;
+    }
+
+    return bytes[10] == 0xff && bytes[11] == 0xff && bytes[12] == 127;
+}
+
+static int ni_sockaddr_target(const void __user *address, unsigned int address_length,
+                              bool *target, bool *loopback)
 {
     __u16 family;
 
-    if (!address) {
-        *target = false;
+    *target = false;
+    *loopback = false;
+    if (!address)
         return 0;
-    }
     if (copy_from_user(&family, address, sizeof(family)))
         return -EFAULT;
-    *target = family == AF_INET || family == AF_INET6;
+
+    if (family == AF_INET) {
+        struct sockaddr_in addr;
+
+        if (address_length < sizeof(addr))
+            return 0;
+        if (copy_from_user(&addr, address, sizeof(addr)))
+            return -EFAULT;
+        *target = true;
+        *loopback = ni_ipv4_loopback(&addr.sin_addr);
+    } else if (family == AF_INET6) {
+        struct sockaddr_in6 addr;
+
+        if (address_length < sizeof(addr))
+            return 0;
+        if (copy_from_user(&addr, address, sizeof(addr)))
+            return -EFAULT;
+        *target = true;
+        *loopback = ni_ipv6_loopback(&addr.sin6_addr);
+    }
     return 0;
 }
 
-static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool *target)
+static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool allow_loopback,
+                             bool *target)
 {
     void __user *name;
+    int name_length;
+    bool address_target;
+    bool loopback;
     int ret;
 
+    *target = false;
     if (compat) {
         struct compat_msghdr __user *msg =
             (struct compat_msghdr __user *)ni_user_ptr(regs, 1, true);
         compat_uptr_t raw_name;
 
         if (!msg) {
-            *target = false;
             return 0;
         }
-        if (get_user(raw_name, &msg->msg_name))
+        if (get_user(raw_name, &msg->msg_name) ||
+            get_user(name_length, &msg->msg_namelen))
             return -EFAULT;
         name = compat_ptr(raw_name);
     } else {
@@ -198,19 +252,25 @@ static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool *targ
         void __user *raw_name = NULL;
 
         if (!msg) {
-            *target = false;
             return 0;
         }
-        if (get_user(raw_name, &msg->msg_name))
+        if (get_user(raw_name, &msg->msg_name) ||
+            get_user(name_length, &msg->msg_namelen))
             return -EFAULT;
         name = raw_name;
     }
 
-    ret = ni_sockaddr_target(name, target);
-    return ret;
+    if (name_length < 0)
+        return 0;
+    ret = ni_sockaddr_target(name, name_length, &address_target, &loopback);
+    if (ret)
+        return ret;
+    *target = address_target && !(allow_loopback && loopback);
+    return 0;
 }
 
-static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool *target)
+static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allow_loopback,
+                              bool *target)
 {
     unsigned long base = ni_arg(regs, 1, compat);
     unsigned long vlen = ni_arg(regs, 2, compat);
@@ -223,7 +283,9 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool *tar
 
     for (i = 0; i < count; i++) {
         void __user *name;
-        bool item_target;
+        bool address_target;
+        bool loopback;
+        int name_length;
         int ret;
 
         if (compat) {
@@ -234,7 +296,8 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool *tar
             if (offset > ULONG_MAX - base)
                 return -EFAULT;
             entry = (struct compat_mmsghdr __user *)(base + offset);
-            if (get_user(raw_name, &entry->msg_hdr.msg_name))
+            if (get_user(raw_name, &entry->msg_hdr.msg_name) ||
+                get_user(name_length, &entry->msg_hdr.msg_namelen))
                 return -EFAULT;
             name = compat_ptr(raw_name);
         } else {
@@ -245,17 +308,20 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool *tar
             if (offset > ULONG_MAX - base)
                 return -EFAULT;
             entry = (struct mmsghdr __user *)(base + offset);
-            if (get_user(raw_name, &entry->msg_hdr.msg_name))
+            if (get_user(raw_name, &entry->msg_hdr.msg_name) ||
+                get_user(name_length, &entry->msg_hdr.msg_namelen))
                 return -EFAULT;
             name = raw_name;
         }
 
         if (!name)
             continue;
-        ret = ni_sockaddr_target(name, &item_target);
+        if (name_length < 0)
+            continue;
+        ret = ni_sockaddr_target(name, name_length, &address_target, &loopback);
         if (ret)
             return ret;
-        if (item_target) {
+        if (address_target && !(allow_loopback && loopback)) {
             *target = true;
             return 0;
         }
@@ -266,26 +332,34 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool *tar
 static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operation op, bool compat)
 {
     u32 policy_flags = 0;
+    bool address_target;
+    bool allow_loopback;
+    bool loopback;
     bool target = false;
 
     if (!ni_policy_match(current_uid().val, op, &policy_flags))
         return false;
+    allow_loopback = policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK;
 
     switch (op) {
     case NI_CONNECT:
-        if (ni_sockaddr_target(ni_user_ptr(regs, 1, compat), &target))
+        if (ni_sockaddr_target(ni_user_ptr(regs, 1, compat), ni_arg(regs, 2, compat),
+                               &address_target, &loopback))
             return false;
+        target = address_target && !(allow_loopback && loopback);
         break;
     case NI_SENDTO:
-        if (ni_sockaddr_target(ni_user_ptr(regs, 4, compat), &target))
+        if (ni_sockaddr_target(ni_user_ptr(regs, 4, compat), ni_arg(regs, 5, compat),
+                               &address_target, &loopback))
             return false;
+        target = address_target && !(allow_loopback && loopback);
         break;
     case NI_SENDMSG:
-        if (ni_sendmsg_target(regs, compat, &target))
+        if (ni_sendmsg_target(regs, compat, allow_loopback, &target))
             return false;
         break;
     case NI_SENDMMSG:
-        if (ni_sendmmsg_target(regs, compat, &target))
+        if (ni_sendmmsg_target(regs, compat, allow_loopback, &target))
             return false;
         break;
     case NI_SOCKET:
@@ -489,10 +563,15 @@ static void ni_publish_locked(const struct ksu_netisolate_config *config)
 
 static int ni_validate_config(const struct ksu_netisolate_config *config)
 {
+    u32 policy_flags;
     u32 i;
     u32 j;
 
     if (config->reserved & ~NI_SUPPORTED_FLAGS)
+        return -EINVAL;
+    policy_flags = config->reserved & KSU_NETISOLATE_FLAG_MASK;
+    if ((policy_flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET) &&
+        (policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK))
         return -EINVAL;
     if (config->count > KSU_NETISOLATE_MAX_UIDS)
         return -EINVAL;

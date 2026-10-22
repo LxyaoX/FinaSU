@@ -85,7 +85,10 @@ class NetIsolateViewModelTest {
         )
         advanceUntilIdle()
 
-        assertEquals(listOf(Triple(true, listOf(10100, 10200), false)), repository.saves)
+        assertEquals(
+            listOf(SaveCall(true, listOf(10100, 10200), false, false)),
+            repository.saves,
+        )
         assertEquals(listOf(10100, 10200), model.uiState.value.status.uids)
     }
 
@@ -103,8 +106,9 @@ class NetIsolateViewModelTest {
         model.setStrictSocket(true)
         advanceUntilIdle()
 
-        assertEquals(listOf(Triple(true, listOf(10123), true)), repository.saves)
+        assertEquals(listOf(SaveCall(true, listOf(10123), true, false)), repository.saves)
         assertTrue(model.uiState.value.status.strictSocket)
+        assertFalse(model.uiState.value.status.allowLoopback)
     }
 
     @Test
@@ -119,6 +123,62 @@ class NetIsolateViewModelTest {
         assertTrue(repository.saves.isEmpty())
         assertEquals("message", model.uiState.value.message)
         assertFalse(model.uiState.value.status.strictSocket)
+    }
+
+    @Test
+    fun `enabling strict socket clears loopback exemption`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            allowLoopbackSupported = true,
+            allowLoopback = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setStrictSocket(true)
+        advanceUntilIdle()
+
+        assertEquals(listOf(SaveCall(true, listOf(10123), true, false)), repository.saves)
+        assertTrue(model.uiState.value.status.strictSocket)
+        assertFalse(model.uiState.value.status.allowLoopback)
+    }
+
+    @Test
+    fun `enabling loopback clears strict socket`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            strictSocket = true,
+            allowLoopbackSupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setAllowLoopback(true)
+        advanceUntilIdle()
+
+        assertEquals(listOf(SaveCall(true, listOf(10123), false, true)), repository.saves)
+        assertFalse(model.uiState.value.status.strictSocket)
+        assertTrue(model.uiState.value.status.allowLoopback)
+    }
+
+    @Test
+    fun `loopback is rejected when the kernel cannot support it`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(supported = true, uids = listOf(10123))
+        val model = model()
+        advanceUntilIdle()
+
+        model.setAllowLoopback(true)
+        advanceUntilIdle()
+
+        assertTrue(repository.saves.isEmpty())
+        assertEquals("message", model.uiState.value.message)
+        assertFalse(model.uiState.value.status.allowLoopback)
     }
 
     @Test
@@ -165,7 +225,7 @@ class NetIsolateViewModelTest {
 
     private class FakeNetIsolateDataSource : NetIsolateDataSource {
         var current = NetIsolateStatus()
-        val saves = mutableListOf<Triple<Boolean, List<Int>, Boolean>>()
+        val saves = mutableListOf<SaveCall>()
         var operationError: Throwable? = null
         var disableCalls = 0
         var clearCalls = 0
@@ -174,13 +234,19 @@ class NetIsolateViewModelTest {
 
         override suspend fun loadApps(): List<UtsTargetApp> = emptyList()
 
-        override suspend fun save(enabled: Boolean, uids: List<Int>, strictSocket: Boolean) {
+        override suspend fun save(
+            enabled: Boolean,
+            uids: List<Int>,
+            strictSocket: Boolean,
+            allowLoopback: Boolean,
+        ) {
             val normalized = uids.distinct().sorted()
-            saves += Triple(enabled, normalized, strictSocket)
+            saves += SaveCall(enabled, normalized, strictSocket, allowLoopback)
             current = current.copy(
                 enabled = enabled,
                 uids = normalized,
                 strictSocket = strictSocket,
+                allowLoopback = allowLoopback,
             )
         }
 
@@ -195,4 +261,11 @@ class NetIsolateViewModelTest {
             current = NetIsolateStatus(supported = true)
         }
     }
+
+    private data class SaveCall(
+        val enabled: Boolean,
+        val uids: List<Int>,
+        val strictSocket: Boolean,
+        val allowLoopback: Boolean,
+    )
 }

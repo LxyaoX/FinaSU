@@ -188,6 +188,26 @@ fun NetIsolateScreen() {
                         onCheckedChange = viewModel::setStrictSocket,
                     )
                 }
+                item(visible = status.enabled) {
+                    SegmentedSwitchItem(
+                        icon = Icons.Filled.Info,
+                        title = stringResource(R.string.netisolate_allow_loopback),
+                        summary = stringResource(
+                            when {
+                                !status.allowLoopbackSupported ->
+                                    R.string.netisolate_allow_loopback_unsupported
+                                status.strictSocket ->
+                                    R.string.netisolate_strict_loopback_conflict
+                                else -> R.string.netisolate_allow_loopback_summary
+                            },
+                        ),
+                        checked = status.allowLoopback,
+                        enabled = canEdit &&
+                            status.allowLoopbackSupported &&
+                            !status.strictSocket,
+                        onCheckedChange = viewModel::setAllowLoopback,
+                    )
+                }
                 item {
                     SegmentedListItem(
                         headlineContent = { Text(stringResource(R.string.netisolate_target_apps)) },
@@ -231,9 +251,19 @@ fun NetIsolateScreen() {
                         leadingContent = { Icon(Icons.Filled.Info, null) },
                     )
                 }
-                item {
+                item(visible = status.enabled) {
                     SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.netisolate_loopback)) },
+                        headlineContent = {
+                            Text(
+                                stringResource(
+                                    if (status.allowLoopback) {
+                                        R.string.netisolate_allow_loopback_proxy_warning
+                                    } else {
+                                        R.string.netisolate_loopback_blocked
+                                    },
+                                ),
+                            )
+                        },
                         leadingContent = { Icon(Icons.Filled.Security, null) },
                     )
                 }

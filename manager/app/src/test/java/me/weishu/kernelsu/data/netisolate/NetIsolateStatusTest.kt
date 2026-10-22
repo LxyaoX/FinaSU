@@ -9,14 +9,16 @@ class NetIsolateStatusTest {
     @Test
     fun `parses the ksud status contract`() {
         val status = NetIsolateStatus.parse(
-            """{"supported":true,"enabled":true,"compat_supported":true,"strict_socket_supported":true,"strict_socket":true,"uids":[10123,10200]}""",
+            """{"supported":true,"enabled":true,"compat_supported":true,"strict_socket_supported":true,"strict_socket":false,"allow_loopback_supported":true,"allow_loopback":true,"uids":[10123,10200]}""",
         )
 
         assertTrue(status.supported)
         assertTrue(status.enabled)
         assertTrue(status.compatSupported)
         assertTrue(status.strictSocketSupported)
-        assertTrue(status.strictSocket)
+        assertFalse(status.strictSocket)
+        assertTrue(status.allowLoopbackSupported)
+        assertTrue(status.allowLoopback)
         assertEquals(listOf(10123, 10200), status.uids)
     }
 
@@ -29,6 +31,8 @@ class NetIsolateStatusTest {
         assertFalse(status.compatSupported)
         assertFalse(status.strictSocketSupported)
         assertFalse(status.strictSocket)
+        assertFalse(status.allowLoopbackSupported)
+        assertFalse(status.allowLoopback)
         assertTrue(status.uids.isEmpty())
     }
 }

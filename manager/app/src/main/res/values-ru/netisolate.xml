@@ -9,7 +9,7 @@
     <string name="netisolate_apps_failed">Не удалось загрузить установленные приложения</string>
     <string name="netisolate_status_failed">Не удалось прочитать состояние сетевой изоляции</string>
     <string name="netisolate_operation_failed">Не удалось выполнить действие сетевой изоляции</string>
-    <string name="netisolate_enabled_summary">Выбранные приложения не могут открывать новые интернет- и loopback-подключения</string>
+    <string name="netisolate_enabled_summary">Выбранные приложения не могут открывать новые интернет-подключения</string>
     <string name="netisolate_disabled_summary">Выключено. При включении блокируются новые исходящие подключения выбранных приложений</string>
     <string name="netisolate_unsupported">Это ядро не поддерживает сетевую изоляцию</string>
     <string name="netisolate_unsupported_summary">Обновите ядро или используйте сборку с поддержкой сетевой изоляции</string>
@@ -17,7 +17,12 @@
     <string name="netisolate_no_targets">Приложения не выбраны</string>
     <string name="netisolate_target_count">Выбрано %1$d из %2$d</string>
     <string name="netisolate_existing_connections">Существующие подключения не разрываются</string>
-    <string name="netisolate_loopback">Loopback-подключения IPv4 и IPv6 также блокируются</string>
+    <string name="netisolate_allow_loopback">Разрешить локальный loopback</string>
+    <string name="netisolate_allow_loopback_summary">Разрешить выбранным приложениям подключения к 127.0.0.0/8 и ::1</string>
+    <string name="netisolate_allow_loopback_unsupported">Это ядро не поддерживает исключение для loopback</string>
+    <string name="netisolate_allow_loopback_proxy_warning">Локальный прокси может перенаправлять loopback-трафик в интернет; включайте только при необходимости</string>
+    <string name="netisolate_loopback_blocked">Loopback-подключения IPv4 и IPv6 блокируются</string>
+    <string name="netisolate_strict_loopback_conflict">Строгая блокировка сокетов включена; отключите её перед разрешением loopback</string>
     <string name="netisolate_manager_exempt">Менеджер всегда исключён, включая рабочие профили</string>
     <string name="netisolate_compat_supported">Поддерживаются 32- и 64-битные приложения</string>
     <string name="netisolate_compat_unsupported">Это ядро не покрывает 32-битные приложения</string>

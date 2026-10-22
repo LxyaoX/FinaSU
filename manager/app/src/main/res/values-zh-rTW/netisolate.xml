@@ -9,7 +9,7 @@
     <string name="netisolate_apps_failed">讀取已安裝應用程式失敗</string>
     <string name="netisolate_status_failed">讀取網路隔離狀態失敗</string>
     <string name="netisolate_operation_failed">網路隔離操作失敗</string>
-    <string name="netisolate_enabled_summary">所選應用程式無法建立新的網際網路或回送連線</string>
+    <string name="netisolate_enabled_summary">所選應用程式無法建立新的網際網路連線</string>
     <string name="netisolate_disabled_summary">已關閉。啟用後會阻止所選應用程式建立新的對外連線</string>
     <string name="netisolate_unsupported">目前核心不支援網路隔離</string>
     <string name="netisolate_unsupported_summary">請更新核心，或使用包含網路隔離支援的核心</string>
@@ -17,7 +17,12 @@
     <string name="netisolate_no_targets">尚未選擇應用程式</string>
     <string name="netisolate_target_count">已選擇 %1$d / %2$d</string>
     <string name="netisolate_existing_connections">已建立的連線不會被中斷</string>
-    <string name="netisolate_loopback">回送 IPv4 與 IPv6 連線也會被封鎖</string>
+    <string name="netisolate_allow_loopback">允許本機回送</string>
+    <string name="netisolate_allow_loopback_summary">允許所選應用程式存取 127.0.0.0/8 與 ::1</string>
+    <string name="netisolate_allow_loopback_unsupported">目前核心不支援回送豁免</string>
+    <string name="netisolate_allow_loopback_proxy_warning">本機代理可能將回送流量轉送至網際網路，請僅在需要時開啟</string>
+    <string name="netisolate_loopback_blocked">回送 IPv4 與 IPv6 連線會被封鎖</string>
+    <string name="netisolate_strict_loopback_conflict">嚴格封鎖通訊端已開啟，請先關閉再允許回送</string>
     <string name="netisolate_manager_exempt">管理員程式一律豁免，包括工作資料中的管理員程式</string>
     <string name="netisolate_compat_supported">同時涵蓋 32 位元與 64 位元應用程式</string>
     <string name="netisolate_compat_unsupported">目前核心無法涵蓋 32 位元應用程式</string>

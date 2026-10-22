@@ -9,7 +9,7 @@
     <string name="netisolate_apps_failed">インストール済みアプリを読み込めませんでした</string>
     <string name="netisolate_status_failed">ネットワーク分離の状態を読み取れませんでした</string>
     <string name="netisolate_operation_failed">ネットワーク分離の操作に失敗しました</string>
-    <string name="netisolate_enabled_summary">選択したアプリは新しいインターネット接続やループバック接続を開けません</string>
+    <string name="netisolate_enabled_summary">選択したアプリは新しいインターネット接続を開けません</string>
     <string name="netisolate_disabled_summary">オフです。有効にすると選択したアプリの新しい送信接続をブロックします</string>
     <string name="netisolate_unsupported">このカーネルはネットワーク分離に対応していません</string>
     <string name="netisolate_unsupported_summary">カーネルを更新するか、ネットワーク分離に対応したビルドを使用してください</string>
@@ -17,7 +17,12 @@
     <string name="netisolate_no_targets">アプリが選択されていません</string>
     <string name="netisolate_target_count">%1$d / %2$d 件選択中</string>
     <string name="netisolate_existing_connections">確立済みの接続は切断されません</string>
-    <string name="netisolate_loopback">ループバック IPv4 および IPv6 接続もブロックされます</string>
+    <string name="netisolate_allow_loopback">ローカルループバックを許可</string>
+    <string name="netisolate_allow_loopback_summary">選択したアプリに 127.0.0.0/8 と ::1 への接続を許可します</string>
+    <string name="netisolate_allow_loopback_unsupported">このカーネルはループバック免除に対応していません</string>
+    <string name="netisolate_allow_loopback_proxy_warning">ローカルプロキシはループバック通信をインターネットへ転送できます。必要な場合のみ有効にしてください</string>
+    <string name="netisolate_loopback_blocked">ループバック IPv4 および IPv6 接続はブロックされます</string>
+    <string name="netisolate_strict_loopback_conflict">厳格なソケットブロックが有効です。ループバックを許可する前に無効にしてください</string>
     <string name="netisolate_manager_exempt">マネージャーはワークプロファイル内も含めて常に除外されます</string>
     <string name="netisolate_compat_supported">32 ビットと 64 ビットの両方のアプリに対応します</string>
     <string name="netisolate_compat_unsupported">このカーネルは 32 ビットアプリに対応していません</string>

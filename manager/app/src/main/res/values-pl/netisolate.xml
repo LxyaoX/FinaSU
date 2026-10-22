@@ -9,7 +9,7 @@
     <string name="netisolate_apps_failed">Nie udało się wczytać zainstalowanych aplikacji</string>
     <string name="netisolate_status_failed">Nie udało się odczytać stanu izolacji sieci</string>
     <string name="netisolate_operation_failed">Operacja izolacji sieci nie powiodła się</string>
-    <string name="netisolate_enabled_summary">Wybrane aplikacje nie mogą otwierać nowych połączeń internetowych ani lokalnych</string>
+    <string name="netisolate_enabled_summary">Wybrane aplikacje nie mogą otwierać nowych połączeń internetowych</string>
     <string name="netisolate_disabled_summary">Wyłączone. Włączenie zablokuje nowe połączenia wychodzące wybranych aplikacji</string>
     <string name="netisolate_unsupported">To jądro nie obsługuje izolacji sieci</string>
     <string name="netisolate_unsupported_summary">Zaktualizuj jądro lub użyj kompilacji z obsługą izolacji sieci</string>
@@ -17,7 +17,12 @@
     <string name="netisolate_no_targets">Nie wybrano aplikacji</string>
     <string name="netisolate_target_count">Wybrano %1$d z %2$d</string>
     <string name="netisolate_existing_connections">Istniejące połączenia nie zostaną rozłączone</string>
-    <string name="netisolate_loopback">Połączenia lokalne IPv4 i IPv6 również są blokowane</string>
+    <string name="netisolate_allow_loopback">Zezwalaj na lokalną pętlę zwrotną</string>
+    <string name="netisolate_allow_loopback_summary">Zezwalaj wybranym aplikacjom na 127.0.0.0/8 i ::1</string>
+    <string name="netisolate_allow_loopback_unsupported">To jądro nie obsługuje wyjątku dla pętli zwrotnej</string>
+    <string name="netisolate_allow_loopback_proxy_warning">Lokalne proxy może przekazywać ruch pętli zwrotnej do internetu; włącz tylko w razie potrzeby</string>
+    <string name="netisolate_loopback_blocked">Połączenia pętli zwrotnej IPv4 i IPv6 są blokowane</string>
+    <string name="netisolate_strict_loopback_conflict">Rygorystyczne blokowanie socketów jest aktywne; wyłącz je przed zezwoleniem na pętlę zwrotną</string>
     <string name="netisolate_manager_exempt">Menedżer jest zawsze wyjątkiem, także w profilach służbowych</string>
     <string name="netisolate_compat_supported">Obsługiwane są aplikacje 32- i 64-bitowe</string>
     <string name="netisolate_compat_unsupported">To jądro nie obsługuje aplikacji 32-bitowych</string>

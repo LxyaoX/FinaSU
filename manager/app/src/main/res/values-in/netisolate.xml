@@ -9,7 +9,7 @@
     <string name="netisolate_apps_failed">Gagal memuat aplikasi yang terpasang</string>
     <string name="netisolate_status_failed">Gagal membaca status isolasi jaringan</string>
     <string name="netisolate_operation_failed">Tindakan isolasi jaringan gagal</string>
-    <string name="netisolate_enabled_summary">Aplikasi terpilih tidak dapat membuka koneksi internet atau loopback baru</string>
+    <string name="netisolate_enabled_summary">Aplikasi terpilih tidak dapat membuka koneksi internet baru</string>
     <string name="netisolate_disabled_summary">Nonaktif. Mengaktifkannya akan memblokir koneksi keluar baru dari aplikasi terpilih</string>
     <string name="netisolate_unsupported">Kernel ini tidak mendukung isolasi jaringan</string>
     <string name="netisolate_unsupported_summary">Perbarui kernel atau gunakan build dengan dukungan isolasi jaringan</string>
@@ -17,7 +17,12 @@
     <string name="netisolate_no_targets">Belum ada aplikasi yang dipilih</string>
     <string name="netisolate_target_count">%1$d dari %2$d dipilih</string>
     <string name="netisolate_existing_connections">Koneksi yang sudah ada tidak akan diputus</string>
-    <string name="netisolate_loopback">Koneksi loopback IPv4 dan IPv6 juga diblokir</string>
+    <string name="netisolate_allow_loopback">Izinkan loopback lokal</string>
+    <string name="netisolate_allow_loopback_summary">Izinkan 127.0.0.0/8 dan ::1 untuk aplikasi terpilih</string>
+    <string name="netisolate_allow_loopback_unsupported">Kernel ini tidak mendukung pengecualian loopback</string>
+    <string name="netisolate_allow_loopback_proxy_warning">Proksi lokal dapat meneruskan lalu lintas loopback ke internet; aktifkan hanya bila diperlukan</string>
+    <string name="netisolate_loopback_blocked">Koneksi loopback IPv4 dan IPv6 diblokir</string>
+    <string name="netisolate_strict_loopback_conflict">Pemblokiran socket ketat aktif; nonaktifkan sebelum mengizinkan loopback</string>
     <string name="netisolate_manager_exempt">Manajer selalu dikecualikan, termasuk di profil kerja</string>
     <string name="netisolate_compat_supported">Mencakup aplikasi 32-bit dan 64-bit</string>
     <string name="netisolate_compat_unsupported">Kernel ini tidak mencakup aplikasi 32-bit</string>

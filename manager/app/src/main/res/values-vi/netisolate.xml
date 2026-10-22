@@ -9,7 +9,7 @@
     <string name="netisolate_apps_failed">Không thể tải các ứng dụng đã cài</string>
     <string name="netisolate_status_failed">Không thể đọc trạng thái cô lập mạng</string>
     <string name="netisolate_operation_failed">Thao tác cô lập mạng thất bại</string>
-    <string name="netisolate_enabled_summary">Các ứng dụng đã chọn không thể mở kết nối internet hoặc loopback mới</string>
+    <string name="netisolate_enabled_summary">Các ứng dụng đã chọn không thể mở kết nối internet mới</string>
     <string name="netisolate_disabled_summary">Đang tắt. Khi bật, các kết nối đi ra mới từ ứng dụng đã chọn sẽ bị chặn</string>
     <string name="netisolate_unsupported">Kernel này không hỗ trợ cô lập mạng</string>
     <string name="netisolate_unsupported_summary">Cập nhật kernel hoặc dùng bản dựng có hỗ trợ cô lập mạng</string>
@@ -17,7 +17,12 @@
     <string name="netisolate_no_targets">Chưa chọn ứng dụng</string>
     <string name="netisolate_target_count">Đã chọn %1$d trên %2$d</string>
     <string name="netisolate_existing_connections">Các kết nối hiện có không bị ngắt</string>
-    <string name="netisolate_loopback">Kết nối loopback IPv4 và IPv6 cũng bị chặn</string>
+    <string name="netisolate_allow_loopback">Cho phép loopback cục bộ</string>
+    <string name="netisolate_allow_loopback_summary">Cho phép các ứng dụng đã chọn truy cập 127.0.0.0/8 và ::1</string>
+    <string name="netisolate_allow_loopback_unsupported">Kernel này không hỗ trợ miễn trừ loopback</string>
+    <string name="netisolate_allow_loopback_proxy_warning">Proxy cục bộ có thể chuyển lưu lượng loopback ra internet; chỉ bật khi cần thiết</string>
+    <string name="netisolate_loopback_blocked">Kết nối loopback IPv4 và IPv6 bị chặn</string>
+    <string name="netisolate_strict_loopback_conflict">Chặn socket nghiêm ngặt đang bật; hãy tắt trước khi cho phép loopback</string>
     <string name="netisolate_manager_exempt">Trình quản lý luôn được miễn trừ, kể cả trong hồ sơ công việc</string>
     <string name="netisolate_compat_supported">Bao phủ ứng dụng 32 bit và 64 bit</string>
     <string name="netisolate_compat_unsupported">Kernel này không bao phủ ứng dụng 32 bit</string>

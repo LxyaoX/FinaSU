@@ -15,6 +15,7 @@ const MAX_INPUT_BYTES: usize = 64 * 1024;
 const FLAG_MASK: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_MASK;
 const SUPPORTED_SHIFT: u32 = ksu_uapi::KSU_NETISOLATE_SUPPORTED_SHIFT;
 const STRICT_SOCKET_FLAG: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_STRICT_SOCKET;
+const ALLOW_LOOPBACK_FLAG: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK;
 
 #[derive(Debug, Clone, clap::Subcommand)]
 pub enum Command {
@@ -39,6 +40,8 @@ struct ConfigFile {
     uids: Vec<u32>,
     #[serde(default)]
     strict_socket: bool,
+    #[serde(default)]
+    allow_loopback: bool,
 }
 
 struct ConfigLock(File);
@@ -112,15 +115,22 @@ fn normalize(mut config: ConfigFile) -> Result<ConfigFile> {
     if config.enabled && config.uids.is_empty() {
         bail!("Network isolation requires at least one UID when enabled");
     }
+    if config.strict_socket && config.allow_loopback {
+        bail!("Strict socket mode and loopback exemption cannot be enabled together");
+    }
     Ok(config)
 }
 
 const fn requested_flags(config: &ConfigFile) -> u32 {
+    let mut flags = 0;
+
     if config.strict_socket {
-        STRICT_SOCKET_FLAG
-    } else {
-        0
+        flags |= STRICT_SOCKET_FLAG;
     }
+    if config.allow_loopback {
+        flags |= ALLOW_LOOPBACK_FLAG;
+    }
+    flags
 }
 
 const fn kernel_flags(config: &ksu_uapi::ksu_netisolate_config) -> (u32, u32) {
@@ -138,6 +148,14 @@ const fn strict_socket_active(config: &ksu_uapi::ksu_netisolate_config) -> bool 
     kernel_flags(config).0 & STRICT_SOCKET_FLAG != 0
 }
 
+const fn allow_loopback_supported(config: &ksu_uapi::ksu_netisolate_config) -> bool {
+    kernel_flags(config).1 & ALLOW_LOOPBACK_FLAG != 0
+}
+
+const fn allow_loopback_active(config: &ksu_uapi::ksu_netisolate_config) -> bool {
+    kernel_flags(config).0 & ALLOW_LOOPBACK_FLAG != 0
+}
+
 const fn normalize_snapshot(
     mut snapshot: ksu_uapi::ksu_netisolate_config,
 ) -> ksu_uapi::ksu_netisolate_config {
@@ -145,12 +163,15 @@ const fn normalize_snapshot(
     snapshot
 }
 
-fn ensure_strict_supported(
+fn ensure_flags_supported(
     config: &ConfigFile,
     kernel: Option<&ksu_uapi::ksu_netisolate_config>,
 ) -> Result<()> {
     if config.strict_socket && !kernel.is_some_and(strict_socket_supported) {
         bail!("Kernel does not support strict socket mode");
+    }
+    if config.allow_loopback && !kernel.is_some_and(allow_loopback_supported) {
+        bail!("Kernel does not support loopback exemption");
     }
     Ok(())
 }
@@ -291,7 +312,7 @@ fn apply_with_snapshot(
     config: &ConfigFile,
     snapshot: Option<&ksu_uapi::ksu_netisolate_config>,
 ) -> Result<()> {
-    ensure_strict_supported(config, snapshot)?;
+    ensure_flags_supported(config, snapshot)?;
     apply_kernel_config(&kernel_config(config))
 }
 
@@ -308,7 +329,7 @@ fn persist_with_rollback(
     config: &ConfigFile,
     old_kernel: Option<&ksu_uapi::ksu_netisolate_config>,
 ) -> Result<()> {
-    ensure_strict_supported(config, old_kernel)?;
+    ensure_flags_supported(config, old_kernel)?;
     persist_kernel_with_rollback(config, &kernel_config(config), old_kernel)
 }
 
@@ -342,6 +363,8 @@ fn status() -> Result<()> {
         .is_some_and(|config| config.compat_supported != 0);
     let strict_supported = kernel.as_ref().is_some_and(strict_socket_supported);
     let strict_socket = kernel.as_ref().is_some_and(strict_socket_active);
+    let allow_loopback_supported = kernel.as_ref().is_some_and(allow_loopback_supported);
+    let allow_loopback = kernel.as_ref().is_some_and(allow_loopback_active);
     let uids = kernel.as_ref().map_or_else(Vec::new, |config| {
         let count = (config.count as usize).min(ksu_uapi::KSU_NETISOLATE_MAX_UIDS as usize);
         config.uids[..count].to_vec()
@@ -354,6 +377,8 @@ fn status() -> Result<()> {
             "compat_supported": compat_supported,
             "strict_socket_supported": strict_supported,
             "strict_socket": strict_socket,
+            "allow_loopback_supported": allow_loopback_supported,
+            "allow_loopback": allow_loopback,
             "uids": uids,
         })
     );
@@ -393,6 +418,7 @@ fn disable() -> Result<()> {
         enabled: false,
         uids: Vec::new(),
         strict_socket: false,
+        allow_loopback: false,
     });
     config.enabled = false;
     let kernel = disabled_kernel_config(&config, &old);
@@ -405,6 +431,7 @@ fn clear() -> Result<()> {
         enabled: false,
         uids: Vec::new(),
         strict_socket: false,
+        allow_loopback: false,
     };
     match ksucalls::get_netisolate_config() {
         Ok(_) => apply(&empty)?,
@@ -464,11 +491,12 @@ pub fn boot_apply() {
 mod tests {
     use super::*;
 
-    fn config(enabled: bool, strict_socket: bool) -> ConfigFile {
+    fn config(enabled: bool, strict_socket: bool, allow_loopback: bool) -> ConfigFile {
         ConfigFile {
             enabled,
             uids: vec![10123],
             strict_socket,
+            allow_loopback,
         }
     }
 
@@ -482,16 +510,41 @@ mod tests {
     }
 
     #[test]
-    fn legacy_json_defaults_strict_socket_to_false() {
+    fn legacy_json_defaults_policy_flags_to_false() {
         let config: ConfigFile =
             serde_json::from_str(r#"{"enabled":true,"uids":[10123]}"#).unwrap();
         assert!(!config.strict_socket);
+        assert!(!config.allow_loopback);
     }
 
     #[test]
     fn strict_socket_maps_to_the_shared_flag() {
-        assert_eq!(STRICT_SOCKET_FLAG, requested_flags(&config(true, true)));
-        assert_eq!(0, requested_flags(&config(true, false)));
+        assert_eq!(
+            STRICT_SOCKET_FLAG,
+            requested_flags(&config(true, true, false))
+        );
+        assert_eq!(0, requested_flags(&config(true, false, false)));
+    }
+
+    #[test]
+    fn loopback_maps_to_the_shared_flag() {
+        assert_eq!(
+            ALLOW_LOOPBACK_FLAG,
+            requested_flags(&config(true, false, true))
+        );
+    }
+
+    #[test]
+    fn serialized_config_writes_both_policy_flags() {
+        let serialized = serde_json::to_value(config(true, false, true)).unwrap();
+        assert_eq!(Some(false), serialized["strict_socket"].as_bool());
+        assert_eq!(Some(true), serialized["allow_loopback"].as_bool());
+    }
+
+    #[test]
+    fn strict_and_loopback_are_mutually_exclusive() {
+        let error = normalize(config(true, true, true)).unwrap_err();
+        assert!(error.to_string().contains("cannot be enabled together"));
     }
 
     #[test]
@@ -506,27 +559,42 @@ mod tests {
     }
 
     #[test]
+    fn status_decodes_loopback_capability() {
+        let snapshot = kernel_config(1, ALLOW_LOOPBACK_FLAG, ALLOW_LOOPBACK_FLAG);
+        assert!(allow_loopback_supported(&snapshot));
+        assert!(allow_loopback_active(&snapshot));
+    }
+
+    #[test]
     fn legacy_kernel_does_not_support_strict_socket() {
         let snapshot = kernel_config(0, 0, 0);
         assert!(!strict_socket_supported(&snapshot));
-        assert!(ensure_strict_supported(&config(true, true), Some(&snapshot)).is_err());
+        assert!(ensure_flags_supported(&config(true, true, false), Some(&snapshot)).is_err());
+    }
+
+    #[test]
+    fn legacy_kernel_does_not_support_loopback_exemption() {
+        let snapshot = kernel_config(0, 0, 0);
+        let error =
+            ensure_flags_supported(&config(true, false, true), Some(&snapshot)).unwrap_err();
+        assert!(error.to_string().contains("does not support loopback"));
     }
 
     #[test]
     fn unsupported_strict_config_is_rejected_before_persisting() {
         let old = kernel_config(1, 0, 0);
-        let error = persist_with_rollback(&config(true, true), Some(&old)).unwrap_err();
+        let error = persist_with_rollback(&config(true, true, false), Some(&old)).unwrap_err();
         assert!(error.to_string().contains("does not support strict socket"));
     }
 
     #[test]
     fn disable_masks_requested_flags_to_kernel_capabilities() {
-        let persisted = config(true, true);
+        let persisted = config(true, false, true);
         let old = kernel_config(1, 0, 0);
         let disabled = disabled_kernel_config(&persisted, &old);
         assert_eq!(0, disabled.enabled);
         assert_eq!(0, disabled.reserved & FLAG_MASK);
-        assert!(persisted.strict_socket);
+        assert!(persisted.allow_loopback);
     }
 
     #[test]
@@ -537,11 +605,11 @@ mod tests {
 
     #[test]
     fn readback_compares_active_flags_not_capability_bits() {
-        let request = kernel_config(1, STRICT_SOCKET_FLAG, 0);
-        let readback = kernel_config(1, STRICT_SOCKET_FLAG, STRICT_SOCKET_FLAG);
+        let request = kernel_config(1, ALLOW_LOOPBACK_FLAG, 0);
+        let readback = kernel_config(1, ALLOW_LOOPBACK_FLAG, ALLOW_LOOPBACK_FLAG);
         assert!(kernel_readback_matches(&request, &readback));
 
-        let wrong_active = kernel_config(1, 0, STRICT_SOCKET_FLAG);
+        let wrong_active = kernel_config(1, 0, ALLOW_LOOPBACK_FLAG);
         assert!(!kernel_readback_matches(&request, &wrong_active));
     }
 }
