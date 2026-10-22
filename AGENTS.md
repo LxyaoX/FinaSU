@@ -29,8 +29,6 @@ expects users to install as modules are vendored into this repository and driven
 /js/                          # JavaScript library for module WebUI
 /.github/workflows/           # CI/CD workflows for building and testing
 /scripts/                     # Build and device-test automation scripts
-/design/                      # Design decisions and investigation records - reference only
-/.research/                   # Upstream checkouts and planning notes - reference only
 /docs/                        # Release checklist and API notes
 ```
 
