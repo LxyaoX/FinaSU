@@ -80,7 +80,11 @@ fun TeesimTargetsScreen() {
                 app.packageName.contains(query, ignoreCase = true))
     }
     val visiblePackages = visible.map { it.packageName }
-    val canEdit = !state.appsLoading && !state.writing && !state.loading
+    // Saving replaces the whole app list, so an unreadable or unparsable config must not be
+    // edited: an empty picker would otherwise write an empty profile over the user's selection.
+    val config = state.status?.config
+    val configUsable = config != null && !config.broken
+    val canEdit = !state.appsLoading && !state.writing && !state.loading && configUsable
 
     ExpressiveScaffold(
         topBar = {
@@ -172,6 +176,16 @@ fun TeesimTargetsScreen() {
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
+                    if (!state.loading && !configUsable) {
+                        item(key = "unreadable") {
+                            Text(
+                                text = stringResource(R.string.teesim_read_error),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                        }
+                    }
                     if (reserved.isNotEmpty()) {
                         item(key = "reserved") {
                             Text(

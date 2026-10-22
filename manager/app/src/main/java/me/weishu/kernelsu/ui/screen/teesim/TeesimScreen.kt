@@ -35,6 +35,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.R
@@ -82,6 +83,13 @@ fun TeesimScreen() {
     val webUiLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { /* The module keeps its own state; nothing to refresh here. */ }
+
+    // The target picker and the module WebUI are separate screens with their own state, so the
+    // counts above go stale while they are on top; re-read on the way back.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose { }
+    }
 
     ExpressiveScaffold(
         topBar = {
@@ -156,8 +164,10 @@ fun TeesimScreen() {
                         leadingContent = { Icon(Icons.Filled.Lock, null) },
                         enabled = status?.installed == true && !state.writing,
                         onClick = {
+                            // Some providers report a keybox as octet-stream, so keep the
+                            // declared XML types but do not lock the picker to them.
                             keyboxPicker.launch(
-                                arrayOf("text/xml", "application/xml", "text/plain")
+                                arrayOf("text/xml", "application/xml", "text/plain", "*/*")
                             )
                         },
                         trailingContent = {

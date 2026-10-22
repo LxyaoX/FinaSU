@@ -160,15 +160,21 @@ class TeesimViewModel(
                     // The superuser list is a process-wide cache; fill it once and reuse it here
                     // instead of walking PackageManager a second time.
                     if (SuperUserViewModel.apps.isEmpty()) SuperUserViewModel().fetchAppList()
-                    SuperUserViewModel.apps.map { app ->
-                        TeesimApp(
-                            packageName = app.packageName,
-                            label = app.label,
-                            system = ((app.packageInfo.applicationInfo?.flags ?: 0) and
-                                ApplicationInfo.FLAG_SYSTEM) != 0,
-                            packageInfo = app.packageInfo,
-                        )
-                    }.distinctBy { it.packageName }.sortedBy { it.label.lowercase() }
+                    SuperUserViewModel.apps
+                        // The superuser list carries synthetic rows (WebView Zygote has no
+                        // package name); config.json targets packages, so only real apps fit.
+                        .filter { it.packageName.isNotBlank() && !it.special }
+                        .map { app ->
+                            TeesimApp(
+                                packageName = app.packageName,
+                                label = app.label,
+                                system = ((app.packageInfo.applicationInfo?.flags ?: 0) and
+                                    ApplicationInfo.FLAG_SYSTEM) != 0,
+                                packageInfo = app.packageInfo,
+                            )
+                        }
+                        .distinctBy { it.packageName }
+                        .sortedBy { it.label.lowercase() }
                 }.getOrDefault(emptyList())
             }
             _uiState.update { it.copy(apps = apps, appsLoading = false) }

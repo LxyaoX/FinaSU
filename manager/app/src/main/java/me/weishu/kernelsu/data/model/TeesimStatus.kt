@@ -27,9 +27,6 @@ data class TeesimStatus(
     val webUiAvailable: Boolean = false,
     val config: TeesimConfig = TeesimConfig(),
 ) {
-    /** Everything the daemon needs is on disk, so the next boot loads the hook. */
-    val ready: Boolean get() = installed && enabled && keyboxPresent
-
     /** Packages the simulator serves, i.e. the `default` profile. */
     val targetApps: List<String> get() = config.defaultApps
 

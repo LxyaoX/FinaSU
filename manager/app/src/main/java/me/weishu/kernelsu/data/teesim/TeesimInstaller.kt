@@ -28,7 +28,7 @@ import org.json.JSONObject
  */
 object TeesimInstaller {
     /** Upstream build carried in the assets; keep in sync with the archive and its NOTICE. */
-    const val VERSION = "v4.0 (75-fcf1738)"
+    const val VERSION = "v4.0 (75-fcf1738-release)"
 
     /** Module id, i.e. the directory name under `/data/adb/modules` and the WebUI key. */
     const val MODULE_ID = "teesim"
@@ -48,7 +48,10 @@ object TeesimInstaller {
     private val probeCommands = arrayOf(
         "if [ -d $MODULE_DIR ]; then echo tee:installed=1; else echo tee:installed=0; fi",
         "if [ -e $MODULE_DIR/disable ]; then echo tee:disabled=1; else echo tee:disabled=0; fi",
-        "if pidof teesim >/dev/null 2>&1; then echo tee:running=1; else echo tee:running=0; fi",
+        // `pidof` matches the short process name; `pgrep -f` covers a kernel where the nice name
+        // was truncated, so a live daemon is never reported as stopped.
+        "if pidof teesim >/dev/null 2>&1 || pgrep -f org.matrix.teesim.App >/dev/null 2>&1; " +
+            "then echo tee:running=1; else echo tee:running=0; fi",
         "if [ -s $KEYBOX_PATH ]; then echo tee:keybox=1; else echo tee:keybox=0; fi",
         "if [ -f $KEYBOX_PATH ]; then echo \"tee:keyboxbytes=\$(stat -c %s $KEYBOX_PATH)\"; " +
             "else echo tee:keyboxbytes=0; fi",
@@ -71,6 +74,13 @@ object TeesimInstaller {
      * keybox or their profile assignments.
      */
     fun install() {
+        // Replacing the tree under a live daemon would leave it running from deleted inodes, i.e.
+        // on the previous build until the next reboot. Stop it first, then bring the boot script
+        // back only if it had been running: a fresh install must keep waiting for the boot
+        // sepolicy rule instead of starting a hook that cannot inject yet.
+        val wasRunning = status().daemonRunning
+        if (wasRunning) stopDaemon()
+
         val stage = File(ksuApp.cacheDir, STAGE_DIR)
         stage.deleteRecursively()
         check(stage.mkdirs() || stage.isDirectory) { "could not create ${stage.absolutePath}" }
@@ -100,10 +110,12 @@ object TeesimInstaller {
             "for ts in /data/adb/modules/tricky_store /data/adb/modules_update/tricky_store; " +
                 "do if [ -d \"\$ts\" ] && [ ! -e \"\$ts/disable\" ]; then touch \"\$ts/disable\"; fi; done",
             "rm -f $MODULE_DIR/disable $MODULE_DIR/remove",
-            "ls $MODULE_DIR/module.prop >/dev/null",
+            // Guard against a wrong bundled archive: the daemon only works under this id.
+            "grep -q '^id=teesim' $MODULE_DIR/module.prop",
         )
         stage.deleteRecursively()
         check(result.isSuccess) { "could not install the TEESimulator module into $MODULE_DIR" }
+        if (wasRunning) startDaemon()
     }
 
     /**
@@ -114,8 +126,14 @@ object TeesimInstaller {
      * pending instead of pretending the hook is live; disabling stops the daemon at once.
      */
     fun setEnabled(enabled: Boolean) {
+        val current = status()
+        if (!current.installed) {
+            // Enabling has to install the bundled copy first; disabling an absent module is
+            // already the state the caller asked for.
+            if (enabled) install()
+            return
+        }
         if (enabled) {
-            if (!status().installed) install()
             val result = run("rm -f $MODULE_DIR/disable $MODULE_DIR/remove")
             check(result.isSuccess) { "could not clear the module markers" }
             return
@@ -157,6 +175,9 @@ object TeesimInstaller {
 
     fun removeKeybox() {
         check(run("rm -f $KEYBOX_PATH").isSuccess) { "could not remove $KEYBOX_PATH" }
+        // The daemon resolves the keybox from the configuration and reloads when it changes, so
+        // nudge that file instead of leaving the removed keybox in the daemon's memory.
+        run("touch $CONFIG_PATH")
     }
 
     /**
@@ -201,6 +222,11 @@ object TeesimInstaller {
             "pkill -f '$MODULE_DIR/service.sh'",
             "kill \$(pidof teesim) 2>/dev/null",
         )
+    }
+
+    /** Relaunches the boot script detached, the way ksud starts it at late_start. */
+    private fun startDaemon() {
+        run("nohup sh $MODULE_DIR/service.sh >/dev/null 2>&1 &")
     }
 
     private fun extract(stage: File) {
