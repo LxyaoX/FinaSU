@@ -959,4 +959,17 @@
     <string name="teesim_enabled_toast">已启用</string>
     <string name="teesim_cancel">取消</string>
     <string name="teesim_save">保存</string>
+    <string name="settings_boot_props">开机状态属性</string>
+    <string name="boot_props_search_summary">修正检测器读取的开机与构建属性（flash.locked、verifiedbootstate、vbmeta）</string>
+    <string name="boot_props_loading">正在读取属性状态…</string>
+    <string name="boot_props_read_error">无法读取属性状态</string>
+    <string name="boot_props_no_ksud">找不到 /data/adb/ksud，无法写入只读属性</string>
+    <string name="boot_props_off_clean">未启用；当前所有相关属性都已符合预期</string>
+    <string name="boot_props_off">未启用；开启后在开机时修正 bootloader 与构建属性</string>
+    <string name="boot_props_on">已启用；所有相关属性都符合预期</string>
+    <string name="boot_props_pending">已启用，但这些仍未修正：%1$s</string>
+    <string name="boot_props_enabled_toast">已启用，属性已立即生效</string>
+    <string name="boot_props_enabled_pending_toast">已启用，但有属性未写入成功，详见状态行</string>
+    <string name="boot_props_disabled_toast">已关闭；已写入的值会在下次重启后恢复</string>
+    <string name="boot_props_write_failed">修改属性状态失败</string>
 </resources>

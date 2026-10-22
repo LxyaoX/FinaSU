@@ -611,6 +611,11 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     RekernelXStatusItem(uiState, actions)
                 },
                 {
+                    // The boot state the bootloader reported is the cheapest tell a detector
+                    // has; ksud's built-in resetprop lets the manager correct it without a module.
+                    BootPropsItem(uiState, actions)
+                },
+                {
                     // TEESimulator keeps its state on disk, not in the settings snapshot: this row
                     // is a door, and the page reads the module itself when it opens.
                     SegmentedListItem(

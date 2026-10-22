@@ -44,6 +44,7 @@ class SettingsViewModel(
                 isFolkMountLoading = true,
                 isFolkZygiskLoading = true,
                 isRekernelXLoading = true,
+                isBootPropsLoading = true,
             )
         }
         viewModelScope.launch {
@@ -104,6 +105,7 @@ class SettingsViewModel(
             val nomountResult = repo.getNomountStatus()
             val folkZygiskResult = repo.getFolkZygiskStatus()
             val rekernelXResult = repo.getRekernelXStatus()
+            val bootPropsResult = repo.getBootPropsStatus()
             val suiResult = repo.getSuiStatus()
 
             // The home card's SUSFS row switch only makes sense when the kernel reports SUSFS.
@@ -176,6 +178,9 @@ class SettingsViewModel(
                     rekernelXStatus = rekernelXResult.getOrNull(),
                     rekernelXReadError = rekernelXResult.isFailure,
                     isRekernelXLoading = false,
+                    bootPropsStatus = bootPropsResult.getOrNull(),
+                    bootPropsReadError = bootPropsResult.isFailure,
+                    isBootPropsLoading = false,
                     suiStatus = suiResult.getOrNull(),
                     suiReadError = suiResult.isFailure,
                     isSuiLoading = false,
@@ -256,6 +261,33 @@ class SettingsViewModel(
                 // module's post-fs-data script loads it at the next boot.
                 status.getOrNull()?.loaded == true -> R.string.rekernel_x_loaded_toast
                 else -> R.string.rekernel_x_reboot_required
+            }
+            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun setBootPropsEnabled(enabled: Boolean) {
+        if (_uiState.value.isBootPropsWriting || _uiState.value.isBootPropsLoading) return
+        ++refreshGeneration
+        _uiState.update { it.copy(isBootPropsWriting = true) }
+        viewModelScope.launch {
+            val result = repo.setBootPropsEnabled(enabled)
+            val status = repo.getBootPropsStatus()
+            _uiState.update {
+                it.copy(
+                    isBootPropsWriting = false,
+                    isBootPropsLoading = false,
+                    bootPropsStatus = status.getOrNull(),
+                    bootPropsReadError = status.isFailure,
+                )
+            }
+            val message = when {
+                result.isFailure -> R.string.boot_props_write_failed
+                !enabled -> R.string.boot_props_disabled_toast
+                // resetprop rewrites the shared property area, so a device that took the values
+                // needs no reboot; anything left is a property this build could not write.
+                status.getOrNull()?.allApplied == true -> R.string.boot_props_enabled_toast
+                else -> R.string.boot_props_enabled_pending_toast
             }
             Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
         }

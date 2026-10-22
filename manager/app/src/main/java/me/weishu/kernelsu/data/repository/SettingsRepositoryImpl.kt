@@ -16,6 +16,8 @@ import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
+import me.weishu.kernelsu.data.bootprops.BootPropsInstaller
+import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
 import me.weishu.kernelsu.data.teesim.TeesimInstaller
@@ -527,6 +529,21 @@ class SettingsRepositoryImpl : SettingsRepository {
             // individual commands: that is what the next boot will act on.
             val after = RekernelXInstaller.status()
             check(after.enabled == enabled) { "ReKernel-X boot state did not change" }
+        }
+    }
+
+    override suspend fun getBootPropsStatus(): Result<BootPropsStatus> = withContext(Dispatchers.IO) {
+        runCatching { BootPropsInstaller.status() }
+    }
+
+    override suspend fun setBootPropsEnabled(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val before = BootPropsInstaller.status()
+            if (enabled) BootPropsInstaller.enable(before) else BootPropsInstaller.disable()
+            // The scripts on disk are the persisted decision, so read them back; the individual
+            // resetprop calls can each succeed while the file never landed.
+            val after = BootPropsInstaller.status()
+            check(after.enabled == enabled) { "boot property scripts did not change" }
         }
     }
 

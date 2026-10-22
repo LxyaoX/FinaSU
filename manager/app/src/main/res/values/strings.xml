@@ -960,4 +960,17 @@
     <string name="teesim_enabled_toast">Enabled</string>
     <string name="teesim_cancel">Cancel</string>
     <string name="teesim_save">Save</string>
+    <string name="settings_boot_props">Boot state properties</string>
+    <string name="boot_props_search_summary">Correct the bootloader and build properties detectors read (flash.locked, verifiedbootstate, vbmeta)</string>
+    <string name="boot_props_loading">Reading the property state…</string>
+    <string name="boot_props_read_error">Could not read the property state</string>
+    <string name="boot_props_no_ksud">/data/adb/ksud is missing, so a read-only property cannot be written</string>
+    <string name="boot_props_off_clean">Off; every tracked property already reads as expected</string>
+    <string name="boot_props_off">Off; turning this on rewrites the bootloader and build properties at boot</string>
+    <string name="boot_props_on">On; every tracked property reads as expected</string>
+    <string name="boot_props_pending">On, but these still deviate: %1$s</string>
+    <string name="boot_props_enabled_toast">Enabled; the properties took effect immediately</string>
+    <string name="boot_props_enabled_pending_toast">Enabled, but some properties could not be written; see the status line</string>
+    <string name="boot_props_disabled_toast">Disabled; the rewritten values revert at the next reboot</string>
+    <string name="boot_props_write_failed">Failed to change the property state</string>
 </resources>

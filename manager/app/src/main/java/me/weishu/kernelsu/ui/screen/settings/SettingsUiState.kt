@@ -8,6 +8,7 @@ import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
+import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.data.themestore.ThemeStoreMode
@@ -85,6 +86,13 @@ data class SettingsUiState(
     val rekernelXReadError: Boolean = false,
     val isRekernelXWriting: Boolean = false,
 
+    // Boot-property rewrite. Only the value read back from the device is kept: the scripts that
+    // carry the decision live in /data/adb, not in the settings snapshot.
+    val bootPropsStatus: BootPropsStatus? = null,
+    val isBootPropsLoading: Boolean = true,
+    val bootPropsReadError: Boolean = false,
+    val isBootPropsWriting: Boolean = false,
+
     // Umount Modules
     val isDefaultUmountModules: Boolean = false,
 
@@ -129,6 +137,7 @@ data class SettingsScreenActions(
     val onOpenNomount: () -> Unit,
     val onOpenTeesim: () -> Unit,
     val onSetRekernelXEnabled: (Boolean) -> Unit,
+    val onSetBootPropsEnabled: (Boolean) -> Unit,
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
     val onRecoverFolkZygisk: () -> Unit,
     val onSetSuiEnabled: (Boolean) -> Unit,

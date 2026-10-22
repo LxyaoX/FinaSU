@@ -98,6 +98,7 @@ fun rememberSettingsActions(
         onOpenNomount = { navigator.push(Route.Nomount) },
         onOpenTeesim = { navigator.push(Route.Teesim) },
         onSetRekernelXEnabled = viewModel::setRekernelXEnabled,
+        onSetBootPropsEnabled = viewModel::setBootPropsEnabled,
         onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
         onRecoverFolkZygisk = viewModel::recoverFolkZygisk,
         onSetSuiEnabled = viewModel::setSuiEnabled,

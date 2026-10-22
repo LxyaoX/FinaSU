@@ -56,6 +56,7 @@ import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.Bedtime
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.BlurCircular
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.BorderOuter
@@ -795,6 +796,23 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Filled.VerifiedUser,
             route = Route.Teesim,
             aliases = listOf("teesim", "attestation", "keybox", "keymint", "tee", "integrity"),
+        )
+    )
+    add(
+        SettingsCategory.FUNCTION.row(
+            id = "function.boot_props",
+            titleRes = R.string.settings_boot_props,
+            summaryRes = R.string.boot_props_search_summary,
+            icon = Icons.Rounded.Lock,
+            aliases = listOf(
+                "bootloader",
+                "verifiedboot",
+                "flash.locked",
+                "vbmeta",
+                "orange",
+                "integrity",
+                "attestation",
+            ),
         )
     )
     add(
