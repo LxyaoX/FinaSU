@@ -104,12 +104,13 @@ fn classify(
         .filter(|s| !s.is_empty())
         .map(str::to_owned)
         .collect();
-    // Only the audited 2.3 wire layout is writable. Other revisions remain visible/read-only.
+    // GKI-LKM is upstream's clearer label for the same v2.3.0 wire layout since r18.4.
+    // Other revisions remain visible/read-only.
     let compatible = version.0 == 0
         && features.0 == 0
         && variant.0 == 0
         && version.1.as_deref() == Some("v2.3.0")
-        && matches!(variant.1.as_deref(), Some("GKI" | "NON-GKI"))
+        && matches!(variant.1.as_deref(), Some("GKI" | "NON-GKI" | "GKI-LKM"))
         && !tokens.is_empty()
         && tokens
             .iter()
@@ -446,10 +447,21 @@ mod tests {
         let lkm = classify(
             &response("v2.3.0"),
             &response("SUSFS_LKM_MODULES\nCONFIG_KSU_SUSFS_SUS_PATH"),
-            &response("GKI"),
+            &response("GKI-LKM"),
         );
+        assert_eq!(lkm.status, "compatible");
         assert_eq!(lkm.implementation, "lkm");
+        assert_eq!(lkm.variant, "GKI-LKM");
         assert!(!lkm.proc("susfs_kstat"));
+        assert_eq!(
+            classify(
+                &response("v2.3.0"),
+                &response("SUSFS_LKM_MODULES\nCONFIG_KSU_SUSFS_SUS_PATH"),
+                &response("GKI-LKM-NEXT")
+            )
+            .status,
+            "unknown_protocol"
+        );
     }
 
     #[test]
