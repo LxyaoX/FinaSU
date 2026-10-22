@@ -18,6 +18,8 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
+import me.weishu.kernelsu.data.teesim.TeesimInstaller
+import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.SuiStatus
@@ -527,6 +529,58 @@ class SettingsRepositoryImpl : SettingsRepository {
             check(after.enabled == enabled) { "ReKernel-X boot state did not change" }
         }
     }
+
+    override suspend fun getTeesimStatus(): Result<TeesimStatus> = withContext(Dispatchers.IO) {
+        runCatching { TeesimInstaller.status() }
+    }
+
+    override suspend fun installTeesim(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            TeesimInstaller.install()
+            check(TeesimInstaller.status().installed) { "TEESimulator module is not on disk" }
+        }
+    }
+
+    override suspend fun setTeesimEnabled(enabled: Boolean): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                TeesimInstaller.setEnabled(enabled)
+                // The marker is the persisted decision, so read it back instead of trusting the
+                // write: that is what the next boot acts on.
+                val after = TeesimInstaller.status()
+                check(after.enabled == enabled) { "TEESimulator module state did not change" }
+            }
+        }
+
+    override suspend fun uninstallTeesim(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            TeesimInstaller.uninstall()
+            check(!TeesimInstaller.status().installed) { "TEESimulator module is still on disk" }
+        }
+    }
+
+    override suspend fun importTeesimKeybox(base64: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching { TeesimInstaller.importKeybox(base64) }
+        }
+
+    override suspend fun removeTeesimKeybox(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            TeesimInstaller.removeKeybox()
+            check(!TeesimInstaller.status().keyboxPresent) { "TEESimulator keybox is still present" }
+        }
+    }
+
+    override suspend fun setTeesimTargetApps(packages: List<String>): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                TeesimInstaller.setTargetApps(packages)
+                val after = TeesimInstaller.status().config
+                check(after.defaultApps.toSet() == packages.toSet()) {
+                    "TEESimulator target apps did not change"
+                }
+            }
+        }
 
     override suspend fun getNomountStatus(): Result<NomountStatus> = withContext(Dispatchers.IO) {
         runCatching {

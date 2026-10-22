@@ -369,6 +369,12 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.NomountExclusions> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountExclusionsScreen()
                                 }
+                                entry<Route.Teesim> {
+                                    me.weishu.kernelsu.ui.screen.teesim.TeesimScreen()
+                                }
+                                entry<Route.TeesimTargets> {
+                                    me.weishu.kernelsu.ui.screen.teesim.TeesimTargetsScreen()
+                                }
                                 entry<Route.ColorPalette> { ColorPaletteScreen() }
                                 entry<Route.AppProfileTemplate> { AppProfileTemplateScreen() }
                                 entry<Route.TemplateEditor> { key -> TemplateEditorScreen(key.template, key.readOnly) }

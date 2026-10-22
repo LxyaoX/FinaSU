@@ -96,6 +96,7 @@ fun rememberSettingsActions(
         onSetAvcSpoofEnabled = viewModel::setAvcSpoofEnabled,
         onSetFolkMountMode = onSetFolkMountMode,
         onOpenNomount = { navigator.push(Route.Nomount) },
+        onOpenTeesim = { navigator.push(Route.Teesim) },
         onSetRekernelXEnabled = viewModel::setRekernelXEnabled,
         onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
         onRecoverFolkZygisk = viewModel::recoverFolkZygisk,

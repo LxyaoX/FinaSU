@@ -127,6 +127,7 @@ data class SettingsScreenActions(
     val onSetAvcSpoofEnabled: (Boolean) -> Unit,
     val onSetFolkMountMode: (FolkMountMode) -> Unit,
     val onOpenNomount: () -> Unit,
+    val onOpenTeesim: () -> Unit,
     val onSetRekernelXEnabled: (Boolean) -> Unit,
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
     val onRecoverFolkZygisk: () -> Unit,
