@@ -36,6 +36,7 @@ object TeesimInstaller {
     const val MODULE_DIR = "/data/adb/modules/teesim"
     const val DATA_DIR = "/data/adb/teesim"
     const val CONFIG_PATH = "/data/adb/teesim/config.json"
+    const val KEYBOX_NAME = "keybox.xml"
     const val KEYBOX_PATH = "/data/adb/teesim/keybox.xml"
 
     private const val ASSET_ZIP = "teesim/teesim-arm64.zip"
@@ -171,6 +172,9 @@ object TeesimInstaller {
         )
         check(result.isSuccess) { "could not write $KEYBOX_PATH" }
         check(status().keyboxBytes > 0) { "$KEYBOX_PATH is empty" }
+        // Importing through the manager means "sign with this file": point the default profile at
+        // it, otherwise a profile still naming another keybox would silently ignore the import.
+        pointDefaultProfileAtManagerKeybox()
     }
 
     fun removeKeybox() {
@@ -188,15 +192,35 @@ object TeesimInstaller {
      * something the manager does not understand, and guessing would be worse than failing.
      */
     fun setTargetApps(packages: List<String>) {
-        val raw = output("cat $CONFIG_PATH 2>/dev/null")
-        val root = runCatching { JSONObject(raw) }.getOrNull()
-            ?: error("$CONFIG_PATH is missing or not valid JSON")
-        val profiles = root.optJSONObject("profiles")
-            ?: error("$CONFIG_PATH has no profiles")
-        val profile = profiles.optJSONObject(TeesimConfig.DEFAULT_PROFILE)
+        val root = readConfig() ?: error("$CONFIG_PATH is missing or not valid JSON")
+        val profile = defaultProfile(root)
             ?: error("$CONFIG_PATH has no ${TeesimConfig.DEFAULT_PROFILE} profile")
-
         profile.put("apps", JSONArray(packages.distinct().sorted()))
+        writeConfig(root)
+    }
+
+    /**
+     * Makes the `default` profile sign with [KEYBOX_NAME] after an import through the manager.
+     *
+     * Best effort on a missing profile: the configuration was edited into something the manager
+     * does not understand, and the file itself is still there for the WebUI to fix up.
+     */
+    private fun pointDefaultProfileAtManagerKeybox() {
+        val root = readConfig() ?: return
+        val profile = defaultProfile(root) ?: return
+        if (profile.optString("keybox") == KEYBOX_NAME) return
+        profile.put("keybox", KEYBOX_NAME)
+        writeConfig(root)
+    }
+
+    private fun readConfig(): JSONObject? =
+        runCatching { JSONObject(output("cat $CONFIG_PATH 2>/dev/null")) }.getOrNull()
+
+    private fun defaultProfile(root: JSONObject): JSONObject? =
+        root.optJSONObject("profiles")?.optJSONObject(TeesimConfig.DEFAULT_PROFILE)
+
+    /** Publishes the configuration atomically; the daemon reloads when it changes. */
+    private fun writeConfig(root: JSONObject) {
         val encoded = Base64.encodeToString(
             root.toString(2).toByteArray(Charsets.UTF_8),
             Base64.NO_WRAP,

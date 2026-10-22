@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.repository.SettingsRepository
+import me.weishu.kernelsu.data.teesim.TeesimKeybox
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.ksuApp
 
@@ -127,7 +128,7 @@ class TeesimViewModel(
                         val bytes = stream.readBytes()
                         check(bytes.size in 1..MAX_KEYBOX_BYTES) { "unexpected keybox size" }
                         val text = String(bytes, Charsets.UTF_8).trim()
-                        check(isUsableKeybox(text)) { "not a keybox" }
+                        check(TeesimKeybox.isUsable(text)) { "not a keybox" }
                         Base64.encodeToString(text.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
                     }
                 }.getOrNull()
@@ -214,14 +215,5 @@ class TeesimViewModel(
     private companion object {
         /** A real keybox is a few dozen kilobytes; anything past this is not one. */
         const val MAX_KEYBOX_BYTES = 1_048_576
-
-        fun isUsableKeybox(text: String): Boolean {
-            if (!text.contains("<AndroidAttestation")) return false
-            if (!text.contains("PRIVATE KEY")) return false
-            if (Regex("BEGIN CERTIFICATE").findAll(text).count() < 4) return false
-            val rsa = Regex("<Key[^>]*algorithm\\s*=\\s*[\"']rsa[\"']").containsMatchIn(text)
-            val ec = Regex("<Key[^>]*algorithm\\s*=\\s*[\"']ecdsa[\"']").containsMatchIn(text)
-            return rsa && ec
-        }
     }
 }

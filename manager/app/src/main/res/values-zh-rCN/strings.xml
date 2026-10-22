@@ -929,7 +929,7 @@
     <string name="teesim_keybox_present">已导入，大小 %1$s</string>
     <string name="teesim_keybox_missing">缺失；没有 keybox 时不会拦截任何请求</string>
     <string name="teesim_keybox_remove">移除 keybox</string>
-    <string name="teesim_keybox_invalid">不是可用的 keybox：需要同时包含 RSA 与 ECDSA 私钥及证书链</string>
+    <string name="teesim_keybox_invalid">不是可用的 keybox：至少需要一个带 algorithm 的 Key 和一条证书链</string>
     <string name="teesim_keybox_imported">keybox 已导入</string>
     <string name="teesim_keybox_removed">keybox 已移除</string>
     <string name="teesim_keybox_write_failed">写入 keybox 失败</string>

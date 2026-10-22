@@ -930,7 +930,7 @@
     <string name="teesim_keybox_present">Imported; size %1$s</string>
     <string name="teesim_keybox_missing">Missing; without one nothing is intercepted</string>
     <string name="teesim_keybox_remove">Remove keybox</string>
-    <string name="teesim_keybox_invalid">Not a usable keybox: it needs an RSA and an ECDSA key with certificate chains</string>
+    <string name="teesim_keybox_invalid">Not a usable keybox: it needs at least one Key block with an algorithm and a certificate chain</string>
     <string name="teesim_keybox_imported">Keybox imported</string>
     <string name="teesim_keybox_removed">Keybox removed</string>
     <string name="teesim_keybox_write_failed">Could not write the keybox</string>
