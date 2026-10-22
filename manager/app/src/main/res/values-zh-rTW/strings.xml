@@ -809,9 +809,7 @@
     <string name="settings_search_hint">搜尋設定</string>
     <string name="settings_search_empty">找不到相關設定</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-    <string name="developer_and_maintainer">開發者 | 維護者</string>
-    <string name="developer_profile_picture">開發者頭像</string>
-    <string name="support_or_donate">支持 / 捐贈</string>
+<string name="support_or_donate">支持 / 捐贈</string>
     <string name="github">GitHub</string>
     <string name="telegram">Telegram</string>
     <string name="kernel_modules">核心模組</string>

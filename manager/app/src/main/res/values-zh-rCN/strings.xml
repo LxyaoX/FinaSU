@@ -827,9 +827,7 @@
     <string name="settings_search_hint">搜索设置</string>
     <string name="settings_search_empty">未找到相关设置</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-    <string name="developer_and_maintainer">开发者 | 维护者</string>
-    <string name="developer_profile_picture">开发者头像</string>
-    <string name="support_or_donate">支持 / 捐赠</string>
+<string name="support_or_donate">支持 / 捐赠</string>
     <string name="github">GitHub</string>
     <string name="telegram">Telegram</string>
     <string name="module_preinit_no_space">预初始化未同步：metadata 空间不足</string>

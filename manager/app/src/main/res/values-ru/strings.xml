@@ -807,9 +807,7 @@
     <string name="settings_search_hint">Поиск настроек</string>
     <string name="settings_search_empty">Настройки не найдены</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-    <string name="developer_and_maintainer">Разработчик | Сопровождающий</string>
-    <string name="developer_profile_picture">Фото профиля разработчика</string>
-    <string name="support_or_donate">Поддержка / Пожертвование</string>
+<string name="support_or_donate">Поддержка / Пожертвование</string>
     <string name="github">GitHub</string>
     <string name="telegram">Telegram</string>
     <string name="module_more_actions">Дополнительные действия</string>

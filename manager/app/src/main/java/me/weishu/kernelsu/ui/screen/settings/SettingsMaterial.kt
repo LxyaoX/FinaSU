@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Policy
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
-import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.SearchAppBar
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
@@ -79,7 +77,6 @@ fun SettingPagerMaterial(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showProfileEditor by remember { mutableStateOf(false) }
     val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
-    val showDeveloperInfo = rememberSaveable { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -124,11 +121,6 @@ fun SettingPagerMaterial(
                 onSearchTextChange = { searchText = it },
                 onClearClick = { searchText = "" },
                 snackbarHostState = snackBarHost,
-                actions = {
-                    FolkIconButton(onClick = { showDeveloperInfo.value = true }) {
-                        Icon(Icons.Outlined.Info, contentDescription = stringResource(R.string.about))
-                    }
-                },
                 defaultContent = { bottomPadding, closeSearch ->
                     SettingsSearchShortcuts(
                         onOpenCategory = { key ->
@@ -283,6 +275,4 @@ fun SettingPagerMaterial(
     if (showDisclaimerDialog.value) {
         SettingsDisclaimerDialog(showDisclaimerDialog)
     }
-
-    SettingsDeveloperInfo(showDeveloperInfo)
 }

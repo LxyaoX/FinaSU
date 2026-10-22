@@ -805,9 +805,7 @@
     <string name="settings_search_hint">설정 검색</string>
     <string name="settings_search_empty">설정을 찾을 수 없습니다</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-    <string name="developer_and_maintainer">개발자 | 유지보수자</string>
-    <string name="developer_profile_picture">개발자 프로필 사진</string>
-    <string name="support_or_donate">지원 / 후원</string>
+<string name="support_or_donate">지원 / 후원</string>
     <string name="github">GitHub</string>
     <string name="telegram">텔레그램</string>
     <string name="module_more_actions">추가 작업</string>

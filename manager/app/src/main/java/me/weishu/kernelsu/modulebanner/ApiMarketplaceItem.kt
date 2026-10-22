@@ -11,7 +11,7 @@ data class ApiMarketplaceItem(
     val descriptionEn: String,
 ) {
     fun localizedDescription(): String {
-        val preferChinese = Locale.getDefault().language.let { it == "zh" || it == "mgl" }
+        val preferChinese = Locale.getDefault().language == "zh"
         val primary = if (preferChinese) description else descriptionEn
         val fallback = if (preferChinese) descriptionEn else description
         return primary.ifBlank { fallback }

@@ -805,9 +805,7 @@
     <string name="settings_search_hint">設定を検索</string>
     <string name="settings_search_empty">設定が見つかりません</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-    <string name="developer_and_maintainer">開発者 | メンテナ</string>
-    <string name="developer_profile_picture">開発者のプロフィール画像</string>
-    <string name="support_or_donate">サポート / 寄付</string>
+<string name="support_or_donate">サポート / 寄付</string>
     <string name="github">GitHub</string>
     <string name="telegram">Telegram</string>
     <string name="module_more_actions">その他の操作</string>
