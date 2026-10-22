@@ -792,6 +792,15 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
         )
     )
     add(
+        SettingsCategory.FUNCTION.page(
+            id = "function.teesim",
+            titleRes = R.string.settings_teesim,
+            icon = Icons.Filled.VerifiedUser,
+            route = Route.Teesim,
+            aliases = listOf("teesim", "attestation", "keybox", "keymint", "tee", "integrity"),
+        )
+    )
+    add(
         SettingsCategory.FUNCTION.row(
             id = "function.rekernel_x",
             titleRes = R.string.settings_rekernel_x,

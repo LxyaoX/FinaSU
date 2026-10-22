@@ -51,6 +51,14 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
+    data object Teesim : Route
+
+    @Parcelize
+    @Serializable
+    data object TeesimTargets : Route
+
+    @Parcelize
+    @Serializable
     data object ColorPalette : Route
 
     @Parcelize

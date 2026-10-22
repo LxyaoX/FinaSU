@@ -609,6 +609,19 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     // ReKernel-X is an external LKM: the row owns its module markers only, so
                     // tombstone tooling keeps working across manager restarts and reboots.
                     RekernelXStatusItem(uiState, actions)
+                },
+                {
+                    // TEESimulator keeps its state on disk, not in the settings snapshot: this row
+                    // is a door, and the page reads the module itself when it opens.
+                    SegmentedListItem(
+                        headlineContent = { Text(stringResource(id = R.string.settings_teesim)) },
+                        supportingContent = { Text(stringResource(id = R.string.teesim_search_summary)) },
+                        leadingContent = { Icon(Icons.Filled.VerifiedUser, null) },
+                        onClick = actions.onOpenTeesim,
+                        trailingContent = {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                        },
+                    )
                 }
             )
         )

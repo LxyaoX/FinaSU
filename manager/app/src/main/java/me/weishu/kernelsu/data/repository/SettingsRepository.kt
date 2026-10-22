@@ -5,6 +5,7 @@ import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
+import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.model.ModuleSortGroup
@@ -109,6 +110,13 @@ interface SettingsRepository {
     suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit>
     suspend fun getRekernelXStatus(): Result<RekernelXStatus>
     suspend fun setRekernelXEnabled(enabled: Boolean): Result<Unit>
+    suspend fun getTeesimStatus(): Result<TeesimStatus>
+    suspend fun installTeesim(): Result<Unit>
+    suspend fun setTeesimEnabled(enabled: Boolean): Result<Unit>
+    suspend fun uninstallTeesim(): Result<Unit>
+    suspend fun importTeesimKeybox(base64: String): Result<Unit>
+    suspend fun removeTeesimKeybox(): Result<Unit>
+    suspend fun setTeesimTargetApps(packages: List<String>): Result<Unit>
     suspend fun getNomountStatus(): Result<NomountStatus>
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>
     suspend fun injectNomountRules(): Result<Unit>
