@@ -133,6 +133,18 @@ Then build with `CONFIG_KSU_SUSFS=y` and the sub-options you need.
 An `android15-6.6` reference image with all SUSFS sub-options enabled has been built
 successfully for this tree. It has not yet been booted or exercised on a device.
 
+Before moving to a newer SUSFS patch set, run the compatibility check from an
+`android15-6.6` DDK image with a pristine kernel source:
+
+```sh
+scripts/check-susfs-upstream.sh --upstream /path/to/SUSFS
+```
+
+The script verifies the pinned commit, Kconfig option set, KernelSU-side symbols,
+non-deprecated command dispatch, the reviewed 10-patch failure fingerprint, and that
+the 50 patch applies without rejects. Update the pin or failure baseline only after
+reviewing the reported hunks.
+
 Current SUSFS patches reference KernelSU symbols such as `my_write_context` directly
 and do not export them for modules, so a SUSFS kernel has to carry FinaSU built in
 (`CONFIG_KSU=y`). Loading FinaSU as a module against such a kernel fails at modpost.
