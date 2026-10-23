@@ -292,7 +292,12 @@ fn uname_conflicts(config: &Config, uts_active: bool) -> bool {
 }
 
 fn uts_arbitration_active(config: &Config, query: impl FnOnce() -> Result<bool>) -> Result<bool> {
-    if config.settings.uname.is_some() {
+    if config
+        .settings
+        .uname
+        .as_ref()
+        .is_some_and(|uname| !uname.is_default())
+    {
         query()
     } else {
         Ok(false)
@@ -509,6 +514,20 @@ mod tests {
     fn susfs_without_uname_does_not_query_uts_provider_state() {
         let mut queried = false;
         let active = uts_arbitration_active(&Config::default(), || {
+            queried = true;
+            Ok(true)
+        })
+        .unwrap();
+
+        assert!(!queried);
+        assert!(!active);
+
+        let mut default_uname = Config::default();
+        default_uname.settings.uname = Some(model::Uname {
+            release: "default".to_owned(),
+            version: "default".to_owned(),
+        });
+        let active = uts_arbitration_active(&default_uname, || {
             queried = true;
             Ok(true)
         })
