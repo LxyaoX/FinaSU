@@ -23,7 +23,10 @@ import org.json.JSONObject
  *   and again from a `post-fs-data.d` script at boot (ksud runs that directory for every install,
  *   no module needed);
  * * the daemon is started from that same script: it waits for keystore2 (there is nothing to hook
- *   before the main class starts), then runs the respawn loop upstream's `service.sh` used to run.
+ *   before the main class starts), then runs the respawn loop upstream's `service.sh` used to run;
+ * * the native logd reader (`libteesim_logcat.so`) is dropped. It exists to feed the WebUI's Logs
+ *   panel, which this runtime does not carry, and left in place it would tail logd and rotate files
+ *   into `/data/adb/teesim/log` that nothing ever reads.
  *
  * Nothing is written to `/data/adb/modules`, so the manager's module list stays clean and the whole
  * runtime goes away with one toggle.
@@ -49,6 +52,9 @@ object TeesimInstaller {
 
     /** Upstream's policy rule, applied live and at boot instead of by the module loader. */
     const val POLICY_PATH = "/data/adb/teesim/sepolicy.rule"
+
+    /** Rotating log files the daemon used to keep for the WebUI's Logs panel. */
+    const val LOG_DIR = "/data/adb/teesim/log"
 
     /** The respawn loop; also the handle used to stop it. */
     const val RUN_SCRIPT = "/data/adb/teesim/run.sh"
@@ -125,6 +131,11 @@ object TeesimInstaller {
             // both, so they are dead weight in the runtime.
             "rm -rf $RUNTIME_DIR/webroot $RUNTIME_DIR/module.prop $RUNTIME_DIR/customize.sh " +
                 "$RUNTIME_DIR/service.sh $RUNTIME_DIR/update.json $RUNTIME_DIR/changelog.md",
+            // libteesim_logcat.so is the native logd reader behind the WebUI's Logs panel, which
+            // this runtime does not have. Without it LogTail logs one line at start-up and disables
+            // itself - the documented degradation - so no thread tails logd and nothing is rotated
+            // into $LOG_DIR. Everything the daemon actually needs to say still goes to logcat.
+            "rm -f $RUNTIME_DIR/arm64-v8a/libteesim_logcat.so",
             "chown -R 0:0 $RUNTIME_DIR",
             // `X` gives the execute bit to directories only; the real entry points are fixed below.
             "chmod -R u+rwX,go+rX $RUNTIME_DIR",
@@ -132,6 +143,8 @@ object TeesimInstaller {
                 "$RUNTIME_DIR/arm64-v8a/teesim-uds",
             "mkdir -p $DATA_DIR",
             "chmod 0700 $DATA_DIR",
+            // Whatever a build with the log reader collected; nothing writes here any more.
+            "rm -rf $LOG_DIR",
             // The rule lives beside the config now; the boot script feeds it to ksud.
             "mv -f $RUNTIME_DIR/sepolicy.rule $POLICY_PATH",
             "chmod 0600 $POLICY_PATH",
@@ -190,6 +203,8 @@ object TeesimInstaller {
             // admin.token is the daemon's own credential; leaving it behind outlives the runtime
             // that issued it. The version describes the runtime, so it goes with it.
             "rm -f $RUN_SCRIPT $DATA_DIR/teesim-uds $DATA_DIR/admin.token $VERSION_PATH $POLICY_PATH",
+            // Log files a build with the log reader left behind.
+            "rm -rf $LOG_DIR",
         )
         check(result.isSuccess) { "could not remove $RUNTIME_DIR" }
     }
@@ -301,6 +316,11 @@ DATA=/data/adb/teesim
 [ -x /data/adb/ksud ] && /data/adb/ksud sepolicy apply ${'$'}DATA/sepolicy.rule >/dev/null 2>&1
 chmod 0700 ${'$'}DATA 2>/dev/null
 chmod 0600 ${'$'}DATA/admin.token 2>/dev/null
+# A runtime staged by an earlier build still ships the logd reader behind the WebUI's Logs panel.
+# Removing it here (before the daemon starts, so nothing has it open) disables the collector for
+# runtimes that were staged before this manager learned to drop it.
+rm -f ${'$'}DATA/runtime/arm64-v8a/libteesim_logcat.so
+rm -rf ${'$'}DATA/log
 # The admin client is staged at a fixed path so it does not depend on the runtime location.
 for f in ${'$'}DATA/runtime/*/teesim-uds; do
   [ -f "${'$'}f" ] || continue

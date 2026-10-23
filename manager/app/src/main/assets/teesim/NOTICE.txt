@@ -20,8 +20,11 @@ FinaSU does not flash it as a module. The payload is staged under
 and a post-fs-data.d hook starts the daemon, so nothing appears in the module
 list. The module wrapper (module.prop, customize.sh, service.sh, update.json)
 and webroot are dropped at that point, because the manager replaces them.
-Runtime state (configuration and the keybox) stays in /data/adb/teesim, exactly
-as upstream expects.
+arm64-v8a/libteesim_logcat.so is dropped too: it is the native logd reader
+behind the Logs panel, and without it LogTail disables itself instead of
+rotating files into /data/adb/teesim/log that nothing reads. Runtime state
+(configuration and the keybox) stays in /data/adb/teesim, exactly as upstream
+expects.
 
 Corresponding source for this GPL-3.0 binary is available at
 https://github.com/JingMatrix/TEESimulator (tag: the commit fcf1738, branch
