@@ -51,10 +51,10 @@ import me.weishu.kernelsu.ui.viewmodel.TeesimViewModel
 /**
  * TEESimulator settings.
  *
- * The page owns the three things the daemon cannot do for itself: installing the bundled module,
- * the on/off marker ksud reads, and the keybox file it signs with. Everything finer grained
- * (per-profile device identity, stored keys, logs) stays in the module's own WebUI, which this
- * page opens when the bundled build carries one.
+ * The page owns the three things the daemon cannot do for itself: staging the bundled runtime, the
+ * boot hook ksud reads, and the keybox file the daemon signs with. Upstream's WebUI is not part of
+ * that runtime, so everything it used to edit (per-profile device identity, stored keys, logs) has
+ * to be handled here or by editing `/data/adb/teesim/config.json` by hand.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,11 +100,14 @@ fun TeesimScreen() {
             SegmentedColumn(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 item {
                     val status = state.status
+                    // What is on disk wins: an asset update without a reinstall then shows the old
+                    // version here instead of claiming the runtime was upgraded with the app.
+                    val installedVersion = status?.installedVersion.orEmpty()
                     SegmentedListItem(
                         headlineContent = {
                             Text(
-                                if (status?.installed == true) {
-                                    TeesimInstaller.VERSION
+                                if (status?.installed == true && installedVersion.isNotBlank()) {
+                                    installedVersion
                                 } else {
                                     stringResource(
                                         R.string.teesim_bundled_version,

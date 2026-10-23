@@ -21,6 +21,13 @@ data class TeesimStatus(
     val daemonRunning: Boolean = false,
     val keyboxPresent: Boolean = false,
     val keyboxBytes: Long = 0L,
+    /**
+     * Version recorded beside the staged runtime, empty for one an older manager staged.
+     *
+     * `module.prop` is not part of the runtime, so without this the page could only compare the
+     * bundled [me.weishu.kernelsu.data.teesim.TeesimInstaller.VERSION] against itself.
+     */
+    val installedVersion: String = "",
     val config: TeesimConfig = TeesimConfig(),
 ) {
     /** Packages the simulator serves, i.e. the `default` profile. */
@@ -54,6 +61,7 @@ data class TeesimStatus(
                 daemonRunning = values["running"] == "1",
                 keyboxPresent = values["keybox"] == "1",
                 keyboxBytes = values["keyboxbytes"]?.toLongOrNull() ?: 0L,
+                installedVersion = values["version"].orEmpty(),
             )
         }
     }

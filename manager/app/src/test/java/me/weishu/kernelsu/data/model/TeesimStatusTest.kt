@@ -29,6 +29,25 @@ class TeesimStatusTest {
     }
 
     @Test
+    fun `the version on disk is reported so a stale runtime stays visible`() {
+        val status = TeesimStatus.fromProbe(
+            probe(
+                "tee:installed=1",
+                "tee:version=v4.0 (75-fcf1738-release)",
+            )
+        )
+
+        assertEquals("v4.0 (75-fcf1738-release)", status.installedVersion)
+    }
+
+    @Test
+    fun `a runtime staged by an older manager reports no version`() {
+        val status = TeesimStatus.fromProbe(probe("tee:installed=1"))
+
+        assertEquals("", status.installedVersion)
+    }
+
+    @Test
     fun `a staged runtime without the boot hook is installed but off`() {
         val status = TeesimStatus.fromProbe(
             probe(

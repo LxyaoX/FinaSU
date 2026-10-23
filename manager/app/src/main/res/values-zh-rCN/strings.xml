@@ -878,7 +878,7 @@
     <string name="teesim_state_disabled">已安装但已关闭</string>
     <string name="teesim_state_no_keybox">已启用，但还没导入 keybox，所有密钥仍走真实硬件</string>
     <string name="teesim_state_running">守护进程运行中，默认档目标数：%1$d</string>
-    <string name="teesim_state_pending">已启用，但守护进程没起来；看 dmesg 或模块日志</string>
+    <string name="teesim_state_pending">已启用，但守护进程没起来；看 logcat 有没有崩溃，并确认 /data/adb/teesim/runtime/daemon 可执行</string>
     <string name="teesim_enable">启用</string>
     <string name="teesim_enable_summary">立即注入并在开机时自启，不需要刷模块</string>
     <string name="teesim_keybox">Keybox</string>
@@ -892,7 +892,7 @@
     <string name="teesim_targets">目标应用</string>
     <string name="teesim_targets_summary">目标应用数：%1$d</string>
     <string name="teesim_targets_title">目标应用</string>
-    <string name="teesim_targets_hint">属于其他配置档的应用数：%1$d（此处不列出，请在模块配置界面修改，默认档 %2$s）</string>
+    <string name="teesim_targets_hint">属于其他配置档的应用数：%1$d（此处不列出，请改 /data/adb/teesim/config.json，默认档 %2$s）</string>
     <string name="teesim_targets_saved">目标应用已保存</string>
     <string name="teesim_search_apps">搜索应用</string>
     <string name="teesim_show_system_apps">显示系统应用</string>

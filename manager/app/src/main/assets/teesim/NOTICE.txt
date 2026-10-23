@@ -15,10 +15,13 @@ Everything else is upstream, byte for byte: classes.dex (the control daemon),
 arm64-v8a/inject, arm64-v8a/libteesim_*.so, arm64-v8a/teesim-uds, the shell
 entry points, module.prop, sepolicy.rule, config.default.json and webroot.
 
-FinaSU installs it into /data/adb/modules/teesim instead of asking the user to
-flash it, so the settings page can enable it and the manager can list it like
-any other module. Runtime state (configuration and the keybox) lives in
-/data/adb/teesim, exactly as upstream expects.
+FinaSU does not flash it as a module. The payload is staged under
+/data/adb/teesim/runtime, its sepolicy.rule is handed to `ksud sepolicy apply`,
+and a post-fs-data.d hook starts the daemon, so nothing appears in the module
+list. The module wrapper (module.prop, customize.sh, service.sh, update.json)
+and webroot are dropped at that point, because the manager replaces them.
+Runtime state (configuration and the keybox) stays in /data/adb/teesim, exactly
+as upstream expects.
 
 Corresponding source for this GPL-3.0 binary is available at
 https://github.com/JingMatrix/TEESimulator (tag: the commit fcf1738, branch

@@ -38,6 +38,15 @@ object TeesimInstaller {
     const val KEYBOX_NAME = "keybox.xml"
     const val KEYBOX_PATH = "/data/adb/teesim/keybox.xml"
 
+    /**
+     * Version of the runtime on disk, written by [install].
+     *
+     * `module.prop` is deleted with the rest of the module wrapper, so without this the manager
+     * could only compare [VERSION] against itself and would never notice a runtime staged by an
+     * older build.
+     */
+    const val VERSION_PATH = "/data/adb/teesim/version"
+
     /** Upstream's policy rule, applied live and at boot instead of by the module loader. */
     const val POLICY_PATH = "/data/adb/teesim/sepolicy.rule"
 
@@ -49,6 +58,20 @@ object TeesimInstaller {
 
     private const val ASSET_ZIP = "teesim/teesim-arm64.zip"
     private const val STAGE_DIR = "teesim-stage"
+
+    /**
+     * One condition, shared by the probe and the start-up wait, so the switch and the toast can
+     * never disagree about whether the daemon is up.
+     */
+    private const val DAEMON_ALIVE_COND =
+        "pidof teesim >/dev/null 2>&1 || pgrep -f org.matrix.teesim.App >/dev/null 2>&1"
+
+    /**
+     * Enabling starts a respawn loop that first waits for keystore2 and then a fresh ART process,
+     * so the daemon is never alive by the time the shell command returns.
+     */
+    private const val DAEMON_START_TIMEOUT_MS = 6_000L
+    private const val DAEMON_POLL_MS = 200L
 
     /** Directories an earlier build of this manager installed as a module; removed on install. */
     private const val LEGACY_MODULE_DIR = "/data/adb/modules/teesim"
@@ -63,8 +86,8 @@ object TeesimInstaller {
         "if [ -f $BOOT_SCRIPT ]; then echo tee:enabled=1; else echo tee:enabled=0; fi",
         // `pidof` matches the short process name; `pgrep -f` covers a kernel where the nice name
         // was truncated, so a live daemon is never reported as stopped.
-        "if pidof teesim >/dev/null 2>&1 || pgrep -f org.matrix.teesim.App >/dev/null 2>&1; " +
-            "then echo tee:running=1; else echo tee:running=0; fi",
+        "if $DAEMON_ALIVE_COND; then echo tee:running=1; else echo tee:running=0; fi",
+        "if [ -f $VERSION_PATH ]; then echo \"tee:version=\$(cat $VERSION_PATH 2>/dev/null)\"; fi",
         "if [ -s $KEYBOX_PATH ]; then echo tee:keybox=1; else echo tee:keybox=0; fi",
         "if [ -f $KEYBOX_PATH ]; then echo \"tee:keyboxbytes=\$(stat -c %s $KEYBOX_PATH)\"; " +
             "else echo tee:keyboxbytes=0; fi",
@@ -114,6 +137,11 @@ object TeesimInstaller {
             "chmod 0600 $POLICY_PATH",
             "if [ ! -f $CONFIG_PATH ]; then cp $RUNTIME_DIR/config.default.json $CONFIG_PATH; fi",
             "chmod 0600 $CONFIG_PATH",
+            // The wrapper that carried a version is gone above; record what was actually staged so
+            // the page can tell a current runtime from one an older build left behind.
+            "echo '$VERSION' > $VERSION_PATH.tmp",
+            "chmod 0644 $VERSION_PATH.tmp",
+            "mv -f $VERSION_PATH.tmp $VERSION_PATH",
             // Adopt a keybox the user already had for TrickyStore, like upstream customize.sh.
             "if [ ! -f $KEYBOX_PATH ] && [ -f /data/adb/tricky_store/keybox.xml ]; " +
                 "then cp /data/adb/tricky_store/keybox.xml $KEYBOX_PATH; fi",
@@ -143,11 +171,14 @@ object TeesimInstaller {
             return
         }
         if (!status().installed) install()
-        // Policy first: if it cannot be applied, leave the switch off instead of reporting an
-        // enabled runtime whose hook would be denied by SELinux.
+        // Policy first: a rule that never reached the kernel would leave the hook denied by SELinux,
+        // which looks exactly like a broken runtime.
         applyPolicy()
         writeScript(BOOT_SCRIPT, bootScriptContent)
         startDaemon()
+        // Give the daemon the time it needs before the caller reads the state back, otherwise every
+        // successful enable reports "enabled but not running" for a runtime that is still starting.
+        awaitDaemon()
     }
 
     /** Removes the runtime and the boot hook; the configuration and the keybox stay in [DATA_DIR]. */
@@ -156,7 +187,9 @@ object TeesimInstaller {
         stopDaemon()
         val result = run(
             "rm -rf $RUNTIME_DIR",
-            "rm -f $RUN_SCRIPT $DATA_DIR/teesim-uds $POLICY_PATH",
+            // admin.token is the daemon's own credential; leaving it behind outlives the runtime
+            // that issued it. The version describes the runtime, so it goes with it.
+            "rm -f $RUN_SCRIPT $DATA_DIR/teesim-uds $DATA_DIR/admin.token $VERSION_PATH $POLICY_PATH",
         )
         check(result.isSuccess) { "could not remove $RUNTIME_DIR" }
     }
@@ -170,10 +203,11 @@ object TeesimInstaller {
      */
     fun importKeybox(base64: String) {
         require(base64.isNotBlank()) { "empty keybox" }
+        val payload = singleLineBase64(base64)
         val result = run(
             "mkdir -p $DATA_DIR",
             "chmod 0700 $DATA_DIR",
-            "echo '$base64' | base64 -d > $KEYBOX_PATH.tmp",
+            "echo '$payload' | base64 -d > $KEYBOX_PATH.tmp",
             "chmod 0600 $KEYBOX_PATH.tmp",
             "chown 0:0 $KEYBOX_PATH.tmp",
             // The daemon watches this path, so publish the finished file atomically.
@@ -230,9 +264,11 @@ object TeesimInstaller {
 
     /** Publishes the configuration atomically; the daemon reloads when it changes. */
     private fun writeConfig(root: JSONObject) {
-        val encoded = Base64.encodeToString(
-            root.toString(2).toByteArray(Charsets.UTF_8),
-            Base64.NO_WRAP,
+        val encoded = singleLineBase64(
+            Base64.encodeToString(
+                root.toString(2).toByteArray(Charsets.UTF_8),
+                Base64.NO_WRAP,
+            ),
         )
         val result = run(
             "echo '$encoded' | base64 -d > $CONFIG_PATH.tmp",
@@ -242,6 +278,18 @@ object TeesimInstaller {
         )
         check(result.isSuccess) { "could not write $CONFIG_PATH" }
     }
+
+    /**
+     * Collapses a base64 payload to one line.
+     *
+     * [run] splits its input into shell commands on newlines, so a wrapped payload would be executed
+     * as several commands and corrupt the file. Whitespace carries no meaning in base64, so this is
+     * safe for any encoder's output.
+     */
+    private fun singleLineBase64(encoded: String): String =
+        encoded.filterNot { it.isWhitespace() }.also {
+            require(it.isNotEmpty()) { "empty base64 payload" }
+        }
 
     /** Boot hook; its presence is also the persisted "on" state the switch reads. */
     private val bootScriptContent = """
@@ -273,18 +321,32 @@ fi
 # Generated by FinaSU: waits for keystore2, then keeps the TEESimulator daemon alive.
 DATA=/data/adb/teesim
 DIR=${'$'}DATA/runtime
+# Nothing to run: a removed or half-staged runtime must not turn into a fork every two seconds for
+# the rest of the boot.
+[ -x "${'$'}DIR/daemon" ] || exit 1
 # keystore2 only exists once the main class starts; there is nothing to hook before that.
 while [ -z "${'$'}(pidof keystore2)" ] && [ -z "${'$'}(pidof keystore)" ]; do sleep 1; done
+delay=2
 while true; do
+  started=${'$'}(date +%s)
   "${'$'}DIR/daemon" "${'$'}DIR"
-  sleep 2
+  # A daemon that stayed up was not crash-looping, so the backoff starts over; one that died at
+  # once gets a longer gap than a flat two-second retry.
+  [ ${'$'}(( ${'$'}(date +%s) - started )) -ge 60 ] && delay=2
+  sleep "${'$'}delay"
+  [ "${'$'}delay" -lt 30 ] && delay=${'$'}(( delay * 2 ))
 done
 """.trimIndent()
 
     private fun writeScript(path: String, content: String) {
         val file = File(ksuApp.cacheDir, File(path).name)
         file.writeText(content)
+        // `post-fs-data.d` is not created by ksud's installer - only its OTA path makes one - so a
+        // device that has never had a boot hook would fail here with a bare `cp` error.
+        val directory = File(path).parentFile?.absolutePath
+            ?: error("$path has no parent directory")
         val result = run(
+            "mkdir -p '$directory'",
             "cp '${file.absolutePath}' '$path'",
             "chmod 0755 '$path'",
             "chown 0:0 '$path'",
@@ -292,10 +354,35 @@ done
         check(result.isSuccess) { "could not write $path" }
     }
 
-    /** Applies the rule to the running policy; the hook needs it before the daemon starts. */
+    /**
+     * Hands the rule to ksud so it is patched into the running policy.
+     *
+     * Not a health check: `ksud sepolicy apply` submits the rule statement by statement and only
+     * warns when the kernel rejects one, so a zero exit code means "the file was readable", not
+     * "every rule landed". That is the behaviour wanted here - the rule names types from other root
+     * managers (`magisk`, `su`) that do not exist on every device, and a strict apply would fail
+     * wholesale instead of applying what fits. The daemon is the authority on whether the hook works.
+     */
     private fun applyPolicy() {
         val result = run("/data/adb/ksud sepolicy apply '$POLICY_PATH'")
-        check(result.isSuccess) { "could not apply $POLICY_PATH" }
+        check(result.isSuccess) { "could not hand $POLICY_PATH to ksud" }
+    }
+
+    /** Whether a daemon process of this boot is alive; the same condition the probe reports. */
+    private fun daemonAlive(): Boolean =
+        output("if $DAEMON_ALIVE_COND; then echo 1; else echo 0; fi").trim() == "1"
+
+    /**
+     * Waits for the daemon to appear, at most [DAEMON_START_TIMEOUT_MS].
+     *
+     * Best effort by design: the caller reads [status] afterwards and the page reports what it
+     * finds, so a daemon that is genuinely broken still surfaces as "enabled but not running".
+     */
+    private fun awaitDaemon(timeoutMs: Long = DAEMON_START_TIMEOUT_MS) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!daemonAlive() && System.currentTimeMillis() < deadline) {
+            Thread.sleep(DAEMON_POLL_MS)
+        }
     }
 
     /** Starts the respawn loop once; a second copy would run a second daemon. */
