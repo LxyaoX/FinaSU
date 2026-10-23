@@ -101,6 +101,9 @@ static bool ksu_mvf_has_root_marker(struct vfsmount *mnt)
     char path[512];
     char *root;
 
+    if (!mnt || !mnt->mnt_root || IS_ROOT(mnt->mnt_root))
+        return false;
+
     root = dentry_path_raw(mnt->mnt_root, path, sizeof(path));
     return !IS_ERR(root) && ksu_mvf_has_marker(root, strlen(root));
 }
@@ -196,7 +199,12 @@ static bool ksu_mvf_in_umount_list(const char *mountpoint, size_t len)
     struct mount_entry *entry;
     bool found = false;
 
-    down_read(&mount_list_lock);
+    // The show callback runs under namespace_sem(R); the umount path takes
+    // mount_list_lock(R) then namespace_sem(W). Blocking here would complete
+    // that cycle once a mount_list writer queues, so skip on contention.
+    if (!down_read_trylock(&mount_list_lock))
+        return false;
+
     list_for_each_entry (entry, &mount_list, list) {
         if (entry->umountable && ksu_mvf_path_equal(mountpoint, len, entry->umountable)) {
             found = true;
