@@ -57,4 +57,32 @@ class NetIsolateStatusTest {
             status.policies,
         )
     }
+
+    @Test
+    fun `parses blocked event diagnostics`() {
+        val events = NetIsolateEvents.parse(
+            """{"supported":true,"capacity":64,"dropped":2,"events":[{"timestamp_ns":123456789,"uid":10410,"operation":"connect","family":"inet","address":"127.0.0.1","port":8080},{"timestamp_ns":223456789,"uid":10200,"operation":"socket","family":"inet6","address":"","port":0}]}""",
+        )
+
+        assertTrue(events.supported)
+        assertEquals(64, events.capacity)
+        assertEquals(2L, events.dropped)
+        assertEquals(
+            listOf(
+                NetIsolateEvent(123456789, 10410, "connect", "inet", "127.0.0.1", 8080),
+                NetIsolateEvent(223456789, 10200, "socket", "inet6", "", 0),
+            ),
+            events.events,
+        )
+    }
+
+    @Test
+    fun `missing event diagnostics degrade safely`() {
+        val events = NetIsolateEvents.parse("""{"supported":false}""")
+
+        assertFalse(events.supported)
+        assertEquals(0, events.capacity)
+        assertEquals(0L, events.dropped)
+        assertTrue(events.events.isEmpty())
+    }
 }

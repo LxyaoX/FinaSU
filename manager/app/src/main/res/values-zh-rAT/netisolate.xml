@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">嚴斷外網</string>
     <string name="netisolate_policy_unsupported">此核心未具各器別策之能</string>
     <string name="netisolate_policy_summary">可為各器別設其禁制</string>
+    <string name="netisolate_events">近攔錄</string>
+    <string name="netisolate_events_empty">開機以來未有攔截</string>
+    <string name="netisolate_events_unsupported">此內核不示攔截診斷</string>
+    <string name="netisolate_events_clear">清錄</string>
+    <string name="netisolate_events_clear_confirm">盡清近攔之錄？隔離之設不變。</string>
+    <string name="netisolate_events_dropped">已覆舊錄 %1$d 條</string>
 </resources>

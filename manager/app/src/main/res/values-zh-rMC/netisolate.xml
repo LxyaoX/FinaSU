@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">彻底断网</string>
     <string name="netisolate_policy_unsupported">此基岩核心不支持逐应用策略</string>
     <string name="netisolate_policy_summary">可为每个应用单独设定边界</string>
+    <string name="netisolate_events">最近拦截现场</string>
+    <string name="netisolate_events_empty">开机到现在还没逮到</string>
+    <string name="netisolate_events_unsupported">这内核不给看拦截诊断，寄</string>
+    <string name="netisolate_events_clear">清空记录</string>
+    <string name="netisolate_events_clear_confirm">最近这些拦截现场全清了？隔离设置不动。</string>
+    <string name="netisolate_events_dropped">老记录被挤掉 %1$d 条</string>
 </resources>

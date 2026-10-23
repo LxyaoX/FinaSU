@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">قطع صارم</string>
     <string name="netisolate_policy_unsupported">هذه النواة لا تدعم سياسات منفصلة لكل تطبيق</string>
     <string name="netisolate_policy_summary">اضبط سياسة كل تطبيق محدد على حدة</string>
+    <string name="netisolate_events">محاولات الحظر الحديثة</string>
+    <string name="netisolate_events_empty">لا توجد محاولات محظورة منذ الإقلاع</string>
+    <string name="netisolate_events_unsupported">هذه النواة لا توفر تشخيص محاولات الحظر</string>
+    <string name="netisolate_events_clear">مسح السجل</string>
+    <string name="netisolate_events_clear_confirm">مسح كل محاولات الحظر الحديثة؟ لن تتغير إعدادات العزل.</string>
+    <string name="netisolate_events_dropped">تمت الكتابة فوق %1$d من المحاولات الأقدم</string>
 </resources>

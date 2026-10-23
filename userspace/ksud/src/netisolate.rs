@@ -5,6 +5,7 @@ use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
+use std::net::{Ipv4Addr, Ipv6Addr};
 use std::os::fd::AsRawFd;
 use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt, PermissionsExt};
 
@@ -31,6 +32,10 @@ pub enum Command {
     Clear,
     /// Reapply the persisted configuration
     Apply,
+    /// Read recent blocked attempts from the kernel ring
+    Events,
+    /// Clear recent blocked attempts without changing isolation state
+    EventsClear,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -559,6 +564,107 @@ fn status() -> Result<()> {
     Ok(())
 }
 
+const NI_CONNECT: u8 = 0;
+const NI_SENDTO: u8 = 1;
+const NI_SENDMSG: u8 = 2;
+const NI_SENDMMSG: u8 = 3;
+const NI_SOCKET: u8 = 4;
+
+const fn operation_name(operation: u8) -> &'static str {
+    match operation {
+        NI_CONNECT => "connect",
+        NI_SENDTO => "sendto",
+        NI_SENDMSG => "sendmsg",
+        NI_SENDMMSG => "sendmmsg",
+        NI_SOCKET => "socket",
+        _ => "unknown",
+    }
+}
+
+const fn family_name(family: u8) -> &'static str {
+    match family {
+        value if value == libc::AF_INET as u8 => "inet",
+        value if value == libc::AF_INET6 as u8 => "inet6",
+        _ => "unknown",
+    }
+}
+
+fn address_text(family: u8, operation: u8, address: &[u8; 16]) -> String {
+    if operation == NI_SOCKET {
+        return String::new();
+    }
+    match family {
+        value if value == libc::AF_INET as u8 => {
+            Ipv4Addr::new(address[0], address[1], address[2], address[3]).to_string()
+        }
+        value if value == libc::AF_INET6 as u8 => Ipv6Addr::from(*address).to_string(),
+        _ => String::new(),
+    }
+}
+
+fn event_value(event: &ksu_uapi::ksu_netisolate_event) -> serde_json::Value {
+    serde_json::json!({
+        "timestamp_ns": event.timestamp_ns,
+        "uid": event.uid,
+        "operation": operation_name(event.operation),
+        "family": family_name(event.family),
+        "address": address_text(event.family, event.operation, &event.address),
+        "port": event.port,
+    })
+}
+
+fn events_value(events: &ksu_uapi::ksu_netisolate_events) -> serde_json::Value {
+    let count = (events.count as usize).min(ksu_uapi::KSU_NETISOLATE_EVENT_MAX as usize);
+    let rows = events.events[..count]
+        .iter()
+        .map(event_value)
+        .collect::<Vec<_>>();
+    serde_json::json!({
+        "supported": true,
+        "capacity": events.capacity,
+        "dropped": events.dropped,
+        "events": rows,
+    })
+}
+
+fn unsupported_events_value() -> serde_json::Value {
+    serde_json::json!({
+        "supported": false,
+        "capacity": 0,
+        "dropped": 0,
+        "events": [],
+    })
+}
+
+fn events_report(result: Result<ksu_uapi::ksu_netisolate_events>) -> Result<serde_json::Value> {
+    match result {
+        Ok(events) => Ok(events_value(&events)),
+        Err(error) if kernel_unsupported(&error) => Ok(unsupported_events_value()),
+        Err(error) => Err(error.context("Read network isolation events")),
+    }
+}
+
+fn clear_events_report(result: Result<()>) -> Result<serde_json::Value> {
+    match result {
+        Ok(()) => Ok(serde_json::json!({ "supported": true, "cleared": true })),
+        Err(error) if kernel_unsupported(&error) => Ok(unsupported_events_value()),
+        Err(error) => Err(error.context("Clear network isolation events")),
+    }
+}
+
+fn events() -> Result<()> {
+    println!("{}", events_report(ksucalls::get_netisolate_events())?);
+    Ok(())
+}
+
+fn events_clear() -> Result<()> {
+    println!(
+        "{}",
+        clear_events_report(ksucalls::clear_netisolate_events())?
+    );
+    Ok(())
+}
+
 fn enable() -> Result<()> {
     let _lock = acquire_lock()?;
     let mut config = read_config()?.context("Network isolation is not configured")?;
@@ -637,6 +743,8 @@ pub fn run(command: &Command) -> Result<()> {
         Command::Disable => disable(),
         Command::Clear => clear(),
         Command::Apply => apply_persisted(),
+        Command::Events => events(),
+        Command::EventsClear => events_clear(),
     }
 }
 
@@ -920,5 +1028,83 @@ mod tests {
         let kernel = kernel_policies(&empty_config());
         assert_eq!(0, kernel.enabled);
         assert_eq!(0, kernel.count);
+    }
+
+    fn event(
+        operation: u8,
+        family: u8,
+        address: [u8; 16],
+        port: u16,
+    ) -> ksu_uapi::ksu_netisolate_event {
+        let mut event = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_event>() };
+        event.uid = 10123;
+        event.operation = operation;
+        event.family = family;
+        event.address = address;
+        event.port = port;
+        event
+    }
+
+    #[test]
+    fn event_abi_layout_is_fixed() {
+        assert_eq!(40, std::mem::size_of::<ksu_uapi::ksu_netisolate_event>());
+        assert_eq!(2576, std::mem::size_of::<ksu_uapi::ksu_netisolate_events>());
+    }
+
+    #[test]
+    fn event_addresses_use_compressed_inet_format() {
+        let ipv4 = [127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let ipv6 = [0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+        assert_eq!(
+            "127.0.0.1",
+            address_text(libc::AF_INET as u8, NI_CONNECT, &ipv4)
+        );
+        assert_eq!(
+            "2001:db8::1",
+            address_text(libc::AF_INET6 as u8, NI_SENDMSG, &ipv6)
+        );
+        assert_eq!(
+            "0.0.0.0",
+            address_text(libc::AF_INET as u8, NI_CONNECT, &[0; 16])
+        );
+        assert_eq!("", address_text(libc::AF_INET as u8, NI_SOCKET, &[0; 16]));
+    }
+
+    #[test]
+    fn events_json_exposes_endpoint_and_drop_count() {
+        let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
+        events.count = 2;
+        events.capacity = 64;
+        events.dropped = 3;
+        events.events[0] = event(
+            NI_CONNECT,
+            libc::AF_INET as u8,
+            [127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            8080,
+        );
+        events.events[1] = event(NI_SOCKET, libc::AF_INET6 as u8, [0; 16], 0);
+
+        let json = events_value(&events);
+        assert_eq!(Some(true), json["supported"].as_bool());
+        assert_eq!(Some(64), json["capacity"].as_u64());
+        assert_eq!(Some(3), json["dropped"].as_u64());
+        assert_eq!(Some("connect"), json["events"][0]["operation"].as_str());
+        assert_eq!(Some("127.0.0.1"), json["events"][0]["address"].as_str());
+        assert_eq!(Some(8080), json["events"][0]["port"].as_u64());
+        assert_eq!(Some("socket"), json["events"][1]["operation"].as_str());
+        assert_eq!(Some("inet6"), json["events"][1]["family"].as_str());
+        assert_eq!(Some(""), json["events"][1]["address"].as_str());
+    }
+
+    #[test]
+    fn old_kernel_reports_events_as_unsupported() {
+        let unsupported = std::io::Error::from_raw_os_error(libc::ENOTTY);
+        let json = events_report(Err(unsupported.into())).unwrap();
+        assert_eq!(Some(false), json["supported"].as_bool());
+        assert!(json["events"].as_array().unwrap().is_empty());
+
+        let unsupported = std::io::Error::from_raw_os_error(libc::EOPNOTSUPP);
+        let json = clear_events_report(Err(unsupported.into())).unwrap();
+        assert_eq!(Some(false), json["supported"].as_bool());
     }
 }

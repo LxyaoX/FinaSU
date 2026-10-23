@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Sin conexión estricta</string>
     <string name="netisolate_policy_unsupported">Este kernel no admite políticas por aplicación</string>
     <string name="netisolate_policy_summary">Configura cada aplicación seleccionada por separado</string>
+    <string name="netisolate_events">Intentos bloqueados recientes</string>
+    <string name="netisolate_events_empty">No hay intentos bloqueados desde el arranque</string>
+    <string name="netisolate_events_unsupported">Este kernel no expone diagnósticos de intentos bloqueados</string>
+    <string name="netisolate_events_clear">Borrar registro</string>
+    <string name="netisolate_events_clear_confirm">¿Borrar todos los intentos bloqueados recientes? Los ajustes de aislamiento no cambiarán.</string>
+    <string name="netisolate_events_dropped">Se sobrescribieron %1$d intentos anteriores</string>
 </resources>

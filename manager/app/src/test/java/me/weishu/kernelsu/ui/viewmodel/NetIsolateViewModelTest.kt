@@ -8,6 +8,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
+import me.weishu.kernelsu.data.netisolate.NetIsolateEvent
+import me.weishu.kernelsu.data.netisolate.NetIsolateEvents
 import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
@@ -308,15 +310,66 @@ class NetIsolateViewModelTest {
         assertTrue(model.uiState.value.status.uids.isEmpty())
     }
 
+    @Test
+    fun `event diagnostics are loaded on demand`() = runTest(dispatcher) {
+        repository.eventData = NetIsolateEvents(
+            supported = true,
+            capacity = 64,
+            dropped = 1,
+            events = listOf(
+                NetIsolateEvent(123456789, 10123, "connect", "inet", "127.0.0.1", 8080),
+            ),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.loadEvents()
+        advanceUntilIdle()
+
+        assertEquals(1, repository.eventCalls)
+        assertTrue(model.uiState.value.eventsLoaded)
+        assertEquals(1L, model.uiState.value.events.dropped)
+        assertEquals("127.0.0.1", model.uiState.value.events.events.single().address)
+    }
+
+    @Test
+    fun `clearing event diagnostics reloads the empty ring`() = runTest(dispatcher) {
+        repository.eventData = NetIsolateEvents(
+            supported = true,
+            capacity = 64,
+            events = listOf(
+                NetIsolateEvent(123456789, 10123, "sendto", "inet", "1.1.1.1", 53),
+            ),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.clearEvents()
+        advanceUntilIdle()
+
+        assertEquals(1, repository.clearEventCalls)
+        assertTrue(model.uiState.value.events.supported)
+        assertTrue(model.uiState.value.events.events.isEmpty())
+    }
+
     private class FakeNetIsolateDataSource : NetIsolateDataSource {
         var current = NetIsolateStatus()
+        var eventData = NetIsolateEvents()
         val saves = mutableListOf<SaveCall>()
         val policySaves = mutableListOf<PolicySaveCall>()
         var operationError: Throwable? = null
         var disableCalls = 0
         var clearCalls = 0
+        var eventCalls = 0
+        var clearEventCalls = 0
 
         override suspend fun status(): NetIsolateStatus = current
+
+        override suspend fun events(): NetIsolateEvents {
+            eventCalls++
+            operationError?.let { throw it }
+            return eventData
+        }
 
         override suspend fun loadApps(): List<UtsTargetApp> = emptyList()
 
@@ -357,6 +410,12 @@ class NetIsolateViewModelTest {
         override suspend fun clear() {
             clearCalls++
             current = NetIsolateStatus(supported = true)
+        }
+
+        override suspend fun clearEvents() {
+            clearEventCalls++
+            operationError?.let { throw it }
+            eventData = NetIsolateEvents(supported = true, capacity = 64)
         }
     }
 

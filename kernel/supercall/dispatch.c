@@ -569,6 +569,27 @@ static int do_set_netisolate_policies(void __user *arg)
     return ret;
 }
 
+static int do_get_netisolate_events(void __user *arg)
+{
+    struct ksu_netisolate_events *events;
+    int ret;
+
+    events = kzalloc(sizeof(*events), GFP_KERNEL);
+    if (!events)
+        return -ENOMEM;
+    ret = ksu_netisolate_get_events(events);
+    if (!ret && copy_to_user(arg, events, sizeof(*events)))
+        ret = -EFAULT;
+    kfree(events);
+    return ret;
+}
+
+static int do_clear_netisolate_events(void __user *arg)
+{
+    (void)arg;
+    return ksu_netisolate_clear_events();
+}
+
 static int do_get_wrapper_fd(void __user *arg)
 {
     if (!ksu_file_sid) {
@@ -1229,6 +1250,18 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .cmd = KSU_IOCTL_SET_NETISOLATE_POLICIES,
         .name = "SET_NETISOLATE_POLICIES",
         .handler = do_set_netisolate_policies,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_GET_NETISOLATE_EVENTS,
+        .name = "GET_NETISOLATE_EVENTS",
+        .handler = do_get_netisolate_events,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_CLEAR_NETISOLATE_EVENTS,
+        .name = "CLEAR_NETISOLATE_EVENTS",
+        .handler = do_clear_netisolate_events,
         .perm_check = manager_or_root
     },
     {

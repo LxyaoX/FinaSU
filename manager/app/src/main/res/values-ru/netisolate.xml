@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Строгий офлайн</string>
     <string name="netisolate_policy_unsupported">Это ядро не поддерживает политики для отдельных приложений</string>
     <string name="netisolate_policy_summary">Настройте каждое выбранное приложение отдельно</string>
+    <string name="netisolate_events">Недавние заблокированные попытки</string>
+    <string name="netisolate_events_empty">С момента загрузки заблокированных попыток нет</string>
+    <string name="netisolate_events_unsupported">Это ядро не предоставляет диагностику заблокированных попыток</string>
+    <string name="netisolate_events_clear">Очистить журнал</string>
+    <string name="netisolate_events_clear_confirm">Очистить все недавние заблокированные попытки? Настройки изоляции не изменятся.</string>
+    <string name="netisolate_events_dropped">Перезаписано старых попыток: %1$d</string>
 </resources>

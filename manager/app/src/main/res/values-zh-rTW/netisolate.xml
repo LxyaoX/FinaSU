@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">嚴格斷網</string>
     <string name="netisolate_policy_unsupported">目前核心不支援個別應用程式策略</string>
     <string name="netisolate_policy_summary">可分別設定每個所選應用程式的隔離方式</string>
+    <string name="netisolate_events">最近封鎖</string>
+    <string name="netisolate_events_empty">開機後尚無封鎖紀錄</string>
+    <string name="netisolate_events_unsupported">目前核心不提供封鎖診斷</string>
+    <string name="netisolate_events_clear">清除紀錄</string>
+    <string name="netisolate_events_clear_confirm">清除所有最近封鎖紀錄？不會變更隔離設定。</string>
+    <string name="netisolate_events_dropped">已覆寫 %1$d 筆較舊紀錄</string>
 </resources>

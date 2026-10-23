@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Strict offline</string>
     <string name="netisolate_policy_unsupported">This kernel does not support per-app policies</string>
     <string name="netisolate_policy_summary">Configure each selected app independently</string>
+    <string name="netisolate_events">Recent blocked attempts</string>
+    <string name="netisolate_events_empty">No blocked attempts since boot</string>
+    <string name="netisolate_events_unsupported">This kernel does not expose blocked-attempt diagnostics</string>
+    <string name="netisolate_events_clear">Clear log</string>
+    <string name="netisolate_events_clear_confirm">Clear all recent blocked attempts? Isolation settings will not change.</string>
+    <string name="netisolate_events_dropped">%1$d older attempts were overwritten</string>
 </resources>

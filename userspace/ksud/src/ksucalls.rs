@@ -362,6 +362,18 @@ pub fn set_netisolate_policies(config: &ksu_uapi::ksu_netisolate_policies) -> Re
     Ok(())
 }
 
+pub fn get_netisolate_events() -> Result<ksu_uapi::ksu_netisolate_events> {
+    let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_EVENTS, &raw mut events)?;
+    Ok(events)
+}
+
+pub fn clear_netisolate_events() -> Result<()> {
+    let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_CLEAR_NETISOLATE_EVENTS, &raw mut events)?;
+    Ok(())
+}
+
 pub fn get_wrapped_fd(fd: RawFd) -> Result<RawFd> {
     let mut cmd = ksu_uapi::ksu_get_wrapper_fd_cmd {
         fd: fd as u32,

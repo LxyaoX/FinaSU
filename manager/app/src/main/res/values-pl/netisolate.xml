@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Ścisła blokada sieci</string>
     <string name="netisolate_policy_unsupported">To jądro nie obsługuje zasad dla poszczególnych aplikacji</string>
     <string name="netisolate_policy_summary">Skonfiguruj każdą wybraną aplikację osobno</string>
+    <string name="netisolate_events">Ostatnie próby zablokowania</string>
+    <string name="netisolate_events_empty">Brak zablokowanych prób od uruchomienia</string>
+    <string name="netisolate_events_unsupported">Ten kernel nie udostępnia diagnostyki zablokowanych prób</string>
+    <string name="netisolate_events_clear">Wyczyść dziennik</string>
+    <string name="netisolate_events_clear_confirm">Wyczyścić wszystkie ostatnie próby zablokowania? Ustawienia izolacji nie ulegną zmianie.</string>
+    <string name="netisolate_events_dropped">Zastąpiono %1$d starszych prób</string>
 </resources>

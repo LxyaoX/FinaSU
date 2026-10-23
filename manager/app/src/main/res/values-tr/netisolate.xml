@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Katı çevrimdışı</string>
     <string name="netisolate_policy_unsupported">Bu çekirdek uygulama başına ilkeleri desteklemiyor</string>
     <string name="netisolate_policy_summary">Seçili her uygulamayı ayrı ayrı yapılandırın</string>
+    <string name="netisolate_events">Son engellenen denemeler</string>
+    <string name="netisolate_events_empty">Önyüklemeden beri engellenen deneme yok</string>
+    <string name="netisolate_events_unsupported">Bu çekirdek engellenen deneme tanılaması sunmuyor</string>
+    <string name="netisolate_events_clear">Günlüğü temizle</string>
+    <string name="netisolate_events_clear_confirm">Son engellenen denemelerin tümü temizlensin mi? Yalıtım ayarları değişmez.</string>
+    <string name="netisolate_events_dropped">%1$d eski denemenin üzerine yazıldı</string>
 </resources>

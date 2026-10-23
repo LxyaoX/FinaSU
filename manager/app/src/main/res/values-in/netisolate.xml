@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Luring ketat</string>
     <string name="netisolate_policy_unsupported">Kernel ini tidak mendukung kebijakan per aplikasi</string>
     <string name="netisolate_policy_summary">Atur setiap aplikasi yang dipilih secara terpisah</string>
+    <string name="netisolate_events">Percobaan terblokir terbaru</string>
+    <string name="netisolate_events_empty">Tidak ada percobaan terblokir sejak boot</string>
+    <string name="netisolate_events_unsupported">Kernel ini tidak menyediakan diagnostik percobaan terblokir</string>
+    <string name="netisolate_events_clear">Hapus log</string>
+    <string name="netisolate_events_clear_confirm">Hapus semua percobaan terblokir terbaru? Pengaturan isolasi tidak akan berubah.</string>
+    <string name="netisolate_events_dropped">%1$d percobaan lama ditimpa</string>
 </resources>

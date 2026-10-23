@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Offline estrito</string>
     <string name="netisolate_policy_unsupported">Este kernel não oferece suporte a políticas por aplicativo</string>
     <string name="netisolate_policy_summary">Configure cada aplicativo selecionado separadamente</string>
+    <string name="netisolate_events">Tentativas bloqueadas recentes</string>
+    <string name="netisolate_events_empty">Nenhuma tentativa bloqueada desde a inicialização</string>
+    <string name="netisolate_events_unsupported">Este kernel não expõe diagnósticos de tentativas bloqueadas</string>
+    <string name="netisolate_events_clear">Limpar registro</string>
+    <string name="netisolate_events_clear_confirm">Limpar todas as tentativas bloqueadas recentes? As configurações de isolamento não serão alteradas.</string>
+    <string name="netisolate_events_dropped">%1$d tentativas antigas foram substituídas</string>
 </resources>

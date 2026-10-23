@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">绝网封印</string>
     <string name="netisolate_policy_unsupported">此心之契约尚无逐应用设策之力</string>
     <string name="netisolate_policy_summary">可为每件契约应用单独设定结界</string>
+    <string name="netisolate_events">最近结界拦截小记</string>
+    <string name="netisolate_events_empty">开机以来尚无拦截小记</string>
+    <string name="netisolate_events_unsupported">此内核未开放拦截小记</string>
+    <string name="netisolate_events_clear">清空小记</string>
+    <string name="netisolate_events_clear_confirm">要让近期拦截小记尽数散去？结界之设不变。</string>
+    <string name="netisolate_events_dropped">旧记已有 %1$d 条被覆盖</string>
 </resources>

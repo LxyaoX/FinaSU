@@ -1,3 +1,5 @@
+#include <linux/types.h>
+#include <linux/byteorder/little_endian.h>
 #include <linux/compiler.h>
 #include <linux/cred.h>
 #include <linux/errno.h>
@@ -12,7 +14,7 @@
 #include <linux/socket.h>
 #include <linux/spinlock.h>
 #include <linux/string.h>
-#include <linux/types.h>
+#include <linux/timekeeping.h>
 #include <linux/uaccess.h>
 
 #include <net/compat.h>
@@ -25,6 +27,8 @@
 
 static_assert(sizeof(struct ksu_netisolate_config) == 1040, "netisolate ABI drift");
 static_assert(sizeof(struct ksu_netisolate_policies) == 2064, "netisolate policies ABI drift");
+static_assert(sizeof(struct ksu_netisolate_event) == 40, "netisolate event ABI drift");
+static_assert(sizeof(struct ksu_netisolate_events) == 2576, "netisolate events ABI drift");
 
 #define NI_NATIVE_BASE 0
 #define NI_OPERATION_COUNT 5
@@ -62,9 +66,24 @@ struct ni_state {
     struct ni_policy policies[KSU_NETISOLATE_MAX_POLICIES];
 };
 
+struct ni_endpoint {
+    u8 family;
+    u8 address[16];
+    u16 port;
+};
+
+struct ni_event_ring {
+    u32 head;
+    u32 count;
+    u64 dropped;
+    struct ksu_netisolate_event events[KSU_NETISOLATE_EVENT_MAX];
+};
+
 static DEFINE_MUTEX(ni_lifecycle_lock);
 static DEFINE_SPINLOCK(ni_state_lock);
+static DEFINE_SPINLOCK(ni_event_lock);
 static struct ni_state ni_state;
+static struct ni_event_ring ni_events;
 static struct ni_hook ni_hooks[NI_HOOK_COUNT];
 static bool ni_supported;
 static bool ni_compat_supported;
@@ -195,10 +214,11 @@ static bool ni_ipv6_loopback(const struct in6_addr *address)
 }
 
 static int ni_sockaddr_target(const void __user *address, unsigned int address_length,
-                              bool *target, bool *loopback)
+                              struct ni_endpoint *endpoint, bool *target, bool *loopback)
 {
     __u16 family;
 
+    memset(endpoint, 0, sizeof(*endpoint));
     *target = false;
     *loopback = false;
     if (!address)
@@ -213,6 +233,9 @@ static int ni_sockaddr_target(const void __user *address, unsigned int address_l
             return 0;
         if (copy_from_user(&addr, address, sizeof(addr)))
             return -EFAULT;
+        endpoint->family = AF_INET;
+        memcpy(endpoint->address, &addr.sin_addr, sizeof(addr.sin_addr));
+        endpoint->port = ntohs(addr.sin_port);
         *target = true;
         *loopback = ni_ipv4_loopback(&addr.sin_addr);
     } else if (family == AF_INET6) {
@@ -222,6 +245,9 @@ static int ni_sockaddr_target(const void __user *address, unsigned int address_l
             return 0;
         if (copy_from_user(&addr, address, sizeof(addr)))
             return -EFAULT;
+        endpoint->family = AF_INET6;
+        memcpy(endpoint->address, &addr.sin6_addr, sizeof(addr.sin6_addr));
+        endpoint->port = ntohs(addr.sin6_port);
         *target = true;
         *loopback = ni_ipv6_loopback(&addr.sin6_addr);
     }
@@ -229,7 +255,7 @@ static int ni_sockaddr_target(const void __user *address, unsigned int address_l
 }
 
 static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool allow_loopback,
-                             bool *target)
+                             struct ni_endpoint *endpoint, bool *target)
 {
     void __user *name;
     int name_length;
@@ -266,7 +292,7 @@ static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool allow
 
     if (name_length < 0)
         return 0;
-    ret = ni_sockaddr_target(name, name_length, &address_target, &loopback);
+    ret = ni_sockaddr_target(name, name_length, endpoint, &address_target, &loopback);
     if (ret)
         return ret;
     *target = address_target && !(allow_loopback && loopback);
@@ -274,7 +300,7 @@ static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool allow
 }
 
 static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allow_loopback,
-                              bool *target)
+                              struct ni_endpoint *endpoint, bool *target)
 {
     unsigned long base = ni_arg(regs, 1, compat);
     unsigned long vlen = ni_arg(regs, 2, compat);
@@ -322,7 +348,7 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allo
             continue;
         if (name_length < 0)
             continue;
-        ret = ni_sockaddr_target(name, name_length, &address_target, &loopback);
+        ret = ni_sockaddr_target(name, name_length, endpoint, &address_target, &loopback);
         if (ret)
             return ret;
         if (address_target && !(allow_loopback && loopback)) {
@@ -333,7 +359,8 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allo
     return 0;
 }
 
-static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operation op, bool compat)
+static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operation op, bool compat,
+                                     struct ni_endpoint *endpoint)
 {
     u32 policy_flags = 0;
     bool address_target;
@@ -341,6 +368,7 @@ static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operati
     bool loopback;
     bool target = false;
 
+    memset(endpoint, 0, sizeof(*endpoint));
     if (!ni_policy_match(current_uid().val, op, &policy_flags))
         return false;
     allow_loopback = policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK;
@@ -348,39 +376,70 @@ static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operati
     switch (op) {
     case NI_CONNECT:
         if (ni_sockaddr_target(ni_user_ptr(regs, 1, compat), ni_arg(regs, 2, compat),
-                               &address_target, &loopback))
+                               endpoint, &address_target, &loopback))
             return false;
         target = address_target && !(allow_loopback && loopback);
         break;
     case NI_SENDTO:
         if (ni_sockaddr_target(ni_user_ptr(regs, 4, compat), ni_arg(regs, 5, compat),
-                               &address_target, &loopback))
+                               endpoint, &address_target, &loopback))
             return false;
         target = address_target && !(allow_loopback && loopback);
         break;
     case NI_SENDMSG:
-        if (ni_sendmsg_target(regs, compat, allow_loopback, &target))
+        if (ni_sendmsg_target(regs, compat, allow_loopback, endpoint, &target))
             return false;
         break;
     case NI_SENDMMSG:
-        if (ni_sendmmsg_target(regs, compat, allow_loopback, &target))
+        if (ni_sendmmsg_target(regs, compat, allow_loopback, endpoint, &target))
             return false;
         break;
     case NI_SOCKET:
         if (!(policy_flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET))
             return false;
-        target = ni_arg(regs, 0, compat) == AF_INET ||
-                 ni_arg(regs, 0, compat) == AF_INET6;
+        endpoint->family = ni_arg(regs, 0, compat);
+        target = endpoint->family == AF_INET || endpoint->family == AF_INET6;
         break;
     }
     return target;
 }
 
+static void ni_record_event(u32 uid, enum ni_operation op, const struct ni_endpoint *endpoint)
+{
+    struct ksu_netisolate_event event = {
+        .timestamp_ns = ktime_get_ns(),
+        .uid = uid,
+        .port = endpoint->port,
+        .family = endpoint->family,
+        .operation = op,
+    };
+    unsigned long flags;
+    u32 slot;
+
+    memcpy(event.address, endpoint->address, sizeof(event.address));
+    spin_lock_irqsave(&ni_event_lock, flags);
+    if (READ_ONCE(ni_stopping)) {
+        spin_unlock_irqrestore(&ni_event_lock, flags);
+        return;
+    }
+    slot = ni_events.head;
+    ni_events.events[slot] = event;
+    ni_events.head = (slot + 1) % KSU_NETISOLATE_EVENT_MAX;
+    if (ni_events.count < KSU_NETISOLATE_EVENT_MAX)
+        ni_events.count++;
+    else
+        ni_events.dropped++;
+    spin_unlock_irqrestore(&ni_event_lock, flags);
+}
+
 #define NI_WRAPPER(name, op, compat)                                                                                   \
     static long __nocfi name(const struct pt_regs *regs)                                                              \
     {                                                                                                                  \
-        if (ni_should_refuse(regs, op, compat))                                                                        \
+        struct ni_endpoint endpoint;                                                                                   \
+        if (ni_should_refuse(regs, op, compat, &endpoint)) {                                                           \
+            ni_record_event(current_uid().val, op, &endpoint);                                                       \
             return op == NI_SOCKET ? -EACCES : -ECONNREFUSED;                                                         \
+        }                                                                                                              \
         return ni_original(op, compat)(regs);                                                                          \
     }
 
@@ -635,6 +694,15 @@ static void ni_legacy_to_policies(const struct ksu_netisolate_config *legacy,
     }
 }
 
+static void ni_clear_events_locked(void)
+{
+    unsigned long flags;
+
+    spin_lock_irqsave(&ni_event_lock, flags);
+    memset(&ni_events, 0, sizeof(ni_events));
+    spin_unlock_irqrestore(&ni_event_lock, flags);
+}
+
 int __init ksu_netisolate_init(void)
 {
     mutex_lock(&ni_lifecycle_lock);
@@ -644,7 +712,9 @@ int __init ksu_netisolate_init(void)
     }
     memset(ni_hooks, 0, sizeof(ni_hooks));
     memset(&ni_state, 0, sizeof(ni_state));
+    ni_clear_events_locked();
     ni_compat_supported = false;
+    ni_stopping = false;
     ni_fill_native_hooks();
     if (!ni_native_hooks_valid()) {
         mutex_unlock(&ni_lifecycle_lock);
@@ -661,7 +731,7 @@ int __init ksu_netisolate_init(void)
 void ksu_netisolate_exit(void)
 {
     mutex_lock(&ni_lifecycle_lock);
-    ni_stopping = true;
+    WRITE_ONCE(ni_stopping, true);
     ni_publish_locked(&(struct ksu_netisolate_policies){});
     {
         int ret = ni_uninstall_hooks_locked();
@@ -671,6 +741,7 @@ void ksu_netisolate_exit(void)
     }
     ni_supported = false;
     ni_compat_supported = false;
+    ni_clear_events_locked();
     mutex_unlock(&ni_lifecycle_lock);
 }
 
@@ -776,6 +847,47 @@ int ksu_netisolate_set_policies(const struct ksu_netisolate_policies *config)
         ret = ni_uninstall_hooks_locked();
     }
 out:
+    mutex_unlock(&ni_lifecycle_lock);
+    return ret;
+}
+
+int ksu_netisolate_get_events(struct ksu_netisolate_events *events)
+{
+    unsigned long flags;
+    u32 first;
+    u32 i;
+
+    if (!events)
+        return -EINVAL;
+    mutex_lock(&ni_lifecycle_lock);
+    if (!ni_supported || ni_stopping) {
+        mutex_unlock(&ni_lifecycle_lock);
+        return -EOPNOTSUPP;
+    }
+    memset(events, 0, sizeof(*events));
+    spin_lock_irqsave(&ni_event_lock, flags);
+    events->count = ni_events.count;
+    events->capacity = KSU_NETISOLATE_EVENT_MAX;
+    events->dropped = ni_events.dropped;
+    first = (ni_events.head + KSU_NETISOLATE_EVENT_MAX - ni_events.count) %
+            KSU_NETISOLATE_EVENT_MAX;
+    for (i = 0; i < ni_events.count; i++)
+        events->events[i] =
+            ni_events.events[(first + i) % KSU_NETISOLATE_EVENT_MAX];
+    spin_unlock_irqrestore(&ni_event_lock, flags);
+    mutex_unlock(&ni_lifecycle_lock);
+    return 0;
+}
+
+int ksu_netisolate_clear_events(void)
+{
+    int ret = 0;
+
+    mutex_lock(&ni_lifecycle_lock);
+    if (!ni_supported || ni_stopping)
+        ret = -EOPNOTSUPP;
+    else
+        ni_clear_events_locked();
     mutex_unlock(&ni_lifecycle_lock);
     return ret;
 }

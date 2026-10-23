@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
+import me.weishu.kernelsu.data.netisolate.NetIsolateEvents
 import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateRepository
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
@@ -29,6 +30,9 @@ data class NetIsolateUiState(
     val apps: List<UtsTargetApp> = emptyList(),
     val appsLoading: Boolean = false,
     val appsLoaded: Boolean = false,
+    val events: NetIsolateEvents = NetIsolateEvents(),
+    val eventsLoading: Boolean = false,
+    val eventsLoaded: Boolean = false,
 )
 
 class NetIsolateViewModel(
@@ -39,6 +43,7 @@ class NetIsolateViewModel(
     private val _uiState = MutableStateFlow(NetIsolateUiState())
     val uiState: StateFlow<NetIsolateUiState> = _uiState.asStateFlow()
     private var requestToken = 0L
+    private var eventsRequestToken = 0L
 
     init {
         refresh()
@@ -178,6 +183,45 @@ class NetIsolateViewModel(
 
     fun clear() {
         operate { repository.clear() }
+    }
+
+    fun loadEvents() {
+        loadEvents(clearFirst = false)
+    }
+
+    fun clearEvents() {
+        loadEvents(clearFirst = true)
+    }
+
+    private fun loadEvents(clearFirst: Boolean) {
+        if (_uiState.value.eventsLoading) return
+        val request = ++eventsRequestToken
+        val generation = shellGeneration()
+        _uiState.update { it.copy(eventsLoading = true, message = null) }
+        viewModelScope.launch {
+            try {
+                if (clearFirst) repository.clearEvents()
+                val events = repository.events()
+                if (request != eventsRequestToken || generation != shellGeneration()) return@launch
+                _uiState.update {
+                    it.copy(events = events, eventsLoaded = true, message = null)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (request == eventsRequestToken && generation == shellGeneration()) {
+                    _uiState.update {
+                        it.copy(
+                            message = e.message ?: getString(R.string.netisolate_operation_failed),
+                        )
+                    }
+                }
+            } finally {
+                if (request == eventsRequestToken) {
+                    _uiState.update { it.copy(eventsLoading = false) }
+                }
+            }
+        }
     }
 
     fun loadApps() {

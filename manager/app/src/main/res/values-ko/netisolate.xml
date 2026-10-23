@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">엄격 오프라인</string>
     <string name="netisolate_policy_unsupported">이 커널은 앱별 정책을 지원하지 않습니다</string>
     <string name="netisolate_policy_summary">선택한 각 앱의 정책을 따로 설정합니다</string>
+    <string name="netisolate_events">최근 차단 시도</string>
+    <string name="netisolate_events_empty">부팅 후 차단된 시도가 없습니다</string>
+    <string name="netisolate_events_unsupported">이 커널은 차단 시도 진단을 제공하지 않습니다</string>
+    <string name="netisolate_events_clear">기록 지우기</string>
+    <string name="netisolate_events_clear_confirm">최근 차단 시도를 모두 지우시겠습니까? 격리 설정은 변경되지 않습니다.</string>
+    <string name="netisolate_events_dropped">이전 시도 %1$d개를 덮어썼습니다</string>
 </resources>

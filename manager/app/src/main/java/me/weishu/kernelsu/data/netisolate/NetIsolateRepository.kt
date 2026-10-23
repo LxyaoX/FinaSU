@@ -72,8 +72,49 @@ data class NetIsolateStatus(
     }
 }
 
+data class NetIsolateEvent(
+    val timestampNanos: Long,
+    val uid: Int,
+    val operation: String,
+    val family: String,
+    val address: String,
+    val port: Int,
+)
+
+data class NetIsolateEvents(
+    val supported: Boolean = false,
+    val capacity: Int = 0,
+    val dropped: Long = 0,
+    val events: List<NetIsolateEvent> = emptyList(),
+) {
+    companion object {
+        fun parse(text: String): NetIsolateEvents {
+            val json = JSONObject(text)
+            val array = json.optJSONArray("events") ?: JSONArray()
+            val events = List(array.length()) { index ->
+                val event = array.getJSONObject(index)
+                NetIsolateEvent(
+                    timestampNanos = event.optLong("timestamp_ns"),
+                    uid = event.optInt("uid"),
+                    operation = event.optString("operation"),
+                    family = event.optString("family"),
+                    address = event.optString("address"),
+                    port = event.optInt("port"),
+                )
+            }
+            return NetIsolateEvents(
+                supported = json.optBoolean("supported"),
+                capacity = json.optInt("capacity"),
+                dropped = json.optLong("dropped"),
+                events = events,
+            )
+        }
+    }
+}
+
 interface NetIsolateDataSource {
     suspend fun status(): NetIsolateStatus
+    suspend fun events(): NetIsolateEvents
     suspend fun loadApps(): List<UtsTargetApp>
     suspend fun save(
         enabled: Boolean,
@@ -84,6 +125,7 @@ interface NetIsolateDataSource {
     suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>)
     suspend fun disable()
     suspend fun clear()
+    suspend fun clearEvents()
 }
 
 class NetIsolateRepository(
@@ -91,7 +133,7 @@ class NetIsolateRepository(
 ) : NetIsolateDataSource {
     private suspend fun command(action: String, input: String? = null): String =
         withContext(dispatcher) {
-            require(action in setOf("status", "set", "disable", "clear"))
+            require(action in setOf("status", "set", "disable", "clear", "events", "events-clear"))
             require(input == null || input.toByteArray().size <= 64 * 1024)
             val shell = try {
                 withTimeout(15_000L) { RootShell.awaitRoot() }
@@ -124,6 +166,8 @@ class NetIsolateRepository(
         }
 
     override suspend fun status(): NetIsolateStatus = NetIsolateStatus.parse(command("status"))
+
+    override suspend fun events(): NetIsolateEvents = NetIsolateEvents.parse(command("events"))
 
     override suspend fun loadApps(): List<UtsTargetApp> = withContext(dispatcher) {
         val viewModel = SuperUserViewModel()
@@ -208,5 +252,9 @@ class NetIsolateRepository(
 
     override suspend fun clear() {
         command("clear")
+    }
+
+    override suspend fun clearEvents() {
+        command("events-clear")
     }
 }

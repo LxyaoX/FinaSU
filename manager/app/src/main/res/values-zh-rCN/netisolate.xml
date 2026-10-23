@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">严格断网</string>
     <string name="netisolate_policy_unsupported">当前内核不支持每应用独立策略</string>
     <string name="netisolate_policy_summary">可分别配置每个所选应用的隔离方式</string>
+    <string name="netisolate_events">最近拦截</string>
+    <string name="netisolate_events_empty">启动后暂无拦截记录</string>
+    <string name="netisolate_events_unsupported">当前内核不提供拦截诊断</string>
+    <string name="netisolate_events_clear">清除记录</string>
+    <string name="netisolate_events_clear_confirm">清除所有最近拦截记录？不会更改隔离设置。</string>
+    <string name="netisolate_events_dropped">已覆盖 %1$d 条较早记录</string>
 </resources>

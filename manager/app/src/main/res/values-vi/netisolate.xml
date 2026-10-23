@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">Chặn mạng nghiêm ngặt</string>
     <string name="netisolate_policy_unsupported">Kernel này không hỗ trợ chính sách riêng cho từng ứng dụng</string>
     <string name="netisolate_policy_summary">Định cấu hình riêng cho từng ứng dụng đã chọn</string>
+    <string name="netisolate_events">Lần thử bị chặn gần đây</string>
+    <string name="netisolate_events_empty">Chưa có lần thử nào bị chặn kể từ khi khởi động</string>
+    <string name="netisolate_events_unsupported">Kernel này không cung cấp chẩn đoán lần thử bị chặn</string>
+    <string name="netisolate_events_clear">Xóa nhật ký</string>
+    <string name="netisolate_events_clear_confirm">Xóa tất cả lần thử bị chặn gần đây? Cài đặt cách ly sẽ không thay đổi.</string>
+    <string name="netisolate_events_dropped">Đã ghi đè %1$d lần thử cũ</string>
 </resources>

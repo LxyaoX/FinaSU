@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">严格断网喵</string>
     <string name="netisolate_policy_unsupported">当前内核不支持每应用策略喵</string>
     <string name="netisolate_policy_summary">可以给每只应用单独配置隔离方式喵</string>
+    <string name="netisolate_events">最近被结界拦下来的坏坏尝试喵</string>
+    <string name="netisolate_events_empty">开机以后还没有东西被拦住喵</string>
+    <string name="netisolate_events_unsupported">这个内核不提供拦截小本本喵</string>
+    <string name="netisolate_events_clear">清掉小本本</string>
+    <string name="netisolate_events_clear_confirm">要把最近拦下来的记录都清掉喵？隔离设置不会变的喵。</string>
+    <string name="netisolate_events_dropped">有 %1$d 条旧记录被新记录盖掉了喵</string>
 </resources>

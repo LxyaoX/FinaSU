@@ -257,6 +257,10 @@ static const __u32 KSU_IOCTL_GET_NETISOLATE_POLICIES =
     _IOWR('K', 29, struct ksu_netisolate_policies);
 static const __u32 KSU_IOCTL_SET_NETISOLATE_POLICIES =
     _IOW('K', 30, struct ksu_netisolate_policies);
+static const __u32 KSU_IOCTL_GET_NETISOLATE_EVENTS =
+    _IOWR('K', 31, struct ksu_netisolate_events);
+static const __u32 KSU_IOCTL_CLEAR_NETISOLATE_EVENTS =
+    _IOW('K', 32, struct ksu_netisolate_events);
 static const __u32 KSU_IOCTL_GET_FULL_VERSION = _IOR('K', 29, struct ksu_get_full_version_cmd);
 
 #endif

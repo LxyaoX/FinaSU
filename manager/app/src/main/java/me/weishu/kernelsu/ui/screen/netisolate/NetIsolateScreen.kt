@@ -1,7 +1,9 @@
 package me.weishu.kernelsu.ui.screen.netisolate
 
+import android.os.SystemClock
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,15 +15,18 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +57,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.netisolate.NETISOLATE_MAX_UIDS
+import me.weishu.kernelsu.data.netisolate.NetIsolateEvent
+import me.weishu.kernelsu.data.netisolate.NetIsolateEvents
 import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
@@ -59,6 +66,7 @@ import me.weishu.kernelsu.data.uts.UtsTargetApp
 import me.weishu.kernelsu.ui.component.AppIconImage
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
+import me.weishu.kernelsu.ui.component.material.SegmentedItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
@@ -68,6 +76,13 @@ import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.uts.TargetAppSheet
 import me.weishu.kernelsu.ui.viewmodel.NetIsolateViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+private val NETISOLATE_EVENT_TIME: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("HH:mm:ss", Locale.ROOT)
 
 @Composable
 fun NetIsolateScreen() {
@@ -78,7 +93,9 @@ fun NetIsolateScreen() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     var showTargets by rememberSaveable { mutableStateOf(false) }
     var showPolicies by rememberSaveable { mutableStateOf(false) }
+    var showEvents by rememberSaveable { mutableStateOf(false) }
     var confirmClear by rememberSaveable { mutableStateOf(false) }
+    var confirmClearEvents by rememberSaveable { mutableStateOf(false) }
     val status = state.status
     val canEdit = status.supported && !state.busy && !state.loading
     val packageByUid = remember(state.apps) { state.apps.associate { it.uid to it.packageName } }
@@ -91,13 +108,18 @@ fun NetIsolateScreen() {
         }
     }
 
-    LifecycleResumeEffect(Unit) {
+    LifecycleResumeEffect(showEvents) {
         viewModel.refresh()
+        if (showEvents) viewModel.loadEvents()
         onPauseOrDispose { }
     }
 
-    LaunchedEffect(showTargets, showPolicies) {
-        if (showTargets || showPolicies) viewModel.loadApps()
+    LaunchedEffect(showTargets, showPolicies, showEvents) {
+        if (showTargets || showPolicies || showEvents) viewModel.loadApps()
+    }
+
+    LaunchedEffect(showEvents) {
+        if (showEvents) viewModel.loadEvents()
     }
 
     LaunchedEffect(state.message) {
@@ -130,6 +152,29 @@ fun NetIsolateScreen() {
         )
     }
 
+    if (confirmClearEvents) {
+        AlertDialog(
+            onDismissRequest = { confirmClearEvents = false },
+            title = { Text(stringResource(R.string.netisolate_events_clear)) },
+            text = { Text(stringResource(R.string.netisolate_events_clear_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmClearEvents = false
+                        viewModel.clearEvents()
+                    },
+                ) {
+                    Text(stringResource(R.string.netisolate_events_clear))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmClearEvents = false }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
+    }
+
     if (showTargets) {
         TargetAppSheet(
             apps = state.apps,
@@ -156,6 +201,16 @@ fun NetIsolateScreen() {
             busy = state.busy,
             onDismiss = { showPolicies = false },
             onSetPolicy = viewModel::setPolicy,
+        )
+    }
+
+    if (showEvents) {
+        NetIsolateEventsSheet(
+            events = state.events,
+            loading = state.eventsLoading && !state.eventsLoaded,
+            apps = state.apps,
+            onDismiss = { showEvents = false },
+            onClear = { confirmClearEvents = true },
         )
     }
 
@@ -347,6 +402,15 @@ fun NetIsolateScreen() {
                 item {
                     SegmentedListItem(
                         headlineContent = {
+                            Text(stringResource(R.string.netisolate_events))
+                        },
+                        leadingContent = { Icon(Icons.Filled.History, null) },
+                        onClick = { showEvents = true },
+                    )
+                }
+                item {
+                    SegmentedListItem(
+                        headlineContent = {
                             Text(
                                 text = stringResource(R.string.netisolate_clear),
                                 color = MaterialTheme.colorScheme.error,
@@ -363,6 +427,163 @@ fun NetIsolateScreen() {
             }
             Spacer(Modifier.height(24.dp))
         }
+    }
+}
+
+@Composable
+private fun NetIsolateEventsSheet(
+    events: NetIsolateEvents,
+    loading: Boolean,
+    apps: List<UtsTargetApp>,
+    onDismiss: () -> Unit,
+    onClear: () -> Unit,
+) {
+    val appByUid = remember(apps) { apps.associateBy(UtsTargetApp::uid) }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.92f),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.netisolate_events),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    if (events.dropped > 0) {
+                        Text(
+                            text = stringResource(
+                                R.string.netisolate_events_dropped,
+                                events.dropped,
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                TextButton(
+                    onClick = onClear,
+                    enabled = events.supported && !loading && events.events.isNotEmpty(),
+                ) {
+                    Text(stringResource(R.string.netisolate_events_clear))
+                }
+            }
+
+            when {
+                loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(24.dp),
+                    )
+                }
+                !events.supported -> {
+                    Text(
+                        text = stringResource(R.string.netisolate_events_unsupported),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                events.events.isEmpty() -> {
+                    Text(
+                        text = stringResource(R.string.netisolate_events_empty),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                else -> {
+                    val displayedEvents = events.events.asReversed()
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                    ) {
+                        itemsIndexed(
+                            displayedEvents,
+                            key = { _, event ->
+                                "${event.timestampNanos}-${event.uid}-${event.operation}-" +
+                                    "${event.address}-${event.port}"
+                            },
+                        ) { index, event ->
+                            SegmentedItem(index = index, count = displayedEvents.size) {
+                                NetIsolateEventRow(
+                                    event = event,
+                                    appLabel = appByUid[event.uid]?.label ?: "UID ${event.uid}",
+                                    modifier = if (index < displayedEvents.lastIndex) {
+                                        Modifier.padding(bottom = 2.dp)
+                                    } else {
+                                        Modifier
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NetIsolateEventRow(
+    event: NetIsolateEvent,
+    appLabel: String,
+    modifier: Modifier = Modifier,
+) {
+    SegmentedListItem(
+        modifier = modifier,
+        headlineContent = {
+            Text(
+                text = "${formatNetIsolateTime(event.timestampNanos)}  " +
+                    "$appLabel  ${event.operation}",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        supportingContent = {
+            Text(
+                text = formatNetIsolateEndpoint(event),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+    )
+}
+
+private fun formatNetIsolateTime(timestampNanos: Long): String {
+    val ageMillis = (SystemClock.uptimeMillis() - timestampNanos / 1_000_000).coerceAtLeast(0)
+    val epochMillis = System.currentTimeMillis() - ageMillis
+    return NETISOLATE_EVENT_TIME.format(
+        Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()),
+    )
+}
+
+private fun formatNetIsolateEndpoint(event: NetIsolateEvent): String {
+    if (event.address.isBlank()) {
+        return when (event.family) {
+            "inet" -> "AF_INET"
+            "inet6" -> "AF_INET6"
+            else -> event.family.uppercase(Locale.ROOT)
+        }
+    }
+    if (event.port <= 0) return event.address
+    return if (event.family == "inet6") {
+        "[${event.address}]:${event.port}"
+    } else {
+        "${event.address}:${event.port}"
     }
 }
 

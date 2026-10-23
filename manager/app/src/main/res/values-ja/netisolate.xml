@@ -37,4 +37,10 @@
     <string name="netisolate_policy_strict">厳格オフライン</string>
     <string name="netisolate_policy_unsupported">このカーネルはアプリ別ポリシーに対応していません</string>
     <string name="netisolate_policy_summary">選択したアプリごとにポリシーを設定します</string>
+    <string name="netisolate_events">最近のブロック試行</string>
+    <string name="netisolate_events_empty">起動後にブロックされた試行はありません</string>
+    <string name="netisolate_events_unsupported">このカーネルはブロック試行の診断を公開していません</string>
+    <string name="netisolate_events_clear">ログを消去</string>
+    <string name="netisolate_events_clear_confirm">最近のブロック試行をすべて消去しますか？隔離設定は変更されません。</string>
+    <string name="netisolate_events_dropped">古い試行 %1$d 件を上書きしました</string>
 </resources>
