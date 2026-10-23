@@ -5,6 +5,15 @@
     <string name="netisolate_title">網路隔絕</string>
     <string name="netisolate_loading">方探網路玄關之況…</string>
     <string name="netisolate_enable">開網界玄關</string>
+    <string name="netisolate_mode">隔絕之式</string>
+    <string name="netisolate_mode_standard">尋常隔絕</string>
+    <string name="netisolate_mode_standard_summary">阻蒙選凡器新闢 IPv4/IPv6 外網，回環亦不通</string>
+    <string name="netisolate_mode_loopback">許通回環</string>
+    <string name="netisolate_mode_loopback_summary">獨許回環；本機代理仍可引流量至外網</string>
+    <string name="netisolate_mode_strict">嚴斷外網</string>
+    <string name="netisolate_mode_strict_summary">禁蒙選凡器新闢 IPv4/IPv6 網竅；已成網途仍通</string>
+    <string name="netisolate_mode_unsupported">此核不備此隔絕之式</string>
+    <string name="netisolate_advanced">進階設定</string>
     <string name="netisolate_enter_targets">請先蒙選至少一件凡器</string>
     <string name="netisolate_apps_failed">已裝凡器之錄未能顯現</string>
     <string name="netisolate_status_failed">網路玄關之況未能探知</string>

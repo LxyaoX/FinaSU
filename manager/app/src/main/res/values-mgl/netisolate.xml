@@ -5,6 +5,15 @@
     <string name="netisolate_title">边界结界</string>
     <string name="netisolate_loading">正在探知边界结界的状况…</string>
     <string name="netisolate_enable">展开边界结界</string>
+    <string name="netisolate_mode">隔离模式</string>
+    <string name="netisolate_mode_standard">寻常结界</string>
+    <string name="netisolate_mode_standard_summary">阻断契约应用新的 IPv4/IPv6 外界通路，本机回环亦不放行</string>
+    <string name="netisolate_mode_loopback">允通回环</string>
+    <string name="netisolate_mode_loopback_summary">仅许契约应用通行本机回环；本机代理仍可将流量引向外界</string>
+    <string name="netisolate_mode_strict">绝网封印</string>
+    <string name="netisolate_mode_strict_summary">封印契约应用新建 IPv4/IPv6 界门；已建立通路仍可沿用</string>
+    <string name="netisolate_mode_unsupported">此地核心不承此隔离模式</string>
+    <string name="netisolate_advanced">进阶设定</string>
     <string name="netisolate_enter_targets">请先与至少一件应用缔结契约</string>
     <string name="netisolate_apps_failed">已安装应用的名录未能显现</string>
     <string name="netisolate_status_failed">边界结界的状况未能探知</string>

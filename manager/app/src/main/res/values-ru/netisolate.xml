@@ -5,6 +5,15 @@
     <string name="netisolate_title">Сетевая изоляция</string>
     <string name="netisolate_loading">Загрузка состояния сетевой изоляции…</string>
     <string name="netisolate_enable">Включить сетевую изоляцию</string>
+    <string name="netisolate_mode">Режим изоляции</string>
+    <string name="netisolate_mode_standard">Обычная изоляция</string>
+    <string name="netisolate_mode_standard_summary">Блокировать новые исходящие подключения IPv4/IPv6, включая loopback</string>
+    <string name="netisolate_mode_loopback">Разрешить loopback</string>
+    <string name="netisolate_mode_loopback_summary">Разрешать только loopback; локальный прокси всё ещё может передавать трафик в интернет</string>
+    <string name="netisolate_mode_strict">Строгий офлайн</string>
+    <string name="netisolate_mode_strict_summary">Блокировать новые сокеты IPv4/IPv6; существующие подключения остаются открытыми</string>
+    <string name="netisolate_mode_unsupported">Текущее ядро не поддерживает этот режим изоляции</string>
+    <string name="netisolate_advanced">Дополнительные настройки</string>
     <string name="netisolate_enter_targets">Сначала выберите хотя бы одно приложение</string>
     <string name="netisolate_apps_failed">Не удалось загрузить установленные приложения</string>
     <string name="netisolate_status_failed">Не удалось прочитать состояние сетевой изоляции</string>

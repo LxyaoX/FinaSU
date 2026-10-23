@@ -5,6 +5,15 @@
     <string name="netisolate_title">عزل الشبكة</string>
     <string name="netisolate_loading">جارٍ تحميل حالة عزل الشبكة…</string>
     <string name="netisolate_enable">تمكين عزل الشبكة</string>
+    <string name="netisolate_mode">وضع العزل</string>
+    <string name="netisolate_mode_standard">عزل عادي</string>
+    <string name="netisolate_mode_standard_summary">حظر اتصالات الخروج الجديدة عبر IPv4/IPv6، بما في ذلك الاسترجاع المحلي</string>
+    <string name="netisolate_mode_loopback">السماح بالاسترجاع المحلي</string>
+    <string name="netisolate_mode_loopback_summary">السماح بالاسترجاع المحلي فقط؛ قد يمرر وكيل محلي حركة المرور إلى الإنترنت</string>
+    <string name="netisolate_mode_strict">قطع صارم</string>
+    <string name="netisolate_mode_strict_summary">حظر المقابس الجديدة عبر IPv4/IPv6؛ تبقى الاتصالات الحالية مفتوحة</string>
+    <string name="netisolate_mode_unsupported">وضع العزل هذا غير مدعوم من النواة الحالية</string>
+    <string name="netisolate_advanced">إعدادات متقدمة</string>
     <string name="netisolate_enter_targets">حدّد تطبيقًا واحدًا على الأقل أولًا</string>
     <string name="netisolate_apps_failed">تعذّر تحميل التطبيقات المثبّتة</string>
     <string name="netisolate_status_failed">تعذّرت قراءة حالة عزل الشبكة</string>

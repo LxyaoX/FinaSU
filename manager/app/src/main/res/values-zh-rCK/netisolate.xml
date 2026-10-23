@@ -5,6 +5,15 @@
     <string name="netisolate_title">网络隔离</string>
     <string name="netisolate_loading">正在查网络闸门…</string>
     <string name="netisolate_enable">拉下网络闸门</string>
+    <string name="netisolate_mode">隔离档位</string>
+    <string name="netisolate_mode_standard">普通断网</string>
+    <string name="netisolate_mode_standard_summary">新的 IPv4/IPv6 外送单子不接，本机回环也不接</string>
+    <string name="netisolate_mode_loopback">放行本机回环</string>
+    <string name="netisolate_mode_loopback_summary">只接本机回环单，本机代理还是可能转去外网</string>
+    <string name="netisolate_mode_strict">严格断网</string>
+    <string name="netisolate_mode_strict_summary">新 IPv4/IPv6 接口一律不开，已经开着的照旧</string>
+    <string name="netisolate_mode_unsupported">这口内核接不了这个隔离档位</string>
+    <string name="netisolate_advanced">高级设置</string>
     <string name="netisolate_enter_targets">先点至少一道应用</string>
     <string name="netisolate_apps_failed">已装应用名单没端出来</string>
     <string name="netisolate_status_failed">网络闸门状态没读出来</string>

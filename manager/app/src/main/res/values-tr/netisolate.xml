@@ -5,6 +5,15 @@
     <string name="netisolate_title">Ağ yalıtımı</string>
     <string name="netisolate_loading">Ağ yalıtımı durumu yükleniyor…</string>
     <string name="netisolate_enable">Ağ yalıtımını etkinleştir</string>
+    <string name="netisolate_mode">Yalıtım modu</string>
+    <string name="netisolate_mode_standard">Normal yalıtım</string>
+    <string name="netisolate_mode_standard_summary">Geri döngü dahil yeni IPv4/IPv6 giden bağlantılarını engelle</string>
+    <string name="netisolate_mode_loopback">Yerel geri döngüye izin ver</string>
+    <string name="netisolate_mode_loopback_summary">Yalnızca geri döngüye izin ver; yerel bir vekil sunucu trafiği yine de internete yönlendirebilir</string>
+    <string name="netisolate_mode_strict">Katı çevrimdışı</string>
+    <string name="netisolate_mode_strict_summary">Yeni IPv4/IPv6 soketlerini engelle; mevcut bağlantılar açık kalır</string>
+    <string name="netisolate_mode_unsupported">Bu yalıtım modu mevcut çekirdek tarafından desteklenmiyor</string>
+    <string name="netisolate_advanced">Gelişmiş ayarlar</string>
     <string name="netisolate_enter_targets">Önce en az bir uygulama seçin</string>
     <string name="netisolate_apps_failed">Yüklü uygulamalar yüklenemedi</string>
     <string name="netisolate_status_failed">Ağ yalıtımı durumu okunamadı</string>

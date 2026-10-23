@@ -5,6 +5,15 @@
     <string name="netisolate_title">網路隔離</string>
     <string name="netisolate_loading">正在讀取網路隔離狀態…</string>
     <string name="netisolate_enable">啟用網路隔離</string>
+    <string name="netisolate_mode">隔離模式</string>
+    <string name="netisolate_mode_standard">一般隔離</string>
+    <string name="netisolate_mode_standard_summary">封鎖新的 IPv4/IPv6 對外連線，包括回環</string>
+    <string name="netisolate_mode_loopback">允許回送</string>
+    <string name="netisolate_mode_loopback_summary">僅允許回送；本機代理仍可能將流量轉送至網際網路</string>
+    <string name="netisolate_mode_strict">嚴格斷網</string>
+    <string name="netisolate_mode_strict_summary">封鎖新建 IPv4/IPv6 通訊端；既有連線不會中斷</string>
+    <string name="netisolate_mode_unsupported">目前核心不支援此隔離模式</string>
+    <string name="netisolate_advanced">進階設定</string>
     <string name="netisolate_enter_targets">請先選擇至少一個應用程式</string>
     <string name="netisolate_apps_failed">讀取已安裝應用程式失敗</string>
     <string name="netisolate_status_failed">讀取網路隔離狀態失敗</string>

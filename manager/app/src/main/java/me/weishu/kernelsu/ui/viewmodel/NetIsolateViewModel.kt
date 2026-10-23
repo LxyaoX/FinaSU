@@ -12,9 +12,11 @@ import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
 import me.weishu.kernelsu.data.netisolate.NetIsolateEvents
+import me.weishu.kernelsu.data.netisolate.NetIsolateMode
 import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateRepository
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
+import me.weishu.kernelsu.data.netisolate.supportsMode
 import me.weishu.kernelsu.data.uts.UtsTarget
 import me.weishu.kernelsu.data.uts.UtsTargetApp
 import me.weishu.kernelsu.ui.util.RootShell
@@ -85,6 +87,24 @@ class NetIsolateViewModel(
             } else {
                 repository.disable()
             }
+        }
+    }
+
+    fun setMode(mode: NetIsolateMode) {
+        val status = _uiState.value.status
+        if (!status.supportsMode(mode)) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_mode_unsupported))
+            }
+            return
+        }
+        operate {
+            repository.save(
+                status.enabled,
+                status.uids,
+                mode == NetIsolateMode.Strict,
+                mode == NetIsolateMode.Loopback,
+            )
         }
     }
 

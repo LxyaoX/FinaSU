@@ -5,6 +5,15 @@
     <string name="netisolate_title">Cô lập mạng</string>
     <string name="netisolate_loading">Đang tải trạng thái cô lập mạng…</string>
     <string name="netisolate_enable">Bật cô lập mạng</string>
+    <string name="netisolate_mode">Chế độ cô lập</string>
+    <string name="netisolate_mode_standard">Cô lập tiêu chuẩn</string>
+    <string name="netisolate_mode_standard_summary">Chặn kết nối đi ra IPv4/IPv6 mới, bao gồm loopback</string>
+    <string name="netisolate_mode_loopback">Cho phép loopback</string>
+    <string name="netisolate_mode_loopback_summary">Chỉ cho phép loopback; proxy cục bộ vẫn có thể chuyển lưu lượng ra internet</string>
+    <string name="netisolate_mode_strict">Chặn mạng nghiêm ngặt</string>
+    <string name="netisolate_mode_strict_summary">Chặn socket IPv4/IPv6 mới; các kết nối hiện có vẫn mở</string>
+    <string name="netisolate_mode_unsupported">Kernel hiện tại không hỗ trợ chế độ cô lập này</string>
+    <string name="netisolate_advanced">Cài đặt nâng cao</string>
     <string name="netisolate_enter_targets">Trước tiên hãy chọn ít nhất một ứng dụng</string>
     <string name="netisolate_apps_failed">Không thể tải các ứng dụng đã cài</string>
     <string name="netisolate_status_failed">Không thể đọc trạng thái cô lập mạng</string>

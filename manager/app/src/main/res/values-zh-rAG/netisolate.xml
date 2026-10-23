@@ -5,6 +5,15 @@
     <string name="netisolate_title">网络隔离喵</string>
     <string name="netisolate_loading">正在看网络隔离状态喵…</string>
     <string name="netisolate_enable">打开网络隔离喵</string>
+    <string name="netisolate_mode">隔离模式喵</string>
+    <string name="netisolate_mode_standard">普通隔离喵</string>
+    <string name="netisolate_mode_standard_summary">拦住新的 IPv4/IPv6 出站连接喵，回环也算喵</string>
+    <string name="netisolate_mode_loopback">允许回环喵</string>
+    <string name="netisolate_mode_loopback_summary">只放行回环喵；本机代理还是可能把流量转到公网喵</string>
+    <string name="netisolate_mode_strict">严格断网喵</string>
+    <string name="netisolate_mode_strict_summary">不许新建 IPv4/IPv6 接口喵，已经连上的还能继续用喵</string>
+    <string name="netisolate_mode_unsupported">当前内核不支持这个隔离模式喵</string>
+    <string name="netisolate_advanced">高级设置喵</string>
     <string name="netisolate_enter_targets">先选至少一个应用喵</string>
     <string name="netisolate_apps_failed">应用列表没读出来喵…</string>
     <string name="netisolate_status_failed">网络隔离状态没读出来喵…</string>

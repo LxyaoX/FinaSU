@@ -16,6 +16,12 @@ import java.util.concurrent.TimeUnit
 
 const val NETISOLATE_MAX_UIDS = 256
 
+enum class NetIsolateMode {
+    Standard,
+    Loopback,
+    Strict,
+}
+
 data class NetIsolatePolicy(
     val uid: Int,
     val strictSocket: Boolean,
@@ -71,6 +77,19 @@ data class NetIsolateStatus(
         }
     }
 }
+
+fun NetIsolateStatus.mode(): NetIsolateMode = when {
+    strictSocket -> NetIsolateMode.Strict
+    allowLoopback -> NetIsolateMode.Loopback
+    else -> NetIsolateMode.Standard
+}
+
+fun NetIsolateStatus.supportsMode(mode: NetIsolateMode): Boolean =
+    supported && when (mode) {
+        NetIsolateMode.Standard -> true
+        NetIsolateMode.Loopback -> allowLoopbackSupported
+        NetIsolateMode.Strict -> strictSocketSupported
+    }
 
 data class NetIsolateEvent(
     val timestampNanos: Long,

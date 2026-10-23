@@ -5,6 +5,15 @@
     <string name="netisolate_title">Isolamento de rede</string>
     <string name="netisolate_loading">Carregando o estado do isolamento de rede…</string>
     <string name="netisolate_enable">Ativar isolamento de rede</string>
+    <string name="netisolate_mode">Modo de isolamento</string>
+    <string name="netisolate_mode_standard">Isolamento padrão</string>
+    <string name="netisolate_mode_standard_summary">Bloqueia novas conexões de saída IPv4/IPv6, incluindo loopback</string>
+    <string name="netisolate_mode_loopback">Permitir loopback</string>
+    <string name="netisolate_mode_loopback_summary">Permite apenas loopback; um proxy local ainda pode encaminhar tráfego para a internet</string>
+    <string name="netisolate_mode_strict">Offline estrito</string>
+    <string name="netisolate_mode_strict_summary">Bloqueia novos sockets IPv4/IPv6; conexões existentes continuam abertas</string>
+    <string name="netisolate_mode_unsupported">Este modo de isolamento não é compatível com o kernel atual</string>
+    <string name="netisolate_advanced">Configurações avançadas</string>
     <string name="netisolate_enter_targets">Selecione pelo menos um app primeiro</string>
     <string name="netisolate_apps_failed">Falha ao carregar os apps instalados</string>
     <string name="netisolate_status_failed">Falha ao ler o estado do isolamento de rede</string>

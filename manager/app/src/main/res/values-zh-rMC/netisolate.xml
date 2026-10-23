@@ -5,6 +5,15 @@
     <string name="netisolate_title">网络隔离</string>
     <string name="netisolate_loading">正在读取网络屏障状态…</string>
     <string name="netisolate_enable">激活网络屏障</string>
+    <string name="netisolate_mode">隔离模式</string>
+    <string name="netisolate_mode_standard">普通隔离</string>
+    <string name="netisolate_mode_standard_summary">阻止新的 IPv4/IPv6 出站连接，包括回环</string>
+    <string name="netisolate_mode_loopback">允许回环</string>
+    <string name="netisolate_mode_loopback_summary">仅放行回环；本机代理仍可能将流量转发到公网</string>
+    <string name="netisolate_mode_strict">彻底断网</string>
+    <string name="netisolate_mode_strict_summary">阻止新建 IPv4/IPv6 套接字；已有连接不会中断</string>
+    <string name="netisolate_mode_unsupported">当前核心不支持此隔离模式</string>
+    <string name="netisolate_advanced">高级设置</string>
     <string name="netisolate_enter_targets">请先选择至少一个应用</string>
     <string name="netisolate_apps_failed">已安装应用加载失败</string>
     <string name="netisolate_status_failed">网络屏障状态读取失败</string>

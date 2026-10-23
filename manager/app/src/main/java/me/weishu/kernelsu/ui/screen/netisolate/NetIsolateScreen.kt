@@ -59,8 +59,11 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.netisolate.NETISOLATE_MAX_UIDS
 import me.weishu.kernelsu.data.netisolate.NetIsolateEvent
 import me.weishu.kernelsu.data.netisolate.NetIsolateEvents
+import me.weishu.kernelsu.data.netisolate.NetIsolateMode
 import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
+import me.weishu.kernelsu.data.netisolate.mode
+import me.weishu.kernelsu.data.netisolate.supportsMode
 import me.weishu.kernelsu.data.uts.UtsTarget
 import me.weishu.kernelsu.data.uts.UtsTargetApp
 import me.weishu.kernelsu.ui.component.AppIconImage
@@ -68,6 +71,7 @@ import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
+import me.weishu.kernelsu.ui.component.material.SegmentedRadioItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
@@ -98,6 +102,7 @@ fun NetIsolateScreen() {
     var confirmClearEvents by rememberSaveable { mutableStateOf(false) }
     val status = state.status
     val canEdit = status.supported && !state.busy && !state.loading
+    val currentMode = status.mode()
     val packageByUid = remember(state.apps) { state.apps.associate { it.uid to it.packageName } }
     val targets = remember(status.uids, packageByUid) {
         status.uids.map { uid ->
@@ -255,42 +260,109 @@ fun NetIsolateScreen() {
                         onCheckedChange = viewModel::setEnabled,
                     )
                 }
-                item(visible = status.enabled) {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Security,
-                        title = stringResource(R.string.netisolate_strict_socket),
-                        summary = stringResource(
-                            if (status.strictSocketSupported) {
-                                R.string.netisolate_strict_socket_summary
-                            } else {
-                                R.string.netisolate_strict_socket_unsupported
-                            },
-                        ),
-                        checked = status.strictSocket,
-                        enabled = canEdit && status.strictSocketSupported,
-                        onCheckedChange = viewModel::setStrictSocket,
-                    )
-                }
-                item(visible = status.enabled) {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Info,
-                        title = stringResource(R.string.netisolate_allow_loopback),
-                        summary = stringResource(
-                            when {
-                                !status.allowLoopbackSupported ->
+            }
+
+            if (state.hasLoaded) {
+                Spacer(Modifier.height(12.dp))
+                SegmentedColumn(title = stringResource(R.string.netisolate_mode)) {
+                    item {
+                        SegmentedRadioItem(
+                            title = stringResource(R.string.netisolate_mode_standard),
+                            summary = stringResource(
+                                if (status.supported) {
+                                    R.string.netisolate_mode_standard_summary
+                                } else {
+                                    R.string.netisolate_unsupported
+                                },
+                            ),
+                            selected = currentMode == NetIsolateMode.Standard,
+                            enabled = status.enabled &&
+                                status.supportsMode(NetIsolateMode.Standard) &&
+                                canEdit,
+                            onClick = { viewModel.setMode(NetIsolateMode.Standard) },
+                        )
+                    }
+                    item {
+                        SegmentedRadioItem(
+                            title = stringResource(R.string.netisolate_mode_loopback),
+                            summary = stringResource(
+                                if (status.allowLoopbackSupported) {
+                                    R.string.netisolate_mode_loopback_summary
+                                } else {
                                     R.string.netisolate_allow_loopback_unsupported
-                                status.strictSocket ->
-                                    R.string.netisolate_strict_loopback_conflict
-                                else -> R.string.netisolate_allow_loopback_summary
-                            },
-                        ),
-                        checked = status.allowLoopback,
-                        enabled = canEdit &&
-                            status.allowLoopbackSupported &&
-                            !status.strictSocket,
-                        onCheckedChange = viewModel::setAllowLoopback,
-                    )
+                                },
+                            ),
+                            selected = currentMode == NetIsolateMode.Loopback,
+                            enabled = status.enabled &&
+                                status.supportsMode(NetIsolateMode.Loopback) &&
+                                canEdit,
+                            onClick = { viewModel.setMode(NetIsolateMode.Loopback) },
+                        )
+                    }
+                    item {
+                        SegmentedRadioItem(
+                            title = stringResource(R.string.netisolate_mode_strict),
+                            summary = stringResource(
+                                if (status.strictSocketSupported) {
+                                    R.string.netisolate_mode_strict_summary
+                                } else {
+                                    R.string.netisolate_strict_socket_unsupported
+                                },
+                            ),
+                            selected = currentMode == NetIsolateMode.Strict,
+                            enabled = status.enabled &&
+                                status.supportsMode(NetIsolateMode.Strict) &&
+                                canEdit,
+                            onClick = { viewModel.setMode(NetIsolateMode.Strict) },
+                        )
+                    }
                 }
+            }
+
+            if (status.enabled) {
+                Spacer(Modifier.height(12.dp))
+                SegmentedColumn(title = stringResource(R.string.netisolate_advanced)) {
+                    item {
+                        SegmentedSwitchItem(
+                            icon = Icons.Filled.Security,
+                            title = stringResource(R.string.netisolate_strict_socket),
+                            summary = stringResource(
+                                if (status.strictSocketSupported) {
+                                    R.string.netisolate_strict_socket_summary
+                                } else {
+                                    R.string.netisolate_strict_socket_unsupported
+                                },
+                            ),
+                            checked = status.strictSocket,
+                            enabled = canEdit && status.strictSocketSupported,
+                            onCheckedChange = viewModel::setStrictSocket,
+                        )
+                    }
+                    item {
+                        SegmentedSwitchItem(
+                            icon = Icons.Filled.Info,
+                            title = stringResource(R.string.netisolate_allow_loopback),
+                            summary = stringResource(
+                                when {
+                                    !status.allowLoopbackSupported ->
+                                        R.string.netisolate_allow_loopback_unsupported
+                                    status.strictSocket ->
+                                        R.string.netisolate_strict_loopback_conflict
+                                    else -> R.string.netisolate_allow_loopback_summary
+                                },
+                            ),
+                            checked = status.allowLoopback,
+                            enabled = canEdit &&
+                                status.allowLoopbackSupported &&
+                                !status.strictSocket,
+                            onCheckedChange = viewModel::setAllowLoopback,
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            SegmentedColumn {
                 item {
                     SegmentedListItem(
                         headlineContent = { Text(stringResource(R.string.netisolate_target_apps)) },

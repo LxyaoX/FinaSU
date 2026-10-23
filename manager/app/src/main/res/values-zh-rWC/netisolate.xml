@@ -5,6 +5,15 @@
     <string name="netisolate_title">网络隔离</string>
     <string name="netisolate_loading">正窥断网天幕之况…</string>
     <string name="netisolate_enable">展开断网天幕</string>
+    <string name="netisolate_mode">天幕模式</string>
+    <string name="netisolate_mode_standard">寻常天幕</string>
+    <string name="netisolate_mode_standard_summary">断所选凡器新生 IPv4/IPv6 出界之路，回环亦不得通行</string>
+    <string name="netisolate_mode_loopback">允通回环</string>
+    <string name="netisolate_mode_loopback_summary">唯许回环；本机代理仍可引流量越出天幕</string>
+    <string name="netisolate_mode_strict">严断外网</string>
+    <string name="netisolate_mode_strict_summary">封所选凡器新辟 IPv4/IPv6 网窍；已成通路仍可通行</string>
+    <string name="netisolate_mode_unsupported">此道核未备此天幕模式</string>
+    <string name="netisolate_advanced">深层设置</string>
     <string name="netisolate_enter_targets">请先择定至少一件凡器</string>
     <string name="netisolate_apps_failed">已装凡器名录未能显现</string>
     <string name="netisolate_status_failed">断网天幕之况未能读取</string>

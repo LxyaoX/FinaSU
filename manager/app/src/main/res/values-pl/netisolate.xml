@@ -5,6 +5,15 @@
     <string name="netisolate_title">Izolacja sieci</string>
     <string name="netisolate_loading">Wczytywanie stanu izolacji sieci…</string>
     <string name="netisolate_enable">Włącz izolację sieci</string>
+    <string name="netisolate_mode">Tryb izolacji</string>
+    <string name="netisolate_mode_standard">Izolacja standardowa</string>
+    <string name="netisolate_mode_standard_summary">Blokuj nowe połączenia wychodzące IPv4/IPv6, w tym pętlę zwrotną</string>
+    <string name="netisolate_mode_loopback">Zezwól na pętlę zwrotną</string>
+    <string name="netisolate_mode_loopback_summary">Zezwalaj tylko na pętlę zwrotną; lokalne proxy nadal może przekazywać ruch do internetu</string>
+    <string name="netisolate_mode_strict">Ścisła blokada sieci</string>
+    <string name="netisolate_mode_strict_summary">Blokuj nowe sockety IPv4/IPv6; istniejące połączenia pozostają otwarte</string>
+    <string name="netisolate_mode_unsupported">Bieżące jądro nie obsługuje tego trybu izolacji</string>
+    <string name="netisolate_advanced">Ustawienia zaawansowane</string>
     <string name="netisolate_enter_targets">Najpierw wybierz co najmniej jedną aplikację</string>
     <string name="netisolate_apps_failed">Nie udało się wczytać zainstalowanych aplikacji</string>
     <string name="netisolate_status_failed">Nie udało się odczytać stanu izolacji sieci</string>

@@ -5,6 +5,15 @@
     <string name="netisolate_title">Isolasi jaringan</string>
     <string name="netisolate_loading">Memuat status isolasi jaringan…</string>
     <string name="netisolate_enable">Aktifkan isolasi jaringan</string>
+    <string name="netisolate_mode">Mode isolasi</string>
+    <string name="netisolate_mode_standard">Isolasi standar</string>
+    <string name="netisolate_mode_standard_summary">Blokir koneksi keluar IPv4/IPv6 baru, termasuk loopback</string>
+    <string name="netisolate_mode_loopback">Izinkan loopback</string>
+    <string name="netisolate_mode_loopback_summary">Izinkan loopback saja; proksi lokal masih dapat meneruskan lalu lintas ke internet</string>
+    <string name="netisolate_mode_strict">Luring ketat</string>
+    <string name="netisolate_mode_strict_summary">Blokir socket IPv4/IPv6 baru; koneksi yang sudah ada tetap terbuka</string>
+    <string name="netisolate_mode_unsupported">Kernel saat ini tidak mendukung mode isolasi ini</string>
+    <string name="netisolate_advanced">Setelan lanjutan</string>
     <string name="netisolate_enter_targets">Pilih setidaknya satu aplikasi terlebih dahulu</string>
     <string name="netisolate_apps_failed">Gagal memuat aplikasi yang terpasang</string>
     <string name="netisolate_status_failed">Gagal membaca status isolasi jaringan</string>

@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.setMain
 import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
 import me.weishu.kernelsu.data.netisolate.NetIsolateEvent
 import me.weishu.kernelsu.data.netisolate.NetIsolateEvents
+import me.weishu.kernelsu.data.netisolate.NetIsolateMode
 import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
@@ -269,6 +270,128 @@ class NetIsolateViewModelTest {
     }
 
     @Test
+    fun `standard mode saves both flags off`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            strictSocket = true,
+            allowLoopbackSupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setMode(NetIsolateMode.Standard)
+        advanceUntilIdle()
+
+        assertEquals(listOf(SaveCall(true, listOf(10123), false, false)), repository.saves)
+    }
+
+    @Test
+    fun `loopback mode saves only loopback`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            allowLoopbackSupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setMode(NetIsolateMode.Loopback)
+        advanceUntilIdle()
+
+        assertEquals(listOf(SaveCall(true, listOf(10123), false, true)), repository.saves)
+    }
+
+    @Test
+    fun `strict mode saves only strict socket`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            allowLoopbackSupported = true,
+            allowLoopback = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setMode(NetIsolateMode.Strict)
+        advanceUntilIdle()
+
+        assertEquals(listOf(SaveCall(true, listOf(10123), true, false)), repository.saves)
+    }
+
+    @Test
+    fun `unsupported strict mode is rejected without blocking standard mode`() =
+        runTest(dispatcher) {
+            repository.current = NetIsolateStatus(
+                supported = true,
+                enabled = true,
+                uids = listOf(10123),
+            )
+            val model = model()
+            advanceUntilIdle()
+
+            model.setMode(NetIsolateMode.Strict)
+            advanceUntilIdle()
+
+            assertTrue(repository.saves.isEmpty())
+            assertEquals("message", model.uiState.value.message)
+
+            model.setMode(NetIsolateMode.Standard)
+            advanceUntilIdle()
+
+            assertEquals(listOf(SaveCall(true, listOf(10123), false, false)), repository.saves)
+        }
+
+    @Test
+    fun `unsupported loopback mode is rejected without blocking strict mode`() =
+        runTest(dispatcher) {
+            repository.current = NetIsolateStatus(
+                supported = true,
+                enabled = true,
+                strictSocketSupported = true,
+                uids = listOf(10123),
+            )
+            val model = model()
+            advanceUntilIdle()
+
+            model.setMode(NetIsolateMode.Loopback)
+            advanceUntilIdle()
+
+            assertTrue(repository.saves.isEmpty())
+            assertEquals("message", model.uiState.value.message)
+
+            model.setMode(NetIsolateMode.Strict)
+            advanceUntilIdle()
+
+            assertEquals(listOf(SaveCall(true, listOf(10123), true, false)), repository.saves)
+        }
+
+    @Test
+    fun `rapid mode changes keep only the first operation`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            allowLoopbackSupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setMode(NetIsolateMode.Strict)
+        model.setMode(NetIsolateMode.Standard)
+        advanceUntilIdle()
+
+        assertEquals(listOf(SaveCall(true, listOf(10123), true, false)), repository.saves)
+    }
+
+    @Test
     fun `disabling uses the dedicated command`() = runTest(dispatcher) {
         repository.current = NetIsolateStatus(supported = true, enabled = true, uids = listOf(10123))
         val model = model()
@@ -287,6 +410,7 @@ class NetIsolateViewModelTest {
         repository.current = NetIsolateStatus(supported = true, enabled = true, uids = listOf(10123))
         val model = model()
         advanceUntilIdle()
+        val statusCallsBeforeFailure = repository.statusCalls
 
         repository.operationError = IllegalStateException("disable failed")
         model.setEnabled(false)
@@ -294,6 +418,7 @@ class NetIsolateViewModelTest {
 
         assertFalse(model.uiState.value.busy)
         assertEquals("disable failed", model.uiState.value.message)
+        assertTrue(repository.statusCalls > statusCallsBeforeFailure)
     }
 
     @Test
@@ -362,8 +487,12 @@ class NetIsolateViewModelTest {
         var clearCalls = 0
         var eventCalls = 0
         var clearEventCalls = 0
+        var statusCalls = 0
 
-        override suspend fun status(): NetIsolateStatus = current
+        override suspend fun status(): NetIsolateStatus {
+            statusCalls++
+            return current
+        }
 
         override suspend fun events(): NetIsolateEvents {
             eventCalls++

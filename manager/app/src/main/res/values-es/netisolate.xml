@@ -5,6 +5,15 @@
     <string name="netisolate_title">Aislamiento de red</string>
     <string name="netisolate_loading">Cargando el estado del aislamiento de red…</string>
     <string name="netisolate_enable">Activar aislamiento de red</string>
+    <string name="netisolate_mode">Modo de aislamiento</string>
+    <string name="netisolate_mode_standard">Aislamiento estándar</string>
+    <string name="netisolate_mode_standard_summary">Bloquea nuevas conexiones salientes IPv4/IPv6, incluido el loopback</string>
+    <string name="netisolate_mode_loopback">Permitir loopback</string>
+    <string name="netisolate_mode_loopback_summary">Permite solo loopback; un proxy local aún puede reenviar tráfico a internet</string>
+    <string name="netisolate_mode_strict">Sin conexión estricta</string>
+    <string name="netisolate_mode_strict_summary">Bloquea nuevos sockets IPv4/IPv6; las conexiones existentes siguen abiertas</string>
+    <string name="netisolate_mode_unsupported">Este modo de aislamiento no es compatible con el kernel actual</string>
+    <string name="netisolate_advanced">Ajustes avanzados</string>
     <string name="netisolate_enter_targets">Selecciona primero al menos una app</string>
     <string name="netisolate_apps_failed">No se pudieron cargar las apps instaladas</string>
     <string name="netisolate_status_failed">No se pudo leer el estado del aislamiento de red</string>

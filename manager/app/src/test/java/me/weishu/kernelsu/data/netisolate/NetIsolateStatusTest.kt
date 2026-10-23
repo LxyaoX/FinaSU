@@ -7,6 +7,41 @@ import org.junit.Test
 
 class NetIsolateStatusTest {
     @Test
+    fun `mode derives from the shared socket flags`() {
+        assertEquals(NetIsolateMode.Standard, NetIsolateStatus().mode())
+        assertEquals(NetIsolateMode.Loopback, NetIsolateStatus(allowLoopback = true).mode())
+        assertEquals(NetIsolateMode.Strict, NetIsolateStatus(strictSocket = true).mode())
+        assertEquals(
+            NetIsolateMode.Strict,
+            NetIsolateStatus(strictSocket = true, allowLoopback = true).mode(),
+        )
+    }
+
+    @Test
+    fun `mode support requires the matching kernel capability`() {
+        val unsupported = NetIsolateStatus()
+        assertFalse(unsupported.supportsMode(NetIsolateMode.Standard))
+        assertFalse(unsupported.supportsMode(NetIsolateMode.Loopback))
+        assertFalse(unsupported.supportsMode(NetIsolateMode.Strict))
+
+        val standard = NetIsolateStatus(supported = true)
+        assertTrue(standard.supportsMode(NetIsolateMode.Standard))
+        assertFalse(standard.supportsMode(NetIsolateMode.Loopback))
+        assertFalse(standard.supportsMode(NetIsolateMode.Strict))
+
+        assertEquals(
+            setOf(NetIsolateMode.Standard, NetIsolateMode.Loopback),
+            NetIsolateStatus(supported = true, allowLoopbackSupported = true)
+                .let { status -> NetIsolateMode.entries.filter(status::supportsMode).toSet() },
+        )
+        assertEquals(
+            setOf(NetIsolateMode.Standard, NetIsolateMode.Strict),
+            NetIsolateStatus(supported = true, strictSocketSupported = true)
+                .let { status -> NetIsolateMode.entries.filter(status::supportsMode).toSet() },
+        )
+    }
+
+    @Test
     fun `parses the ksud status contract`() {
         val status = NetIsolateStatus.parse(
             """{"supported":true,"enabled":true,"compat_supported":true,"policy_supported":true,"strict_socket_supported":true,"strict_socket":false,"allow_loopback_supported":true,"allow_loopback":false,"uids":[10123,10200],"policies":[{"uid":10123,"strict_socket":false,"allow_loopback":true},{"uid":10200,"strict_socket":true,"allow_loopback":false}]}""",

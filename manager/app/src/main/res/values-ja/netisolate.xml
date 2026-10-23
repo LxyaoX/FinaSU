@@ -5,6 +5,15 @@
     <string name="netisolate_title">ネットワーク分離</string>
     <string name="netisolate_loading">ネットワーク分離の状態を読み込み中…</string>
     <string name="netisolate_enable">ネットワーク分離を有効にする</string>
+    <string name="netisolate_mode">分離モード</string>
+    <string name="netisolate_mode_standard">標準分離</string>
+    <string name="netisolate_mode_standard_summary">ループバックを含む新しい IPv4/IPv6 送信接続をブロックします</string>
+    <string name="netisolate_mode_loopback">ループバックを許可</string>
+    <string name="netisolate_mode_loopback_summary">ループバックのみ許可します。ローカルプロキシは引き続きインターネットへ転送できる場合があります</string>
+    <string name="netisolate_mode_strict">厳格オフライン</string>
+    <string name="netisolate_mode_strict_summary">新しい IPv4/IPv6 ソケットをブロックします。既存の接続は維持されます</string>
+    <string name="netisolate_mode_unsupported">この分離モードは現在のカーネルでサポートされていません</string>
+    <string name="netisolate_advanced">詳細設定</string>
     <string name="netisolate_enter_targets">少なくとも 1 つのアプリを選択してください</string>
     <string name="netisolate_apps_failed">インストール済みアプリを読み込めませんでした</string>
     <string name="netisolate_status_failed">ネットワーク分離の状態を読み取れませんでした</string>
