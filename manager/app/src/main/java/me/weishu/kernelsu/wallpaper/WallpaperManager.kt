@@ -32,7 +32,6 @@ object WallpaperManager {
     private const val FILENAME_BASE = "wallpaper"
     private const val WORK_CARD_FILENAME_BASE = "work_card_background"
     private const val PAGE_HOME_FILENAME_BASE = "wallpaper_home"
-    private const val PAGE_PLUGIN_FILENAME_BASE = "wallpaper_plugin"
     private const val PAGE_SUPERUSER_FILENAME_BASE = "wallpaper_superuser"
     private const val PAGE_MODULE_FILENAME_BASE = "wallpaper_module"
     private const val PAGE_SETTINGS_FILENAME_BASE = "wallpaper_settings"
@@ -227,7 +226,6 @@ object WallpaperManager {
     /** File-name stem for a page background, or null when [page] is out of range. */
     private fun pageFilenameBase(page: Int): String? = when (page) {
         WallpaperConfig.PAGE_HOME -> PAGE_HOME_FILENAME_BASE
-        WallpaperConfig.PAGE_PLUGIN -> PAGE_PLUGIN_FILENAME_BASE
         WallpaperConfig.PAGE_SUPERUSER -> PAGE_SUPERUSER_FILENAME_BASE
         WallpaperConfig.PAGE_MODULE -> PAGE_MODULE_FILENAME_BASE
         WallpaperConfig.PAGE_SETTINGS -> PAGE_SETTINGS_FILENAME_BASE
@@ -237,7 +235,6 @@ object WallpaperManager {
     private fun updatePageUri(page: Int, value: String?) {
         when (page) {
             WallpaperConfig.PAGE_HOME -> WallpaperConfig.updateHomeBackgroundUri(value)
-            WallpaperConfig.PAGE_PLUGIN -> WallpaperConfig.updatePluginBackgroundUri(value)
             WallpaperConfig.PAGE_SUPERUSER -> WallpaperConfig.updateSuperuserBackgroundUri(value)
             WallpaperConfig.PAGE_MODULE -> WallpaperConfig.updateModuleBackgroundUri(value)
             WallpaperConfig.PAGE_SETTINGS -> WallpaperConfig.updateSettingsBackgroundUri(value)
@@ -247,7 +244,6 @@ object WallpaperManager {
     private fun updatePageLuminance(page: Int, value: Float) {
         when (page) {
             WallpaperConfig.PAGE_HOME -> WallpaperConfig.updateHomeBackgroundLuminance(value)
-            WallpaperConfig.PAGE_PLUGIN -> WallpaperConfig.updatePluginBackgroundLuminance(value)
             WallpaperConfig.PAGE_SUPERUSER -> WallpaperConfig.updateSuperuserBackgroundLuminance(value)
             WallpaperConfig.PAGE_MODULE -> WallpaperConfig.updateModuleBackgroundLuminance(value)
             WallpaperConfig.PAGE_SETTINGS -> WallpaperConfig.updateSettingsBackgroundLuminance(value)
@@ -257,7 +253,6 @@ object WallpaperManager {
     private fun updatePageSeed(page: Int, value: Int) {
         when (page) {
             WallpaperConfig.PAGE_HOME -> WallpaperConfig.updateHomeBackgroundSeed(value)
-            WallpaperConfig.PAGE_PLUGIN -> WallpaperConfig.updatePluginBackgroundSeed(value)
             WallpaperConfig.PAGE_SUPERUSER -> WallpaperConfig.updateSuperuserBackgroundSeed(value)
             WallpaperConfig.PAGE_MODULE -> WallpaperConfig.updateModuleBackgroundSeed(value)
             WallpaperConfig.PAGE_SETTINGS -> WallpaperConfig.updateSettingsBackgroundSeed(value)

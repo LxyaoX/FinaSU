@@ -4,7 +4,7 @@ package me.weishu.kernelsu.modulebanner
  * Describes where one module family keeps its banners and user metadata.
  *
  * Everything that stores or resolves a banner works against this seam instead of a hardcoded
- * directory, so a new family (script, plugin, ...) only adds an instance. FinaSU ships the APM
+ * directory, so a new family (script, theme, ...) only adds an instance. FinaSU ships the APM
  * slot today.
  */
 interface ModuleBannerSlot {

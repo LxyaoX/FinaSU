@@ -190,7 +190,6 @@ private fun NavLayoutSection() {
                         icon = destination.iconNotSelected,
                         title = stringResource(
                             when (destination) {
-                                BottomBarDestination.Plugin -> R.string.settings_show_plugin
                                 BottomBarDestination.SuperUser -> R.string.settings_show_superuser
                                 else -> R.string.settings_show_module
                             }

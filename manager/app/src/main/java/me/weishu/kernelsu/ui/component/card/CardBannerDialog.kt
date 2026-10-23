@@ -45,8 +45,8 @@ import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 /**
  * The text a card shows, independent of the family it comes from.
  *
- * The banner dialog edits these fields, so a module and a plugin only differ in how they build the
- * subject and which [ModuleBannerSlot] they store it under.
+ * The banner dialog edits these fields, so a card family only differs in how it builds the subject
+ * and which [ModuleBannerSlot] it stores it under.
  */
 @Immutable
 data class CardSubject(

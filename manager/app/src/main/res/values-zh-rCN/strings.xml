@@ -275,7 +275,6 @@
     <string name="settings_section_layout">布局</string>
     <string name="settings_theme_store_mode">主题商店模式</string>
     <string name="settings_theme_store_mode_summary">选择在应用内下载主题，还是交给浏览器下载。</string>
-    <string name="plugin_search_hint">搜索插件</string>
     <string name="superuser_search_hint">搜索应用</string>
     <string name="module_search_hint">搜索模块</string>
     <string name="settings_home_info">首页信息</string>
@@ -523,7 +522,6 @@
     <string name="settings_nav_custom_icons">自定义底部导航图标</string>
     <string name="settings_nav_custom_icons_summary">用你自己的图片替换底部导航图标</string>
     <string name="settings_nav_layout_title">导航布局设置</string>
-    <string name="settings_show_plugin">显示插件</string>
     <string name="settings_show_superuser">显示超级用户</string>
     <string name="settings_show_module">显示模块</string>
     <string name="settings_floating_bar">悬浮导航栏</string>
@@ -565,7 +563,6 @@
     <string name="wallpaper_multi_background_mode">多页面背景</string>
     <string name="wallpaper_multi_background_mode_summary">为不同页面设置不同的背景图片</string>
     <string name="wallpaper_select_home_background">主页背景</string>
-    <string name="wallpaper_select_plugin_background">插件页背景</string>
     <string name="wallpaper_select_superuser_background">超级用户背景</string>
     <string name="wallpaper_select_module_background">模块背景</string>
     <string name="wallpaper_select_settings_background">设置背景</string>
@@ -782,25 +779,6 @@
     <string name="my_themes_refresh">刷新</string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
-    <string name="plugin">插件</string>
-    <string name="plugin_empty">未安装插件</string>
-    <string name="plugin_log">输出日志</string>
-    <string name="plugin_dependencies">依赖</string>
-    <string name="plugin_uninstall_confirm">确定卸载 %1$s 并删除插件包？</string>
-    <string name="plugin_log_empty">暂无输出</string>
-    <string name="plugin_config">配置</string>
-    <string name="plugin_config_unset">未设置</string>
-    <string name="plugin_run">执行</string>
-    <string name="plugin_run_done">已执行</string>
-    <string name="plugin_run_missing">插件没有这个回调</string>
-    <string name="plugin_save">保存配置</string>
-    <string name="plugin_config_reset">恢复默认</string>
-    <string name="plugin_store">插件商店</string>
-    <string name="plugin_store_installed">已安装 %1$s</string>
-    <string name="plugin_store_empty">商店暂时没有可安装的插件</string>
-    <string name="plugin_store_no_matches">没有匹配的插件</string>
-    <string name="plugin_store_error">无法连接插件商店</string>
-    <string name="plugin_store_download_failed">下载失败</string>
     <string name="settings_wallpaper_gallery">壁纸图鉴</string>
     <string name="wallpaper_gallery_device_phone">手机</string>
     <string name="wallpaper_gallery_device_tablet">平板</string>

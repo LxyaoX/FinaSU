@@ -419,10 +419,6 @@ fun WallpaperScreen() {
             pendingPage = WallpaperConfig.PAGE_HOME
             pagePickToken += 1
         },
-        onPickPluginBackground = {
-            pendingPage = WallpaperConfig.PAGE_PLUGIN
-            pagePickToken += 1
-        },
         onPickSuperuserBackground = {
             pendingPage = WallpaperConfig.PAGE_SUPERUSER
             pagePickToken += 1
@@ -561,14 +557,6 @@ fun WallpaperScreenMaterial(
                                     selected = state.homeBackgroundSelected,
                                     enabled = !state.isSaving,
                                     onClick = actions.onPickHomeBackground,
-                                )
-                            }
-                            add {
-                                WallpaperPagePickItem(
-                                    titleRes = R.string.wallpaper_select_plugin_background,
-                                    selected = state.pluginBackgroundSelected,
-                                    enabled = !state.isSaving,
-                                    onClick = actions.onPickPluginBackground,
                                 )
                             }
                             add {

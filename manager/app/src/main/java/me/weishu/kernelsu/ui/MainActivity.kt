@@ -132,10 +132,8 @@ import me.weishu.kernelsu.ui.screen.home.HomePager
 import me.weishu.kernelsu.ui.screen.home.LocalHomeLayoutStyle
 import me.weishu.kernelsu.ui.screen.install.InstallScreen
 import me.weishu.kernelsu.ui.screen.module.ModulePager
-import me.weishu.kernelsu.ui.screen.plugin.PluginPager
 import me.weishu.kernelsu.ui.screen.modulerepo.ModuleRepoDetailScreen
 import me.weishu.kernelsu.ui.screen.modulerepo.ModuleRepoScreen
-import me.weishu.kernelsu.ui.screen.plugin.PluginStoreScreen
 import me.weishu.kernelsu.ui.component.settings.ProfileConfig
 import me.weishu.kernelsu.ui.screen.settings.CategorySettingsScreen
 import me.weishu.kernelsu.ui.screen.settings.LanguagePickerScreen
@@ -164,7 +162,6 @@ import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.viewmodel.MainActivityViewModel
 import me.weishu.kernelsu.ui.viewmodel.MainPagerConfig
 import me.weishu.kernelsu.ui.viewmodel.ModuleViewModel
-import me.weishu.kernelsu.ui.viewmodel.PluginViewModel
 import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.LocalWallpaperPage
@@ -378,7 +375,6 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.KernelModules> {
                                     me.weishu.kernelsu.ui.screen.kernelmodule.KernelModuleScreen()
                                 }
-                                entry<Route.PluginStore> { PluginStoreScreen() }
                                 entry<Route.Install> { InstallScreen() }
                                 entry<Route.Flash> { key ->
                                     FlashScreen(
@@ -587,12 +583,6 @@ fun MainScreen(
     val badgeEnabled = enableNavigationBadge && isFullFeatured
     val moduleViewModel = viewModel<ModuleViewModel>()
     val moduleUiState by moduleViewModel.uiState.collectAsStateWithLifecycle()
-    val pluginViewModel = viewModel<PluginViewModel>()
-
-    LaunchedEffect(isFullFeatured) {
-        if (isFullFeatured) pluginViewModel.ensureLoaded()
-    }
-
     val superUserViewModel = viewModel<SuperUserViewModel>()
     val grantedUidCount by remember(superUserViewModel) {
         superUserViewModel.uiState
@@ -634,11 +624,6 @@ fun MainScreen(
     }
 
     val moduleEnabledCount = moduleUiState.modules.count { it.enabled }
-    val pluginEnabledCount by remember(pluginViewModel) {
-        pluginViewModel.uiState
-            .map { state -> state.plugins.count { it.enabled } }
-            .distinctUntilChanged()
-    }.collectAsStateWithLifecycle(0)
     val homeMetamodule = remember(moduleUiState.modules) {
         moduleUiState.modules.firstOrNull { it.metamodule && !it.remove }?.let { module ->
             HomeMetamodule(
@@ -652,7 +637,6 @@ fun MainScreen(
     val navigationBadge = if (badgeEnabled) {
         NavigationBadgeState(
             superuserCount = superuserCount,
-            pluginEnabledCount = pluginEnabledCount,
             moduleEnabledCount = moduleEnabledCount,
             moduleUpdatableCount = moduleUiState.updateInfo.count { it.value.downloadUrl.isNotBlank() },
         )
@@ -721,8 +705,7 @@ fun MainScreen(
                 ) { page ->
                     val isCurrentPage = page == settledPage
                     when (destinations.getOrNull(page)) {
-                        BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, pluginEnabledCount, homeMetamodule)
-                        BottomBarDestination.Plugin -> if (renderPagerPages || isCurrentPage) PluginPager(bottomInnerPadding, isCurrentPage)
+                        BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
                         BottomBarDestination.SuperUser -> if (renderPagerPages || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
                         BottomBarDestination.Module -> if (renderPagerPages || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
                         BottomBarDestination.Setting -> if (renderPagerPages || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)

@@ -43,7 +43,6 @@ fun HomePager(
     isCurrentPage: Boolean = true,
     superuserCount: Int = 0,
     moduleEnabledCount: Int = 0,
-    pluginEnabledCount: Int = 0,
     metamodule: HomeMetamodule? = null,
 ) {
     val viewModel = viewModel<HomeViewModel>()
@@ -120,7 +119,6 @@ fun HomePager(
         bottomInnerPadding = bottomInnerPadding,
         superuserCount = superuserCount,
         moduleEnabledCount = moduleEnabledCount,
-        pluginEnabledCount = pluginEnabledCount,
         metrics = metrics,
     )
 }

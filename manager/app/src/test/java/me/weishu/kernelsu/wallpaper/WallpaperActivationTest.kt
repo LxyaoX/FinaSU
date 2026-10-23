@@ -12,23 +12,16 @@ class WallpaperActivationTest {
 
     @Test fun masterOffKeepsRememberedPageImagesInactive() {
         WallpaperConfig.updateModuleBackgroundUri("file:///module.png")
-        WallpaperConfig.updatePluginBackgroundUri("file:///plugin.png")
         WallpaperConfig.updateMultiBackgroundEnabled(true)
         assertFalse(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_MODULE))
-        assertFalse(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_PLUGIN))
     }
 
-    @Test fun anotherPagesImageDoesNotMakeModuleOrPluginTransparent() {
+    @Test fun anotherPagesImageDoesNotMakeModuleTransparent() {
         WallpaperConfig.updateEnabled(true)
         WallpaperConfig.updateMultiBackgroundEnabled(true)
         WallpaperConfig.updateHomeBackgroundUri("file:///home.png")
         assertTrue(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_HOME))
         assertFalse(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_MODULE))
-        assertFalse(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_PLUGIN))
-        WallpaperConfig.updatePluginBackgroundUri("file:///plugin.png")
-        assertTrue(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_PLUGIN))
-        WallpaperConfig.updatePluginBackgroundUri(null)
-        assertFalse(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_PLUGIN))
     }
 
     @Test fun singleModeIgnoresRememberedPageImages() {
@@ -37,7 +30,7 @@ class WallpaperActivationTest {
         assertFalse(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_MODULE))
         WallpaperConfig.updateUri("file:///global.png")
         assertTrue(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_MODULE))
-        assertTrue(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_PLUGIN))
+        assertTrue(WallpaperConfig.isPageActive(WallpaperConfig.PAGE_SUPERUSER))
     }
 
     @Test fun completedPickDoesNotUndoMasterOff() {

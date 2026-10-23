@@ -39,8 +39,8 @@ import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
  * The shell every card of the module design shares: the animated corner, press scaling, the
  * wallpaper tint and the banner drawn behind the content.
  *
- * Module and plugin cards only differ in what they put inside, so both wrap their content in this
- * frame and inherit the same look and interactions.
+ * Cards only differ in what they put inside, so every card wraps its content in this frame and
+ * inherits the same look and interactions.
  */
 @Composable
 fun FolkCardFrame(
