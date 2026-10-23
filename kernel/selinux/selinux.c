@@ -234,3 +234,97 @@ void escape_to_root_for_adb_root(void)
     }
     commit_creds(cred);
 }
+
+#ifdef CONFIG_KSU_SUSFS
+#define ZYGOTE_NEXT_CONTEXT "u:r:zygote_next:s0"
+#define PRIV_APP_CONTEXT "u:r:priv_app:s0:c512,c768"
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 18, 0)
+typedef struct task_security_struct ksu_selinux_cred_t;
+#else
+typedef struct cred_security_struct ksu_selinux_cred_t;
+#endif
+
+u32 susfs_ksu_sid __read_mostly = 0;
+u32 susfs_init_sid __read_mostly = 0;
+u32 susfs_zygote_sid __read_mostly = 0;
+u32 susfs_zygote_next_sid __read_mostly = 0;
+u32 susfs_priv_app_sid __read_mostly = 0;
+
+static u32 current_selinux_sid(void)
+{
+    const ksu_selinux_cred_t *tsec = selinux_cred(current_cred());
+    return tsec ? tsec->sid : 0;
+}
+
+static void susfs_cache_sid(const char *secctx_name, u32 *out_sid)
+{
+    u32 sid = 0;
+
+    if (security_secctx_to_secid(secctx_name, strlen(secctx_name), &sid))
+        sid = 0;
+    *out_sid = sid;
+}
+
+bool susfs_is_sid_equal(const struct cred *cred, u32 sid2)
+{
+    const ksu_selinux_cred_t *tsec;
+
+    if (!cred)
+        return false;
+    tsec = selinux_cred(cred);
+    if (!tsec)
+        return false;
+    return tsec->sid == sid2;
+}
+
+u32 susfs_get_sid_from_name(const char *secctx_name)
+{
+    u32 sid = 0;
+
+    if (!secctx_name)
+        return 0;
+    if (security_secctx_to_secid(secctx_name, strlen(secctx_name), &sid))
+        return 0;
+    return sid;
+}
+
+u32 susfs_get_current_sid(void)
+{
+    return current_selinux_sid();
+}
+
+void susfs_set_batch_sid(void)
+{
+    susfs_cache_sid(ZYGOTE_CONTEXT, &susfs_zygote_sid);
+    susfs_cache_sid(ZYGOTE_NEXT_CONTEXT, &susfs_zygote_next_sid);
+    susfs_cache_sid(KERNEL_SU_CONTEXT, &susfs_ksu_sid);
+    susfs_cache_sid(INIT_CONTEXT, &susfs_init_sid);
+    susfs_cache_sid(PRIV_APP_CONTEXT, &susfs_priv_app_sid);
+}
+
+bool susfs_is_current_zygote_domain(void)
+{
+    return susfs_zygote_sid && current_selinux_sid() == susfs_zygote_sid;
+}
+
+bool susfs_is_current_zygote_next_domain(void)
+{
+    return susfs_zygote_next_sid && current_selinux_sid() == susfs_zygote_next_sid;
+}
+
+bool susfs_is_current_ksu_domain(void)
+{
+    return susfs_ksu_sid && current_selinux_sid() == susfs_ksu_sid;
+}
+
+bool susfs_is_current_init_domain(void)
+{
+    return susfs_init_sid && current_selinux_sid() == susfs_init_sid;
+}
+
+bool susfs_is_current_priv_app_domain(void)
+{
+    return susfs_priv_app_sid && current_selinux_sid() == susfs_priv_app_sid;
+}
+#endif

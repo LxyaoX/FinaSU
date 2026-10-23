@@ -7,6 +7,10 @@
 #include <linux/workqueue.h>
 #include <linux/moduleparam.h>
 
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs.h>
+#endif
+
 #include "policy/allowlist.h"
 #include "policy/app_profile.h"
 #include "policy/feature.h"
@@ -132,11 +136,17 @@ int __init kernelsu_init(void)
         pr_alert("shell is allowed at init!");
     }
 
+    pr_info("KernelSU version: %s\n", KSU_VERSION_FULL);
+
     ksu_cred = prepare_creds();
     if (!ksu_cred) {
         pr_err("prepare cred failed!\n");
         return -ENOSYS;
     }
+
+#ifdef CONFIG_KSU_SUSFS
+    susfs_init();
+#endif
 
     ksu_init_symbol_resolver();
     ksu_syscall_hook_init();

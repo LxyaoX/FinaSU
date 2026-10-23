@@ -48,6 +48,10 @@ struct ksu_get_info_legacy_cmd {
     __u32 features; /* Output: max feature ID supported */
 };
 
+struct ksu_get_full_version_cmd {
+    char version_full[64]; /* Output: KSU_VERSION_FULL */
+};
+
 struct ksu_report_event_cmd {
     __u32 event; /* Input: EVENT_POST_FS_DATA, EVENT_BOOT_COMPLETED, etc. */
 };
@@ -249,5 +253,6 @@ static const __u32 KSU_IOCTL_GET_UTS_VIEW_CONFIG = _IOWR('K', 25, struct ksu_uts
 static const __u32 KSU_IOCTL_SET_UTS_VIEW_CONFIG = _IOW('K', 26, struct ksu_uts_view_config);
 static const __u32 KSU_IOCTL_GET_NETISOLATE_CONFIG = _IOWR('K', 27, struct ksu_netisolate_config);
 static const __u32 KSU_IOCTL_SET_NETISOLATE_CONFIG = _IOW('K', 28, struct ksu_netisolate_config);
+static const __u32 KSU_IOCTL_GET_FULL_VERSION = _IOR('K', 29, struct ksu_get_full_version_cmd);
 
 #endif

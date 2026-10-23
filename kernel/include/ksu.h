@@ -7,6 +7,10 @@
 
 #define KERNEL_SU_VERSION KSU_VERSION
 
+#ifndef KSU_VERSION_FULL
+#define KSU_VERSION_FULL "v0.0.0-00000000@unknown"
+#endif
+
 extern struct cred *ksu_cred;
 extern bool ksu_late_loaded;
 extern bool allow_shell;
