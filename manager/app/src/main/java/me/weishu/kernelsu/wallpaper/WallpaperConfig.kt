@@ -108,7 +108,6 @@ object WallpaperConfig {
 
     var homeBackgroundUri by mutableStateOf<String?>(null)
         private set
-        private set
     var superuserBackgroundUri by mutableStateOf<String?>(null)
         private set
     var moduleBackgroundUri by mutableStateOf<String?>(null)
@@ -119,7 +118,6 @@ object WallpaperConfig {
     /** Per-page luminance in 0..1; -1f means "unknown". */
     var homeBackgroundLuminance by mutableFloatStateOf(-1f)
         private set
-        private set
     var superuserBackgroundLuminance by mutableFloatStateOf(-1f)
         private set
     var moduleBackgroundLuminance by mutableFloatStateOf(-1f)
@@ -129,7 +127,6 @@ object WallpaperConfig {
 
     /** Per-page ARGB seed; 0 means "not derived". */
     var homeBackgroundSeed by mutableIntStateOf(0)
-        private set
         private set
     var superuserBackgroundSeed by mutableIntStateOf(0)
         private set
