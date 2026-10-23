@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">Kernel này không hỗ trợ chặn socket nghiêm ngặt</string>
     <string name="netisolate_clear">Xóa cài đặt</string>
     <string name="netisolate_clear_summary">Tắt cô lập, xóa danh sách ứng dụng và xóa cài đặt đã lưu</string>
+    <string name="netisolate_app_policies">Chính sách theo ứng dụng</string>
+    <string name="netisolate_policy_default">Cách ly thường</string>
+    <string name="netisolate_policy_loopback">Cho phép loopback</string>
+    <string name="netisolate_policy_strict">Chặn mạng nghiêm ngặt</string>
+    <string name="netisolate_policy_unsupported">Kernel này không hỗ trợ chính sách riêng cho từng ứng dụng</string>
+    <string name="netisolate_policy_summary">Định cấu hình riêng cho từng ứng dụng đã chọn</string>
 </resources>

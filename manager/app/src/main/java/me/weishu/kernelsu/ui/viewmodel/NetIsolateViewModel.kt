@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
+import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateRepository
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
@@ -75,12 +76,7 @@ class NetIsolateViewModel(
         }
         operate {
             if (enabled) {
-                repository.save(
-                    true,
-                    status.uids,
-                    status.strictSocket,
-                    status.allowLoopback,
-                )
+                repository.savePolicies(true, status.policies)
             } else {
                 repository.disable()
             }
@@ -94,13 +90,53 @@ class NetIsolateViewModel(
             _uiState.update { it.copy(message = getString(R.string.netisolate_enter_targets)) }
             return
         }
-        operate {
-            repository.save(
-                status.enabled,
-                uids,
-                status.strictSocket,
-                status.allowLoopback,
+        val existing = status.policies.associateBy(NetIsolatePolicy::uid)
+        val policies = uids.sorted().map { uid ->
+            existing[uid] ?: NetIsolatePolicy(
+                uid = uid,
+                strictSocket = status.strictSocket,
+                allowLoopback = status.allowLoopback,
             )
+        }
+        operate {
+            repository.savePolicies(status.enabled, policies)
+        }
+    }
+
+    fun setPolicy(uid: Int, strictSocket: Boolean, allowLoopback: Boolean) {
+        val status = _uiState.value.status
+        if (!status.policySupported) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_policy_unsupported))
+            }
+            return
+        }
+        if (strictSocket && !status.strictSocketSupported) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_strict_socket_unsupported))
+            }
+            return
+        }
+        if (allowLoopback && !status.allowLoopbackSupported) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_allow_loopback_unsupported))
+            }
+            return
+        }
+        if (strictSocket && allowLoopback) return
+        val policies = status.policies.map { policy ->
+            if (policy.uid == uid) {
+                policy.copy(
+                    strictSocket = strictSocket,
+                    allowLoopback = allowLoopback,
+                )
+            } else {
+                policy
+            }
+        }
+        if (policies.none { it.uid == uid }) return
+        operate {
+            repository.savePolicies(status.enabled, policies)
         }
     }
 

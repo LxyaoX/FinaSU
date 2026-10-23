@@ -16,29 +16,57 @@ import java.util.concurrent.TimeUnit
 
 const val NETISOLATE_MAX_UIDS = 256
 
+data class NetIsolatePolicy(
+    val uid: Int,
+    val strictSocket: Boolean,
+    val allowLoopback: Boolean,
+)
+
 data class NetIsolateStatus(
     val supported: Boolean = false,
     val enabled: Boolean = false,
     val compatSupported: Boolean = false,
+    val policySupported: Boolean = false,
     val strictSocketSupported: Boolean = false,
     val strictSocket: Boolean = false,
     val allowLoopbackSupported: Boolean = false,
     val allowLoopback: Boolean = false,
     val uids: List<Int> = emptyList(),
+    val policies: List<NetIsolatePolicy> = emptyList(),
 ) {
     companion object {
         fun parse(text: String): NetIsolateStatus {
             val json = JSONObject(text)
             val array = json.optJSONArray("uids") ?: JSONArray()
+            val uids = List(array.length()) { index -> array.getInt(index) }
+            val strictSocket = json.optBoolean("strict_socket")
+            val allowLoopback = json.optBoolean("allow_loopback")
+            val policyArray = json.optJSONArray("policies")
+            val policies = if (policyArray != null) {
+                List(policyArray.length()) { index ->
+                    val policy = policyArray.getJSONObject(index)
+                    NetIsolatePolicy(
+                        uid = policy.getInt("uid"),
+                        strictSocket = policy.optBoolean("strict_socket"),
+                        allowLoopback = policy.optBoolean("allow_loopback"),
+                    )
+                }
+            } else {
+                uids.map { uid ->
+                    NetIsolatePolicy(uid, strictSocket, allowLoopback)
+                }
+            }
             return NetIsolateStatus(
                 supported = json.optBoolean("supported"),
                 enabled = json.optBoolean("enabled"),
                 compatSupported = json.optBoolean("compat_supported"),
+                policySupported = json.optBoolean("policy_supported"),
                 strictSocketSupported = json.optBoolean("strict_socket_supported"),
-                strictSocket = json.optBoolean("strict_socket"),
+                strictSocket = strictSocket,
                 allowLoopbackSupported = json.optBoolean("allow_loopback_supported"),
-                allowLoopback = json.optBoolean("allow_loopback"),
-                uids = List(array.length()) { index -> array.getInt(index) },
+                allowLoopback = allowLoopback,
+                uids = uids,
+                policies = policies,
             )
         }
     }
@@ -53,6 +81,7 @@ interface NetIsolateDataSource {
         strictSocket: Boolean,
         allowLoopback: Boolean,
     )
+    suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>)
     suspend fun disable()
     suspend fun clear()
 }
@@ -133,8 +162,34 @@ class NetIsolateRepository(
         strictSocket: Boolean,
         allowLoopback: Boolean,
     ) {
+        savePolicies(
+            enabled,
+            uids.distinct().sorted().map { uid ->
+                NetIsolatePolicy(uid, strictSocket, allowLoopback)
+            },
+        )
+    }
+
+    override suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>) {
+        val sorted = policies.sortedBy { it.uid }
+        require(sorted.map(NetIsolatePolicy::uid).distinct().size == sorted.size) {
+            "Network isolation policy UIDs must be unique"
+        }
         val array = JSONArray()
-        uids.distinct().sorted().forEach(array::put)
+        sorted.forEach { array.put(it.uid) }
+        val policyArray = JSONArray()
+        sorted.forEach { policy ->
+            policyArray.put(
+                JSONObject()
+                    .put("uid", policy.uid)
+                    .put("strict_socket", policy.strictSocket)
+                    .put("allow_loopback", policy.allowLoopback),
+            )
+        }
+        val strictSocket = sorted.isNotEmpty() &&
+            sorted.all(NetIsolatePolicy::strictSocket)
+        val allowLoopback = sorted.isNotEmpty() &&
+            sorted.all(NetIsolatePolicy::allowLoopback)
         command(
             "set",
             JSONObject()
@@ -142,6 +197,7 @@ class NetIsolateRepository(
                 .put("uids", array)
                 .put("strict_socket", strictSocket)
                 .put("allow_loopback", allowLoopback)
+                .put("policies", policyArray)
                 .toString(),
         )
     }

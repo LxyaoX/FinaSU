@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">此道核尚无严封网窍之能</string>
     <string name="netisolate_clear">撤去天幕</string>
     <string name="netisolate_clear_summary">收起天幕、清空凡器名录，并抹去所存的禁制</string>
+    <string name="netisolate_app_policies">凡器策略</string>
+    <string name="netisolate_policy_default">寻常封锁</string>
+    <string name="netisolate_policy_loopback">许通回环</string>
+    <string name="netisolate_policy_strict">严断外网</string>
+    <string name="netisolate_policy_unsupported">此道核尚无逐器设策之力</string>
+    <string name="netisolate_policy_summary">可为每件受幕凡器单独立下禁制</string>
 </resources>

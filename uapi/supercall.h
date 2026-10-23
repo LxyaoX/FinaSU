@@ -253,6 +253,10 @@ static const __u32 KSU_IOCTL_GET_UTS_VIEW_CONFIG = _IOWR('K', 25, struct ksu_uts
 static const __u32 KSU_IOCTL_SET_UTS_VIEW_CONFIG = _IOW('K', 26, struct ksu_uts_view_config);
 static const __u32 KSU_IOCTL_GET_NETISOLATE_CONFIG = _IOWR('K', 27, struct ksu_netisolate_config);
 static const __u32 KSU_IOCTL_SET_NETISOLATE_CONFIG = _IOW('K', 28, struct ksu_netisolate_config);
+static const __u32 KSU_IOCTL_GET_NETISOLATE_POLICIES =
+    _IOWR('K', 29, struct ksu_netisolate_policies);
+static const __u32 KSU_IOCTL_SET_NETISOLATE_POLICIES =
+    _IOW('K', 30, struct ksu_netisolate_policies);
 static const __u32 KSU_IOCTL_GET_FULL_VERSION = _IOR('K', 29, struct ksu_get_full_version_cmd);
 
 #endif

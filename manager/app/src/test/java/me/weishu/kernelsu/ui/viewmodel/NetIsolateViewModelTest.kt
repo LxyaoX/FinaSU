@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.weishu.kernelsu.data.netisolate.NetIsolateDataSource
+import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
 import me.weishu.kernelsu.data.uts.UtsTargetApp
@@ -86,10 +87,94 @@ class NetIsolateViewModelTest {
         advanceUntilIdle()
 
         assertEquals(
-            listOf(SaveCall(true, listOf(10100, 10200), false, false)),
-            repository.saves,
+            listOf(
+                PolicySaveCall(
+                    true,
+                    listOf(
+                        NetIsolatePolicy(10100, false, false),
+                        NetIsolatePolicy(10200, false, false),
+                    ),
+                ),
+            ),
+            repository.policySaves,
         )
         assertEquals(listOf(10100, 10200), model.uiState.value.status.uids)
+    }
+
+    @Test
+    fun `changing apps preserves existing per-app policies`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            policySupported = true,
+            uids = listOf(10123),
+            policies = listOf(NetIsolatePolicy(10123, false, true)),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setTargets(listOf(UtsTarget("com.example.one", 10123), UtsTarget("com.example.two", 10200)))
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(
+                NetIsolatePolicy(10123, false, true),
+                NetIsolatePolicy(10200, false, false),
+            ),
+            repository.policySaves.single().policies,
+        )
+    }
+
+    @Test
+    fun `single app policy update sends the complete policy set`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            policySupported = true,
+            strictSocketSupported = true,
+            allowLoopbackSupported = true,
+            uids = listOf(10123, 10200),
+            policies = listOf(
+                NetIsolatePolicy(10123, false, true),
+                NetIsolatePolicy(10200, false, false),
+            ),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setPolicy(10200, strictSocket = true, allowLoopback = false)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(
+                PolicySaveCall(
+                    true,
+                    listOf(
+                        NetIsolatePolicy(10123, false, true),
+                        NetIsolatePolicy(10200, true, false),
+                    ),
+                ),
+            ),
+            repository.policySaves,
+        )
+    }
+
+    @Test
+    fun `single app policy is rejected when per-app policies are unsupported`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            uids = listOf(10123),
+            policies = listOf(NetIsolatePolicy(10123, false, false)),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setPolicy(10123, strictSocket = false, allowLoopback = true)
+        advanceUntilIdle()
+
+        assertTrue(repository.policySaves.isEmpty())
+        assertEquals("message", model.uiState.value.message)
     }
 
     @Test
@@ -226,6 +311,7 @@ class NetIsolateViewModelTest {
     private class FakeNetIsolateDataSource : NetIsolateDataSource {
         var current = NetIsolateStatus()
         val saves = mutableListOf<SaveCall>()
+        val policySaves = mutableListOf<PolicySaveCall>()
         var operationError: Throwable? = null
         var disableCalls = 0
         var clearCalls = 0
@@ -242,11 +328,23 @@ class NetIsolateViewModelTest {
         ) {
             val normalized = uids.distinct().sorted()
             saves += SaveCall(enabled, normalized, strictSocket, allowLoopback)
+            savePolicies(
+                enabled,
+                normalized.map { uid ->
+                    NetIsolatePolicy(uid, strictSocket, allowLoopback)
+                },
+            )
+        }
+
+        override suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>) {
+            val normalized = policies.sortedBy(NetIsolatePolicy::uid)
+            policySaves += PolicySaveCall(enabled, normalized)
             current = current.copy(
                 enabled = enabled,
-                uids = normalized,
-                strictSocket = strictSocket,
-                allowLoopback = allowLoopback,
+                uids = normalized.map(NetIsolatePolicy::uid),
+                strictSocket = normalized.isNotEmpty() && normalized.all(NetIsolatePolicy::strictSocket),
+                allowLoopback = normalized.isNotEmpty() && normalized.all(NetIsolatePolicy::allowLoopback),
+                policies = normalized,
             )
         }
 
@@ -267,5 +365,10 @@ class NetIsolateViewModelTest {
         val uids: List<Int>,
         val strictSocket: Boolean,
         val allowLoopback: Boolean,
+    )
+
+    private data class PolicySaveCall(
+        val enabled: Boolean,
+        val policies: List<NetIsolatePolicy>,
     )
 }

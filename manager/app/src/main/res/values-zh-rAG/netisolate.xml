@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">这个内核还不会严格锁接口喵</string>
     <string name="netisolate_clear">清除设置喵</string>
     <string name="netisolate_clear_summary">关闭隔离、清空应用，再把保存的设置删掉喵</string>
+    <string name="netisolate_app_policies">应用策略喵</string>
+    <string name="netisolate_policy_default">普通隔离喵</string>
+    <string name="netisolate_policy_loopback">允许回环喵</string>
+    <string name="netisolate_policy_strict">严格断网喵</string>
+    <string name="netisolate_policy_unsupported">当前内核不支持每应用策略喵</string>
+    <string name="netisolate_policy_summary">可以给每只应用单独配置隔离方式喵</string>
 </resources>

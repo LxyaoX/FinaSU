@@ -2,11 +2,15 @@ package me.weishu.kernelsu.ui.screen.netisolate
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,10 +23,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +49,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.netisolate.NETISOLATE_MAX_UIDS
+import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
+import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
+import me.weishu.kernelsu.data.uts.UtsTargetApp
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
@@ -61,6 +72,7 @@ fun NetIsolateScreen() {
     val snackbar = remember { SnackbarHostState() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     var showTargets by rememberSaveable { mutableStateOf(false) }
+    var showPolicies by rememberSaveable { mutableStateOf(false) }
     var confirmClear by rememberSaveable { mutableStateOf(false) }
     val status = state.status
     val canEdit = status.supported && !state.busy && !state.loading
@@ -79,8 +91,8 @@ fun NetIsolateScreen() {
         onPauseOrDispose { }
     }
 
-    LaunchedEffect(showTargets) {
-        if (showTargets) viewModel.loadApps()
+    LaunchedEffect(showTargets, showPolicies) {
+        if (showTargets || showPolicies) viewModel.loadApps()
     }
 
     LaunchedEffect(state.message) {
@@ -128,6 +140,17 @@ fun NetIsolateScreen() {
             countText = { selected, maximum ->
                 stringResource(R.string.netisolate_target_count, selected, maximum)
             },
+        )
+    }
+
+    if (showPolicies) {
+        NetIsolatePolicySheet(
+            status = status,
+            targets = targets,
+            apps = state.apps,
+            busy = state.busy,
+            onDismiss = { showPolicies = false },
+            onSetPolicy = viewModel::setPolicy,
         )
     }
 
@@ -229,6 +252,27 @@ fun NetIsolateScreen() {
                         onClick = { showTargets = true },
                     )
                 }
+                item(visible = targets.isNotEmpty()) {
+                    SegmentedListItem(
+                        headlineContent = {
+                            Text(stringResource(R.string.netisolate_app_policies))
+                        },
+                        supportingContent = {
+                            Text(
+                                stringResource(
+                                    if (status.policySupported) {
+                                        R.string.netisolate_policy_summary
+                                    } else {
+                                        R.string.netisolate_policy_unsupported
+                                    },
+                                ),
+                            )
+                        },
+                        leadingContent = { Icon(Icons.Filled.Security, null) },
+                        enabled = canEdit && status.policySupported,
+                        onClick = { showPolicies = true },
+                    )
+                }
             }
 
             if (!status.supported) {
@@ -315,4 +359,114 @@ fun NetIsolateScreen() {
             Spacer(Modifier.height(24.dp))
         }
     }
+}
+
+@Composable
+private fun NetIsolatePolicySheet(
+    status: NetIsolateStatus,
+    targets: List<UtsTarget>,
+    apps: List<UtsTargetApp>,
+    busy: Boolean,
+    onDismiss: () -> Unit,
+    onSetPolicy: (uid: Int, strictSocket: Boolean, allowLoopback: Boolean) -> Unit,
+) {
+    val appByUid = remember(apps) { apps.associateBy(UtsTargetApp::uid) }
+    val policiesByUid = remember(status.policies) {
+        status.policies.associateBy(NetIsolatePolicy::uid)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.92f)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.netisolate_app_policies),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = stringResource(R.string.netisolate_policy_summary),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(targets.sortedBy(UtsTarget::uid), key = UtsTarget::uid) { target ->
+                    val app = appByUid[target.uid]
+                    val policy = policiesByUid[target.uid] ?: NetIsolatePolicy(
+                        uid = target.uid,
+                        strictSocket = status.strictSocket,
+                        allowLoopback = status.allowLoopback,
+                    )
+                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                        Text(
+                            text = app?.label ?: target.packageName,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = app?.packageName ?: target.packageName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        SegmentedColumn {
+                            item {
+                                PolicyChoice(
+                                    title = stringResource(R.string.netisolate_policy_default),
+                                    selected = !policy.strictSocket && !policy.allowLoopback,
+                                    enabled = !busy,
+                                    onClick = { onSetPolicy(target.uid, false, false) },
+                                )
+                            }
+                            item {
+                                PolicyChoice(
+                                    title = stringResource(R.string.netisolate_policy_loopback),
+                                    selected = policy.allowLoopback,
+                                    enabled = !busy && status.allowLoopbackSupported,
+                                    onClick = { onSetPolicy(target.uid, false, true) },
+                                )
+                            }
+                            item {
+                                PolicyChoice(
+                                    title = stringResource(R.string.netisolate_policy_strict),
+                                    selected = policy.strictSocket,
+                                    enabled = !busy && status.strictSocketSupported,
+                                    onClick = { onSetPolicy(target.uid, true, false) },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PolicyChoice(
+    title: String,
+    selected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    SegmentedListItem(
+        headlineContent = { Text(title) },
+        trailingContent = {
+            RadioButton(
+                selected = selected,
+                onClick = null,
+                enabled = enabled,
+            )
+        },
+        enabled = enabled,
+        onClick = onClick,
+    )
 }

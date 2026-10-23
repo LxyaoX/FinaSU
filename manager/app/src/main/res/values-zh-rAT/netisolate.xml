@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">此核尚無嚴鎖網竅之能</string>
     <string name="netisolate_clear">散此玄關</string>
     <string name="netisolate_clear_summary">收網界、清器錄，並毀所存之禁制</string>
+    <string name="netisolate_app_policies">應用策略</string>
+    <string name="netisolate_policy_default">尋常隔絕</string>
+    <string name="netisolate_policy_loopback">許通回環</string>
+    <string name="netisolate_policy_strict">嚴斷外網</string>
+    <string name="netisolate_policy_unsupported">此核心未具各器別策之能</string>
+    <string name="netisolate_policy_summary">可為各器別設其禁制</string>
 </resources>

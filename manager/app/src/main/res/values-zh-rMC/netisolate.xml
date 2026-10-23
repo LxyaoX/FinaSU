@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">当前核心不支持严格封锁套接字</string>
     <string name="netisolate_clear">清除设置</string>
     <string name="netisolate_clear_summary">关闭隔离、清空应用列表并删除已保存的设置</string>
+    <string name="netisolate_app_policies">应用策略</string>
+    <string name="netisolate_policy_default">普通封锁</string>
+    <string name="netisolate_policy_loopback">放行回环</string>
+    <string name="netisolate_policy_strict">彻底断网</string>
+    <string name="netisolate_policy_unsupported">此基岩核心不支持逐应用策略</string>
+    <string name="netisolate_policy_summary">可为每个应用单独设定边界</string>
 </resources>

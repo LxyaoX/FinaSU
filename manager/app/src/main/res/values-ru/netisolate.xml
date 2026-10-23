@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">Это ядро не поддерживает строгую блокировку сокетов</string>
     <string name="netisolate_clear">Очистить настройки</string>
     <string name="netisolate_clear_summary">Выключить изоляцию, очистить список приложений и удалить сохранённые настройки</string>
+    <string name="netisolate_app_policies">Политики приложений</string>
+    <string name="netisolate_policy_default">Обычная изоляция</string>
+    <string name="netisolate_policy_loopback">Разрешить loopback</string>
+    <string name="netisolate_policy_strict">Строгий офлайн</string>
+    <string name="netisolate_policy_unsupported">Это ядро не поддерживает политики для отдельных приложений</string>
+    <string name="netisolate_policy_summary">Настройте каждое выбранное приложение отдельно</string>
 </resources>

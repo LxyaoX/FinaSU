@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">Bu çekirdek kesin soket engellemeyi desteklemiyor</string>
     <string name="netisolate_clear">Ayarları temizle</string>
     <string name="netisolate_clear_summary">Yalıtımı kapat, uygulama listesini temizle ve kayıtlı ayarları sil</string>
+    <string name="netisolate_app_policies">Uygulama ilkeleri</string>
+    <string name="netisolate_policy_default">Normal yalıtım</string>
+    <string name="netisolate_policy_loopback">Yerel döngüye izin ver</string>
+    <string name="netisolate_policy_strict">Katı çevrimdışı</string>
+    <string name="netisolate_policy_unsupported">Bu çekirdek uygulama başına ilkeleri desteklemiyor</string>
+    <string name="netisolate_policy_summary">Seçili her uygulamayı ayrı ayrı yapılandırın</string>
 </resources>

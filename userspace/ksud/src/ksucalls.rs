@@ -350,6 +350,18 @@ pub fn set_netisolate_config(config: &ksu_uapi::ksu_netisolate_config) -> Result
     Ok(())
 }
 
+pub fn get_netisolate_policies() -> Result<ksu_uapi::ksu_netisolate_policies> {
+    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_policies>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_POLICIES, &raw mut cmd)?;
+    Ok(cmd)
+}
+
+pub fn set_netisolate_policies(config: &ksu_uapi::ksu_netisolate_policies) -> Result<()> {
+    let mut cmd = *config;
+    ksuctl(ksu_uapi::KSU_IOCTL_SET_NETISOLATE_POLICIES, &raw mut cmd)?;
+    Ok(())
+}
+
 pub fn get_wrapped_fd(fd: RawFd) -> Result<RawFd> {
     let mut cmd = ksu_uapi::ksu_get_wrapper_fd_cmd {
         fd: fd as u32,

@@ -4,6 +4,7 @@
 #include <linux/types.h>
 
 #define KSU_NETISOLATE_MAX_UIDS 256
+#define KSU_NETISOLATE_MAX_POLICIES 256
 #define KSU_NETISOLATE_FLAG_MASK 0xffffu
 #define KSU_NETISOLATE_SUPPORTED_SHIFT 16u
 
@@ -16,6 +17,19 @@ struct ksu_netisolate_config {
     __u32 compat_supported; /* Output; ignored on SET */
     __u32 reserved;         /* SET: active flags. GET: active | supported << 16 */
     __u32 uids[KSU_NETISOLATE_MAX_UIDS];
+};
+
+struct ksu_netisolate_policy {
+    __u32 uid;
+    __u32 flags;
+};
+
+struct ksu_netisolate_policies {
+    __u32 enabled;         /* Input/Output */
+    __u32 count;           /* Input/Output */
+    __u32 supported_flags; /* Output; ignored but must be 0 on SET */
+    __u32 reserved;        /* Input/Output; must be 0 */
+    struct ksu_netisolate_policy policies[KSU_NETISOLATE_MAX_POLICIES];
 };
 
 #endif // __KSU_UAPI_NETISOLATE_H

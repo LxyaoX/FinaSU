@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">このカーネルは厳格なソケットブロックに対応していません</string>
     <string name="netisolate_clear">設定を消去</string>
     <string name="netisolate_clear_summary">分離をオフにし、アプリ一覧を消去して保存済み設定を削除します</string>
+    <string name="netisolate_app_policies">アプリ別ポリシー</string>
+    <string name="netisolate_policy_default">通常隔離</string>
+    <string name="netisolate_policy_loopback">ループバックを許可</string>
+    <string name="netisolate_policy_strict">厳格オフライン</string>
+    <string name="netisolate_policy_unsupported">このカーネルはアプリ別ポリシーに対応していません</string>
+    <string name="netisolate_policy_summary">選択したアプリごとにポリシーを設定します</string>
 </resources>

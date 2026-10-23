@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">Este kernel no admite el bloqueo estricto de sockets</string>
     <string name="netisolate_clear">Borrar ajustes</string>
     <string name="netisolate_clear_summary">Desactiva el aislamiento, borra la lista de apps y elimina los ajustes guardados</string>
+    <string name="netisolate_app_policies">Políticas por aplicación</string>
+    <string name="netisolate_policy_default">Aislada</string>
+    <string name="netisolate_policy_loopback">Permitir bucle local</string>
+    <string name="netisolate_policy_strict">Sin conexión estricta</string>
+    <string name="netisolate_policy_unsupported">Este kernel no admite políticas por aplicación</string>
+    <string name="netisolate_policy_summary">Configura cada aplicación seleccionada por separado</string>
 </resources>

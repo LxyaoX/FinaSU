@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">Kernel ini tidak mendukung pemblokiran socket ketat</string>
     <string name="netisolate_clear">Hapus setelan</string>
     <string name="netisolate_clear_summary">Matikan isolasi, kosongkan daftar aplikasi, dan hapus setelan tersimpan</string>
+    <string name="netisolate_app_policies">Kebijakan aplikasi</string>
+    <string name="netisolate_policy_default">Terisolasi</string>
+    <string name="netisolate_policy_loopback">Izinkan loopback</string>
+    <string name="netisolate_policy_strict">Luring ketat</string>
+    <string name="netisolate_policy_unsupported">Kernel ini tidak mendukung kebijakan per aplikasi</string>
+    <string name="netisolate_policy_summary">Atur setiap aplikasi yang dipilih secara terpisah</string>
 </resources>

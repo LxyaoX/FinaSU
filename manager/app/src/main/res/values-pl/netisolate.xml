@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">To jądro nie obsługuje rygorystycznego blokowania socketów</string>
     <string name="netisolate_clear">Wyczyść ustawienia</string>
     <string name="netisolate_clear_summary">Wyłącz izolację, wyczyść listę aplikacji i usuń zapisane ustawienia</string>
+    <string name="netisolate_app_policies">Zasady aplikacji</string>
+    <string name="netisolate_policy_default">Izolacja zwykła</string>
+    <string name="netisolate_policy_loopback">Zezwól na pętlę zwrotną</string>
+    <string name="netisolate_policy_strict">Ścisła blokada sieci</string>
+    <string name="netisolate_policy_unsupported">To jądro nie obsługuje zasad dla poszczególnych aplikacji</string>
+    <string name="netisolate_policy_summary">Skonfiguruj każdą wybraną aplikację osobno</string>
 </resources>

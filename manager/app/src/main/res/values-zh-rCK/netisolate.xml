@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">这口内核锁不了新接口</string>
     <string name="netisolate_clear">清空店规</string>
     <string name="netisolate_clear_summary">关掉隔离、清空应用名单，再把保存的店规删掉</string>
+    <string name="netisolate_app_policies">应用策略</string>
+    <string name="netisolate_policy_default">普通断网</string>
+    <string name="netisolate_policy_loopback">放行本机回环</string>
+    <string name="netisolate_policy_strict">严格断网</string>
+    <string name="netisolate_policy_unsupported">当前内核没有逐应用策略能力</string>
+    <string name="netisolate_policy_summary">可以逐个配置所选应用的隔离方式</string>
 </resources>

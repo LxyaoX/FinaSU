@@ -8,6 +8,7 @@
 #include <linux/mutex.h>
 #include <linux/printk.h>
 #include <linux/ptrace.h>
+#include <linux/slab.h>
 #include <linux/socket.h>
 #include <linux/spinlock.h>
 #include <linux/string.h>
@@ -23,6 +24,7 @@
 #include "manager/manager_identity.h"
 
 static_assert(sizeof(struct ksu_netisolate_config) == 1040, "netisolate ABI drift");
+static_assert(sizeof(struct ksu_netisolate_policies) == 2064, "netisolate policies ABI drift");
 
 #define NI_NATIVE_BASE 0
 #define NI_OPERATION_COUNT 5
@@ -49,11 +51,15 @@ struct ni_hook {
     bool installed;
 };
 
+struct ni_policy {
+    u32 uid;
+    u32 flags;
+};
+
 struct ni_state {
     u32 enabled;
     u32 count;
-    u32 flags;
-    u32 uids[KSU_NETISOLATE_MAX_UIDS];
+    struct ni_policy policies[KSU_NETISOLATE_MAX_POLICIES];
 };
 
 static DEFINE_MUTEX(ni_lifecycle_lock);
@@ -139,7 +145,6 @@ static void __user *ni_user_ptr(const struct pt_regs *regs, unsigned int index, 
 static bool ni_policy_match(uid_t uid, enum ni_operation op, u32 *policy_flags)
 {
     unsigned long flags;
-    bool selected = false;
     u32 i;
 
     if (op >= NI_OPERATION_COUNT)
@@ -152,16 +157,15 @@ static bool ni_policy_match(uid_t uid, enum ni_operation op, u32 *policy_flags)
     spin_lock_irqsave(&ni_state_lock, flags);
     if (ni_state.enabled) {
         for (i = 0; i < ni_state.count; i++) {
-            if (ni_state.uids[i] == uid) {
-                selected = true;
-                break;
+            if (ni_state.policies[i].uid == uid) {
+                *policy_flags = ni_state.policies[i].flags;
+                spin_unlock_irqrestore(&ni_state_lock, flags);
+                return true;
             }
         }
-        if (selected)
-            *policy_flags = ni_state.flags;
     }
     spin_unlock_irqrestore(&ni_state_lock, flags);
-    return selected;
+    return false;
 }
 
 static bool ni_ipv4_loopback(const struct in_addr *address)
@@ -547,17 +551,18 @@ static int ni_uninstall_hooks_locked(void)
     return ret;
 }
 
-static void ni_publish_locked(const struct ksu_netisolate_config *config)
+static void ni_publish_locked(const struct ksu_netisolate_policies *config)
 {
     unsigned long flags;
     u32 i;
 
     spin_lock_irqsave(&ni_state_lock, flags);
-    ni_state.enabled = config->enabled ? 1 : 0;
     ni_state.count = config->count;
-    ni_state.flags = config->reserved & KSU_NETISOLATE_FLAG_MASK;
-    for (i = 0; i < config->count; i++)
-        ni_state.uids[i] = config->uids[i];
+    for (i = 0; i < config->count; i++) {
+        ni_state.policies[i].uid = config->policies[i].uid;
+        ni_state.policies[i].flags = config->policies[i].flags;
+    }
+    ni_state.enabled = config->enabled ? 1 : 0;
     spin_unlock_irqrestore(&ni_state_lock, flags);
 }
 
@@ -588,6 +593,48 @@ static int ni_validate_config(const struct ksu_netisolate_config *config)
     return 0;
 }
 
+static int ni_validate_policies(const struct ksu_netisolate_policies *config)
+{
+    u32 flags;
+    u32 i;
+    u32 j;
+
+    if (config->supported_flags || config->reserved)
+        return -EINVAL;
+    if (config->count > KSU_NETISOLATE_MAX_POLICIES)
+        return -EINVAL;
+    if (config->enabled && !config->count)
+        return -EINVAL;
+    for (i = 0; i < config->count; i++) {
+        flags = config->policies[i].flags;
+        if (!config->policies[i].uid || flags & ~NI_SUPPORTED_FLAGS)
+            return -EINVAL;
+        if ((flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET) &&
+            (flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK))
+            return -EINVAL;
+        for (j = 0; j < i; j++) {
+            if (config->policies[j].uid == config->policies[i].uid)
+                return -EINVAL;
+        }
+    }
+    return 0;
+}
+
+static void ni_legacy_to_policies(const struct ksu_netisolate_config *legacy,
+                                  struct ksu_netisolate_policies *policies)
+{
+    u32 flags = legacy->reserved & KSU_NETISOLATE_FLAG_MASK;
+    u32 i;
+
+    memset(policies, 0, sizeof(*policies));
+    policies->enabled = legacy->enabled;
+    policies->count = legacy->count;
+    for (i = 0; i < legacy->count; i++) {
+        policies->policies[i].uid = legacy->uids[i];
+        policies->policies[i].flags = flags;
+    }
+}
+
 int __init ksu_netisolate_init(void)
 {
     mutex_lock(&ni_lifecycle_lock);
@@ -615,7 +662,7 @@ void ksu_netisolate_exit(void)
 {
     mutex_lock(&ni_lifecycle_lock);
     ni_stopping = true;
-    ni_publish_locked(&(struct ksu_netisolate_config){});
+    ni_publish_locked(&(struct ksu_netisolate_policies){});
     {
         int ret = ni_uninstall_hooks_locked();
 
@@ -628,6 +675,57 @@ void ksu_netisolate_exit(void)
 }
 
 int ksu_netisolate_get_config(struct ksu_netisolate_config *config)
+{
+    unsigned long flags;
+    u32 common_flags = 0;
+    u32 i;
+
+    if (!config)
+        return -EINVAL;
+    mutex_lock(&ni_lifecycle_lock);
+    if (!ni_supported || ni_stopping) {
+        mutex_unlock(&ni_lifecycle_lock);
+        return -EOPNOTSUPP;
+    }
+    memset(config, 0, sizeof(*config));
+    spin_lock_irqsave(&ni_state_lock, flags);
+    config->enabled = ni_state.enabled;
+    config->count = ni_state.count;
+    if (ni_state.count)
+        common_flags = ni_state.policies[0].flags;
+    for (i = 0; i < ni_state.count; i++) {
+        config->uids[i] = ni_state.policies[i].uid;
+        common_flags &= ni_state.policies[i].flags;
+    }
+    config->reserved = common_flags & KSU_NETISOLATE_FLAG_MASK;
+    spin_unlock_irqrestore(&ni_state_lock, flags);
+    config->compat_supported = ni_compat_supported;
+    config->reserved |=
+        (NI_SUPPORTED_FLAGS & KSU_NETISOLATE_FLAG_MASK) << KSU_NETISOLATE_SUPPORTED_SHIFT;
+    mutex_unlock(&ni_lifecycle_lock);
+    return 0;
+}
+
+int ksu_netisolate_set_config(const struct ksu_netisolate_config *config)
+{
+    struct ksu_netisolate_policies *policies;
+    int ret;
+
+    if (!config)
+        return -EINVAL;
+    ret = ni_validate_config(config);
+    if (ret)
+        return ret;
+    policies = kzalloc(sizeof(*policies), GFP_KERNEL);
+    if (!policies)
+        return -ENOMEM;
+    ni_legacy_to_policies(config, policies);
+    ret = ksu_netisolate_set_policies(policies);
+    kfree(policies);
+    return ret;
+}
+
+int ksu_netisolate_get_policies(struct ksu_netisolate_policies *config)
 {
     unsigned long flags;
     u32 i;
@@ -643,24 +741,23 @@ int ksu_netisolate_get_config(struct ksu_netisolate_config *config)
     spin_lock_irqsave(&ni_state_lock, flags);
     config->enabled = ni_state.enabled;
     config->count = ni_state.count;
-    config->reserved = ni_state.flags & KSU_NETISOLATE_FLAG_MASK;
-    for (i = 0; i < ni_state.count; i++)
-        config->uids[i] = ni_state.uids[i];
+    for (i = 0; i < ni_state.count; i++) {
+        config->policies[i].uid = ni_state.policies[i].uid;
+        config->policies[i].flags = ni_state.policies[i].flags;
+    }
     spin_unlock_irqrestore(&ni_state_lock, flags);
-    config->compat_supported = ni_compat_supported;
-    config->reserved |=
-        (NI_SUPPORTED_FLAGS & KSU_NETISOLATE_FLAG_MASK) << KSU_NETISOLATE_SUPPORTED_SHIFT;
+    config->supported_flags = NI_SUPPORTED_FLAGS;
     mutex_unlock(&ni_lifecycle_lock);
     return 0;
 }
 
-int ksu_netisolate_set_config(const struct ksu_netisolate_config *config)
+int ksu_netisolate_set_policies(const struct ksu_netisolate_policies *config)
 {
     int ret;
 
     if (!config)
         return -EINVAL;
-    ret = ni_validate_config(config);
+    ret = ni_validate_policies(config);
     if (ret)
         return ret;
 

@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">هذه النواة لا تدعم الحظر الصارم للمقابس</string>
     <string name="netisolate_clear">مسح الإعدادات</string>
     <string name="netisolate_clear_summary">إيقاف العزل ومسح قائمة التطبيقات وحذف الإعدادات المحفوظة</string>
+    <string name="netisolate_app_policies">سياسات التطبيقات</string>
+    <string name="netisolate_policy_default">معزولة</string>
+    <string name="netisolate_policy_loopback">السماح بالاسترجاع المحلي</string>
+    <string name="netisolate_policy_strict">قطع صارم</string>
+    <string name="netisolate_policy_unsupported">هذه النواة لا تدعم سياسات منفصلة لكل تطبيق</string>
+    <string name="netisolate_policy_summary">اضبط سياسة كل تطبيق محدد على حدة</string>
 </resources>

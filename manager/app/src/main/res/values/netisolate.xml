@@ -31,4 +31,10 @@
     <string name="netisolate_strict_socket_unsupported">This kernel does not support strict socket blocking</string>
     <string name="netisolate_clear">Clear settings</string>
     <string name="netisolate_clear_summary">Turn isolation off, clear the app list, and delete saved settings</string>
+    <string name="netisolate_app_policies">App policies</string>
+    <string name="netisolate_policy_default">Isolated</string>
+    <string name="netisolate_policy_loopback">Allow loopback</string>
+    <string name="netisolate_policy_strict">Strict offline</string>
+    <string name="netisolate_policy_unsupported">This kernel does not support per-app policies</string>
+    <string name="netisolate_policy_summary">Configure each selected app independently</string>
 </resources>
