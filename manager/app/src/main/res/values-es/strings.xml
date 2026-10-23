@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU solo admite kernels GKI ahora, pero puedes parchear la imagen para dispositivos GKI.</string>
     <string name="home_device_model">Modelo del dispositivo</string>
     <string name="home_kernel">Versión del kernel</string>
+    <string name="home_kernel_full_version">Compilación del kernel</string>
     <string name="home_manager_version">Versión del gestor</string>
     <string name="home_fingerprint">Huella del dispositivo</string>
     <string name="home_selinux_status">Estado de SELinux</string>

@@ -12,6 +12,7 @@
 #include <android/log.h>
 #include <dirent.h>
 #include <cstdlib>
+#include <string>
 
 #include <unistd.h>
 #include <climits>
@@ -151,6 +152,15 @@ uint32_t get_kernel_uapi_version() {
 
 uint32_t get_manager_uapi_version() {
     return KERNEL_SU_UAPI_VERSION;
+}
+
+std::string get_full_version() {
+    struct ksu_get_full_version_cmd cmd = {};
+    if (ksuctl(KSU_IOCTL_GET_FULL_VERSION, &cmd) != 0) {
+        return {};
+    }
+    cmd.version_full[sizeof(cmd.version_full) - 1] = '\0';
+    return std::string(cmd.version_full);
 }
 
 uint32_t get_version() {

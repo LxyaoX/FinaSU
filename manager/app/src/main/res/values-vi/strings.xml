@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU hiện tại chỉ hỗ trợ Kernel GKI, nhưng bạn có thể patch file .img của thiết bị GKI mà bạn cần.</string>
     <string name="home_device_model">Mẫu thiết bị</string>
     <string name="home_kernel">Phiên bản Kernel</string>
+    <string name="home_kernel_full_version">Bản dựng kernel</string>
     <string name="home_manager_version">Phiên bản Trình quản lý</string>
     <string name="home_fingerprint">Fingerprint</string>
     <string name="home_selinux_status">Trạng thái SELinux</string>

@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU sekarang hanya mendukung kernel GKI, tetapi Anda dapat menambal image untuk perangkat GKI.</string>
     <string name="home_device_model">Model perangkat</string>
     <string name="home_kernel">Versi kernel</string>
+    <string name="home_kernel_full_version">Build kernel lengkap</string>
     <string name="home_manager_version">Versi manajer</string>
     <string name="home_fingerprint">Sidik jari</string>
     <string name="home_selinux_status">Status SELinux</string>

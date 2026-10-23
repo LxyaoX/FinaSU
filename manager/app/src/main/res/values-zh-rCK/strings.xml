@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU 眼下只认 GKI 秘酱料，不过 GKI 灶具的镜像还是能补的</string>
     <string name="home_device_model">灶具型号</string>
     <string name="home_kernel">秘酱料版本</string>
+    <string name="home_kernel_full_version">秘酱料全谱</string>
     <string name="home_manager_version">掌柜版本</string>
     <string name="home_fingerprint">饭庄指纹</string>
     <string name="home_selinux_status">SELinux 状态</string>
