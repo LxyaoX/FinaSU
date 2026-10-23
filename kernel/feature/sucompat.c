@@ -14,6 +14,9 @@
 #include <linux/version.h>
 #include <linux/sched/task_stack.h>
 #include <linux/ptrace.h>
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs_def.h>
+#endif
 
 #include "arch.h"
 #include "policy/allowlist.h"
@@ -54,6 +57,13 @@ static const struct ksu_feature_handler su_compat_handler = {
     .set_handler = su_compat_feature_set,
 };
 
+#ifdef CONFIG_KSU_SUSFS
+void ksu_sucompat_mark_no_su(void)
+{
+    susfs_set_current_proc_no_su();
+}
+#endif
+
 static char __user *ksud_user_path(void)
 {
     static const char ksud_path[] = KSUD_PATH;
@@ -84,6 +94,11 @@ long ksu_handle_faccessat_sucompat(int orig_nr, struct pt_regs *regs)
     const char __user **filename_user, *orig_filename;
     long ret;
     const struct cred *old_cred;
+
+#ifdef CONFIG_KSU_SUSFS
+    if (unlikely(susfs_is_current_proc_no_su()))
+        goto do_orig_facessat;
+#endif
 
     if (!ksu_is_allow_uid_for_current(current_uid().val)) {
         goto do_orig_facessat;
@@ -119,6 +134,11 @@ long ksu_handle_stat_sucompat(int orig_nr, struct pt_regs *regs)
     const char __user **filename_user, *orig_filename;
     long ret;
     const struct cred *old_cred;
+
+#ifdef CONFIG_KSU_SUSFS
+    if (unlikely(susfs_is_current_proc_no_su()))
+        goto do_orig_stat;
+#endif
 
     if (!ksu_is_allow_uid_for_current(current_uid().val)) {
         goto do_orig_stat;
@@ -168,6 +188,11 @@ static long ksu_handle_execve_sucompat_common(const char __user **filename_user,
 
     if (unlikely(!filename_user))
         goto do_orig_execve;
+
+#ifdef CONFIG_KSU_SUSFS
+    if (unlikely(susfs_is_current_proc_no_su()))
+        goto do_orig_execve;
+#endif
 
     if (!ksu_is_allow_uid_for_current(current_uid().val))
         goto do_orig_execve;
