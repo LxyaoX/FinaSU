@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">模組名稱：1–63 個 ASCII 字母、數字或底線。不會載入或卸載模組。</string>
     <string name="susfs_prefix_hint">透過公開的 LKM 控制項隱藏掛載前綴。不會全域清除現有規則。</string>
     <string name="susfs_deferred">UTS 檢視生效中，已暫緩</string>
+    <string name="susfs_idle">無需套用</string>
+    <string name="susfs_idle_hint">目前沒有設定任何受管理的規則或設定。</string>
+    <string name="susfs_deferred_hint">UTS 檢視正在提供核心資訊偽裝，因此 SUSFS uname 尚未套用。</string>
+    <string name="susfs_saved_reboot">設定已儲存；本次開機未重新套用。可立即套用，或開啟「開機時套用」。</string>
+    <string name="susfs_apply_saved">儲存並立即套用</string>
+    <string name="susfs_apply_saved_title">要套用已儲存的設定嗎？</string>
+    <string name="susfs_apply_saved_message">設定已經儲存。現在要套用到本次開機嗎？</string>
+    <string name="susfs_apply_saved_action">立即套用</string>
     <string name="susfs_uts_apply_confirm_title">套用 SUSFS uname？</string>
     <string name="susfs_uts_apply_confirm_message">套用期間會暫時關閉 UTS 檢視，但保留其設定。只有 SUSFS 確認 uname 已實際生效後，UTS 檢視才會保持關閉；否則會自動還原。</string>
     <string name="susfs_uts_apply_confirm_action">套用 SUSFS</string>

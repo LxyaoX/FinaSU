@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">Nazwa modułu: 1–63 liter ASCII, cyfr lub podkreśleń. Nie wczytuje ani nie wyładowuje modułów.</string>
     <string name="susfs_prefix_hint">Ukryj prefiks montowania przez udostępnione mechanizmy kontroli LKM. Brak globalnego czyszczenia istniejących reguł.</string>
     <string name="susfs_deferred">Wstrzymano, ponieważ UTS View jest aktywny</string>
+    <string name="susfs_idle">Nie ma nic do zastosowania</string>
+    <string name="susfs_idle_hint">Nie skonfigurowano żadnych zarządzanych reguł ani ustawień.</string>
+    <string name="susfs_deferred_hint">UTS View zapewnia fałszowanie informacji o jądrze, więc ustawienie uname w SUSFS nie zostało zastosowane.</string>
+    <string name="susfs_saved_reboot">Konfiguracja została zapisana, ale nie została ponownie zastosowana podczas tego rozruchu. Zastosuj ją teraz lub włącz „Zastosuj przy rozruchu”.</string>
+    <string name="susfs_apply_saved">Zapisz i zastosuj</string>
+    <string name="susfs_apply_saved_title">Zastosować zapisaną konfigurację?</string>
+    <string name="susfs_apply_saved_message">Konfiguracja jest już zapisana. Zastosować ją teraz w tym uruchomieniu?</string>
+    <string name="susfs_apply_saved_action">Zastosuj teraz</string>
     <string name="susfs_uts_apply_confirm_title">Zastosować uname SUSFS?</string>
     <string name="susfs_uts_apply_confirm_message">Podczas stosowania uname SUSFS funkcja UTS View zostanie wyłączona, ale jej ustawienia zostaną zachowane. UTS View pozostanie wyłączona tylko po potwierdzeniu przez SUSFS, że uname zaczął obowiązywać; w przeciwnym razie zostanie przywrócona.</string>
     <string name="susfs_uts_apply_confirm_action">Zastosuj SUSFS</string>

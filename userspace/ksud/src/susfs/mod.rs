@@ -299,6 +299,10 @@ fn uts_arbitration_active(config: &Config, query: impl FnOnce() -> Result<bool>)
     }
 }
 
+fn status_summary(config: &Config, uts_active: bool) -> Result<&'static str> {
+    store::summary_with_deferred(config, uname_conflicts(config, uts_active))
+}
+
 fn apply_with_uts_arbitration(
     config: &Config,
     detection: &Detection,
@@ -313,6 +317,9 @@ fn apply_with_uts_arbitration(
     let mut report = apply::apply(&effective, detection, stage)?;
     if defer_uname {
         report.deferred.push("uname".to_owned());
+        if matches!(report.status, "applied" | "saved") {
+            report.status = "deferred";
+        }
     }
     Ok(report)
 }
@@ -326,7 +333,9 @@ pub fn run(command: Command) -> Result<()> {
             let detection = detect();
             let uname_provider = uname_provider_state().unwrap_or_default();
             let config = store::read_config().and_then(|config| {
-                let summary = store::summary(&config)?;
+                let uts_active =
+                    uts_arbitration_active(&config, uts_provider_active).unwrap_or(false);
+                let summary = status_summary(&config, uts_active)?;
                 Ok((config, summary))
             });
             let status = match config {
@@ -481,6 +490,19 @@ mod tests {
         });
         assert!(uname_conflicts(&config, true));
         assert!(!uname_conflicts(&config, false));
+    }
+
+    #[test]
+    fn status_reports_saved_uname_as_deferred_while_uts_is_active() {
+        let mut config = Config::default();
+        assert_eq!(status_summary(&config, true).unwrap(), "idle");
+
+        config.settings.uname = Some(model::Uname {
+            release: "6.1.0-test".to_owned(),
+            version: "#1".to_owned(),
+        });
+        assert_eq!(status_summary(&config, true).unwrap(), "deferred");
+        assert_eq!(status_summary(&config, false).unwrap(), "saved");
     }
 
     #[test]

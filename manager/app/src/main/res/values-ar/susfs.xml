@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">اسم الوحدة: 1–63 حرفًا لاتينيًا ASCII أو رقمًا أو شرطة سفلية. لا يحمّل الوحدات أو يلغي تحميلها.</string>
     <string name="susfs_prefix_hint">إخفاء بادئة تركيب عبر عناصر تحكّم LKM المكشوفة. دون مسح شامل للقواعد الموجودة.</string>
     <string name="susfs_deferred">مؤجل أثناء تفعيل UTS View</string>
+    <string name="susfs_idle">لا شيء للتطبيق</string>
+    <string name="susfs_idle_hint">لم يتم تكوين أي قواعد أو إعدادات مُدارة.</string>
+    <string name="susfs_deferred_hint">يتولى UTS View تزييف هوية النواة، لذا لم يتم تطبيق إعداد uname في SUSFS.</string>
+    <string name="susfs_saved_reboot">تم حفظ الإعداد؛ لم يُعَد تطبيقه في هذا الإقلاع. طبّقه الآن أو فعّل «التطبيق عند الإقلاع».</string>
+    <string name="susfs_apply_saved">حفظ وتطبيق</string>
+    <string name="susfs_apply_saved_title">تطبيق الإعداد المحفوظ؟</string>
+    <string name="susfs_apply_saved_message">تم حفظ الإعداد بالفعل. هل تريد تطبيقه في هذا الإقلاع الآن؟</string>
+    <string name="susfs_apply_saved_action">تطبيق الآن</string>
     <string name="susfs_uts_apply_confirm_title">تطبيق uname عبر SUSFS؟</string>
     <string name="susfs_uts_apply_confirm_message">سيتم إيقاف UTS View مؤقتًا أثناء تطبيق uname عبر SUSFS، مع الاحتفاظ بإعداداته. لن يبقى UTS View متوقفًا إلا بعد تأكيد SUSFS أن uname أصبح ساريًا؛ وإلا فسيُستعاد.</string>
     <string name="susfs_uts_apply_confirm_action">تطبيق SUSFS</string>

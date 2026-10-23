@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">Un nombre de módulo: 1–63 letras ASCII, dígitos o guiones bajos. No carga ni descarga módulos.</string>
     <string name="susfs_prefix_hint">Oculta un prefijo de montaje mediante los controles LKM expuestos. No borra globalmente las reglas existentes.</string>
     <string name="susfs_deferred">Diferido mientras UTS View está activo</string>
+    <string name="susfs_idle">Nada que aplicar</string>
+    <string name="susfs_idle_hint">No hay reglas ni ajustes gestionados configurados.</string>
+    <string name="susfs_deferred_hint">UTS View está proporcionando la suplantación de identidad del kernel, por lo que el ajuste uname de SUSFS no se aplica.</string>
+    <string name="susfs_saved_reboot">Configuración guardada; no se volvió a aplicar en este arranque. Aplícala ahora o activa «Aplicar al arrancar».</string>
+    <string name="susfs_apply_saved">Guardar y aplicar</string>
+    <string name="susfs_apply_saved_title">¿Aplicar la configuración guardada?</string>
+    <string name="susfs_apply_saved_message">La configuración ya está guardada. ¿Aplicarla a este arranque ahora?</string>
+    <string name="susfs_apply_saved_action">Aplicar ahora</string>
     <string name="susfs_uts_apply_confirm_title">¿Aplicar uname de SUSFS?</string>
     <string name="susfs_uts_apply_confirm_message">UTS View se desactivará mientras se aplica uname de SUSFS. Sus ajustes se conservan. UTS View solo permanecerá desactivado cuando SUSFS confirme que uname se aplicó; de lo contrario, se restaurará.</string>
     <string name="susfs_uts_apply_confirm_action">Aplicar SUSFS</string>

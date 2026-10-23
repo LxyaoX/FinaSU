@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">模组名称须为 1–63 个 ASCII 字母、数字或下划线。不会加载或卸载模组。</string>
     <string name="susfs_prefix_hint">通过开放的 LKM 控制节点藏起挂载前缀；不会全局清空已有规则。</string>
     <string name="susfs_deferred">UTS 视图生效中，任务暂缓</string>
+    <string name="susfs_idle">无需应用</string>
+    <string name="susfs_idle_hint">尚未配置受管理的规则或设定。</string>
+    <string name="susfs_deferred_hint">UTS 视图正在提供内核信息伪装，因此 SUSFS uname 尚未应用。</string>
+    <string name="susfs_saved_reboot">配置已保存；本次重生未重放。可立即应用，或开启“开机自动应用”。</string>
+    <string name="susfs_apply_saved">保存并立即应用</string>
+    <string name="susfs_apply_saved_title">应用已保存的配置？</string>
+    <string name="susfs_apply_saved_message">配置已经保存。现在应用到本次重生吗？</string>
+    <string name="susfs_apply_saved_action">立即应用</string>
     <string name="susfs_uts_apply_confirm_title">应用 SUSFS uname？</string>
     <string name="susfs_uts_apply_confirm_message">应用 SUSFS uname 时，UTS 视图会暂时关闭，但设置会保留。只有 SUSFS 确认 uname 已经生效，UTS 视图才会保持关闭；否则会自动恢复。</string>
     <string name="susfs_uts_apply_confirm_action">应用 SUSFS</string>

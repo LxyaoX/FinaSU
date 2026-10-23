@@ -57,6 +57,8 @@ fun susfsManagementLabel(status: String): String = stringResource(when (status) 
     "applied" -> R.string.susfs_applied
     "failed" -> R.string.susfs_failed
     "pending_reboot" -> R.string.susfs_pending
+    "deferred" -> R.string.susfs_deferred
+    "idle" -> R.string.susfs_idle
     else -> R.string.susfs_saved
 })
 
@@ -75,6 +77,7 @@ fun SusfsScreen() {
     // Keep all six positions outside pager composition: distant pages may be disposed.
     val scrolls = susfsPages.map { rememberScrollState() }
     var draft by rememberSaveable { mutableStateOf<String?>(null) }
+    var confirmApplyAfterSave by rememberSaveable { mutableStateOf(false) }
     val config = remember(state.config) { state.config?.let(::JSONObject) }
     val writable = state.status.writable && !state.busy && config != null
     val import = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -126,7 +129,7 @@ fun SusfsScreen() {
             if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
             HorizontalPager(state = pager, modifier = Modifier.weight(1f), verticalAlignment = Alignment.Top) { page ->
                 SusfsPage(scrolls[page]) {
-                    SusfsNotice(state)
+                    SusfsNotice(state) { confirmApplyAfterSave = true }
                     when (page) {
                         0 -> SusfsOverview(state, config, writable, vm,
                             { import.launch(arrayOf("application/json", "text/plain")) },
@@ -173,6 +176,27 @@ fun SusfsScreen() {
             },
             dismissButton = {
                 TextButton(enabled = !state.busy, onClick = vm::dismissPendingUnameApply) {
+                    Text(stringResource(R.string.susfs_cancel))
+                }
+            },
+        )
+    }
+    if (confirmApplyAfterSave) {
+        AlertDialog(
+            onDismissRequest = { confirmApplyAfterSave = false },
+            title = { Text(stringResource(R.string.susfs_apply_saved_title)) },
+            text = { Text(stringResource(R.string.susfs_apply_saved_message)) },
+            confirmButton = {
+                TextButton(
+                    enabled = state.status.writable && !state.busy,
+                    onClick = {
+                        confirmApplyAfterSave = false
+                        vm.apply()
+                    },
+                ) { Text(stringResource(R.string.susfs_apply_saved_action)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmApplyAfterSave = false }) {
                     Text(stringResource(R.string.susfs_cancel))
                 }
             },
@@ -228,7 +252,7 @@ internal fun susfsDisabledReason(status: SusfsStatus, supported: Boolean): Strin
 }
 
 @Composable
-private fun SusfsNotice(state: SusfsUiState) {
+private fun SusfsNotice(state: SusfsUiState, onApplyAfterSave: () -> Unit) {
     val reason = susfsDisabledReason(state.status, true)
     if (reason != null || state.message != null || state.savedNotice) {
         SegmentedColumn {
@@ -239,6 +263,14 @@ private fun SusfsNotice(state: SusfsUiState) {
                 supportingContent = { Text(stringResource(R.string.susfs_error_hint)) }) } }
             if (state.savedNotice) item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_save_success)) },
                 supportingContent = { Text(stringResource(R.string.susfs_save_success_hint)) }) }
+            if (state.savedNotice && state.status.writable) item {
+                SegmentedListItem(
+                    enabled = !state.busy,
+                    onClick = onApplyAfterSave,
+                    headlineContent = { Text(stringResource(R.string.susfs_apply_saved)) },
+                    leadingContent = { Icon(Icons.Rounded.PlayArrow, null) },
+                )
+            }
         }
     }
 }
@@ -257,7 +289,7 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
         })) }, supportingContent = { Text(listOf(status.version, status.implementation, status.variant).filter(String::isNotEmpty).joinToString(" · ")) },
             leadingContent = { Icon(Icons.Rounded.VisibilityOff, null) }) }
         item { SegmentedListItem(headlineContent = { Text(susfsManagementLabel(status.management)) },
-            supportingContent = { Text(stringResource(R.string.susfs_ack_hint)) }) }
+            supportingContent = { Text(stringResource(susfsManagementHint(status))) }) }
         item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_saved_counts,
             config?.optJSONArray("rules")?.length() ?: 0)) }, supportingContent = { Text(stringResource(R.string.susfs_ownership)) }) }
         item { SegmentedSwitchItem(title = stringResource(R.string.susfs_automatic),
@@ -296,6 +328,13 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
         status.features.forEach { feature -> item(key = feature) { SegmentedListItem(headlineContent = { Text(feature.removePrefix("CONFIG_KSU_SUSFS_")) }) } }
         if (status.features.isEmpty()) item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_unsupported)) }) }
     }
+}
+
+private fun susfsManagementHint(status: SusfsStatus): Int = when {
+    status.management == "idle" -> R.string.susfs_idle_hint
+    status.management == "deferred" -> R.string.susfs_deferred_hint
+    status.management == "saved" && !status.automatic -> R.string.susfs_saved_reboot
+    else -> R.string.susfs_ack_hint
 }
 
 @Composable

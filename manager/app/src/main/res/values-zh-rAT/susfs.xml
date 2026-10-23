@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">圣光阵名：1–63 位 ASCII 字母、数字或下划线。不加载亦不卸载圣光阵。</string>
     <string name="susfs_prefix_hint">借所现之 LKM 掌理隐匿圣引圣缀。不全域涤净现行之圣律。</string>
     <string name="susfs_deferred">UTS 圣视正蒙恩，暂缓施行</string>
+    <string name="susfs_idle">无需施展</string>
+    <string name="susfs_idle_hint">尚无受掌理法则或圣设。</string>
+    <string name="susfs_deferred_hint">UTS 圣视正执内核情报幻化，故 SUSFS uname 尚未施展。</string>
+    <string name="susfs_saved_reboot">圣设已封存；此番圣启未重演。可即刻施展，或启圣启时施展。</string>
+    <string name="susfs_apply_saved">封存并即刻施展</string>
+    <string name="susfs_apply_saved_title">欲施展已封存之圣设乎？</string>
+    <string name="susfs_apply_saved_message">圣设已封存。今即施于此番圣启乎？</string>
+    <string name="susfs_apply_saved_action">即刻施展</string>
     <string name="susfs_uts_apply_confirm_title">欲施展 SUSFS uname 乎？</string>
     <string name="susfs_uts_apply_confirm_message">施展 SUSFS uname 时，UTS 圣视将暂熄，然圣设仍存。唯 SUSFS 勘验 uname 已应验后，UTS 圣视方续熄；否则自当归元。</string>
     <string name="susfs_uts_apply_confirm_action">施展 SUSFS</string>

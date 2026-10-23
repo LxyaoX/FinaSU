@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">Tên module: 1–63 chữ cái ASCII, chữ số hoặc dấu gạch dưới. Không nạp hay gỡ module.</string>
     <string name="susfs_prefix_hint">Ẩn một tiền tố mount thông qua các điều khiển LKM được phơi bày. Không xoá toàn bộ các quy tắc hiện có.</string>
     <string name="susfs_deferred">Tạm hoãn khi UTS View đang hoạt động</string>
+    <string name="susfs_idle">Không có gì để áp dụng</string>
+    <string name="susfs_idle_hint">Chưa cấu hình quy tắc hoặc cài đặt được quản lý nào.</string>
+    <string name="susfs_deferred_hint">UTS View đang cung cấp việc giả mạo thông tin kernel, vì vậy cài đặt uname của SUSFS chưa được áp dụng.</string>
+    <string name="susfs_saved_reboot">Cấu hình đã được lưu nhưng chưa được áp dụng lại trong lần khởi động này. Hãy áp dụng ngay hoặc bật "Áp dụng khi khởi động".</string>
+    <string name="susfs_apply_saved">Lưu và áp dụng</string>
+    <string name="susfs_apply_saved_title">Áp dụng cấu hình đã lưu?</string>
+    <string name="susfs_apply_saved_message">Cấu hình đã được lưu. Áp dụng cho lần khởi động này ngay bây giờ?</string>
+    <string name="susfs_apply_saved_action">Áp dụng ngay</string>
     <string name="susfs_uts_apply_confirm_title">Áp dụng uname của SUSFS?</string>
     <string name="susfs_uts_apply_confirm_message">UTS View sẽ tắt trong khi áp dụng uname của SUSFS. Cài đặt của nó vẫn được giữ. UTS View chỉ tiếp tục tắt sau khi SUSFS xác nhận uname đã có hiệu lực; nếu không, nó sẽ được khôi phục.</string>
     <string name="susfs_uts_apply_confirm_action">Áp dụng SUSFS</string>

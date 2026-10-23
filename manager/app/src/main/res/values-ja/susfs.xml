@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">モジュール名: ASCII 文字、数字、アンダースコア 1–63 文字です。モジュールの読み込みやアンロードは行いません。</string>
     <string name="susfs_prefix_hint">公開された LKM 制御を介してマウントプレフィックスを隠します。既存のルールをグローバルに消去しません。</string>
     <string name="susfs_deferred">UTS View の有効中は保留</string>
+    <string name="susfs_idle">適用する項目はありません</string>
+    <string name="susfs_idle_hint">管理対象のルールや設定は構成されていません。</string>
+    <string name="susfs_deferred_hint">UTS View がカーネル識別情報の偽装を担当しているため、SUSFS の uname 設定は適用されていません。</string>
+    <string name="susfs_saved_reboot">設定は保存済みですが、今回の起動では再適用されていません。「今すぐ適用」または起動時の適用を有効にしてください。</string>
+    <string name="susfs_apply_saved">保存して適用</string>
+    <string name="susfs_apply_saved_title">保存済みの設定を適用しますか？</string>
+    <string name="susfs_apply_saved_message">設定はすでに保存されています。今回の起動に今すぐ適用しますか？</string>
+    <string name="susfs_apply_saved_action">今すぐ適用</string>
     <string name="susfs_uts_apply_confirm_title">SUSFS の uname を適用しますか？</string>
     <string name="susfs_uts_apply_confirm_message">SUSFS の uname を適用する間、UTS View はオフになります。設定は保持されます。SUSFS が uname の反映を確認した場合に限り UTS View はオフのままになり、それ以外は復元されます。</string>
     <string name="susfs_uts_apply_confirm_action">SUSFS を適用</string>

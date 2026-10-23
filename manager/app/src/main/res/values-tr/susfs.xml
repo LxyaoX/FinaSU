@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">Bir modül adı: 1–63 ASCII harf, rakam veya alt çizgi. Modülleri yüklemez veya kaldırmaz.</string>
     <string name="susfs_prefix_hint">Sunulan LKM kontrolleri aracılığıyla bir bağlama öneki gizle. Mevcut kuralların genel temizliği yok.</string>
     <string name="susfs_deferred">UTS View etkinken ertelendi</string>
+    <string name="susfs_idle">Uygulanacak bir şey yok</string>
+    <string name="susfs_idle_hint">Yapılandırılmış yönetilen kural veya ayar yok.</string>
+    <string name="susfs_deferred_hint">UTS View çekirdek kimliği taklidini sağladığından SUSFS uname ayarı uygulanmadı.</string>
+    <string name="susfs_saved_reboot">Yapılandırma kaydedildi; bu önyüklemede yeniden uygulanmadı. Şimdi uygulayın veya "Önyüklemede uygula" seçeneğini açın.</string>
+    <string name="susfs_apply_saved">Kaydet ve uygula</string>
+    <string name="susfs_apply_saved_title">Kaydedilen yapılandırma uygulansın mı?</string>
+    <string name="susfs_apply_saved_message">Yapılandırma zaten kaydedildi. Şimdi bu önyüklemede uygulansın mı?</string>
+    <string name="susfs_apply_saved_action">Şimdi uygula</string>
     <string name="susfs_uts_apply_confirm_title">SUSFS uname uygulansın mı?</string>
     <string name="susfs_uts_apply_confirm_message">SUSFS uname uygulanırken UTS View kapatılır ancak ayarları korunur. UTS View yalnızca SUSFS uname\'in etkinleştiğini doğruladıktan sonra kapalı kalır; aksi halde geri yüklenir.</string>
     <string name="susfs_uts_apply_confirm_action">SUSFS\'i uygula</string>

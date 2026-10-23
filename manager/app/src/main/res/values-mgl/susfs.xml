@@ -102,6 +102,14 @@
     <string name="susfs_module_hint">魔法阵名称须为 1–63 个 ASCII 字母、数字或下划线。不会加载或卸载魔法阵。</string>
     <string name="susfs_prefix_hint">经由开放的 LKM 控制节点隐遁挂载前缀；不会全域清空已有法则。</string>
     <string name="susfs_deferred">UTS 幻化生效中，已暂时封印</string>
+    <string name="susfs_idle">无需施展</string>
+    <string name="susfs_idle_hint">当前没有受管法则或魔法设定。</string>
+    <string name="susfs_deferred_hint">UTS 幻化正执掌内核情报伪装，因此 SUSFS uname 尚未施展。</string>
+    <string name="susfs_saved_reboot">设定已保存；本次觉醒未重演。可即刻施展，或开启“觉醒时自动施展”。</string>
+    <string name="susfs_apply_saved">保存并即刻施展</string>
+    <string name="susfs_apply_saved_title">要施展已保存的设定吗？</string>
+    <string name="susfs_apply_saved_message">设定已经保存。现在就对本次觉醒施展吗？</string>
+    <string name="susfs_apply_saved_action">即刻施展</string>
     <string name="susfs_uts_apply_confirm_title">要施展 SUSFS uname 吗？</string>
     <string name="susfs_uts_apply_confirm_message">施展 SUSFS uname 期间，UTS 幻化会暂时熄灭，但会保留设定。唯 SUSFS 确认 uname 已实际生效后，UTS 幻化才会保持熄灭；否则会自动复原。</string>
     <string name="susfs_uts_apply_confirm_action">施展 SUSFS</string>
