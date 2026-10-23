@@ -9,6 +9,9 @@
 #include <linux/ptrace.h>
 #include <linux/static_key.h>
 #include <linux/slab.h>
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs_def.h>
+#endif
 
 #include "adb_root.h"
 #include "arch.h"
@@ -159,6 +162,11 @@ out_release_env_p:
 
 static long do_ksu_adb_root_handle_execve(const char __user *filename_user, struct pt_regs *regs, unsigned long *envp_p)
 {
+#ifdef CONFIG_KSU_SUSFS
+    if (unlikely(susfs_is_current_proc_no_su()))
+        return 0;
+#endif
+
     if (likely(is_exec_adbd(filename_user) != 1)) {
         return 0;
     }

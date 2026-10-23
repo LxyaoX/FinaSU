@@ -7,6 +7,9 @@
 #include <linux/uaccess.h>
 #include <linux/version.h>
 #include <linux/thread_info.h>
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs.h>
+#endif
 #include "uapi/supercall.h"
 #include "supercall/internal.h"
 #include "arch.h" // IWYU pragma: keep
@@ -176,6 +179,9 @@ static int do_report_event(void __user *arg)
             } else {
                 pr_info("boot_complete triggered\n");
                 on_boot_completed();
+#ifdef CONFIG_KSU_SUSFS
+                susfs_start_sdcard_monitor_fn();
+#endif
             }
         }
         break;
@@ -430,7 +436,9 @@ static int do_set_app_profile(void __user *arg)
     ret = ksu_set_app_profile(&cmd.profile);
     if (!ret) {
         ksu_persistent_allow_list();
+#ifndef CONFIG_KSU_SUSFS
         ksu_mark_running_process();
+#endif
     }
     return ret;
 }
@@ -545,7 +553,9 @@ static int do_get_wrapper_fd(void __user *arg)
 static int do_manage_mark(void __user *arg)
 {
     struct ksu_manage_mark_cmd cmd;
+#ifndef CONFIG_KSU_SUSFS
     int ret = 0;
+#endif
 
     if (copy_from_user(&cmd, arg, sizeof(cmd))) {
         pr_err("manage_mark: copy_from_user failed\n");
@@ -553,6 +563,15 @@ static int do_manage_mark(void __user *arg)
     }
 
     switch (cmd.operation) {
+#ifdef CONFIG_KSU_SUSFS
+    case KSU_MARK_GET:
+        cmd.result = susfs_is_current_proc_no_su() ? 0 : 1;
+        break;
+    case KSU_MARK_MARK:
+    case KSU_MARK_UNMARK:
+    case KSU_MARK_REFRESH:
+        break;
+#else
     case KSU_MARK_GET: {
         // Get task mark status
         ret = ksu_get_task_mark(cmd.pid);
@@ -592,6 +611,7 @@ static int do_manage_mark(void __user *arg)
         pr_info("manage_mark: refreshed running processes\n");
         break;
     }
+#endif
     default: {
         pr_err("manage_mark: invalid operation %u\n", cmd.operation);
         return -EINVAL;
