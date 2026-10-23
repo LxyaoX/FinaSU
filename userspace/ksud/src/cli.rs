@@ -1002,6 +1002,9 @@ pub fn run() -> Result<()> {
             Debug::Info => {
                 let info = ksucalls::get_info();
                 println!("version: {}", info.version);
+                if let Some(full_version) = ksucalls::get_full_version() {
+                    println!("full_version: {full_version}");
+                }
                 println!("flags: 0x{:x}", info.flags);
                 println!("uapi_version: {}", info.uapi_version);
                 println!("features: 0x{:x}", info.features);

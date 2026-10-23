@@ -177,6 +177,23 @@ pub fn get_version() -> i32 {
     get_info().version as i32
 }
 
+pub fn get_full_version() -> Option<String> {
+    let mut cmd = ksu_uapi::ksu_get_full_version_cmd {
+        version_full: [0; 64],
+    };
+    if ksuctl(ksu_uapi::KSU_IOCTL_GET_FULL_VERSION, &raw mut cmd).is_err() {
+        return None;
+    }
+    let bytes = cmd
+        .version_full
+        .iter()
+        .map(|c| c.to_ne_bytes()[0])
+        .collect::<Vec<_>>();
+    let end = bytes.iter().position(|c| *c == 0).unwrap_or(bytes.len());
+    let value = String::from_utf8_lossy(&bytes[..end]).into_owned();
+    (!value.is_empty()).then_some(value)
+}
+
 pub fn is_late_load() -> bool {
     get_info().flags & ksu_uapi::KSU_GET_INFO_FLAG_LATE_LOAD != 0
 }
