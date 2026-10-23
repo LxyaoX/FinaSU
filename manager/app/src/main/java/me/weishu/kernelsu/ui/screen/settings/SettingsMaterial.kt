@@ -43,9 +43,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SendLogBottomSheet
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
-import me.weishu.kernelsu.ui.component.settings.ProfileConfig
-import me.weishu.kernelsu.ui.component.settings.ProfileEditSheet
-import me.weishu.kernelsu.ui.component.settings.ProfileHeader
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
 import me.weishu.kernelsu.ui.component.settings.SettingsCategoryEntry
 import me.weishu.kernelsu.ui.component.settings.SettingsCategoryGrid
@@ -58,7 +55,6 @@ import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchShortcuts
 import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchTarget
 import me.weishu.kernelsu.ui.screen.settings.search.rememberSettingsSearchEntries
 import me.weishu.kernelsu.ui.screen.settings.search.settingsSearchGroups
-import me.weishu.kernelsu.ui.util.resolveDeviceName
 
 private const val BUG_FEEDBACK_URL = "https://github.com/LyraVoid/FinaSU/issues/new/choose"
 
@@ -75,7 +71,6 @@ fun SettingPagerMaterial(
     val snackBarHost = remember { SnackbarHostState() }
     val showUninstallDialog = rememberSaveable { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
-    var showProfileEditor by remember { mutableStateOf(false) }
     val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
@@ -102,10 +97,6 @@ fun SettingPagerMaterial(
         show = showUninstallDialog.value,
         onDismissRequest = { showUninstallDialog.value = false }
     )
-
-    if (showProfileEditor) {
-        ProfileEditSheet(onDismiss = { showProfileEditor = false })
-    }
 
     ExpressiveScaffold(
         topBar = {
@@ -160,21 +151,14 @@ fun SettingPagerMaterial(
                 .widthIn(max = SettingsContentMaxWidth)
                 .verticalScroll(rememberScrollState())
         ) {
-            ProfileHeader(
-                nickname = ProfileConfig.nickname.ifBlank { ProfileConfig.DEFAULT_NICKNAME },
-                signature = ProfileConfig.signature,
-                deviceName = remember { resolveDeviceName() },
-                avatarUri = ProfileConfig.avatarUri,
-                avatarOpacity = ProfileConfig.avatarOpacity,
-                onAvatarClick = { showProfileEditor = true },
-            )
-
             val entries = SettingsCategory.entries.map { category ->
                 SettingsCategoryEntry(category) { actions.onOpenCategory(category.key) }
             }
             SettingsCategoryGrid(
                 entries = entries,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 13.dp),
+                // The identity header used to hold this corner; the grid now owns the page's top
+                // inset itself instead of sitting on a 4dp sliver under the bar.
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 13.dp),
             )
 
             SegmentedColumn(

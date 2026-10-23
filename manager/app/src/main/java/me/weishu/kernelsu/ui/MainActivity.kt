@@ -134,7 +134,6 @@ import me.weishu.kernelsu.ui.screen.install.InstallScreen
 import me.weishu.kernelsu.ui.screen.module.ModulePager
 import me.weishu.kernelsu.ui.screen.modulerepo.ModuleRepoDetailScreen
 import me.weishu.kernelsu.ui.screen.modulerepo.ModuleRepoScreen
-import me.weishu.kernelsu.ui.component.settings.ProfileConfig
 import me.weishu.kernelsu.ui.screen.settings.CategorySettingsScreen
 import me.weishu.kernelsu.ui.screen.settings.LanguagePickerScreen
 import me.weishu.kernelsu.ui.screen.settings.SettingPager
@@ -179,6 +178,16 @@ open class MainActivity : FragmentActivity() {
         super.attachBaseContext(me.weishu.kernelsu.wallpaper.ThemeLanguage.wrap(newBase))
     }
 
+    /**
+     * Drops what the removed settings identity header kept: its prefs file, the avatar copied into
+     * app storage and the cache directory remote avatars were downloaded into. Idempotent and
+     * cheap, so it runs at every start instead of needing a migration flag.
+     */
+    private fun purgeLegacyProfile() {
+        getSharedPreferences("profile", MODE_PRIVATE).edit().clear().apply()
+        getFileStreamPath("profile_avatar").delete()
+        cacheDir.resolve("profile_avatar_download").deleteRecursively()
+    }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -206,7 +215,7 @@ open class MainActivity : FragmentActivity() {
 
         WallpaperConfig.load(this)
         FontConfig.load(this)
-        ProfileConfig.load(this)
+        purgeLegacyProfile()
         // Activity recreation must not overwrite a slider edit still waiting for its debounce.
         me.weishu.kernelsu.modulebanner.ModuleBannerConfig.loadOnce()
         me.weishu.kernelsu.modulebanner.ModuleCardConfig.load()

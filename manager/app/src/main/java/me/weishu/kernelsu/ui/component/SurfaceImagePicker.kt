@@ -12,8 +12,8 @@ import me.weishu.kernelsu.wallpaper.surface.surfaceAspect
  *
  * Set [request] to the surface being edited to start it: the photo picker opens, then a small
  * dialog lets the user crop the picture to the card's exact bounds or use it as is. It is a thin
- * wrapper over [ImageCropPickerHost], so surfaces get the same in-app crop the avatar and the
- * wallpaper use. [onPicked] receives the final image; the caller must keep [request] set until then.
+ * wrapper over [ImageCropPickerHost], so surfaces get the same in-app crop the wallpaper uses.
+ * [onPicked] receives the final image; the caller must keep [request] set until then.
  */
 @Composable
 fun SurfaceImagePickerHost(
