@@ -293,10 +293,17 @@ call_orig:
 #endif
 }
 
+#ifdef CONFIG_KSU_SUSFS
+DEFINE_STATIC_KEY_FALSE(fake_status_initialize_key);
+struct page *fake_status = NULL;
+
+void initialize_fake_status(void)
+#else
 static DEFINE_STATIC_KEY_FALSE(fake_status_initialize_key);
 static struct page *fake_status = NULL;
 
-static void initialize_fake_status()
+static void initialize_fake_status(void)
+#endif
 {
     mutex_lock(&selinux_state.status_lock);
     if (fake_status)
@@ -367,7 +374,7 @@ static int my_sel_open_handle_status(struct inode *inode, struct file *filp)
     return ret;
 }
 
-static void hook_selinux_status_open();
+static void __maybe_unused hook_selinux_status_open();
 static void ksu_selinux_hide_unhook();
 static int ksu_selinux_hide_enable()
 {
@@ -525,7 +532,7 @@ void ksu_selinux_hide_handle_post_fs_data()
     }
 }
 
-static void hook_selinux_status_open()
+static void __maybe_unused hook_selinux_status_open()
 {
     if (orig_sel_open_handle_status)
         return;
@@ -557,7 +564,9 @@ void __init ksu_selinux_hide_init()
     } else {
         static_key_enable(&fake_status_initialize_key.key);
     }
+#ifndef CONFIG_KSU_SUSFS
     hook_selinux_status_open();
+#endif
 }
 
 void __exit ksu_selinux_hide_exit()

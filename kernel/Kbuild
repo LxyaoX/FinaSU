@@ -60,6 +60,8 @@ kernelsu-objs += feature/selinux_hide.o
 kernelsu-objs += feature/shell_su_adb_only.o
 kernelsu-objs += feature/avc_spoof.o
 
+kernelsu-$(CONFIG_KSU_SUSFS) += extension/susfs.o
+
 ifdef KBUILD_EXTMOD
 ifeq ($(CONFIG_KSU_DISABLE_MANAGER),y)
 ccflags-y += -DCONFIG_KSU_DISABLE_MANAGER=1

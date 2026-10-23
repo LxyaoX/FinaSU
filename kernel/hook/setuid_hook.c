@@ -85,19 +85,25 @@ static void ksu_handle_susfs_setresuid(uid_t old_uid, uid_t new_uid, bool zygote
 }
 #endif
 
-int ksu_handle_setresuid(uid_t old_uid, uid_t new_uid)
+int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 {
+    (void)suid;
 #ifdef CONFIG_KSU_SUSFS
+    uid_t old_uid = current_uid().val;
+
     if (susfs_is_current_zygote_domain())
-        ksu_handle_susfs_setresuid(old_uid, new_uid, false);
+        ksu_handle_susfs_setresuid(old_uid, ruid, false);
     else if (susfs_is_current_zygote_next_domain())
-        ksu_handle_susfs_setresuid(old_uid, new_uid, true);
+        ksu_handle_susfs_setresuid(old_uid, ruid, true);
     else
         return 0;
 
-    ksu_uts_view_on_setresuid(old_uid, new_uid);
+    ksu_uts_view_on_setresuid(old_uid, ruid);
     return 0;
 #else
+    uid_t old_uid = ruid;
+    uid_t new_uid = euid;
+
     // we rely on the fact that zygote always call setresuid(3) with same uids
 
     pr_info("handle_setresuid from %d to %d\n", old_uid, new_uid);

@@ -94,7 +94,7 @@ LKM is reported separately through `KSU_GET_INFO_FLAG_LKM`.
 ## SUSFS
 
 SUSFS support in the kernel requires `CONFIG_KSU_SUSFS`, which this tree exposes under
-`KernelSU - SUSFS` in `Kconfig`. The integration in `kernel/` covers:
+`KernelSU - SUSFS` in `Kconfig`. The in-tree integration covers:
 
 - `susfs_init()` is called from the driver init.
 - `kernel/selinux/selinux.c` provides the SID helpers SUSFS expects
@@ -104,27 +104,34 @@ SUSFS support in the kernel requires `CONFIG_KSU_SUSFS`, which this tree exposes
 - `my_write_context` / `my_write_access` / `ksu_selinux_hide_running` are exported from
   the SELinux hide hooks, so a kernel-side SUSFS patch can call them instead of
   carrying its own copy.
+- `kernel/extension/susfs.c` provides the process-state and command-dispatch entry
+  points used by the kernel-side patch. Existing kprobe paths remain responsible for
+  sucompat, preinit, init.rc and input handling.
 
 What is **not** in this repository is the SUSFS kernel implementation itself
 (`fs/susfs.c`, `include/linux/susfs.h`, the per-KMI `fs/*` hooks). Apply it from the
-SUSFS source that matches your kernel version, then drop the hunks that this tree
-already covers instead of applying them twice:
+SUSFS source that matches your kernel version. For `android15-6.6`, the minimal
+kernel-side patch applies cleanly to a pristine reference tree at upstream commit
+`4a4cb1be85a4694372d3efb9420de69982eac29a`. Do not apply the driver-side patch as a
+whole; this tree already implements many of its hunks and its hook model differs.
 
 | Upstream patch hunk | Action |
 | --- | --- |
 | `kernel/Kconfig` SUSFS menu | Skip; the options are already here |
-| `kernel/Kbuild` / `kernel/Makefile` defines | Skip; handled by `CONFIG_KSU_SUSFS` |
+| `kernel/Kbuild` / `kernel/Makefile` defines | Skip; handled by `CONFIG_KSU_SUSFS` and `kernel/extension/susfs.c` |
 | `kernel/selinux/rules.c` sid refresh and zygote rule | Skip; already applied |
 | `kernel/selinux/selinux.c` / `.h` SID helpers | Skip; already applied |
 | `kernel/feature/selinux_hide.c` symbol visibility | Skip; already exported |
-| Hook-site rewrites (sucompat, setuid, adb_root, preinit, sulog, supercall) | Adapt by hand; they target file names and call sites that differ here |
+| Hook-site rewrites (sucompat, setuid, adb_root, preinit, sulog, supercall) | Do not patch the driver; use the compatible entry points provided here |
 
-The hook-site rewrites are what turns the driver's user-space compatibility paths into
-SUSFS inline hooks. This tree keeps its kprobe/tracepoint hooks, so the two models have
-to be reconciled by hand; expect that part to need device testing. Without it the
-kernel-side spoofing still works, but SUSFS does not take over the sucompat paths.
+The kernel-side patch adds direct calls for the paths it needs. This tree keeps its
+kprobe/tracepoint hooks for the existing integration and supplies compatible entry
+points for the remaining direct calls.
 
 Then build with `CONFIG_KSU_SUSFS=y` and the sub-options you need.
+
+An `android15-6.6` reference image with all SUSFS sub-options enabled has been built
+successfully for this tree. It has not yet been booted or exercised on a device.
 
 Current SUSFS patches reference KernelSU symbols such as `my_write_context` directly
 and do not export them for modules, so a SUSFS kernel has to carry FinaSU built in
