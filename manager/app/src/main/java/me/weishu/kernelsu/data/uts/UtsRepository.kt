@@ -164,8 +164,18 @@ data class UtsViewStatus(
                 } else {
                     json.optString("kernel_error").ifEmpty { null }
                 }
-            val providerError = json.optString("provider_error").ifEmpty { null }
-            val runtimeError = json.optString("runtime_error").ifEmpty { null }
+            val providerError =
+                if (json.isNull("provider_error")) {
+                    null
+                } else {
+                    json.optString("provider_error").ifEmpty { null }
+                }
+            val runtimeError =
+                if (json.isNull("runtime_error")) {
+                    null
+                } else {
+                    json.optString("runtime_error").ifEmpty { null }
+                }
             val phase = if (json.has("state")) {
                 UtsViewPhase.fromWire(json.getString("state"))
             } else {

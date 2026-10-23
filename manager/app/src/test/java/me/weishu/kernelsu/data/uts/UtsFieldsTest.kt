@@ -1,6 +1,7 @@
 package me.weishu.kernelsu.data.uts
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -180,5 +181,26 @@ class UtsFieldsTest {
         assertEquals(UtsViewPhase.Error, status.phase)
         assertEquals("SUSFS state is unreadable", status.providerError)
         assertEquals("UTS restore failed", status.runtimeError)
+    }
+
+    @Test
+    fun `null provider and runtime errors remain absent`() {
+        val status = UtsViewStatus.parse(
+            """{
+                "supported":true,
+                "enabled":true,
+                "active":true,
+                "field_mask":4,
+                "fields":{},
+                "provider":{"uname_applied":false,"uname_scheduled":false,"uname_uncertain":false},
+                "provider_error":null,
+                "runtime_error":null,
+                "config_error":null,
+                "kernel_error":null
+            }""",
+        )
+
+        assertNull(status.providerError)
+        assertNull(status.runtimeError)
     }
 }
