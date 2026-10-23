@@ -332,6 +332,7 @@ fn protected_replacements_merge_files_and_never_inject_the_marker() {
                 plan.rules[0].virtual_path,
                 format!("/{target}/libsample.so")
             );
+            assert!(!plan.rules[0].opaque);
             assert!(plan.directory_replacements.is_empty());
             assert!(
                 plan.skipped
@@ -401,6 +402,7 @@ fn empty_stock_directory_allows_allowlisted_replacement() {
             format!("{MODULE}/product/fonts")
         )]
     );
+    assert!(!plan.rules[0].opaque);
     assert!(plan.directory_replacements.contains("/product/fonts"));
 }
 
@@ -423,6 +425,50 @@ fn unlisted_empty_target_still_merges() {
         plan.skipped
             .iter()
             .any(|(_, reason)| reason == "dir-replace-blocked:/system/etc/foo")
+    );
+}
+
+#[test]
+fn remove_marker_whiteouts_its_directory_without_injecting_the_marker() {
+    let fs = base()
+        .dir(&format!("{MODULE}/system"), &["priv-app"])
+        .dir(&format!("{MODULE}/system/priv-app"), &["Old"])
+        .dir(&format!("{MODULE}/system/priv-app/Old"), &[REMOVE_MARKER])
+        .entry(
+            &format!("{MODULE}/system/priv-app/Old/{REMOVE_MARKER}"),
+            EntryKind::File,
+        );
+    let plan = collect_rules(
+        &fs,
+        &config(Path::new(MODULES), Path::new("/"), Path::new("/system")),
+    )
+    .unwrap();
+    assert_eq!(plan.rules, vec![Rule::whiteout("/system/priv-app/Old")]);
+    assert!(!plan.rules[0].opaque);
+}
+
+#[test]
+fn remove_marker_never_takes_over_a_protected_root() {
+    let fs = base()
+        .dir(&format!("{MODULE}/vendor"), &[REMOVE_MARKER, "libfoo.so"])
+        .entry(&format!("{MODULE}/vendor/{REMOVE_MARKER}"), EntryKind::File)
+        .entry(&format!("{MODULE}/vendor/libfoo.so"), EntryKind::File);
+    let plan = collect_rules(
+        &fs,
+        &config(Path::new(MODULES), Path::new("/"), Path::new("/system")),
+    )
+    .unwrap();
+    assert_eq!(
+        plan.rules,
+        vec![Rule::redirect(
+            "/vendor/libfoo.so",
+            format!("{MODULE}/vendor/libfoo.so")
+        )]
+    );
+    assert!(
+        plan.skipped
+            .iter()
+            .any(|(_, reason)| reason == "dir-remove-blocked:/vendor")
     );
 }
 
