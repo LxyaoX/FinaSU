@@ -367,8 +367,7 @@ private fun NavContainerTransformEntry(
     val navigator = LocalNavigator.current
     val key = entry.contentKey
     val currentKey = navigator.current()
-    val isCurrent = currentKey != null &&
-        key == (currentKey.toString() to currentKey::class.toString())
+    val isCurrent = currentKey != null && key == navContentKey(currentKey)
     val direction = navigator.lastDirection
     val animateIn = direction == NavDirection.Push && isCurrent
 
@@ -455,7 +454,9 @@ private fun NavContainerTransformEntry(
     DisposableEffect(key) {
         onDispose {
             state.clearPredictive(key)
-            state.removeOrigin(key)
+            if (shouldDiscardNavOrigin(key, navigator.backStack)) {
+                state.removeOrigin(key)
+            }
         }
     }
 
@@ -474,6 +475,11 @@ private fun NavContainerTransformEntry(
         entry.Content()
     }
 }
+
+internal fun shouldDiscardNavOrigin(key: Any?, backStack: Collection<NavKey>): Boolean =
+    key != null && backStack.none { navContentKey(it) == key }
+
+internal fun navContentKey(key: NavKey): Any = key.toString() to key::class.toString()
 
 @Composable
 private fun ContainerTransformLayout(

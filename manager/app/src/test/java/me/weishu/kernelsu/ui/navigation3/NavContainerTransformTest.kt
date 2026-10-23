@@ -45,6 +45,14 @@ class NavContainerTransformTest {
     }
 
     @Test
+    fun `origin survives while its entry remains on the back stack`() {
+        val key = Route.SettingsCategory("appearance")
+
+        assertFalse(shouldDiscardNavOrigin(navContentKey(key), listOf(Route.Main, key)))
+        assertTrue(shouldDiscardNavOrigin(navContentKey(key), listOf(Route.Main)))
+    }
+
+    @Test
     fun `fast commit keeps a tiny start and never passes through full screen`() {
         val state = NavOriginState()
         val key = "screen"
