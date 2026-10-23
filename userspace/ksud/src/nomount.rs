@@ -32,9 +32,9 @@ pub const BUFFER_SIZE: usize = PAGE_SIZE - PAYLOAD_HEADER_SIZE;
 
 const PAYLOAD_HEADER_SIZE: usize = 28;
 
-/// Oldest kernel API this backend accepts. The vendored module (v2.1.1)
-/// reports `21`; anything lower predates the payload this code encodes.
-pub const MIN_API_VERSION: u32 = 21;
+/// Oldest kernel API this backend accepts. The vendored module (v2.2.0)
+/// reports `22`; v21 uses an incompatible rule header.
+pub const MIN_API_VERSION: u32 = 22;
 
 /// Base name of the module inside the embedded assets.
 pub const ASSET_SUFFIX: &str = "_nomount.ko";
@@ -44,6 +44,15 @@ pub const WHITEOUT_FLAG: u32 = 1 << 2;
 
 /// Intermediate directory the kernel created to host a deeper rule.
 pub const VIRTUAL_DIR_FLAG: u32 = 1 << 1;
+
+/// Resolve a directory as a native replacement instead of merging it.
+pub const OPAQUE_FLAG: u32 = 1 << 3;
+
+/// Wire header preceding a rule in add and list replies.
+const RULE_HEADER_SIZE: usize = 24;
+
+/// Wire header preceding a path in a delete request.
+const DELETE_HEADER_SIZE: usize = 18;
 
 /// Driver state as reported by [`probe`], never inferred from a load attempt.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -139,7 +148,12 @@ pub struct Rule {
     pub whiteout: bool,
     /// True for directories the kernel created to host deeper rules.
     pub virtual_dir: bool,
+    /// A native replacement hides entries that are not in the module tree.
+    pub opaque: bool,
     pub uid: u32,
+    pub uid_end: u32,
+    pub deny_start: u32,
+    pub deny_end: u32,
 }
 
 impl Rule {
@@ -150,7 +164,11 @@ impl Rule {
             real_path: None,
             whiteout: true,
             virtual_dir: false,
+            opaque: false,
             uid: 0,
+            uid_end: 0,
+            deny_start: 0,
+            deny_end: 0,
         }
     }
 
@@ -161,7 +179,11 @@ impl Rule {
             real_path: Some(real_path.into()),
             whiteout: false,
             virtual_dir: false,
+            opaque: false,
             uid: 0,
+            uid_end: 0,
+            deny_start: 0,
+            deny_end: 0,
         }
     }
 }
@@ -415,7 +437,7 @@ impl<T: Transport> Driver<T> {
         let mut cursor = 0_usize;
         for path in virtual_paths {
             let len = u16::try_from(path.len()).context("nomount: path too long")?;
-            let record = 6 + path.len();
+            let record = DELETE_HEADER_SIZE + path.len();
             ensure!(
                 record <= BUFFER_SIZE,
                 "nomount: {path} does not fit in one payload"
@@ -425,9 +447,9 @@ impl<T: Transport> Driver<T> {
                 cursor = 0;
             }
             let buffer = &mut page.as_mut().buffer;
-            buffer[cursor..cursor + 4].copy_from_slice(&0_u32.to_le_bytes());
-            buffer[cursor + 4..cursor + 6].copy_from_slice(&len.to_le_bytes());
-            buffer[cursor + 6..cursor + 6 + path.len()].copy_from_slice(path.as_bytes());
+            buffer[cursor..cursor + 16].fill(0);
+            buffer[cursor + 16..cursor + 18].copy_from_slice(&len.to_le_bytes());
+            buffer[cursor + 18..cursor + 18 + path.len()].copy_from_slice(path.as_bytes());
             cursor += record;
         }
         self.flush(Command::DelRule, &mut page, cursor)
@@ -581,7 +603,7 @@ impl<T: Transport> Driver<T> {
     }
 }
 
-/// Parse the leading integer of a version string (`"21"`, `"21 (1234)"`).
+/// Parse the leading integer of a version string (`"22"`, `"22 (605)"`).
 #[must_use]
 pub fn parse_api_version(version: &str) -> Option<u32> {
     let digits: String = version
@@ -614,9 +636,32 @@ pub fn encode_batches(rules: &[Rule]) -> Result<Vec<Vec<u8>>> {
                 rule.virtual_path
             );
         }
+        ensure!(
+            !(rule.whiteout && rule.opaque),
+            "nomount: a rule cannot be both whiteout and opaque"
+        );
+        let uid_end = if rule.uid_end == 0 {
+            rule.uid
+        } else {
+            rule.uid_end
+        };
+        ensure!(
+            rule.uid <= uid_end,
+            "nomount: UID range starts after it ends"
+        );
+        if rule.deny_start != 0 || rule.deny_end != 0 {
+            ensure!(
+                rule.deny_start != 0 && rule.deny_end != 0 && rule.deny_start <= rule.deny_end,
+                "nomount: invalid excluded UID range"
+            );
+            ensure!(
+                rule.deny_start >= rule.uid && rule.deny_end <= uid_end,
+                "nomount: excluded UID range is outside the rule scope"
+            );
+        }
         let v_len = u16::try_from(rule.virtual_path.len()).context("nomount: path too long")?;
         let r_len = u16::try_from(real.len()).context("nomount: target too long")?;
-        let record = 12 + rule.virtual_path.len() + real.len();
+        let record = RULE_HEADER_SIZE + rule.virtual_path.len() + real.len();
         ensure!(
             record <= BUFFER_SIZE,
             "nomount: rule for {} does not fit in one payload",
@@ -625,9 +670,13 @@ pub fn encode_batches(rules: &[Rule]) -> Result<Vec<Vec<u8>>> {
         if current.len() + record > BUFFER_SIZE {
             batches.push(std::mem::take(&mut current));
         }
-        let flags = if rule.whiteout { WHITEOUT_FLAG } else { 0 };
+        let flags = (if rule.whiteout { WHITEOUT_FLAG } else { 0 })
+            | (if rule.opaque { OPAQUE_FLAG } else { 0 });
         current.extend_from_slice(&flags.to_le_bytes());
         current.extend_from_slice(&rule.uid.to_le_bytes());
+        current.extend_from_slice(&uid_end.to_le_bytes());
+        current.extend_from_slice(&rule.deny_start.to_le_bytes());
+        current.extend_from_slice(&rule.deny_end.to_le_bytes());
         current.extend_from_slice(&v_len.to_le_bytes());
         current.extend_from_slice(&r_len.to_le_bytes());
         current.extend_from_slice(rule.virtual_path.as_bytes());
@@ -646,21 +695,25 @@ pub fn encode_batches(rules: &[Rule]) -> Result<Vec<Vec<u8>>> {
 pub fn parse_list_records(data: &[u8]) -> Result<Vec<Rule>> {
     let mut rules = Vec::new();
     let mut cursor = 0_usize;
-    while cursor + 12 <= data.len() {
-        let header = &data[cursor..cursor + 12];
+    while cursor + RULE_HEADER_SIZE <= data.len() {
+        let header = &data[cursor..cursor + RULE_HEADER_SIZE];
         let flags = u32::from_le_bytes([header[0], header[1], header[2], header[3]]);
         let uid = u32::from_le_bytes([header[4], header[5], header[6], header[7]]);
-        let v_len = usize::from(u16::from_le_bytes([header[8], header[9]]));
-        let r_len = usize::from(u16::from_le_bytes([header[10], header[11]]));
-        let end = cursor + 12 + v_len + r_len;
+        let uid_end = u32::from_le_bytes([header[8], header[9], header[10], header[11]]);
+        let deny_start = u32::from_le_bytes([header[12], header[13], header[14], header[15]]);
+        let deny_end = u32::from_le_bytes([header[16], header[17], header[18], header[19]]);
+        let v_len = usize::from(u16::from_le_bytes([header[20], header[21]]));
+        let r_len = usize::from(u16::from_le_bytes([header[22], header[23]]));
+        let end = cursor + RULE_HEADER_SIZE + v_len + r_len;
         ensure!(end <= data.len(), "nomount: truncated rule record");
-        let virtual_path = String::from_utf8(data[cursor + 12..cursor + 12 + v_len].to_vec())
+        let path_start = cursor + RULE_HEADER_SIZE;
+        let virtual_path = String::from_utf8(data[path_start..path_start + v_len].to_vec())
             .context("nomount: rule path is not UTF-8")?;
         let real_path = if r_len == 0 {
             None
         } else {
             Some(
-                String::from_utf8(data[cursor + 12 + v_len..end].to_vec())
+                String::from_utf8(data[path_start + v_len..end].to_vec())
                     .context("nomount: rule target is not UTF-8")?,
             )
         };
@@ -669,7 +722,11 @@ pub fn parse_list_records(data: &[u8]) -> Result<Vec<Rule>> {
             real_path,
             whiteout: flags & WHITEOUT_FLAG != 0,
             virtual_dir: flags & VIRTUAL_DIR_FLAG != 0,
+            opaque: flags & OPAQUE_FLAG != 0,
             uid,
+            uid_end,
+            deny_start,
+            deny_end,
         });
         cursor = end;
     }
@@ -806,6 +863,8 @@ pub fn hot_load(id: &str) -> Result<usize> {
 /// refuses a deletion.
 #[cfg(target_os = "android")]
 pub fn hot_unload(id: &str) -> Result<usize> {
+    let driver = Driver::kernel();
+    ensure_usable(&driver.probe())?;
     let cfg = crate::nomount_plan::PlanConfig::new(
         std::path::Path::new(crate::defs::MODULE_DIR),
         std::path::Path::new("/"),
@@ -821,7 +880,7 @@ pub fn hot_unload(id: &str) -> Result<usize> {
         .map(|rule| rule.virtual_path.clone())
         .collect();
     let count = paths.len();
-    Driver::kernel().delete_rules(&paths)?;
+    driver.delete_rules(&paths)?;
     log_action(&format!("hot-unload {id}"));
     Ok(count)
 }
@@ -1502,7 +1561,9 @@ fn log_action(action: &str) {
 /// # Errors
 /// Returns an error when the kernel refuses the command or writing fails.
 pub fn print_rules(json: bool) -> Result<()> {
-    let rules = Driver::kernel().list_rules()?;
+    let driver = Driver::kernel();
+    ensure_usable(&driver.probe())?;
+    let rules = driver.list_rules()?;
     let stdout = std::io::stdout();
     let mut out = stdout.lock();
     if json {
@@ -1515,7 +1576,11 @@ pub fn print_rules(json: bool) -> Result<()> {
                     "real": rule.real_path,
                     "whiteout": rule.whiteout,
                     "virtual_dir": rule.virtual_dir,
+                    "opaque": rule.opaque,
                     "uid": rule.uid,
+                    "uid_end": rule.uid_end,
+                    "deny_start": rule.deny_start,
+                    "deny_end": rule.deny_end,
                 }))
                 .collect::<Vec<_>>(),
         });
@@ -1524,17 +1589,34 @@ pub fn print_rules(json: bool) -> Result<()> {
         for rule in &rules {
             if rule.whiteout {
                 writeln!(out, "{} (whiteout)", rule.virtual_path)
+                    .context("failed to write rules")?;
             } else if rule.virtual_dir {
                 writeln!(out, "{} (virtual dir)", rule.virtual_path)
+                    .context("failed to write rules")?;
             } else {
-                writeln!(
+                write!(
                     out,
-                    "{} -> {}",
+                    "{} -> {}{}",
                     rule.virtual_path,
-                    rule.real_path.as_deref().unwrap_or("-")
+                    rule.real_path.as_deref().unwrap_or("-"),
+                    if rule.opaque { " (opaque)" } else { "" }
                 )
+                .context("failed to write rules")?;
+                if rule.uid != 0 || rule.uid_end != 0 {
+                    if rule.uid == rule.uid_end {
+                        write!(out, " [UID: {}]", rule.uid)
+                    } else {
+                        write!(out, " [UID: {}-{}", rule.uid, rule.uid_end)
+                    }
+                    .context("failed to write rules")?;
+                    if rule.deny_start != 0 {
+                        write!(out, " excl {}-{}", rule.deny_start, rule.deny_end)
+                            .context("failed to write rules")?;
+                    }
+                    write!(out, "]").context("failed to write rules")?;
+                }
+                writeln!(out).context("failed to write rules")?;
             }
-            .context("failed to write rules")?;
         }
     }
     out.flush().context("failed to flush rules")

@@ -31,4 +31,9 @@ class SusfsStatusTest {
         assertEquals("saved", status.management)
         assertFalse(status.automatic)
     }
+    @Test fun `CLI status preserves idle and deferred management states`() {
+        val base = """{"detection":{"status":"compatible","version":"v2.3.0","variant":"GKI","implementation":"builtin","features":[],"proc_nodes":[]},"automatic":false,"config_error":null,"management":"%s"}"""
+        assertEquals("idle", SusfsStatus.parse(base.format("idle")).management)
+        assertEquals("deferred", SusfsStatus.parse(base.format("deferred")).management)
+    }
 }

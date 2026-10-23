@@ -219,7 +219,7 @@ fun UtsViewScreen() {
     }
 
     if (showTargets) {
-        UtsTargetAppSheet(
+        TargetAppSheet(
             apps = state.apps,
             selectedTargets = status.targets,
             loading = state.appsLoading || !state.appsLoaded,
@@ -227,6 +227,11 @@ fun UtsViewScreen() {
             onConfirm = { targets ->
                 showTargets = false
                 viewModel.setTargets(targets)
+            },
+            maxTargets = 128,
+            title = stringResource(R.string.uts_view_targets_title),
+            countText = { selected, maximum ->
+                stringResource(R.string.uts_view_targets_count, selected, maximum)
             },
         )
     }

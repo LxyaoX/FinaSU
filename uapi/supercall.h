@@ -5,6 +5,7 @@
 #include <linux/types.h>
 
 #include "uapi/app_profile.h"
+#include "uapi/netisolate.h"
 #include "uapi/uts_view.h"
 
 // 2: allowlist v4 root profile flags
@@ -45,6 +46,10 @@ struct ksu_get_info_legacy_cmd {
     __u32 version; /* Output: KERNEL_SU_VERSION */
     __u32 flags; /* Output: KSU_GET_INFO_FLAG_* bits */
     __u32 features; /* Output: max feature ID supported */
+};
+
+struct ksu_get_full_version_cmd {
+    char version_full[64]; /* Output: KSU_VERSION_FULL */
 };
 
 struct ksu_report_event_cmd {
@@ -246,5 +251,16 @@ static const __u32 KSU_IOCTL_GET_DYNAMIC_MANAGERS = _IOWR('K', 23, struct ksu_ge
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS = _IOC(_IOC_WRITE, 'K', 24, 0);
 static const __u32 KSU_IOCTL_GET_UTS_VIEW_CONFIG = _IOWR('K', 25, struct ksu_uts_view_config);
 static const __u32 KSU_IOCTL_SET_UTS_VIEW_CONFIG = _IOW('K', 26, struct ksu_uts_view_config);
+static const __u32 KSU_IOCTL_GET_NETISOLATE_CONFIG = _IOWR('K', 27, struct ksu_netisolate_config);
+static const __u32 KSU_IOCTL_SET_NETISOLATE_CONFIG = _IOW('K', 28, struct ksu_netisolate_config);
+static const __u32 KSU_IOCTL_GET_NETISOLATE_POLICIES =
+    _IOWR('K', 29, struct ksu_netisolate_policies);
+static const __u32 KSU_IOCTL_SET_NETISOLATE_POLICIES =
+    _IOW('K', 30, struct ksu_netisolate_policies);
+static const __u32 KSU_IOCTL_GET_NETISOLATE_EVENTS =
+    _IOWR('K', 31, struct ksu_netisolate_events);
+static const __u32 KSU_IOCTL_CLEAR_NETISOLATE_EVENTS =
+    _IOW('K', 32, struct ksu_netisolate_events);
+static const __u32 KSU_IOCTL_GET_FULL_VERSION = _IOR('K', 29, struct ksu_get_full_version_cmd);
 
 #endif

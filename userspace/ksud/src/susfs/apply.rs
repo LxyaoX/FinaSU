@@ -331,7 +331,7 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
     } else if !report.pending_reboot.is_empty() {
         "pending_reboot"
     } else {
-        store::summarize(&state, &desired)
+        store::summarize(&state, &desired, false)
     };
     store::write_state(&state)?;
     Ok(report)

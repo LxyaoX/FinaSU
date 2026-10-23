@@ -45,6 +45,11 @@ enum Commands {
         #[command(subcommand)]
         command: crate::uts_view::Command,
     },
+    /// Manage kernel UID network isolation
+    Netisolate {
+        #[command(subcommand)]
+        command: crate::netisolate::Command,
+    },
     /// Manage KernelSU modules
     Module {
         #[command(subcommand)]
@@ -769,6 +774,7 @@ pub fn run() -> Result<()> {
         Commands::Anykernel3 { zip } => crate::anykernel3::flash(&zip),
         Commands::Susfs { command } => crate::susfs::run(command),
         Commands::UtsView { command } => crate::uts_view::run(&command),
+        Commands::Netisolate { command } => crate::netisolate::run(&command),
         Commands::Zygisk { command } => crate::zygisk::run(&command),
         Commands::Sui { command } => crate::sui::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
@@ -996,6 +1002,9 @@ pub fn run() -> Result<()> {
             Debug::Info => {
                 let info = ksucalls::get_info();
                 println!("version: {}", info.version);
+                if let Some(full_version) = ksucalls::get_full_version() {
+                    println!("full_version: {full_version}");
+                }
                 println!("flags: 0x{:x}", info.flags);
                 println!("uapi_version: {}", info.uapi_version);
                 println!("features: 0x{:x}", info.features);

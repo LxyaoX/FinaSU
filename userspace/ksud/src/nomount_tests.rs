@@ -23,6 +23,7 @@ struct FakeState {
     uids: Vec<u32>,
     isolated: bool,
     commands: Vec<Command>,
+    last_delete: Vec<u8>,
 }
 
 struct FakeKernel {
@@ -35,12 +36,13 @@ impl FakeKernel {
     fn new(mode: Mode) -> Self {
         Self {
             mode,
-            version: "21",
+            version: "22",
             state: RefCell::new(FakeState {
                 rules: Vec::new(),
                 uids: Vec::new(),
                 isolated: false,
                 commands: Vec::new(),
+                last_delete: Vec::new(),
             }),
         }
     }
@@ -84,6 +86,8 @@ fn kernel_record(rule: &Rule) -> Vec<u8> {
         WHITEOUT_FLAG
     } else if rule.virtual_dir {
         VIRTUAL_DIR_FLAG
+    } else if rule.opaque {
+        OPAQUE_FLAG
     } else {
         0
     };
@@ -91,6 +95,9 @@ fn kernel_record(rule: &Rule) -> Vec<u8> {
     let mut out = Vec::new();
     out.extend_from_slice(&flags.to_le_bytes());
     out.extend_from_slice(&rule.uid.to_le_bytes());
+    out.extend_from_slice(&rule.uid_end.to_le_bytes());
+    out.extend_from_slice(&rule.deny_start.to_le_bytes());
+    out.extend_from_slice(&rule.deny_end.to_le_bytes());
     out.extend_from_slice(
         &u16::try_from(rule.virtual_path.len())
             .expect("path fits")
@@ -162,25 +169,30 @@ impl FakeKernel {
                 // replaces the previous one instead of stacking.
                 for rule in decoded {
                     state.rules.retain(|existing| {
-                        existing.virtual_path != rule.virtual_path || existing.uid != rule.uid
+                        existing.virtual_path != rule.virtual_path
+                            || existing.uid != rule.uid
+                            || existing.uid_end != rule.uid_end
+                            || existing.deny_start != rule.deny_start
+                            || existing.deny_end != rule.deny_end
                     });
                     state.rules.push(rule);
                 }
             }
             Command::DelRule => {
                 let len = usize::try_from(payload.data_size)?;
+                self.state.borrow_mut().last_delete = payload.buffer[..len].to_vec();
                 let mut cursor = 0_usize;
                 let mut doomed = Vec::new();
-                while cursor + 6 <= len {
+                while cursor + DELETE_HEADER_SIZE <= len {
                     let v_len = usize::from(u16::from_le_bytes([
-                        payload.buffer[cursor + 4],
-                        payload.buffer[cursor + 5],
+                        payload.buffer[cursor + 16],
+                        payload.buffer[cursor + 17],
                     ]));
                     doomed.push(
-                        String::from_utf8_lossy(&payload.buffer[cursor + 6..cursor + 6 + v_len])
+                        String::from_utf8_lossy(&payload.buffer[cursor + 18..cursor + 18 + v_len])
                             .to_string(),
                     );
-                    cursor += 6 + v_len;
+                    cursor += DELETE_HEADER_SIZE + v_len;
                 }
                 self.state
                     .borrow_mut()
@@ -248,6 +260,8 @@ fn payload_is_exactly_one_page() {
 fn api_version_parses_the_leading_integer() {
     assert_eq!(parse_api_version("21"), Some(21));
     assert_eq!(parse_api_version("21 (1234)"), Some(21));
+    assert_eq!(parse_api_version("22"), Some(22));
+    assert_eq!(parse_api_version("22 (1234)"), Some(22));
     assert_eq!(parse_api_version(" 20\n"), Some(20));
     assert_eq!(parse_api_version("unknown"), None);
     assert_eq!(parse_api_version(""), None);
@@ -267,7 +281,7 @@ fn only_an_absent_driver_is_worth_loading() {
     }));
     assert!(!should_load(&DriverProbe {
         state: DriverState::Ready,
-        version: Some("21".to_string()),
+        version: Some("22".to_string()),
     }));
     assert_eq!(DriverKind::Builtin.as_str(), "builtin");
     assert_eq!(DriverKind::Module.as_str(), "module");
@@ -416,19 +430,16 @@ fn redirect_and_whiteout_records_follow_the_wire_layout() {
     let batches = encode_batches(std::slice::from_ref(&redirect)).unwrap();
     assert_eq!(batches.len(), 1);
     let bytes = &batches[0];
+    assert_eq!(&bytes[..20], &[0; 20]);
     assert_eq!(
-        u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
-        0
+        usize::from(u16::from_le_bytes([bytes[20], bytes[21]])),
+        "/system/etc/hosts".len()
     );
-    assert_eq!(
-        u32::from_le_bytes([bytes[4], bytes[5], bytes[6], bytes[7]]),
-        0
-    );
-    let v_len = usize::from(u16::from_le_bytes([bytes[8], bytes[9]]));
-    let r_len = usize::from(u16::from_le_bytes([bytes[10], bytes[11]]));
+    let v_len = usize::from(u16::from_le_bytes([bytes[20], bytes[21]]));
+    let r_len = usize::from(u16::from_le_bytes([bytes[22], bytes[23]]));
     assert_eq!(v_len, "/system/etc/hosts".len());
     assert_eq!(r_len, "/data/adb/modules/m/system/etc/hosts".len());
-    assert_eq!(&bytes[12..12 + v_len], b"/system/etc/hosts");
+    assert_eq!(&bytes[24..24 + v_len], b"/system/etc/hosts");
 
     let whiteout = Rule::whiteout("/system/etc/removed");
     let batches = encode_batches(std::slice::from_ref(&whiteout)).unwrap();
@@ -437,9 +448,52 @@ fn redirect_and_whiteout_records_follow_the_wire_layout() {
         u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
         WHITEOUT_FLAG
     );
-    let r_len = usize::from(u16::from_le_bytes([bytes[10], bytes[11]]));
+    let r_len = usize::from(u16::from_le_bytes([bytes[22], bytes[23]]));
     assert_eq!(r_len, 0);
-    assert_eq!(bytes.len(), 12 + "/system/etc/removed".len());
+    assert_eq!(bytes.len(), RULE_HEADER_SIZE + "/system/etc/removed".len());
+}
+
+#[test]
+fn single_uid_rules_encode_a_matching_range_endpoint() {
+    let mut rule = Rule::redirect("/system/etc/hosts", "/data/adb/modules/m/system/etc/hosts");
+    rule.uid = 10_123;
+    let bytes = encode_batches(std::slice::from_ref(&rule))
+        .unwrap()
+        .remove(0);
+    assert_eq!(
+        &bytes[4..20],
+        [
+            10_123_u32.to_le_bytes(),
+            10_123_u32.to_le_bytes(),
+            0_u32.to_le_bytes(),
+            0_u32.to_le_bytes(),
+        ]
+        .concat()
+    );
+    assert_eq!(
+        u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) & OPAQUE_FLAG,
+        0
+    );
+    assert_eq!(parse_list_records(&bytes).unwrap()[0].uid_end, 10_123);
+}
+
+#[test]
+fn encoder_rejects_unsafe_v22_flag_combinations_and_scopes() {
+    let mut opaque_whiteout = Rule::whiteout("/system/etc/gone");
+    opaque_whiteout.opaque = true;
+    assert!(encode_batches(&[opaque_whiteout]).is_err());
+
+    let mut reversed = Rule::redirect("/system/etc/a", "/data/a");
+    reversed.uid = 2000;
+    reversed.uid_end = 1000;
+    assert!(encode_batches(&[reversed]).is_err());
+
+    let mut outside = Rule::redirect("/system/etc/a", "/data/a");
+    outside.uid = 1000;
+    outside.uid_end = 2000;
+    outside.deny_start = 900;
+    outside.deny_end = 1200;
+    assert!(encode_batches(&[outside]).is_err());
 }
 
 #[test]
@@ -462,7 +516,7 @@ fn batches_split_before_overflowing_the_payload_buffer() {
 }
 
 fn record_len(rule: &Rule) -> usize {
-    12 + rule.virtual_path.len() + rule.real_path.as_deref().unwrap_or_default().len()
+    RULE_HEADER_SIZE + rule.virtual_path.len() + rule.real_path.as_deref().unwrap_or_default().len()
 }
 
 #[test]
@@ -472,7 +526,11 @@ fn redirect_without_a_target_is_rejected() {
         real_path: None,
         whiteout: false,
         virtual_dir: false,
+        opaque: false,
         uid: 0,
+        uid_end: 0,
+        deny_start: 0,
+        deny_end: 0,
     };
     assert!(encode_batches(std::slice::from_ref(&broken)).is_err());
 }
@@ -518,10 +576,10 @@ fn probe_reports_absent_outdated_and_ready() {
     let (absent, _kernel) = driver(Mode::Silent);
     assert_eq!(absent.probe().state, DriverState::Absent);
 
-    let outdated = driver_versioned(Mode::Ready, "20");
+    let outdated = driver_versioned(Mode::Ready, "21");
     let probe = outdated.probe();
     assert_eq!(probe.state, DriverState::Outdated);
-    assert_eq!(probe.version.as_deref(), Some("20"));
+    assert_eq!(probe.version.as_deref(), Some("21"));
     assert!(ensure_usable(&probe).is_err());
 
     let (refused, _kernel) = driver(Mode::ListingRefused);
@@ -530,8 +588,52 @@ fn probe_reports_absent_outdated_and_ready() {
     let (ready, _kernel) = driver(Mode::Ready);
     let probe = ready.probe();
     assert!(probe.ready());
-    assert_eq!(probe.version.as_deref(), Some("21"));
+    assert_eq!(probe.version.as_deref(), Some("22"));
     assert!(ensure_usable(&probe).is_ok());
+}
+
+#[test]
+fn delete_records_use_the_18_byte_v22_header() {
+    let (driver, kernel) = driver(Mode::Ready);
+    let path = "/system/etc/hosts";
+    driver.delete_rules(&[path.to_string()]).unwrap();
+    let record = kernel.state.borrow().last_delete.clone();
+    assert_eq!(record.len(), DELETE_HEADER_SIZE + path.len());
+    assert_eq!(&record[..16], &[0; 16]);
+    assert_eq!(
+        u16::from_le_bytes([record[16], record[17]]),
+        u16::try_from(path.len()).unwrap()
+    );
+    assert_eq!(&record[18..], path.as_bytes());
+}
+
+#[test]
+fn list_reply_parses_ranges_exclusions_and_opaque() {
+    let range = Rule {
+        virtual_path: "/system/etc/range".to_string(),
+        real_path: Some("/data/adb/modules/m/system/etc/range".to_string()),
+        whiteout: false,
+        virtual_dir: false,
+        opaque: false,
+        uid: 1000,
+        uid_end: 2000,
+        deny_start: 1500,
+        deny_end: 1600,
+    };
+    let opaque = Rule {
+        virtual_path: "/product/fonts".to_string(),
+        real_path: Some("/data/adb/modules/m/product/fonts".to_string()),
+        whiteout: false,
+        virtual_dir: false,
+        opaque: true,
+        uid: 1000,
+        uid_end: 2000,
+        deny_start: 0,
+        deny_end: 0,
+    };
+    let mut bytes = kernel_record(&range);
+    bytes.extend_from_slice(&kernel_record(&opaque));
+    assert_eq!(parse_list_records(&bytes).unwrap(), vec![range, opaque]);
 }
 
 #[test]
@@ -627,14 +729,22 @@ fn reconcile_keeps_kernel_created_virtual_directories() {
         real_path: Some("/data/adb/modules/m/system/etc/hosts".to_string()),
         whiteout: false,
         virtual_dir: false,
+        opaque: false,
         uid: 0,
+        uid_end: 0,
+        deny_start: 0,
+        deny_end: 0,
     });
     kernel.state.borrow_mut().rules.push(Rule {
         virtual_path: "/system/etc/newdir".to_string(),
         real_path: None,
         whiteout: false,
         virtual_dir: true,
+        opaque: false,
         uid: 0,
+        uid_end: 0,
+        deny_start: 0,
+        deny_end: 0,
     });
 
     let (applied, removed) = driver
@@ -720,7 +830,7 @@ fn runtime_record_is_key_value_text() {
         &RuntimeRecord {
             boot_id: "boot-1".to_string(),
             driver_state: "ready".to_string(),
-            driver_version: "21".to_string(),
+            driver_version: "22".to_string(),
             rules_applied: 42,
             rules_removed: 3,
             uid_count: 2,
@@ -733,7 +843,7 @@ fn runtime_record_is_key_value_text() {
     for expected in [
         "boot_id=boot-1",
         "driver_state=ready",
-        "driver_version=21",
+        "driver_version=22",
         "rules_applied=42",
         "rules_removed=3",
         "uid_count=2",

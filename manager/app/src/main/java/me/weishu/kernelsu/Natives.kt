@@ -38,6 +38,9 @@ object Natives {
     val version: Int
         external get
 
+    /** Build string of the kernel side driver, null when the kernel predates it. */
+    external fun getFullVersion(): String?
+
     val isSafeMode: Boolean
         external get
 

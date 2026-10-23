@@ -12,15 +12,13 @@ Rust, so no upstream shell scripts or WebUI are imported.
 ## Pinned sources
 
 - NoMount: https://github.com/maxsteeel/nomount
-  commit `87603f4c6ddbc00eec99930a4438296781908453`, the head of the `dev`
-  branch (the nightly line upstream ships as "Nightly builds"). The last tagged
-  release, `v2.1.1` / `7046c7ad`, is 45 commits behind it and was the previous
-  pin here. Imported from `kernel/src/` only:
+  commit `bf1847f98fed382369c43bfd652cd93774b9b8e3` (tag `v2.2.0`).
+  Imported from `kernel/src/` only:
 
   | upstream path | vendored path | sha256 |
   | --- | --- | --- |
-  | `kernel/src/nomount.c` | `kernel/src/nomount.c` | `e355d181fa432c222b83328092106d45f6d58c4d664b7a9c68698728eeb9712f` |
-  | `kernel/src/nomount.h` | `kernel/src/nomount.h` | `96966c1e945dfcb7ef2d86fae0bfca0e2b989fe5017232e9de23b84f17c4d878` |
+  | `kernel/src/nomount.c` | `kernel/src/nomount.c` | `25452d96684d066446fbd1b433f4fdeab1c5b0ade11701d9b46bb8dfb5acfc1b` |
+  | `kernel/src/nomount.h` | `kernel/src/nomount.h` | `8f15ffcb4b998d8a05219b793cf22c0e25a383296376fc49a331e07bc7c93766` |
   | `kernel/src/Kconfig` | `kernel/src/Kconfig` | `1df7ad3589a282128f797f7a46b28aee315d080550aae26b681a898f11c7abc7` |
   | `kernel/src/Makefile` | `kernel/src/Makefile` | `1191fe9ef8e2f3549419fd90a118fbe3d11fc02a04b6353bae0e81be27e03e62` |
   | `kernel/LICENSE` | `kernel/LICENSE` | `8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643` |
@@ -30,30 +28,26 @@ All imported files are byte-identical to upstream. No copyright notice has been
 replaced or added inside them; FinaSU attribution is not applied to upstream
 files.
 
-### What the dev sync changed
+## v2.2.0 integration boundary
 
-The kernel side was reworked between `v2.1.1` and this pin; the control
-interface FinaSU speaks did not move, which is why the Rust side needed no
-change:
+The imported driver speaks protocol v22. Its rule-add and list headers are 24
+bytes (`flags`, `uid`, `uid_end`, `deny_start`, `deny_end`, `v_len`, `r_len`)
+and its delete header is 18 bytes (the same UID fields followed by `v_len`).
+v21 and v22 headers are not compatible.
 
-- opaque directory support: a new `NM_FLAG_OPAQUE` rule flag and directory-view
-  bookkeeping. FinaSU never sets the flag, so injected directories keep the
-  merge behaviour they had.
-- rules and leaves are retired with `call_rcu` instead of being freed under a
-  held lock, and the rule arrays are replaced in one pass.
-- readdir merging is bypassed for native replacements, and only injected names
-  are invalidated instead of the whole dentry.
-- a `rcu_guard()` scope guard, an fsuid cache in the actor proxy, and a Bloom
-  filter skip for small child sets.
-- the internal `nomount_*` symbols were renamed to `nm_*`; `NM_MAGIC_SIG`
-  replaces `NOMOUNT_MAGIC_SIG`. Both are private to the module.
-- `kernel/src/Makefile` probes `include/linux/xattr.h` for the `__get` member
-  and defines `NM_HAS_XATTR__GET`, so the same source builds against 6.1 and
-  6.18 DDK headers.
+FinaSU's Rust control path accepts v22 and rejects older drivers. Existing
+rules keep the protocol's default scope (`uid = uid_end = 0`, no denied range),
+and a single explicit UID is encoded with `uid_end = uid`. The Rust codec can
+parse and report range, denied-range, and opaque fields for diagnostics, but
+the built-in planner does not generate UID ranges or opaque rules. Opaque and
+`.replace` directories therefore remain subject to FinaSU's file-merge and
+directory-allowlist protections rather than upstream's `.replace` behavior.
+`.remove` is handled as a whiteout only for unprotected directories; protected
+partition roots and `lib*`/`bin`/`etc` keep their file-merge fallback.
 
-Unchanged and still relied on by `userspace/ksud/src/nomount.rs`:
-`NOMOUNT_BASE_VERSION` is still `21`, the `NM_CMD_*` command set is identical,
-and `struct nm_payload` has the same layout.
+Upstream's `module/common.sh` bootloop detection and KernelSU/APatch injection
+ordering are not imported: ksud owns driver loading, rule injection, UI
+readiness and boot guards.
 
 ## Deliberately not imported
 
@@ -118,8 +112,7 @@ matching `userspace/ksud/bin/aarch64/<kmi>_kernelsu.ko`. Output is staged as
 The upstream `kernel/src/Makefile` appends a commit count to
 `NOMOUNT_VERSION` only when the source tree's enclosing git repository has an
 origin URL containing `nomount`. Inside this repository that condition is
-false, so the built module reports the plain base version (`21`, unchanged
-between v2.1.1 and this pin).
+false, so the built module reports the plain base version (`22` for v2.2.0).
 FinaSU's driver check therefore compares against the base version, not a commit
 count.
 
@@ -127,8 +120,6 @@ count.
 
 - `android17-6.18` is in FinaSU's KMI matrix but is not in upstream's test
   matrix; compiling NoMount for it is unverified.
-- This pin tracks upstream `dev`, not a release: re-check it whenever upstream
-  tags a new version and re-pin to the tag then.
 - Upstream's LKM workflow strips page-pinner symbols from the DDK headers before
   building; the same workaround is needed here.
 - Stripped module size per KMI is not yet measured, so the APK size delta is

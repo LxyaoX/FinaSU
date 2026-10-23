@@ -11,7 +11,8 @@ use std::fs::{File, OpenOptions};
 use std::io::Read;
 use std::os::fd::AsRawFd;
 use std::os::raw::c_char;
-use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
+use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt, PermissionsExt};
+use std::path::Path;
 
 const CONFIG_PATH: &str = "/data/adb/ksu/uts_view.json";
 const LOCK_PATH: &str = "/data/adb/ksu/.uts_view.lock";
@@ -36,7 +37,7 @@ pub enum Command {
     TakeOver,
 }
 
-pub struct ConfigLock(File);
+struct ConfigLock(File);
 
 impl Drop for ConfigLock {
     fn drop(&mut self) {
@@ -63,8 +64,11 @@ fn ensure_working_dir() -> Result<()> {
         Ok(metadata) => {
             // The shared ksud directory is normally 0755. Only group/other write access would
             // let an unprivileged process replace the root-owned config or lock entries.
-            if !metadata.is_dir() || metadata.uid() != 0 || metadata.mode() & 0o022 != 0 {
+            if !metadata.is_dir() || metadata.uid() != 0 {
                 bail!("Unsafe UTS View working directory");
+            }
+            if metadata.mode() & 0o022 != 0 {
+                repair_working_dir_mode(Path::new(WORKING_DIR), metadata.mode())?;
             }
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
@@ -74,6 +78,18 @@ fn ensure_working_dir() -> Result<()> {
                 .context("Create UTS View working directory")?;
         }
         Err(error) => return Err(error).context("Inspect UTS View working directory"),
+    }
+    Ok(())
+}
+
+fn repair_working_dir_mode(path: &Path, mode: u32) -> Result<()> {
+    let mode = mode & 0o7777 & !0o022;
+    std::fs::set_permissions(path, std::fs::Permissions::from_mode(mode))
+        .context("Repair UTS View working directory permissions")?;
+    let metadata =
+        std::fs::symlink_metadata(path).context("Inspect repaired UTS View directory")?;
+    if !metadata.is_dir() || metadata.mode() & 0o022 != 0 {
+        bail!("Unsafe UTS View working directory");
     }
     Ok(())
 }
@@ -97,10 +113,6 @@ fn acquire_lock() -> Result<ConfigLock> {
         bail!("UTS View is busy; retry later");
     }
     Ok(ConfigLock(file))
-}
-
-pub fn provider_lock() -> Result<ConfigLock> {
-    acquire_lock()
 }
 
 fn read_config_snapshot() -> Result<Option<ConfigSnapshot>> {
@@ -915,5 +927,23 @@ pub fn resume_after_susfs() {
     })();
     if let Err(error) = result {
         record_runtime_error(&error);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn repairs_group_or_other_writable_working_directory() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("ksu");
+        std::fs::create_dir(&path).unwrap();
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o777)).unwrap();
+
+        repair_working_dir_mode(&path, 0o777).unwrap();
+
+        let mode = std::fs::metadata(path).unwrap().mode() & 0o777;
+        assert_eq!(mode, 0o755);
     }
 }

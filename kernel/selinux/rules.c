@@ -156,11 +156,19 @@ void apply_kernelsu_rules()
     ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "getpgid");
     ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "sigkill");
 
+#ifdef CONFIG_KSU_SUSFS
+    // Let zygote umount hidden mounts without installing zygisk
+    ksu_allow(db, "zygote", "labeledfs", "filesystem", "unmount");
+#endif
+
     rcu_assign_pointer(selinux_state.policy, pol);
     synchronize_rcu();
     ksu_destroy_sepolicy(old_pol);
 
     reset_avc_cache();
+#ifdef CONFIG_KSU_SUSFS
+    susfs_set_batch_sid();
+#endif
 out_unlock:
     mutex_unlock(&selinux_state.policy_mutex);
 }
@@ -520,6 +528,9 @@ int handle_sepolicy(void __user *user_data, u64 data_len)
     ksu_destroy_sepolicy(old_pol);
 
     reset_avc_cache();
+#ifdef CONFIG_KSU_SUSFS
+    susfs_set_batch_sid();
+#endif
     ret = success_cmd_count;
     goto out_unlock;
 

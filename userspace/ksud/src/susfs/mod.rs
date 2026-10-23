@@ -104,12 +104,13 @@ fn classify(
         .filter(|s| !s.is_empty())
         .map(str::to_owned)
         .collect();
-    // Only the audited 2.3 wire layout is writable. Other revisions remain visible/read-only.
+    // GKI-LKM is upstream's clearer label for the same v2.3.0 wire layout since r18.4.
+    // Other revisions remain visible/read-only.
     let compatible = version.0 == 0
         && features.0 == 0
         && variant.0 == 0
         && version.1.as_deref() == Some("v2.3.0")
-        && matches!(variant.1.as_deref(), Some("GKI" | "NON-GKI"))
+        && matches!(variant.1.as_deref(), Some("GKI" | "NON-GKI" | "GKI-LKM"))
         && !tokens.is_empty()
         && tokens
             .iter()
@@ -272,16 +273,6 @@ pub fn restore_uname_provider(snapshot: &UnameTakeoverSnapshot) -> Result<()> {
 }
 
 #[cfg(target_os = "android")]
-fn lock_uts_provider() -> Result<Option<crate::uts_view::ConfigLock>> {
-    Ok(Some(crate::uts_view::provider_lock()?))
-}
-
-#[cfg(not(target_os = "android"))]
-fn lock_uts_provider() -> Result<Option<()>> {
-    Ok(None)
-}
-
-#[cfg(target_os = "android")]
 fn uts_provider_active() -> Result<bool> {
     crate::uts_view::provider_active()
 }
@@ -300,6 +291,23 @@ fn uname_conflicts(config: &Config, uts_active: bool) -> bool {
         && uts_active
 }
 
+fn uts_arbitration_active(config: &Config, query: impl FnOnce() -> Result<bool>) -> Result<bool> {
+    if config
+        .settings
+        .uname
+        .as_ref()
+        .is_some_and(|uname| !uname.is_default())
+    {
+        query()
+    } else {
+        Ok(false)
+    }
+}
+
+fn status_summary(config: &Config, uts_active: bool) -> Result<&'static str> {
+    store::summary_with_deferred(config, uname_conflicts(config, uts_active))
+}
+
 fn apply_with_uts_arbitration(
     config: &Config,
     detection: &Detection,
@@ -314,6 +322,9 @@ fn apply_with_uts_arbitration(
     let mut report = apply::apply(&effective, detection, stage)?;
     if defer_uname {
         report.deferred.push("uname".to_owned());
+        if matches!(report.status, "applied" | "saved") {
+            report.status = "deferred";
+        }
     }
     Ok(report)
 }
@@ -327,7 +338,9 @@ pub fn run(command: Command) -> Result<()> {
             let detection = detect();
             let uname_provider = uname_provider_state().unwrap_or_default();
             let config = store::read_config().and_then(|config| {
-                let summary = store::summary(&config)?;
+                let uts_active =
+                    uts_arbitration_active(&config, uts_provider_active).unwrap_or(false);
+                let summary = status_summary(&config, uts_active)?;
                 Ok((config, summary))
             });
             let status = match config {
@@ -363,10 +376,12 @@ pub fn run(command: Command) -> Result<()> {
             );
         }
         Command::Apply => {
-            let _uts_lock = lock_uts_provider()?;
+            // UTS transactions take this store lock before changing either
+            // provider. Holding it here serializes arbitration without making
+            // unrelated SUSFS operations depend on UTS config storage.
             let _lock = store::lock()?;
             let config = store::read_config()?;
-            let uts_active = config.settings.uname.is_some() && uts_provider_active()?;
+            let uts_active = uts_arbitration_active(&config, uts_provider_active)?;
             let result =
                 apply_with_uts_arbitration(&config, &detect(), apply::Stage::Live, uts_active)?;
             println!("{}", serde_json::to_string(&result)?);
@@ -383,13 +398,15 @@ pub fn boot(stage: &str) {
         _ => return,
     };
     let result = (|| -> Result<()> {
-        let _uts_lock = lock_uts_provider()?;
+        // Keep the shared provider state stable for this transaction. UTS
+        // commits take the same lock, so a separate UTS config lock would only
+        // duplicate serialization and couple SUSFS to UTS file permissions.
         let _lock = store::lock()?;
         let config = store::read_config()?;
         if !config.automatic || safe_mode() {
             return Ok(());
         }
-        let uts_active = config.settings.uname.is_some() && uts_provider_active()?;
+        let uts_active = uts_arbitration_active(&config, uts_provider_active)?;
         let report = apply_with_uts_arbitration(&config, &detect(), stage, uts_active)?;
         log::info!("SUSFS: {}", serde_json::to_string(&report)?);
         Ok(())
@@ -446,10 +463,21 @@ mod tests {
         let lkm = classify(
             &response("v2.3.0"),
             &response("SUSFS_LKM_MODULES\nCONFIG_KSU_SUSFS_SUS_PATH"),
-            &response("GKI"),
+            &response("GKI-LKM"),
         );
+        assert_eq!(lkm.status, "compatible");
         assert_eq!(lkm.implementation, "lkm");
+        assert_eq!(lkm.variant, "GKI-LKM");
         assert!(!lkm.proc("susfs_kstat"));
+        assert_eq!(
+            classify(
+                &response("v2.3.0"),
+                &response("SUSFS_LKM_MODULES\nCONFIG_KSU_SUSFS_SUS_PATH"),
+                &response("GKI-LKM-NEXT")
+            )
+            .status,
+            "unknown_protocol"
+        );
     }
 
     #[test]
@@ -467,6 +495,46 @@ mod tests {
         });
         assert!(uname_conflicts(&config, true));
         assert!(!uname_conflicts(&config, false));
+    }
+
+    #[test]
+    fn status_reports_saved_uname_as_deferred_while_uts_is_active() {
+        let mut config = Config::default();
+        assert_eq!(status_summary(&config, true).unwrap(), "idle");
+
+        config.settings.uname = Some(model::Uname {
+            release: "6.1.0-test".to_owned(),
+            version: "#1".to_owned(),
+        });
+        assert_eq!(status_summary(&config, true).unwrap(), "deferred");
+        assert_eq!(status_summary(&config, false).unwrap(), "saved");
+    }
+
+    #[test]
+    fn susfs_without_uname_does_not_query_uts_provider_state() {
+        let mut queried = false;
+        let active = uts_arbitration_active(&Config::default(), || {
+            queried = true;
+            Ok(true)
+        })
+        .unwrap();
+
+        assert!(!queried);
+        assert!(!active);
+
+        let mut default_uname = Config::default();
+        default_uname.settings.uname = Some(model::Uname {
+            release: "default".to_owned(),
+            version: "default".to_owned(),
+        });
+        let active = uts_arbitration_active(&default_uname, || {
+            queried = true;
+            Ok(true)
+        })
+        .unwrap();
+
+        assert!(!queried);
+        assert!(!active);
     }
 
     #[test]

@@ -106,6 +106,7 @@ pub fn on_post_fs_data() -> Result<()> {
         warn!("init features failed: {e}");
     }
     crate::uts_view::boot_apply();
+    crate::netisolate::boot_apply();
 
     match crate::kernel_module::autoload_with_startup_timeout() {
         Ok(Some(report)) => {

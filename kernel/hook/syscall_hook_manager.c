@@ -24,7 +24,9 @@
 #include "hook/riscv64/syscall_regs.h"
 #endif
 
+#ifdef MODULE
 static bool syscall_redirects_pinned_module;
+#endif
 
 bool ksu_syscall_redirect_pin_module(void)
 {
@@ -154,7 +156,9 @@ void __init ksu_syscall_hook_manager_init(void)
 #endif
 
     // Register syscall hooks via dispatcher
+#ifndef CONFIG_KSU_SUSFS
     ksu_register_syscall_hook(__NR_setresuid, ksu_hook_setresuid);
+#endif
     ksu_register_syscall_hook(__NR_execve, ksu_hook_execve);
     ksu_register_syscall_hook(__NR_execveat, ksu_hook_execveat);
     ksu_register_syscall_hook(__NR_newfstatat, ksu_hook_newfstatat);
@@ -190,7 +194,9 @@ void __exit ksu_syscall_hook_manager_exit(void)
     destroy_kretprobe(&syscall_unregfunc_rp);
 #endif
 
+#ifndef CONFIG_KSU_SUSFS
     ksu_unregister_syscall_hook(__NR_setresuid);
+#endif
     ksu_unregister_syscall_hook(__NR_execve);
     ksu_unregister_syscall_hook(__NR_execveat);
     ksu_unregister_syscall_hook(__NR_newfstatat);

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
@@ -630,6 +631,19 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         supportingContent = { Text(stringResource(id = R.string.settings_uts_view_summary)) },
                         leadingContent = { Icon(Icons.Rounded.TextFields, null) },
                         onClick = actions.onOpenUtsView,
+                        trailingContent = {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                        },
+                    )
+                },
+                {
+                    SegmentedListItem(
+                        headlineContent = { Text(stringResource(id = R.string.settings_netisolate)) },
+                        supportingContent = {
+                            Text(stringResource(id = R.string.settings_netisolate_summary))
+                        },
+                        leadingContent = { Icon(Icons.Filled.WifiOff, null) },
+                        onClick = actions.onOpenNetIsolate,
                         trailingContent = {
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
                         },

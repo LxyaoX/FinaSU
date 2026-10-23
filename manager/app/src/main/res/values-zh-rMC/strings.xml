@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU 现在只支持 GKI 基岩核心，但是你可以为 GKI 设备补丁镜像</string>
     <string name="home_device_model">设备型号</string>
     <string name="home_kernel">基岩核心版本</string>
+    <string name="home_kernel_full_version">基岩核心全貌</string>
     <string name="home_manager_version">管理器版本</string>
     <string name="home_fingerprint">红石系统指纹</string>
     <string name="home_selinux_status">SELinux 状态</string>

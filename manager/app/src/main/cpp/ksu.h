@@ -6,6 +6,7 @@
 #define KERNELSU_KSU_H
 
 #include <cstdint>
+#include <string>
 #include <sys/ioctl.h>
 #include <sys/prctl.h>
 #include <utility>
@@ -17,6 +18,8 @@ uint32_t get_kernel_uapi_version();
 uint32_t get_manager_uapi_version();
 
 uint32_t get_version();
+
+std::string get_full_version();
 
 // Re-reads the kernel info explicitly and returns the fresh snapshot, bypassing the TTL cache.
 // Used when the caller must observe a just-changed identity (dynamic-manager grant/revoke).

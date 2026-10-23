@@ -107,6 +107,7 @@ fun rememberSettingsActions(
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,
         onOpenUtsView = { navigator.push(Route.UtsView) },
+        onOpenNetIsolate = { navigator.push(Route.NetIsolate) },
         onSetDefaultUmountModules = viewModel::setDefaultUmountModules,
         onSetEnableWebDebugging = viewModel::setEnableWebDebugging,
         onSetHomeLayoutStyle = viewModel::setHomeLayoutStyle,

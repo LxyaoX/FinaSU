@@ -13,6 +13,7 @@ data class ManagerVersion(
 @Immutable
 data class SystemInfo(
     val kernelVersion: String,
+    val kernelFullVersion: String? = null,
     val managerVersion: String,
     val deviceModel: String,
     val fingerprint: String,

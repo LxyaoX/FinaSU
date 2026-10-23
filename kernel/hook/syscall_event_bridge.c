@@ -45,6 +45,9 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
                       strstr(path, "/stub_zygote") == NULL)) {
         pr_info("hook_manager: unmark %d exec %s\n", current->pid, path);
         ksu_clear_task_tracepoint_flag_if_needed(current);
+#ifdef CONFIG_KSU_SUSFS
+        ksu_sucompat_mark_no_su();
+#endif
     }
 
     return 0;
@@ -52,7 +55,7 @@ static int ksu_handle_init_mark_tracker(const char __user **filename_user)
 
 long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 {
-    if (!ksu_su_compat_enabled)
+    if (!ksu_su_compat_is_enabled())
         return ksu_syscall_table[orig_nr](regs);
 
     return ksu_handle_stat_sucompat(orig_nr, (struct pt_regs *)regs);
@@ -60,7 +63,7 @@ long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
 
 long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
 {
-    if (!ksu_su_compat_enabled)
+    if (!ksu_su_compat_is_enabled())
         return ksu_syscall_table[orig_nr](regs);
 
     return ksu_handle_faccessat_sucompat(orig_nr, (struct pt_regs *)regs);
@@ -110,8 +113,8 @@ static long __nocfi ksu_hook_execve_common(int orig_nr, const struct pt_regs *re
         if (ret) {
             pr_err("adb root failed: %ld\n", ret);
         }
-    } else if (ksu_su_compat_enabled) {
-        ret = execveat ? ksu_handle_execveat_sucompat(filename_user, orig_nr, (struct pt_regs *)regs) :
+    } else if (ksu_su_compat_is_enabled()) {
+        ret = execveat ? ksu_handle_execveat_sucompat_regs(filename_user, orig_nr, (struct pt_regs *)regs) :
                          ksu_handle_execve_sucompat(filename_user, orig_nr, (struct pt_regs *)regs);
         ksu_sulog_emit_pending(pending_root_execve, ret, GFP_KERNEL);
         return ret;
@@ -140,6 +143,6 @@ long __nocfi ksu_hook_setresuid(int orig_nr, const struct pt_regs *regs)
     if (ret < 0)
         return ret;
 
-    ksu_handle_setresuid(old_uid, current_uid().val);
+    ksu_handle_setresuid(old_uid, current_uid().val, current_uid().val);
     return ret;
 }

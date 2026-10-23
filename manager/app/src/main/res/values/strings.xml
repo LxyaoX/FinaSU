@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU only supports GKI kernels now, but you can patch the image for GKI devices.</string>
     <string name="home_device_model">Device model</string>
     <string name="home_kernel">Kernel version</string>
+    <string name="home_kernel_full_version">Kernel build</string>
     <string name="home_manager_version">Manager version</string>
     <string name="home_fingerprint">Fingerprint</string>
     <string name="home_selinux_status">SELinux status</string>

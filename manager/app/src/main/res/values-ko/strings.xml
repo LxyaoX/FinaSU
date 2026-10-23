@@ -38,6 +38,7 @@
     <string name="home_unsupported_reason">KernelSU는 현재 GKI 커널만 지원합니다.</string>
     <string name="home_device_model">기기 모델</string>
     <string name="home_kernel">커널 버전</string>
+    <string name="home_kernel_full_version">커널 빌드</string>
     <string name="home_manager_version">매니저 버전</string>
     <string name="home_fingerprint">핑거프린트</string>
     <string name="home_selinux_status">SELinux 상태</string>

@@ -54,6 +54,9 @@ pub const REMAPPED_PREFIX: &str = "my_";
 /// Marker meaning "replace the directory that contains this file".
 pub const REPLACE_MARKER: &str = ".replace";
 
+/// Marker meaning "remove the directory that contains this file".
+pub const REMOVE_MARKER: &str = ".remove";
+
 /// Module lifecycle marks that keep a module out of the injection.
 pub const SKIP_MARKS: [&str; 3] = ["disable", "remove", "skip_mount"];
 
@@ -389,6 +392,14 @@ impl<F: PlanFs> Walker<'_, F> {
     fn walk_contents(&mut self, dir: &Path, relative: &str, target: &str) -> Result<()> {
         let mut names = self.fs.read_dir(dir)?;
         names.sort_unstable();
+        if names.iter().any(|name| name == REMOVE_MARKER) {
+            if protected_directory(target) {
+                self.note("dir-remove-blocked", target);
+            } else {
+                self.push(Rule::whiteout(target));
+                return Ok(());
+            }
+        }
         let replace = names.iter().any(|name| name == REPLACE_MARKER) || self.fs.is_opaque(dir)?;
         if replace {
             let stock = self.cfg.root.join(target.trim_start_matches('/'));
@@ -411,7 +422,7 @@ impl<F: PlanFs> Walker<'_, F> {
             }
         }
         for name in names {
-            if name == REPLACE_MARKER {
+            if name == REPLACE_MARKER || name == REMOVE_MARKER {
                 continue;
             }
             let child = dir.join(&name);

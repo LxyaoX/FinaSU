@@ -43,6 +43,10 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
+    data object NetIsolate : Route
+
+    @Parcelize
+    @Serializable
     data object Nomount : Route
 
     @Parcelize

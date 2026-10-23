@@ -2,6 +2,7 @@ kernelsu-objs := core/init.o
 
 kernelsu-objs += feature/kernel_umount.o
 kernelsu-objs += feature/module_blacklist.o
+kernelsu-objs += feature/netisolate.o
 kernelsu-objs += feature/sulog.o
 kernelsu-objs += feature/sucompat.o
 kernelsu-objs += feature/uts_view.o
@@ -58,6 +59,8 @@ kernelsu-objs += feature/adb_root.o
 kernelsu-objs += feature/selinux_hide.o
 kernelsu-objs += feature/shell_su_adb_only.o
 kernelsu-objs += feature/avc_spoof.o
+
+kernelsu-$(CONFIG_KSU_SUSFS) += extension/susfs.o
 
 ifdef KBUILD_EXTMOD
 ifeq ($(CONFIG_KSU_DISABLE_MANAGER),y)
@@ -163,11 +166,19 @@ ifdef KSU_GIT_VERSION_VALID
 $(eval KSU_VERSION=$(shell expr 30000 + $(KSU_GIT_VERSION)))
 $(info -- KernelSU version: $(KSU_VERSION))
 ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
+KSU_VERSION_TAG := $(shell cd $(GIT_ROOT) && $(GIT) describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+KSU_VERSION_SHA := $(shell cd $(GIT_ROOT) && $(GIT) rev-parse --short=8 HEAD 2>/dev/null)
+KSU_VERSION_BRANCH := $(shell cd $(GIT_ROOT) && $(GIT) rev-parse --abbrev-ref HEAD 2>/dev/null)
+KSU_VERSION_FULL := v$(if $(KSU_VERSION_TAG),$(KSU_VERSION_TAG),unknown)-$(KSU_VERSION_SHA)@$(KSU_VERSION_BRANCH)
 else
 # If there is no .git directory, use default version
 $(warning "KSU_GIT_VERSION not defined! It is better to make KernelSU a git repository!")
 ccflags-y += -DKSU_VERSION=16
+KSU_VERSION_FULL := v0.0.0-00000000@unknown
 endif
+
+$(info -- KernelSU version full: $(KSU_VERSION_FULL))
+ccflags-y += -DKSU_VERSION_FULL=\"$(KSU_VERSION_FULL)\"
 
 KSU_NEW_DCACHE_FLUSH := $(shell grep -q __flush_dcache_area $(srctree)/arch/arm64/include/asm/cacheflush.h ; echo $$?)
 $(info -- KSU_NEW_DCACHE_FLUSH: $(KSU_NEW_DCACHE_FLUSH))

@@ -24,6 +24,16 @@ Java_me_weishu_kernelsu_Natives_getVersion(JNIEnv *env, jobject) {
 }
 
 extern "C"
+JNIEXPORT jstring JNICALL
+Java_me_weishu_kernelsu_Natives_getFullVersion(JNIEnv *env, jobject) {
+    auto version = get_full_version();
+    if (version.empty()) {
+        return nullptr;
+    }
+    return env->NewStringUTF(version.c_str());
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_me_weishu_kernelsu_Natives_getKernelUAPIVersion(JNIEnv *env, jobject) {
     return get_kernel_uapi_version();

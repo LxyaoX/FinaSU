@@ -151,7 +151,7 @@ fn ksuctl<T>(request: u32, arg: *mut T) -> Result<i32> {
     unsafe {
         let ret = libc::ioctl(fd as libc::c_int, request as i32, arg);
         if ret < 0 {
-            bail!("ksuctl failed: {}", io::Error::last_os_error())
+            return Err(anyhow::Error::new(io::Error::last_os_error()).context("ksuctl failed"));
         }
         Ok(ret)
     }
@@ -175,6 +175,23 @@ pub fn get_info() -> ksu_uapi::ksu_get_info_cmd {
 
 pub fn get_version() -> i32 {
     get_info().version as i32
+}
+
+pub fn get_full_version() -> Option<String> {
+    let mut cmd = ksu_uapi::ksu_get_full_version_cmd {
+        version_full: [0; 64],
+    };
+    if ksuctl(ksu_uapi::KSU_IOCTL_GET_FULL_VERSION, &raw mut cmd).is_err() {
+        return None;
+    }
+    let bytes = cmd
+        .version_full
+        .iter()
+        .map(|c| c.to_ne_bytes()[0])
+        .collect::<Vec<_>>();
+    let end = bytes.iter().position(|c| *c == 0).unwrap_or(bytes.len());
+    let value = String::from_utf8_lossy(&bytes[..end]).into_owned();
+    (!value.is_empty()).then_some(value)
 }
 
 pub fn is_late_load() -> bool {
@@ -318,6 +335,42 @@ pub fn get_uts_view_config() -> Result<ksu_uapi::ksu_uts_view_config> {
 pub fn set_uts_view_config(config: &ksu_uapi::ksu_uts_view_config) -> Result<()> {
     let mut cmd = *config;
     ksuctl(ksu_uapi::KSU_IOCTL_SET_UTS_VIEW_CONFIG, &raw mut cmd)?;
+    Ok(())
+}
+
+pub fn get_netisolate_config() -> Result<ksu_uapi::ksu_netisolate_config> {
+    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_config>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_CONFIG, &raw mut cmd)?;
+    Ok(cmd)
+}
+
+pub fn set_netisolate_config(config: &ksu_uapi::ksu_netisolate_config) -> Result<()> {
+    let mut cmd = *config;
+    ksuctl(ksu_uapi::KSU_IOCTL_SET_NETISOLATE_CONFIG, &raw mut cmd)?;
+    Ok(())
+}
+
+pub fn get_netisolate_policies() -> Result<ksu_uapi::ksu_netisolate_policies> {
+    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_policies>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_POLICIES, &raw mut cmd)?;
+    Ok(cmd)
+}
+
+pub fn set_netisolate_policies(config: &ksu_uapi::ksu_netisolate_policies) -> Result<()> {
+    let mut cmd = *config;
+    ksuctl(ksu_uapi::KSU_IOCTL_SET_NETISOLATE_POLICIES, &raw mut cmd)?;
+    Ok(())
+}
+
+pub fn get_netisolate_events() -> Result<ksu_uapi::ksu_netisolate_events> {
+    let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_EVENTS, &raw mut events)?;
+    Ok(events)
+}
+
+pub fn clear_netisolate_events() -> Result<()> {
+    let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
+    ksuctl(ksu_uapi::KSU_IOCTL_CLEAR_NETISOLATE_EVENTS, &raw mut events)?;
     Ok(())
 }
 

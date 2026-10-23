@@ -288,6 +288,7 @@ class HomeViewModel(
             currentManagerVersionCode = managerVersion.versionCode,
             systemInfo = SystemInfo(
                 kernelVersion = Os.uname().release,
+                kernelFullVersion = if (isManager) Natives.getFullVersion() else null,
                 managerVersion = "${managerVersion.versionName} (${managerVersion.versionCode}-${managerUAPIVersion})",
                 deviceModel = resolveDeviceName(),
                 fingerprint = Build.FINGERPRINT,

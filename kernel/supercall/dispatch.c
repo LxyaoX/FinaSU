@@ -7,6 +7,9 @@
 #include <linux/uaccess.h>
 #include <linux/version.h>
 #include <linux/thread_info.h>
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs.h>
+#endif
 #include "uapi/supercall.h"
 #include "supercall/internal.h"
 #include "arch.h" // IWYU pragma: keep
@@ -16,6 +19,7 @@
 #include "ksu.h"
 #include "runtime/ksud_boot.h"
 #include "feature/kernel_umount.h"
+#include "feature/netisolate.h"
 #include "feature/uts_view.h"
 #include "manager/dynamic_manager.h"
 #include "manager/manager_identity.h"
@@ -126,6 +130,20 @@ static int do_get_info_legacy(void __user *arg)
     return 0;
 }
 
+static int do_get_full_version(void __user *arg)
+{
+    struct ksu_get_full_version_cmd cmd = { 0 };
+
+    strscpy(cmd.version_full, KSU_VERSION_FULL, sizeof(cmd.version_full));
+
+    if (copy_to_user(arg, &cmd, sizeof(cmd))) {
+        pr_err("get_full_version: copy_to_user failed\n");
+        return -EFAULT;
+    }
+
+    return 0;
+}
+
 static int do_report_event(void __user *arg)
 {
     static bool services_started = false;
@@ -161,6 +179,9 @@ static int do_report_event(void __user *arg)
             } else {
                 pr_info("boot_complete triggered\n");
                 on_boot_completed();
+#ifdef CONFIG_KSU_SUSFS
+                susfs_start_sdcard_monitor_fn();
+#endif
             }
         }
         break;
@@ -415,7 +436,9 @@ static int do_set_app_profile(void __user *arg)
     ret = ksu_set_app_profile(&cmd.profile);
     if (!ret) {
         ksu_persistent_allow_list();
+#ifndef CONFIG_KSU_SUSFS
         ksu_mark_running_process();
+#endif
     }
     return ret;
 }
@@ -490,6 +513,83 @@ static int do_set_uts_view_config(void __user *arg)
     return ksu_uts_view_set_config(&config);
 }
 
+static int do_get_netisolate_config(void __user *arg)
+{
+    struct ksu_netisolate_config config;
+    int ret;
+
+    ret = ksu_netisolate_get_config(&config);
+    if (ret)
+        return ret;
+    if (copy_to_user(arg, &config, sizeof(config)))
+        return -EFAULT;
+    return 0;
+}
+
+static int do_set_netisolate_config(void __user *arg)
+{
+    struct ksu_netisolate_config config;
+
+    if (copy_from_user(&config, arg, sizeof(config)))
+        return -EFAULT;
+    return ksu_netisolate_set_config(&config);
+}
+
+static int do_get_netisolate_policies(void __user *arg)
+{
+    struct ksu_netisolate_policies *config;
+    int ret;
+
+    config = kzalloc(sizeof(*config), GFP_KERNEL);
+    if (!config)
+        return -ENOMEM;
+    ret = ksu_netisolate_get_policies(config);
+    if (ret)
+        goto out;
+    if (copy_to_user(arg, config, sizeof(*config)))
+        ret = -EFAULT;
+out:
+    kfree(config);
+    return ret;
+}
+
+static int do_set_netisolate_policies(void __user *arg)
+{
+    struct ksu_netisolate_policies *config;
+    int ret;
+
+    config = kzalloc(sizeof(*config), GFP_KERNEL);
+    if (!config)
+        return -ENOMEM;
+    if (copy_from_user(config, arg, sizeof(*config)))
+        ret = -EFAULT;
+    else
+        ret = ksu_netisolate_set_policies(config);
+    kfree(config);
+    return ret;
+}
+
+static int do_get_netisolate_events(void __user *arg)
+{
+    struct ksu_netisolate_events *events;
+    int ret;
+
+    events = kzalloc(sizeof(*events), GFP_KERNEL);
+    if (!events)
+        return -ENOMEM;
+    ret = ksu_netisolate_get_events(events);
+    if (!ret && copy_to_user(arg, events, sizeof(*events)))
+        ret = -EFAULT;
+    kfree(events);
+    return ret;
+}
+
+static int do_clear_netisolate_events(void __user *arg)
+{
+    (void)arg;
+    return ksu_netisolate_clear_events();
+}
+
 static int do_get_wrapper_fd(void __user *arg)
 {
     if (!ksu_file_sid) {
@@ -508,7 +608,9 @@ static int do_get_wrapper_fd(void __user *arg)
 static int do_manage_mark(void __user *arg)
 {
     struct ksu_manage_mark_cmd cmd;
+#ifndef CONFIG_KSU_SUSFS
     int ret = 0;
+#endif
 
     if (copy_from_user(&cmd, arg, sizeof(cmd))) {
         pr_err("manage_mark: copy_from_user failed\n");
@@ -516,6 +618,15 @@ static int do_manage_mark(void __user *arg)
     }
 
     switch (cmd.operation) {
+#ifdef CONFIG_KSU_SUSFS
+    case KSU_MARK_GET:
+        cmd.result = susfs_is_current_proc_no_su() ? 0 : 1;
+        break;
+    case KSU_MARK_MARK:
+    case KSU_MARK_UNMARK:
+    case KSU_MARK_REFRESH:
+        break;
+#else
     case KSU_MARK_GET: {
         // Get task mark status
         ret = ksu_get_task_mark(cmd.pid);
@@ -555,6 +666,7 @@ static int do_manage_mark(void __user *arg)
         pr_info("manage_mark: refreshed running processes\n");
         break;
     }
+#endif
     default: {
         pr_err("manage_mark: invalid operation %u\n", cmd.operation);
         return -EINVAL;
@@ -951,6 +1063,12 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .perm_check = always_allow
     },
     {
+        .cmd = KSU_IOCTL_GET_FULL_VERSION,
+        .name = "GET_FULL_VERSION",
+        .handler = do_get_full_version,
+        .perm_check = always_allow
+    },
+    {
         .cmd = KSU_IOCTL_REPORT_EVENT,
         .name = "REPORT_EVENT",
         .handler = do_report_event,
@@ -1108,6 +1226,42 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .cmd = KSU_IOCTL_SET_UTS_VIEW_CONFIG,
         .name = "SET_UTS_VIEW_CONFIG",
         .handler = do_set_uts_view_config,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_GET_NETISOLATE_CONFIG,
+        .name = "GET_NETISOLATE_CONFIG",
+        .handler = do_get_netisolate_config,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_SET_NETISOLATE_CONFIG,
+        .name = "SET_NETISOLATE_CONFIG",
+        .handler = do_set_netisolate_config,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_GET_NETISOLATE_POLICIES,
+        .name = "GET_NETISOLATE_POLICIES",
+        .handler = do_get_netisolate_policies,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_SET_NETISOLATE_POLICIES,
+        .name = "SET_NETISOLATE_POLICIES",
+        .handler = do_set_netisolate_policies,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_GET_NETISOLATE_EVENTS,
+        .name = "GET_NETISOLATE_EVENTS",
+        .handler = do_get_netisolate_events,
+        .perm_check = manager_or_root
+    },
+    {
+        .cmd = KSU_IOCTL_CLEAR_NETISOLATE_EVENTS,
+        .name = "CLEAR_NETISOLATE_EVENTS",
+        .handler = do_clear_netisolate_events,
         .perm_check = manager_or_root
     },
     {

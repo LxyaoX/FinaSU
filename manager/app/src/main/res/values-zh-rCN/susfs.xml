@@ -17,6 +17,14 @@
     <string name="susfs_failed">应用失败</string>
     <string name="susfs_pending">待重启</string>
     <string name="susfs_deferred">UTS 视图生效中，已暂缓</string>
+    <string name="susfs_idle">无需应用</string>
+    <string name="susfs_idle_hint">当前没有配置规则或由 FinaSU 管理的设置。</string>
+    <string name="susfs_deferred_hint">UTS 视图正在提供内核信息伪装，因此 SUSFS uname 暂未应用。</string>
+    <string name="susfs_saved_reboot">配置已保存；本次启动未重放。可立即应用，或开启“开机应用”。</string>
+    <string name="susfs_apply_saved">保存并立即应用</string>
+    <string name="susfs_apply_saved_title">应用已保存的配置？</string>
+    <string name="susfs_apply_saved_message">配置已经保存。现在应用到本次启动吗？</string>
+    <string name="susfs_apply_saved_action">立即应用</string>
     <string name="susfs_probe">正在检测 SUSFS…</string>
     <string name="susfs_absent">未检测到 SUSFS</string>
     <string name="susfs_readonly">未知协议 · 只读</string>
