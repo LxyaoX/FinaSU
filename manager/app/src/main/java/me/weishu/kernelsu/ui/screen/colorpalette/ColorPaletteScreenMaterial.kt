@@ -40,7 +40,6 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.outlined.ToggleOn
-import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -73,7 +72,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -102,17 +100,6 @@ private val themeModeChoices = listOf(
     ThemeModeChoice(ColorMode.SYSTEM, Icons.Filled.AutoAwesome, R.string.settings_theme_mode_system),
 )
 
-private class ColorSpecChoice(
-    val spec: ColorSpec.SpecVersion,
-    val icon: ImageVector,
-    @StringRes val labelRes: Int,
-)
-
-private val colorSpecChoices = listOf(
-    ColorSpecChoice(ColorSpec.SpecVersion.SPEC_2021, Icons.Rounded.Build, R.string.color_standard_md3_2021),
-    ColorSpecChoice(ColorSpec.SpecVersion.SPEC_2025, Icons.Filled.AutoAwesome, R.string.color_standard_m3e_2025),
-)
-
 private val ThemeGroupModifier = Modifier
     .fillMaxWidth()
     .padding(horizontal = 16.dp)
@@ -126,7 +113,6 @@ fun ColorPaletteScreenMaterial(
     val currentColorMode = state.currentColorMode
     val currentKeyColor = state.uiState.keyColor
     val colorStyle = state.currentPaletteStyle
-    val colorSpec = state.currentColorSpec
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
     val activeMode = if (currentColorMode.isAmoled) ColorMode.DARK else currentColorMode
@@ -136,7 +122,6 @@ fun ColorPaletteScreenMaterial(
         isDark = darkTheme,
         isAmoled = currentColorMode.isAmoled,
         paletteStyle = colorStyle,
-        colorSpec = colorSpec,
     ).primary
 
     ExpressiveScaffold(
@@ -199,17 +184,6 @@ fun ColorPaletteScreenMaterial(
                                     onSelect = { color ->
                                         haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                                         actions.onSetKeyColor(color)
-                                    }
-                                )
-                            }
-                        },
-                        {
-                            SegmentedItemContainer {
-                                ColorSpecRow(
-                                    selected = colorSpec,
-                                    onSelect = { spec ->
-                                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                                        actions.onSetColorSpec(spec.name)
                                     }
                                 )
                             }
@@ -464,29 +438,6 @@ private fun KeyColorDot(
                 contentDescription = null,
                 modifier = Modifier.size(28.dp),
                 tint = checkColor
-            )
-        }
-    }
-}
-
-@Composable
-private fun ColorSpecRow(
-    selected: ColorSpec.SpecVersion,
-    onSelect: (ColorSpec.SpecVersion) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        colorSpecChoices.forEach { choice ->
-            SegmentedSegment(
-                icon = choice.icon,
-                label = stringResource(choice.labelRes),
-                selected = selected == choice.spec,
-                onClick = { onSelect(choice.spec) },
-                modifier = Modifier.weight(1f)
             )
         }
     }

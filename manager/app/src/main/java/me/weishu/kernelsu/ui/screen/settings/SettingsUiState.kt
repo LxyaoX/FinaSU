@@ -2,7 +2,6 @@ package me.weishu.kernelsu.ui.screen.settings
 
 import androidx.compose.runtime.Immutable
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
@@ -20,7 +19,6 @@ data class SettingsUiState(
     val themeMode: Int = 0,
     val keyColor: Int = 0,
     val colorStyle: String = PaletteStyle.TonalSpot.name,
-    val colorSpec: String = ColorSpec.SpecVersion.SPEC_2025.name,
     val enablePredictiveBack: Boolean = false,
     val enableNavigationBadge: Boolean = true,
     val pageScale: Float = 1.0f,

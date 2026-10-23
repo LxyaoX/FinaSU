@@ -18,7 +18,6 @@ interface SettingsRepository {
     var themeMode: Int
     var keyColor: Int
     var colorStyle: String
-    var colorSpec: String
     var useSystemDynamicColor: Boolean
     var colorGenerationMode: String
     var colorContrast: String

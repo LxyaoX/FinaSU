@@ -12,6 +12,9 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 
+/** The color standard every scheme is generated with; see [effectiveFor] for the one exception. */
+private val DEFAULT_COLOR_SPEC = ColorSpec.SpecVersion.SPEC_2025
+
 fun ColorScheme.amoledBackground(amoled: Boolean): ColorScheme =
     if (!amoled) this
     else copy(
@@ -47,7 +50,6 @@ fun rememberKernelSUColorScheme(
     isDark: Boolean,
     isAmoled: Boolean,
     paletteStyle: PaletteStyle,
-    colorSpec: ColorSpec.SpecVersion,
     contrastLevel: Double = 0.0,
     generationMode: String = "custom",
 ): ColorScheme {
@@ -71,7 +73,9 @@ fun rememberKernelSUColorScheme(
         isDark = isDark,
         isAmoled = isAmoled,
         style = paletteStyle,
-        specVersion = colorSpec.effectiveFor(paletteStyle),
+        // Spec 2025 is the only standard this build knows. A palette style without 2025
+        // definitions falls back to its own, which is a library constraint, not a choice.
+        specVersion = DEFAULT_COLOR_SPEC.effectiveFor(paletteStyle),
         contrastLevel = if (generationMode == "custom") contrastLevel else 0.0,
     ).withSemanticError(isDark).amoledBackground(isAmoled)
 }

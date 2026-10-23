@@ -16,7 +16,7 @@ internal object ThemeSettingsMapping {
     val importDefaults: Map<String, Any> = mapOf(
         "customColor" to "indigo", "homeLayoutStyle" to "circle", "statsTopLayout" to "list",
         "nightModeEnabled" to true, "nightModeFollowSys" to true, "useSystemDynamicColor" to true,
-        "colorGenerationMode" to "classic", "colorStandard" to "MD3_2021",
+        "colorGenerationMode" to "classic", "colorStandard" to "M3E_2025",
         "colorStyle" to "TONAL_SPOT", "colorContrast" to "STANDARD",
         "isListWorkingCardModeHidden" to false,
     )
@@ -44,7 +44,9 @@ internal object ThemeSettingsMapping {
         json.put("nightModeFollowSys", mode.isSystem)
         json.put("useSystemDynamicColor", repo.useSystemDynamicColor)
         json.put("colorGenerationMode", repo.colorGenerationMode)
-        json.put("colorStandard", if (repo.colorSpec == "SPEC_2025") "M3E_2025" else "MD3_2021")
+        // The 2025 standard is the only one this build generates; the field stays in the protocol
+        // so a theme exported here still reads as current in another manager.
+        json.put("colorStandard", "M3E_2025")
         json.put("colorStyle", styles.entries.firstOrNull { it.value.name == repo.colorStyle }?.key ?: "TONAL_SPOT")
         json.put("colorContrast", repo.colorContrast)
         json.put("statsTopLayout", repo.statsTopLayout)
@@ -67,10 +69,8 @@ internal object ThemeSettingsMapping {
         }
         if (json.has("useSystemDynamicColor")) repo.useSystemDynamicColor = json.getBoolean("useSystemDynamicColor")
         if (json.has("colorGenerationMode")) repo.colorGenerationMode = json.getString("colorGenerationMode")
-        if (json.has("colorStandard")) repo.colorSpec = when (json.getString("colorStandard")) {
-            "M3E_2025" -> "SPEC_2025"
-            else -> "SPEC_2021"
-        }
+        // `colorStandard` is accepted and ignored: older themes (and FolkPatch's) carry it, but this
+        // build has no 2021 standard to switch to.
         if (json.has("colorStyle")) styles[json.getString("colorStyle")]?.let { repo.colorStyle = it.name }
         if (json.has("colorContrast")) repo.colorContrast = json.getString("colorContrast")
         if (json.has("statsTopLayout")) repo.statsTopLayout = json.getString("statsTopLayout")

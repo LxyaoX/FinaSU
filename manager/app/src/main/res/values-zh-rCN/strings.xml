@@ -312,8 +312,6 @@
     <string name="settings_module_description_max_lines_summary">超过此行数的模块介绍将自动折叠，点击卡片可展开全文</string>
     <string name="unit_lines">行</string>
     <string name="settings_color_spec">色彩标准</string>
-    <string name="color_standard_md3_2021">MD3 2021</string>
-    <string name="color_standard_m3e_2025">M3e 2025</string>
     <string name="settings_color_style">色彩风格</string>
     <string name="palette_style_tonal_spot">柔和</string>
     <string name="palette_style_neutral">中性</string>

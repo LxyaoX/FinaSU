@@ -74,7 +74,6 @@ fun MaterialKernelSUTheme(
         isDark = darkTheme,
         isAmoled = amoledMode,
         paletteStyle = appSettings.paletteStyle,
-        colorSpec = appSettings.colorSpec,
         contrastLevel = appSettings.contrastLevel,
         generationMode = appSettings.colorGenerationMode,
     )
@@ -89,7 +88,6 @@ fun MaterialKernelSUTheme(
         isDark = darkNeutral,
         isAmoled = false,
         paletteStyle = PaletteStyle.Neutral,
-        colorSpec = appSettings.colorSpec,
         contrastLevel = appSettings.contrastLevel,
         generationMode = appSettings.colorGenerationMode,
     )

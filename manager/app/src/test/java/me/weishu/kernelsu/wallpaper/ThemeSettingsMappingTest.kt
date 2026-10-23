@@ -27,7 +27,9 @@ class ThemeSettingsMappingTest {
         assertEquals(2, values["themeMode"])
         assertEquals(false, values["useSystemDynamicColor"])
         assertEquals("classic", values["colorGenerationMode"])
-        assertEquals("SPEC_2021", values["colorSpec"])
+        // `colorStandard` is protocol residue now: an old M3 2021 theme still imports, it just has
+        // no setting to write.
+        assertEquals(null, values["colorSpec"])
         assertEquals("Expressive", values["colorStyle"])
         assertEquals("HIGH", values["colorContrast"])
         assertEquals("grid", values["statsTopLayout"])

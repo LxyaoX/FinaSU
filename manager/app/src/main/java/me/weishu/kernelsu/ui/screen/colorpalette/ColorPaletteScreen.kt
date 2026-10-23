@@ -6,7 +6,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.theme.ColorMode
 import me.weishu.kernelsu.ui.viewmodel.SettingsViewModel
@@ -21,16 +20,10 @@ fun ColorPaletteScreen() {
     } catch (_: Exception) {
         PaletteStyle.TonalSpot
     }
-    val currentColorSpec = try {
-        ColorSpec.SpecVersion.valueOf(uiState.colorSpec)
-    } catch (_: Exception) {
-        ColorSpec.SpecVersion.SPEC_2025
-    }
     val state = ColorPaletteUiState(
         uiState = uiState,
         currentColorMode = ColorMode.fromValue(uiState.themeMode),
         currentPaletteStyle = currentPaletteStyle,
-        currentColorSpec = currentColorSpec,
     )
     val actions = ColorPaletteScreenActions(
         onBack = dropUnlessResumed { navigator.pop() },
@@ -38,7 +31,6 @@ fun ColorPaletteScreen() {
         onSetKeyColor = viewModel::setKeyColor,
         onSetColorMode = viewModel::setColorMode,
         onSetColorStyle = viewModel::setColorStyle,
-        onSetColorSpec = viewModel::setColorSpec,
     )
 
     ColorPaletteScreenMaterial(state, actions)

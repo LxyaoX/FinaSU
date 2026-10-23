@@ -421,8 +421,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_module_description_max_lines_summary">Descriptions exceeding this line count will be folded automatically.</string>
     <string name="unit_lines">Lines</string>
     <string name="settings_color_spec">Color Spec</string>
-    <string name="color_standard_md3_2021">MD3 2021</string>
-    <string name="color_standard_m3e_2025">M3e 2025</string>
     <string name="settings_color_style">Color Style</string>
     <string name="palette_style_tonal_spot">Soft</string>
     <string name="palette_style_neutral">Neutral</string>

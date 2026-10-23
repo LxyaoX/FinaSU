@@ -46,18 +46,25 @@ data class AppSettings(
     val colorMode: ColorMode,
     val keyColor: Int,
     val paletteStyle: PaletteStyle,
-    val colorSpec: ColorSpec.SpecVersion,
     val useSystemDynamicColor: Boolean = keyColor == 0,
     val colorGenerationMode: String = "custom",
     val contrastLevel: Double = 0.0,
 )
 
+/**
+ * Palette styles that ship 2025 color definitions in materialkolor.
+ *
+ * Everything here is generated with the 2025 spec, which is the only standard this build offers;
+ * the rest fall back to the standard their definitions were written against. That is a library
+ * constraint, not a setting - there is no user-facing 2021 mode.
+ */
 val PaletteStyle.supportsSpec2025: Boolean
     get() = this == PaletteStyle.TonalSpot ||
             this == PaletteStyle.Neutral ||
             this == PaletteStyle.Vibrant ||
             this == PaletteStyle.Expressive
 
+/** The spec a scheme is actually generated with for [style]; see [supportsSpec2025]. */
 fun ColorSpec.SpecVersion.effectiveFor(style: PaletteStyle): ColorSpec.SpecVersion =
     if (this == ColorSpec.SpecVersion.SPEC_2025 && !style.supportsSpec2025) {
         ColorSpec.SpecVersion.SPEC_2021
@@ -75,20 +82,20 @@ object ThemeController {
         } catch (_: Exception) {
             PaletteStyle.TonalSpot
         }
-        val colorSpecStr = repo.colorSpec
-        val colorSpec = try {
-            ColorSpec.SpecVersion.valueOf(colorSpecStr)
-        } catch (_: Exception) {
-            ColorSpec.SpecVersion.SPEC_2025
-        }
 
         val contrast = when (repo.colorContrast) {
             "MEDIUM" -> 0.5
             "HIGH" -> 1.0
             else -> 0.0
         }
-        return AppSettings(colorMode, keyColor, paletteStyle, colorSpec,
-            repo.useSystemDynamicColor, repo.colorGenerationMode, contrast)
+        return AppSettings(
+            colorMode = colorMode,
+            keyColor = keyColor,
+            paletteStyle = paletteStyle,
+            useSystemDynamicColor = repo.useSystemDynamicColor,
+            colorGenerationMode = repo.colorGenerationMode,
+            contrastLevel = contrast,
+        )
     }
 }
 

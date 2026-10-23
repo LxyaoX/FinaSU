@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.edit
 import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
 import com.topjohnwu.superuser.ShellUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -106,10 +105,6 @@ class SettingsRepositoryImpl : SettingsRepository {
     override var colorStyle: String
         get() = prefs.getString("color_style", PaletteStyle.TonalSpot.name) ?: PaletteStyle.TonalSpot.name
         set(value) = prefs.edit { putString("color_style", value) }
-
-    override var colorSpec: String
-        get() = prefs.getString("color_spec", ColorSpec.SpecVersion.SPEC_2025.name) ?: ColorSpec.SpecVersion.SPEC_2025.name
-        set(value) = prefs.edit { putString("color_spec", value) }
 
     override var useSystemDynamicColor: Boolean
         get() = prefs.getBoolean("use_system_dynamic_color", keyColor == 0)

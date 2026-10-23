@@ -60,7 +60,6 @@ class SettingsViewModel(
             val homeLayoutStyle = repo.homeLayoutStyle
             val themeStoreMode = repo.themeStoreMode
             val colorStyle = repo.colorStyle
-            val colorSpec = repo.colorSpec
             val isLkmMode = repo.isLkmMode()
 
             // Async loading for natives/features
@@ -142,7 +141,6 @@ class SettingsViewModel(
                     hideHomeMount = repo.hideHomeMount,
                     susfsDetected = susfsDetected,
                     colorStyle = colorStyle,
-                    colorSpec = colorSpec,
                     suCompatStatus = suCompatStatus,
                     suCompatMode = suCompatMode,
                     isSuEnabled = isSuEnabled,
@@ -382,12 +380,6 @@ class SettingsViewModel(
         repo.colorStyle = style
         repo.colorGenerationMode = "custom"
         _uiState.update { it.copy(colorStyle = style) }
-    }
-
-    fun setColorSpec(spec: String) {
-        repo.colorSpec = spec
-        repo.colorGenerationMode = "custom"
-        _uiState.update { it.copy(colorSpec = spec) }
     }
 
     fun setEnablePredictiveBack(enabled: Boolean) {
