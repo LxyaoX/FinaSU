@@ -1,12 +1,14 @@
 package me.weishu.kernelsu.ui.screen.netisolate
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,6 +56,7 @@ import me.weishu.kernelsu.data.netisolate.NetIsolatePolicy
 import me.weishu.kernelsu.data.netisolate.NetIsolateStatus
 import me.weishu.kernelsu.data.uts.UtsTarget
 import me.weishu.kernelsu.data.uts.UtsTargetApp
+import me.weishu.kernelsu.ui.component.AppIconImage
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
@@ -60,6 +64,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
+import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.uts.TargetAppSheet
 import me.weishu.kernelsu.ui.viewmodel.NetIsolateViewModel
@@ -374,6 +379,11 @@ private fun NetIsolatePolicySheet(
     val policiesByUid = remember(status.policies) {
         status.policies.associateBy(NetIsolatePolicy::uid)
     }
+    var expandedUid by rememberSaveable { mutableStateOf<Int?>(null) }
+    val orderedTargets = remember(targets) { targets.sortedBy(UtsTarget::uid) }
+    val defaultLabel = stringResource(R.string.netisolate_policy_default)
+    val loopbackLabel = stringResource(R.string.netisolate_policy_loopback)
+    val strictLabel = stringResource(R.string.netisolate_policy_strict)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -385,63 +395,119 @@ private fun NetIsolatePolicySheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.92f)
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
+                .fillMaxHeight(0.92f),
         ) {
-            Text(
-                text = stringResource(R.string.netisolate_app_policies),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = stringResource(R.string.netisolate_policy_summary),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(targets.sortedBy(UtsTarget::uid), key = UtsTarget::uid) { target ->
+            Column(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.netisolate_app_policies),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    text = stringResource(R.string.netisolate_policy_summary),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+            ) {
+                items(orderedTargets, key = UtsTarget::uid) { target ->
                     val app = appByUid[target.uid]
                     val policy = policiesByUid[target.uid] ?: NetIsolatePolicy(
                         uid = target.uid,
                         strictSocket = status.strictSocket,
                         allowLoopback = status.allowLoopback,
                     )
-                    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                        Text(
-                            text = app?.label ?: target.packageName,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = app?.packageName ?: target.packageName,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        SegmentedColumn {
-                            item {
-                                PolicyChoice(
-                                    title = stringResource(R.string.netisolate_policy_default),
-                                    selected = !policy.strictSocket && !policy.allowLoopback,
-                                    enabled = !busy,
-                                    onClick = { onSetPolicy(target.uid, false, false) },
-                                )
-                            }
-                            item {
-                                PolicyChoice(
-                                    title = stringResource(R.string.netisolate_policy_loopback),
-                                    selected = policy.allowLoopback,
-                                    enabled = !busy && status.allowLoopbackSupported,
-                                    onClick = { onSetPolicy(target.uid, false, true) },
-                                )
-                            }
-                            item {
-                                PolicyChoice(
-                                    title = stringResource(R.string.netisolate_policy_strict),
-                                    selected = policy.strictSocket,
-                                    enabled = !busy && status.strictSocketSupported,
-                                    onClick = { onSetPolicy(target.uid, true, false) },
-                                )
-                            }
+                    val expanded = expandedUid == target.uid
+                    val policyLabel = when {
+                        policy.strictSocket -> strictLabel
+                        policy.allowLoopback -> loopbackLabel
+                        else -> defaultLabel
+                    }
+                    val policyBackground = when {
+                        policy.strictSocket -> MaterialTheme.colorScheme.errorContainer
+                        policy.allowLoopback -> MaterialTheme.colorScheme.secondaryContainer
+                        else -> MaterialTheme.colorScheme.primary
+                    }
+                    val policyForeground = when {
+                        policy.strictSocket -> MaterialTheme.colorScheme.onErrorContainer
+                        policy.allowLoopback -> MaterialTheme.colorScheme.onSecondaryContainer
+                        else -> MaterialTheme.colorScheme.onPrimary
+                    }
+
+                    SegmentedColumn {
+                        item(key = "app-${target.uid}") {
+                            SegmentedListItem(
+                                selected = expanded,
+                                onClick = {
+                                    expandedUid = if (expanded) null else target.uid
+                                },
+                                headlineContent = {
+                                    Text(
+                                        text = app?.label ?: target.packageName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = app?.packageName ?: target.packageName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
+                                leadingContent = {
+                                    app?.packageInfo?.let { packageInfo ->
+                                        AppIconImage(
+                                            packageInfo = packageInfo,
+                                            label = app.label,
+                                            modifier = Modifier.size(48.dp),
+                                        )
+                                    } ?: run {
+                                        Icon(
+                                            imageVector = Icons.Filled.Apps,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(40.dp),
+                                        )
+                                    }
+                                },
+                                trailingContent = {
+                                    StatusTag(
+                                        label = policyLabel,
+                                        backgroundColor = policyBackground,
+                                        contentColor = policyForeground,
+                                    )
+                                },
+                            )
+                        }
+                        item(key = "default-${target.uid}", visible = expanded) {
+                            PolicyChoice(
+                                title = defaultLabel,
+                                selected = !policy.strictSocket && !policy.allowLoopback,
+                                enabled = !busy,
+                                onClick = { onSetPolicy(target.uid, false, false) },
+                            )
+                        }
+                        item(key = "loopback-${target.uid}", visible = expanded) {
+                            PolicyChoice(
+                                title = loopbackLabel,
+                                selected = policy.allowLoopback,
+                                enabled = !busy && status.allowLoopbackSupported,
+                                onClick = { onSetPolicy(target.uid, false, true) },
+                            )
+                        }
+                        item(key = "strict-${target.uid}", visible = expanded) {
+                            PolicyChoice(
+                                title = strictLabel,
+                                selected = policy.strictSocket,
+                                enabled = !busy && status.strictSocketSupported,
+                                onClick = { onSetPolicy(target.uid, true, false) },
+                            )
                         }
                     }
                 }
