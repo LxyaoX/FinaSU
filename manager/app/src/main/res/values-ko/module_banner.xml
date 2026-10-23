@@ -13,7 +13,6 @@
     <string name="module_card_style_icon">아이콘</string>
 
     <string name="settings_module_banner">모듈 배너</string>
-    <string name="module_banner_title">모듈 배너</string>
     <string name="module_banner_enabled">모듈 배너 사용</string>
     <string name="module_banner_enabled_summary">모듈 카드에 배너 이미지를 표시합니다.</string>
     <string name="module_banner_folk">모듈 배너 사용자 지정</string>
@@ -43,12 +42,10 @@
     <string name="module_banner_reset">초기화</string>
 
     <string name="api_marketplace_title">API 마켓</string>
-    <string name="api_marketplace_subtitle">공유 배너 API</string>
     <string name="api_marketplace_empty">지금은 사용할 수 있는 항목이 없습니다</string>
     <string name="api_marketplace_error">마켓을 불러오지 못했습니다</string>
     <string name="api_marketplace_retry">재시도</string>
     <string name="api_marketplace_apply">적용</string>
     <string name="api_marketplace_applied">적용됨</string>
-    <string name="api_marketplace_url">URL</string>
     <string name="api_marketplace_verify_failed">소스가 올바른 이미지를 반환하지 않았습니다</string>
 </resources>

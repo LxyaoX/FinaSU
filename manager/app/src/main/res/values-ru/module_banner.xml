@@ -13,7 +13,6 @@
     <string name="module_card_style_icon">Значок</string>
 
     <string name="settings_module_banner">Баннер модуля</string>
-    <string name="module_banner_title">Баннер модуля</string>
     <string name="module_banner_enabled">Включить баннер модуля</string>
     <string name="module_banner_enabled_summary">Показывает баннер на карточках модулей.</string>
     <string name="module_banner_folk">Настроить баннер модуля</string>
@@ -43,12 +42,10 @@
     <string name="module_banner_reset">Сбросить</string>
 
     <string name="api_marketplace_title">Магазин API</string>
-    <string name="api_marketplace_subtitle">Общие API баннеров</string>
     <string name="api_marketplace_empty">Сейчас ничего нет</string>
     <string name="api_marketplace_error">Не удалось загрузить магазин</string>
     <string name="api_marketplace_retry">Повторить</string>
     <string name="api_marketplace_apply">Применить</string>
     <string name="api_marketplace_applied">Применено</string>
-    <string name="api_marketplace_url">URL</string>
     <string name="api_marketplace_verify_failed">Источник не вернул допустимое изображение</string>
 </resources>

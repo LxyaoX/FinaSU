@@ -13,7 +13,6 @@
     <string name="module_card_style_icon">图标</string>
 
     <string name="settings_module_banner">模组横幅</string>
-    <string name="module_banner_title">模组横幅</string>
     <string name="module_banner_enabled">启用模组横幅</string>
     <string name="module_banner_enabled_summary">在模组卡片上显示横幅图。</string>
     <string name="module_banner_folk">自定义模组横幅</string>
@@ -43,12 +42,10 @@
     <string name="module_banner_reset">重置</string>
 
     <string name="api_marketplace_title">API 市场</string>
-    <string name="api_marketplace_subtitle">共享横幅 API</string>
     <string name="api_marketplace_empty">目前没有可用的内容</string>
     <string name="api_marketplace_error">市场加载失败</string>
     <string name="api_marketplace_retry">重试</string>
     <string name="api_marketplace_apply">应用</string>
     <string name="api_marketplace_applied">已应用</string>
-    <string name="api_marketplace_url">URL</string>
     <string name="api_marketplace_verify_failed">来源未返回有效图片</string>
 </resources>

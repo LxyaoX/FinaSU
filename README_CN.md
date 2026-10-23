@@ -64,7 +64,7 @@ SUSFS 管理按能力开关。仅在支持的内核上显示相关控件，每�
 
 ### Folk-Mount
 
-Folk-Mount 是内置的模块挂载引擎，只有 NoMount（VFS，默认）和关闭两种模式。magic mount 引擎仅作为 NoMount 驱动不可用时的自动回退保留。
+Folk-Mount 是管理器对模块挂载后端的称呼，只有两种设置：NoMount（VFS 驱动，默认）与关闭。
 
 ### NoMount
 

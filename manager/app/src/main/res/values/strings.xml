@@ -70,10 +70,8 @@
     <string name="sulog_filter_daemon_restart">Daemon restart</string>
     <string name="module_failed_to_enable">Failed to enable module: %s</string>
     <string name="module_failed_to_disable">Failed to disable module: %s</string>
-    <string name="module_empty">No module installed</string>
     <string name="module">Module</string>
     <string name="module_install_prompt_with_name">The following modules will be installed: %1$s</string>
-    <string name="module_sort_action_first">Action first</string>
     <string name="module_sort_enabled_first">Enabled first</string>
     <string name="module_sort">Sort order</string>
     <string name="module_sort_priority">Sort priority</string>
@@ -213,12 +211,6 @@
     <string name="settings_check_update_summary">Automatically check for updates when opening the app.</string>
     <string name="settings_enable_predictive_back">Predictive back gesture</string>
     <string name="settings_enable_predictive_back_summary">Enable predictive back gesture support.</string>
-    <string name="settings_enable_swipe_dismiss">Swipe back gesture</string>
-    <string name="settings_enable_swipe_dismiss_summary">Swipe from the edge to return to the previous page.</string>
-    <string name="settings_pager_gesture_mode">Pager gesture mode</string>
-    <string name="settings_pager_gesture_native">Default</string>
-    <string name="settings_pager_gesture_cross_axis">Cross-axis</string>
-    <string name="settings_pager_gesture_ios_like">iOS-like</string>
     <string name="settings_module_check_update">Check for module updates</string>
     <string name="grant_root_failed">Failed to grant Root!</string>
     <string name="root_recovering">Restoring root access...</string>
@@ -363,11 +355,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_mode_enable_by_default">Enable (Default)</string>
     <string name="settings_mode_disable_until_reboot">Disable until Reboot</string>
     <string name="settings_mode_disable_always">Always disable</string>
-    <string name="processing">Processing…</string>
-    <string name="refresh_pulling">Pull down to refresh</string>
-    <string name="refresh_release">Release to refresh</string>
-    <string name="refresh_refresh">Refreshing…</string>
-    <string name="refresh_complete">Refreshed successfully</string>
     <string name="undo">Undo</string>
     <string name="module_undo_uninstall_success">Successfully canceled uninstall of %s</string>
     <string name="module_undo_uninstall_failed">Failed to undo uninstall: %s</string>
@@ -410,18 +397,12 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_switch_icon_desc">Show status icons on toggle switches</string>
     <string name="settings_discrete_slider">Discrete Slider</string>
     <string name="settings_discrete_slider_desc">Show tick marks on slider tracks</string>
-    <string name="settings_monet">Enable Monet</string>
-    <string name="settings_key_color">Key color</string>
     <string name="settings_key_color_default">Ambient</string>
-    <string name="settings_ui_mode">UI Style</string>
-    <string name="settings_ui_mode_summary">Choose the interface style.</string>
     <string name="settings_page_scale">Page Scale</string>
     <string name="settings_page_scale_summary">Adjust the global display scale.</string>
     <string name="settings_module_description_max_lines">Module description max lines</string>
     <string name="settings_module_description_max_lines_summary">Descriptions exceeding this line count will be folded automatically.</string>
     <string name="unit_lines">Lines</string>
-    <string name="settings_color_spec">Color Spec</string>
-    <string name="settings_color_style">Color Style</string>
     <string name="palette_style_tonal_spot">Soft</string>
     <string name="palette_style_neutral">Neutral</string>
     <string name="palette_style_vibrant">Vibrant</string>
@@ -464,14 +445,7 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="no_such_module">Module %s does not exist</string>
     <string name="module_unavailable">Module %s is disabled, updating, or pending removal</string>
     <string name="select_file_tip_nogki">Please select the GKI device image file you want to patch!</string>
-    <string name="current_kmi">KMI version of this device: %s</string>
     <string name="current_device_kmi">This device KMI</string>
-    <string name="settings_enable_blur">Blur</string>
-    <string name="settings_enable_blur_summary">Enable blur effect for top and bottom bars.</string>
-    <string name="settings_floating_bottom_bar">Floating bottom bar</string>
-    <string name="settings_floating_bottom_bar_summary">Use Apple style floating bottom bar.</string>
-    <string name="settings_enable_glass">Frosted glass</string>
-    <string name="settings_enable_glass_summary">Enable frosted glass effect for floating bottom bar.</string>
     <string name="show_only_primary_user_apps">Show only primary user apps</string>
     <string name="settings_auto_jailbreak">Auto jailbreak</string>
     <string name="settings_auto_jailbreak_summary">Automatically use Magica to escalate privileges when Permissive SELinux is detected at boot. Requires granting autostart permission to this app.</string>
@@ -504,8 +478,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="profile_flags_desc_no_new_privs">Prevent further privilege escalation via KernelSU from within the context of this root profile</string>
     <string name="module_shortcut_copy_scheme">Copy URL scheme</string>
     <string name="module_shortcut_scheme_copied">URL scheme copied</string>
-    <string name="nav_rail_expand">Expand navigation rail</string>
-    <string name="nav_rail_collapse">Collapse navigation rail</string>
     <string name="settings_navigation_badge">Navigation badge</string>
     <string name="settings_navigation_badge_summary">Show granted app and enabled module counts on the navigation bar</string>
     <string name="settings_nav_custom_icons">Custom navigation icons</string>
@@ -513,8 +485,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_nav_layout_title">Navigation layout</string>
     <string name="settings_show_superuser">Show superuser</string>
     <string name="settings_show_module">Show module</string>
-    <string name="settings_floating_bar">Floating navigation bar</string>
-    <string name="settings_floating_bar_summary">Detach the bottom bar into a floating pill</string>
     <string name="settings_floating_bar_style">Style</string>
     <string name="settings_floating_bar_style_standard">Standard</string>
     <string name="settings_floating_bar_style_drawer">Drawer</string>
@@ -598,7 +568,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="wallpaper_removed">Wallpaper removed</string>
     <string name="wallpaper_save_failed">Failed to load the image</string>
     <string name="wallpaper_work_card_section">Work card</string>
-    <string name="wallpaper_work_card_options_title">Work card background</string>
     <string name="wallpaper_work_card_enable">Work card background</string>
     <string name="wallpaper_work_card_enable_summary">Show an image behind the grid work card</string>
     <string name="wallpaper_work_card_pick">Choose work card image</string>
@@ -637,7 +606,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="theme_store_mode_compat_hint">Compatibility mode: the file opens in your browser. Save it and open the .fpt to install the theme.</string>
     <string name="theme_store_mode_onboarding_title">Choose how themes are downloaded</string>
     <string name="theme_store_mode_onboarding_msg">How would you like to browse and install themes? You can change this later in Settings.</string>
-    <string name="theme_store_search_hint">Search themes</string>
     <string name="theme_store_filter_title">Filters</string>
     <string name="theme_store_filter_author">Author</string>
     <string name="theme_store_filter_source">Source</string>
@@ -665,7 +633,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="theme_download_pause">Pause</string>
     <string name="theme_download_resume">Resume</string>
     <string name="my_themes_title">My themes</string>
-    <string name="my_themes_search_hint">Search my themes</string>
     <string name="my_themes_empty">No themes downloaded yet</string>
     <string name="my_themes_delete">Delete</string>
     <string name="my_themes_delete_title">Delete theme</string>
@@ -676,7 +643,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="theme_store_download_complete">Download complete</string>
     <string name="theme_store_download_complete_message">\"%1$s\" is ready in My themes</string>
     <string name="theme_store_go_my_themes">Go to My themes</string>
-    <string name="my_themes_refresh">Refresh</string>
     <string name="settings_category_backup">Backup</string>
     <string name="backup_section_targets">Backup to</string>
     <string name="backup_section_content">What to back up</string>
@@ -720,7 +686,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="install_backup_before_flash_summary">Save a snapshot to your backup destinations first</string>
     <string name="backup_restore_title">Backups</string>
     <string name="backup_open_list">Manage backups</string>
-    <string name="backup_restore_action">Restore</string>
     <string name="backup_empty_list">No backups yet</string>
     <string name="backup_partitions">Partitions</string>
     <string name="backup_restored">Restored %1$s</string>
@@ -767,9 +732,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_search_hint">Search settings</string>
     <string name="settings_search_empty">No settings found</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-<string name="support_or_donate">Support / Donate</string>
-    <string name="github">GitHub</string>
-    <string name="telegram">Telegram</string>
     <string name="module_preinit_no_space">Preinit not synchronized: insufficient metadata space</string>
     <string name="module_preinit_error">Preinit synchronization failed; previous configuration retained</string>
     <string name="module_preinit_bootloop">Preinit paused after repeated boot attempts</string>

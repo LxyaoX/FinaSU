@@ -59,9 +59,7 @@
     <string name="superuser">超级用户</string>
     <string name="module_failed_to_enable">无法启用模块：%s</string>
     <string name="module_failed_to_disable">无法禁用模块：%s</string>
-    <string name="module_empty">没有安装模块</string>
     <string name="module">模块</string>
-    <string name="module_sort_action_first">可执行优先</string>
     <string name="module_sort_enabled_first">已启用优先</string>
     <string name="module_sort">排序方式</string>
     <string name="module_sort_priority">排序优先级</string>
@@ -198,12 +196,6 @@
     <string name="settings_check_update_summary">在应用启动后自动检查是否有最新版</string>
     <string name="settings_enable_predictive_back">预测性返回手势</string>
     <string name="settings_enable_predictive_back_summary">启用对预测性返回手势的支持</string>
-    <string name="settings_enable_swipe_dismiss">横移返回手势</string>
-    <string name="settings_enable_swipe_dismiss_summary">从屏幕边缘横移返回上一页</string>
-    <string name="settings_pager_gesture_mode">页面切换手势</string>
-    <string name="settings_pager_gesture_native">默认</string>
-    <string name="settings_pager_gesture_cross_axis">跨轴拦截</string>
-    <string name="settings_pager_gesture_ios_like">iOS 风格</string>
     <string name="settings_module_check_update">检查模块更新</string>
     <string name="grant_root_failed">获取 Root 失败！</string>
     <string name="root_recovering">正在恢复 Root 权限…</string>
@@ -254,11 +246,6 @@
     <string name="settings_kernel_umount_summary">在内核给需要的应用卸载模块</string>
     <string name="module_install_prompt_with_name">将安装以下模块：%1$s</string>
     <string name="confirm">确认</string>
-    <string name="processing">处理中…</string>
-    <string name="refresh_pulling">下拉刷新</string>
-    <string name="refresh_release">松开刷新</string>
-    <string name="refresh_refresh">正在刷新…</string>
-    <string name="refresh_complete">刷新成功</string>
     <string name="undo">撤销</string>
     <string name="module_undo_uninstall_success">成功撤销卸载 %s</string>
     <string name="module_undo_uninstall_failed">撤销卸载 %s 失败</string>
@@ -301,18 +288,12 @@
     <string name="settings_switch_icon_desc">为开关按钮添加状态指示图标</string>
     <string name="settings_discrete_slider">离散滑块</string>
     <string name="settings_discrete_slider_desc">在滑块轨道上显示刻度标记</string>
-    <string name="settings_monet">启用 Monet 颜色</string>
-    <string name="settings_key_color">强调色</string>
     <string name="settings_key_color_default">随光</string>
-    <string name="settings_ui_mode">界面风格</string>
-    <string name="settings_ui_mode_summary">选择应用的界面风格</string>
     <string name="settings_page_scale">界面缩放</string>
     <string name="settings_page_scale_summary">调整全局显示比例</string>
     <string name="settings_module_description_max_lines">模块描述最大行数</string>
     <string name="settings_module_description_max_lines_summary">超过此行数的模块介绍将自动折叠，点击卡片可展开全文</string>
     <string name="unit_lines">行</string>
-    <string name="settings_color_spec">色彩标准</string>
-    <string name="settings_color_style">色彩风格</string>
     <string name="palette_style_tonal_spot">柔和</string>
     <string name="palette_style_neutral">中性</string>
     <string name="palette_style_vibrant">活力</string>
@@ -357,15 +338,8 @@
     <string name="no_such_module">模块 %s 不存在</string>
     <string name="module_unavailable">模块 %s 被禁用，待更新或待卸载</string>
     <string name="select_file_tip_nogki">请选择要修补的 GKI 设备镜像文件</string>
-    <string name="current_kmi">本设备 KMI 版本：%s</string>
     <string name="current_device_kmi">当前设备的 KMI</string>
     <string name="module_action_success">模块 action 执行成功。</string>
-    <string name="settings_enable_blur">模糊</string>
-    <string name="settings_enable_blur_summary">启用顶栏和底栏的模糊效果</string>
-    <string name="settings_floating_bottom_bar">悬浮底栏</string>
-    <string name="settings_floating_bottom_bar_summary">使用 Apple 风格的悬浮底栏</string>
-    <string name="settings_enable_glass">毛玻璃</string>
-    <string name="settings_enable_glass_summary">启用悬浮底栏的毛玻璃效果</string>
     <string name="show_only_primary_user_apps">只显示主用户应用</string>
     <string name="settings_auto_jailbreak">自动越狱</string>
     <string name="settings_auto_jailbreak_summary">开机检测到 Permissive SELinux 时自动使用 Magica 提权。需要授予本应用自启动权限！</string>
@@ -498,8 +472,6 @@
     <string name="sulog_enable_action">启用</string>
     <string name="sulog_filter_title">按类型筛选</string>
     <string name="sulog_clean_title">清空日志</string>
-    <string name="nav_rail_expand">展开导航栏</string>
-    <string name="nav_rail_collapse">收起导航栏</string>
     <string name="settings_navigation_badge">导航栏角标</string>
     <string name="settings_navigation_badge_summary">在导航栏显示已授权应用和已启用模块数量</string>
     <string name="settings_nav_custom_icons">自定义底部导航图标</string>
@@ -507,8 +479,6 @@
     <string name="settings_nav_layout_title">导航布局设置</string>
     <string name="settings_show_superuser">显示超级用户</string>
     <string name="settings_show_module">显示模块</string>
-    <string name="settings_floating_bar">悬浮导航栏</string>
-    <string name="settings_floating_bar_summary">将底部栏分离为悬浮胶囊</string>
     <string name="settings_floating_bar_style">样式</string>
     <string name="settings_floating_bar_style_standard">标准</string>
     <string name="settings_floating_bar_style_drawer">抽屉</string>
@@ -592,7 +562,6 @@
     <string name="wallpaper_removed">壁纸已移除</string>
     <string name="wallpaper_save_failed">图片加载失败</string>
     <string name="wallpaper_work_card_section">工作卡片</string>
-    <string name="wallpaper_work_card_options_title">工作卡片背景</string>
     <string name="wallpaper_work_card_enable">工作卡片背景</string>
     <string name="wallpaper_work_card_enable_summary">在网格工作卡片后显示图片</string>
     <string name="wallpaper_work_card_pick">选择工作卡片图片</string>
@@ -631,7 +600,6 @@
     <string name="theme_store_mode_compat_hint">兼容模式：文件会在浏览器中打开。保存后打开 .fpt 即可安装主题。</string>
     <string name="theme_store_mode_onboarding_title">选择主题下载方式</string>
     <string name="theme_store_mode_onboarding_msg">你想怎么浏览和安装主题？之后可以在设置里修改。</string>
-    <string name="theme_store_search_hint">搜索主题</string>
     <string name="theme_store_filter_title">筛选</string>
     <string name="theme_store_filter_author">作者</string>
     <string name="theme_store_filter_source">来源</string>
@@ -656,7 +624,6 @@
     <string name="theme_download_pause">暂停</string>
     <string name="theme_download_resume">继续</string>
     <string name="my_themes_title">我的主题</string>
-    <string name="my_themes_search_hint">搜索我的主题</string>
     <string name="my_themes_empty">还没有下载任何主题</string>
     <string name="my_themes_delete">删除</string>
     <string name="my_themes_delete_title">删除主题</string>
@@ -707,7 +674,6 @@
     <string name="install_backup_before_flash_summary">先向备份目标保存一份快照</string>
     <string name="backup_restore_title">备份</string>
     <string name="backup_open_list">管理备份</string>
-    <string name="backup_restore_action">恢复</string>
     <string name="backup_empty_list">暂无备份</string>
     <string name="backup_partitions">分区</string>
     <string name="backup_restored">已恢复 %1$s</string>
@@ -742,7 +708,6 @@
     <string name="theme_store_download_complete">下载完成</string>
     <string name="theme_store_download_complete_message">「%1$s」已就绪，可在我的主题中查看</string>
     <string name="theme_store_go_my_themes">前往我的主题</string>
-    <string name="my_themes_refresh">刷新</string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_wallpaper_gallery">壁纸图鉴</string>
@@ -766,9 +731,6 @@
     <string name="settings_search_hint">搜索设置</string>
     <string name="settings_search_empty">未找到相关设置</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-<string name="support_or_donate">支持 / 捐赠</string>
-    <string name="github">GitHub</string>
-    <string name="telegram">Telegram</string>
     <string name="module_preinit_no_space">预初始化未同步：metadata 空间不足</string>
     <string name="module_preinit_error">预初始化同步失败，保留上次配置</string>
     <string name="module_preinit_bootloop">多次启动未完成，预初始化已暂停</string>

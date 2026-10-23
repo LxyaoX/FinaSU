@@ -10,7 +10,6 @@
     <string name="sui_manage">管理 Sui 權限</string>
     <string name="sui_manage_summary">讀取並修改各應用程式的 Shizuku 權限</string>
     <string name="sui_api_title">Shizuku API</string>
-    <string name="sui_version">承載內容 %1$s</string>
     <string name="sui_not_installed">未安裝</string>
     <string name="sui_dependency">Zygisk：%1$s</string>
     <string name="sui_state_disabled">未啟用</string>
@@ -47,8 +46,6 @@
     <string name="sui_diag_management">管理通道</string>
     <string name="sui_permissions_loading">正在讀取 Sui 權限…</string>
     <string name="sui_permissions_empty">沒有可顯示的應用程式</string>
-    <string name="sui_permissions_search">搜尋應用程式</string>
-    <string name="sui_permissions_only_configured">僅顯示已設定的應用程式</string>
     <string name="sui_default_mode">預設權限</string>
     <string name="sui_default_mode_summary">用於沒有個別設定權限的應用程式</string>
     <string name="sui_hidden_count">對 Sui 隱藏的應用程式</string>
@@ -60,7 +57,6 @@
     <string name="sui_mode_shell">允許 shell</string>
     <string name="sui_mode_deny">拒絕</string>
     <string name="sui_mode_hide">隱藏 Sui</string>
-    <string name="sui_mode_cancel">取消</string>
     <string name="sui_request_title">%1$s 請求 Shizuku 權限</string>
     <string name="sui_request_body">選擇 Sui 對該應用程式的回應方式。</string>
     <string name="sui_request_root">以 root 允許</string>

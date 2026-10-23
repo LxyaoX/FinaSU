@@ -70,10 +70,8 @@
     <string name="sulog_filter_daemon_restart">Перезапуск демона</string>
     <string name="module_failed_to_enable">Не удалось включить модуль %s</string>
     <string name="module_failed_to_disable">Не удалось отключить модуль %s</string>
-    <string name="module_empty">Нет установленных модулей</string>
     <string name="module">Модули</string>
     <string name="module_install_prompt_with_name">Будут установлены следующие модули: %1$s</string>
-    <string name="module_sort_action_first">Сначала с действием</string>
     <string name="module_sort_enabled_first">Сначала включённые</string>
     <string name="module_sort">Порядок сортировки</string>
     <string name="module_sort_priority">Приоритет сортировки</string>
@@ -212,12 +210,6 @@
     <string name="settings_check_update_summary">Автоматическая проверка обновлений при открытии приложения.</string>
     <string name="settings_enable_predictive_back">Жест предсказуемого возврата</string>
     <string name="settings_enable_predictive_back_summary">Включить поддержку жеста предсказуемого возврата.</string>
-    <string name="settings_enable_swipe_dismiss">Жест возврата свайпом</string>
-    <string name="settings_enable_swipe_dismiss_summary">Свайп от края для возврата на предыдущую страницу.</string>
-    <string name="settings_pager_gesture_mode">Режим жестов перелистывания</string>
-    <string name="settings_pager_gesture_native">По умолчанию</string>
-    <string name="settings_pager_gesture_cross_axis">Поперечная ось</string>
-    <string name="settings_pager_gesture_ios_like">Как в iOS</string>
     <string name="settings_module_check_update">Проверять обновления модулей</string>
     <string name="grant_root_failed">Не удалось выдать root!</string>
     <string name="root_recovering">Восстановление root-доступа...</string>
@@ -364,11 +356,6 @@
     <string name="settings_mode_enable_by_default">Включена (По умолчанию)</string>
     <string name="settings_mode_disable_until_reboot">Отключить до перезагрузки</string>
     <string name="settings_mode_disable_always">Всегда отключена</string>
-    <string name="processing">Обработка…</string>
-    <string name="refresh_pulling">Потяните вниз чтобы обновить</string>
-    <string name="refresh_release">Отпустите чтобы обновить</string>
-    <string name="refresh_refresh">Обновление…</string>
-    <string name="refresh_complete">Обновлено успешно</string>
     <string name="undo">Отменить</string>
     <string name="module_undo_uninstall_success">Удаление %s успешно отменено</string>
     <string name="module_undo_uninstall_failed">не удалось отменить удаление: %s</string>
@@ -403,18 +390,12 @@
     <string name="settings_theme_mode_system">Как в системе</string>
     <string name="settings_theme_mode_light">Светлая</string>
     <string name="settings_theme_mode_dark">Тёмная</string>
-    <string name="settings_monet">Включить Monet</string>
-    <string name="settings_key_color">Ключевой цвет</string>
     <string name="settings_key_color_default">Аура</string>
-    <string name="settings_ui_mode">Стиль интерфейса</string>
-    <string name="settings_ui_mode_summary">Выберите стиль интерфейса.</string>
     <string name="settings_page_scale">Масштаб страницы</string>
     <string name="settings_page_scale_summary">Настройте глобальный масштаб отображения.</string>
     <string name="settings_module_description_max_lines">Максимум строк описания модуля</string>
     <string name="settings_module_description_max_lines_summary">Описания, превышающие это число строк, будут автоматически свёрнуты.</string>
     <string name="unit_lines">Строк</string>
-    <string name="settings_color_spec">Спецификация цвета</string>
-    <string name="settings_color_style">Стиль цвета</string>
     <string name="color_blue">Лазурь</string>
     <string name="color_red">Уголёк</string>
     <string name="color_green">Изумруд</string>
@@ -448,14 +429,7 @@
     <string name="no_such_module">Модуль %s не существует</string>
     <string name="module_unavailable">Модуль %s отключен, обновляется или ожидает удаления</string>
     <string name="select_file_tip_nogki">Пожалуйста, выберите файл образа GKI устройства, который вы хотите пропатчить</string>
-    <string name="current_kmi">Версия KMI этого устройства: %s</string>
     <string name="current_device_kmi">KMI этого устройства</string>
-    <string name="settings_enable_blur">Размытие</string>
-    <string name="settings_enable_blur_summary">Включить эффект размытия для верхней и нижней панелей.</string>
-    <string name="settings_floating_bottom_bar">Плавающая нижняя панель</string>
-    <string name="settings_floating_bottom_bar_summary">Использовать плавающую нижнюю панель в стиле Apple.</string>
-    <string name="settings_enable_glass">Жидкое стекло</string>
-    <string name="settings_enable_glass_summary">Включить эффект жидкого стекла для плавающей нижней панели.</string>
     <string name="show_only_primary_user_apps">Показывать только приложения основного пользователя</string>
     <string name="settings_auto_jailbreak">Автоматический Jailbreak</string>
     <string name="settings_auto_jailbreak_summary">Автоматически использовать Magica для повышения привилегий при обнаружении Permissive SELinux во время загрузки. Требуется предоставить этому приложению разрешение на автозапуск.</string>
@@ -487,8 +461,6 @@
     <string name="profile_flags_desc_no_new_privs">Предотвращает дальнейшее повышение привилегий через KernelSU в контексте этого root-профиля.</string>
     <string name="module_shortcut_copy_scheme">Копировать URL-схему</string>
     <string name="module_shortcut_scheme_copied">URL-схема скопирована</string>
-    <string name="nav_rail_expand">Развернуть панель навигации</string>
-    <string name="nav_rail_collapse">Свернуть панель навигации</string>
     <string name="settings_navigation_badge">Значок на панели навигации</string>
     <string name="settings_navigation_badge_summary">Показывать количество приложений с правами и включённых модулей на панели навигации</string>
     <string name="settings_nav_custom_icons">Пользовательские значки навигации</string>
@@ -496,8 +468,6 @@
     <string name="settings_nav_layout_title">Макет навигации</string>
     <string name="settings_show_superuser">Показывать суперюзера</string>
     <string name="settings_show_module">Показывать модули</string>
-    <string name="settings_floating_bar">Плавающая панель навигации</string>
-    <string name="settings_floating_bar_summary">Отделить нижнюю панель в виде плавающей «пилюли»</string>
     <string name="settings_floating_bar_style">Стиль</string>
     <string name="settings_floating_bar_style_standard">Стандартный</string>
     <string name="settings_floating_bar_style_drawer">Ящик</string>
@@ -581,7 +551,6 @@
     <string name="wallpaper_removed">Обои удалены</string>
     <string name="wallpaper_save_failed">Не удалось загрузить изображение</string>
     <string name="wallpaper_work_card_section">Рабочая карточка</string>
-    <string name="wallpaper_work_card_options_title">Фон рабочей карточки</string>
     <string name="wallpaper_work_card_enable">Фон рабочей карточки</string>
     <string name="wallpaper_work_card_enable_summary">Показывать изображение за рабочей карточкой сетки</string>
     <string name="wallpaper_work_card_pick">Выбрать изображение рабочей карточки</string>
@@ -620,7 +589,6 @@
     <string name="theme_store_mode_compat_hint">Режим совместимости: файл откроется в браузере. Сохраните его и откройте .fpt, чтобы установить тему.</string>
     <string name="theme_store_mode_onboarding_title">Выберите способ скачивания тем</string>
     <string name="theme_store_mode_onboarding_msg">Как вы хотите просматривать и устанавливать темы? Это можно изменить позже в настройках.</string>
-    <string name="theme_store_search_hint">Поиск тем</string>
     <string name="theme_store_filter_title">Фильтры</string>
     <string name="theme_store_filter_author">Автор</string>
     <string name="theme_store_filter_source">Источник</string>
@@ -648,7 +616,6 @@
     <string name="theme_download_pause">Пауза</string>
     <string name="theme_download_resume">Продолжить</string>
     <string name="my_themes_title">Мои темы</string>
-    <string name="my_themes_search_hint">Поиск в моих темах</string>
     <string name="my_themes_empty">Темы ещё не скачаны</string>
     <string name="my_themes_delete">Удалить</string>
     <string name="my_themes_delete_title">Удалить тему</string>
@@ -659,7 +626,6 @@
     <string name="theme_store_download_complete">Загрузка завершена</string>
     <string name="theme_store_download_complete_message">\"%1$s\" готова в разделе «Мои темы»</string>
     <string name="theme_store_go_my_themes">Перейти в «Мои темы»</string>
-    <string name="my_themes_refresh">Обновить</string>
     <string name="settings_category_backup">Резервная копия</string>
     <string name="backup_section_targets">Куда сохранять</string>
     <string name="backup_section_content">Что копировать</string>
@@ -703,7 +669,6 @@
     <string name="install_backup_before_flash_summary">Сначала сохранить снимок в места резервного копирования</string>
     <string name="backup_restore_title">Резервные копии</string>
     <string name="backup_open_list">Управление копиями</string>
-    <string name="backup_restore_action">Восстановить</string>
     <string name="backup_empty_list">Копий пока нет</string>
     <string name="backup_partitions">Разделы</string>
     <string name="backup_restored">%1$s восстановлено</string>
@@ -748,9 +713,6 @@
     <string name="settings_search_hint">Поиск настроек</string>
     <string name="settings_search_empty">Настройки не найдены</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-<string name="support_or_donate">Поддержка / Пожертвование</string>
-    <string name="github">GitHub</string>
-    <string name="telegram">Telegram</string>
     <string name="module_more_actions">Дополнительные действия</string>
     <string name="collapse">Свернуть</string>
     <string name="kernel_modules">Модули ядра</string>

@@ -13,7 +13,6 @@
     <string name="module_card_style_icon">圖標</string>
 
     <string name="settings_module_banner">模組橫幅</string>
-    <string name="module_banner_title">模組橫幅</string>
     <string name="module_banner_enabled">啟用模組橫幅</string>
     <string name="module_banner_enabled_summary">在模組卡片上顯示橫幅圖片。</string>
     <string name="module_banner_folk">自訂橫幅</string>
@@ -43,12 +42,10 @@
     <string name="module_banner_reset">重設</string>
 
     <string name="api_marketplace_title">API 市集</string>
-    <string name="api_marketplace_subtitle">共享的橫幅 API</string>
     <string name="api_marketplace_empty">暫時沒有可用的內容</string>
     <string name="api_marketplace_error">載入市集失敗</string>
     <string name="api_marketplace_retry">重試</string>
     <string name="api_marketplace_apply">套用</string>
     <string name="api_marketplace_applied">已套用</string>
-    <string name="api_marketplace_url">連結</string>
     <string name="api_marketplace_verify_failed">該來源未回傳有效的圖片</string>
 </resources>

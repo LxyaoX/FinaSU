@@ -70,10 +70,8 @@
     <string name="sulog_filter_daemon_restart">데몬 재시작</string>
     <string name="module_failed_to_enable">모듈 활성화 실패: %s</string>
     <string name="module_failed_to_disable">모듈 비활성화 실패: %s</string>
-    <string name="module_empty">설치된 모듈 없음</string>
     <string name="module">모듈</string>
     <string name="module_install_prompt_with_name">다음 모듈이 설치됩니다: %1$s</string>
-    <string name="module_sort_action_first">액션 우선</string>
     <string name="module_sort_enabled_first">활성화 우선</string>
     <string name="module_sort">정렬 순서</string>
     <string name="module_sort_priority">정렬 우선순위</string>
@@ -212,12 +210,6 @@
     <string name="settings_check_update_summary">앱 실행 시 자동으로 업데이트를 확인합니다.</string>
     <string name="settings_enable_predictive_back">예측 뒤로 가기 제스처</string>
     <string name="settings_enable_predictive_back_summary">예측 뒤로 가기 제스처 지원을 활성화합니다.</string>
-    <string name="settings_enable_swipe_dismiss">스와이프 뒤로 가기 제스처</string>
-    <string name="settings_enable_swipe_dismiss_summary">화면 가장자리에서 스와이프하여 이전 페이지로 돌아갑니다.</string>
-    <string name="settings_pager_gesture_mode">페이지 제스처 모드</string>
-    <string name="settings_pager_gesture_native">기본값</string>
-    <string name="settings_pager_gesture_cross_axis">교차 축</string>
-    <string name="settings_pager_gesture_ios_like">iOS 스타일</string>
     <string name="settings_module_check_update">모듈 업데이트 확인</string>
     <string name="grant_root_failed">루트 권한 부여 실패!</string>
     <string name="root_recovering">루트 권한 복구 중...</string>
@@ -362,11 +354,6 @@
     <string name="settings_mode_enable_by_default">활성화 (기본값)</string>
     <string name="settings_mode_disable_until_reboot">재부팅까지 비활성화</string>
     <string name="settings_mode_disable_always">항상 비활성화</string>
-    <string name="processing">처리 중…</string>
-    <string name="refresh_pulling">당겨서 새로 고침</string>
-    <string name="refresh_release">놓아서 새로 고침</string>
-    <string name="refresh_refresh">새로 고침 중…</string>
-    <string name="refresh_complete">새로 고침 성공</string>
     <string name="undo">되돌리기</string>
     <string name="module_undo_uninstall_success">%s 제거 취소 성공</string>
     <string name="module_undo_uninstall_failed">제거 취소 실패: %s</string>
@@ -401,18 +388,12 @@
     <string name="settings_theme_mode_system">시스템 설정에 따름</string>
     <string name="settings_theme_mode_light">라이트</string>
     <string name="settings_theme_mode_dark">다크</string>
-    <string name="settings_monet">Monet 활성화</string>
-    <string name="settings_key_color">주 색상</string>
     <string name="settings_key_color_default">여명</string>
-    <string name="settings_ui_mode">UI 스타일</string>
-    <string name="settings_ui_mode_summary">인터페이스 스타일을 선택합니다.</string>
     <string name="settings_page_scale">페이지 배율</string>
     <string name="settings_page_scale_summary">전체 표시 배율을 조정합니다.</string>
     <string name="settings_module_description_max_lines">모듈 설명 최대 줄 수</string>
     <string name="settings_module_description_max_lines_summary">이 줄 수를 초과하는 설명은 자동으로 접힙니다.</string>
     <string name="unit_lines">줄</string>
-    <string name="settings_color_spec">색상 사양</string>
-    <string name="settings_color_style">색상 스타일</string>
     <string name="color_blue">청람</string>
     <string name="color_red">홍염</string>
     <string name="color_green">청옥</string>
@@ -446,14 +427,7 @@
     <string name="no_such_module">%s 모듈이 존재하지 않습니다</string>
     <string name="module_unavailable">%s 모듈이 비활성화되었거나 업데이트 중이거나 제거 대기 중입니다</string>
     <string name="select_file_tip_nogki">패치할 GKI 기기 이미지 파일을 선택하세요!</string>
-    <string name="current_kmi">이 기기의 KMI 버전: %s</string>
     <string name="current_device_kmi">이 기기의 KMI</string>
-    <string name="settings_enable_blur">블러</string>
-    <string name="settings_enable_blur_summary">상단 및 하단 표시줄에 블러 효과를 활성화합니다.</string>
-    <string name="settings_floating_bottom_bar">플로팅 하단 표시줄</string>
-    <string name="settings_floating_bottom_bar_summary">Apple 스타일의 플로팅 하단 표시줄을 사용합니다.</string>
-    <string name="settings_enable_glass">리퀴드 글래스</string>
-    <string name="settings_enable_glass_summary">플로팅 하단 표시줄에 리퀴드 글래스 효과를 활성화합니다.</string>
     <string name="show_only_primary_user_apps">기본 사용자 앱만 표시</string>
     <string name="settings_auto_jailbreak">자동 탈옥</string>
     <string name="settings_auto_jailbreak_summary">부팅 시 Permissive SELinux가 감지되면 Magica를 사용하여 자동으로 권한을 상승시킵니다. 이 앱에 자동 시작 권한을 부여해야 합니다.</string>
@@ -485,8 +459,6 @@
     <string name="profile_flags_desc_no_new_privs">이 루트 프로필의 컨텍스트 내에서 KernelSU를 통한 추가 권한 상승을 방지합니다.</string>
     <string name="module_shortcut_copy_scheme">URL 스키마 복사</string>
     <string name="module_shortcut_scheme_copied">URL 스키마가 복사되었습니다</string>
-    <string name="nav_rail_expand">탐색 레일 펼치기</string>
-    <string name="nav_rail_collapse">탐색 레일 접기</string>
     <string name="settings_navigation_badge">탐색 배지</string>
     <string name="settings_navigation_badge_summary">탐색 표시줄에 권한이 부여된 앱과 활성화된 모듈 수를 표시합니다</string>
     <string name="settings_nav_custom_icons">사용자 지정 탐색 아이콘</string>
@@ -494,8 +466,6 @@
     <string name="settings_nav_layout_title">탐색 레이아웃</string>
     <string name="settings_show_superuser">슈퍼유저 표시</string>
     <string name="settings_show_module">모듈 표시</string>
-    <string name="settings_floating_bar">플로팅 탐색 표시줄</string>
-    <string name="settings_floating_bar_summary">하단 표시줄을 플로팅 알약 형태로 분리합니다</string>
     <string name="settings_floating_bar_style">스타일</string>
     <string name="settings_floating_bar_style_standard">표준</string>
     <string name="settings_floating_bar_style_drawer">드로어</string>
@@ -579,7 +549,6 @@
     <string name="wallpaper_removed">배경 화면이 제거되었습니다</string>
     <string name="wallpaper_save_failed">이미지를 불러오지 못했습니다</string>
     <string name="wallpaper_work_card_section">작업 카드</string>
-    <string name="wallpaper_work_card_options_title">작업 카드 배경</string>
     <string name="wallpaper_work_card_enable">작업 카드 배경</string>
     <string name="wallpaper_work_card_enable_summary">그리드 작업 카드 뒤에 이미지를 표시합니다</string>
     <string name="wallpaper_work_card_pick">작업 카드 이미지 선택</string>
@@ -618,7 +587,6 @@
     <string name="theme_store_mode_compat_hint">호환 모드: 파일이 브라우저에서 열립니다. 저장한 뒤 .fpt를 열어 테마를 설치하세요.</string>
     <string name="theme_store_mode_onboarding_title">테마 다운로드 방법 선택</string>
     <string name="theme_store_mode_onboarding_msg">테마를 어떻게 둘러보고 설치할까요? 나중에 설정에서 바꿀 수 있습니다.</string>
-    <string name="theme_store_search_hint">테마 검색</string>
     <string name="theme_store_filter_title">필터</string>
     <string name="theme_store_filter_author">제작자</string>
     <string name="theme_store_filter_source">출처</string>
@@ -646,7 +614,6 @@
     <string name="theme_download_pause">일시 중지</string>
     <string name="theme_download_resume">계속</string>
     <string name="my_themes_title">내 테마</string>
-    <string name="my_themes_search_hint">내 테마 검색</string>
     <string name="my_themes_empty">아직 다운로드한 테마가 없습니다</string>
     <string name="my_themes_delete">삭제</string>
     <string name="my_themes_delete_title">테마 삭제</string>
@@ -657,7 +624,6 @@
     <string name="theme_store_download_complete">다운로드 완료</string>
     <string name="theme_store_download_complete_message">\"%1$s\"이(가) 내 테마에 준비되었습니다</string>
     <string name="theme_store_go_my_themes">내 테마로 이동</string>
-    <string name="my_themes_refresh">새로 고침</string>
     <string name="settings_category_backup">백업</string>
     <string name="backup_section_targets">백업 위치</string>
     <string name="backup_section_content">백업할 항목</string>
@@ -701,7 +667,6 @@
     <string name="install_backup_before_flash_summary">먼저 백업 대상에 스냅샷을 저장합니다</string>
     <string name="backup_restore_title">백업</string>
     <string name="backup_open_list">백업 관리</string>
-    <string name="backup_restore_action">복원</string>
     <string name="backup_empty_list">아직 백업이 없습니다</string>
     <string name="backup_partitions">파티션</string>
     <string name="backup_restored">%1$s 복원됨</string>
@@ -746,9 +711,6 @@
     <string name="settings_search_hint">설정 검색</string>
     <string name="settings_search_empty">설정을 찾을 수 없습니다</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-<string name="support_or_donate">지원 / 후원</string>
-    <string name="github">GitHub</string>
-    <string name="telegram">텔레그램</string>
     <string name="module_more_actions">추가 작업</string>
     <string name="collapse">접기</string>
     <string name="kernel_modules">커널 모듈</string>

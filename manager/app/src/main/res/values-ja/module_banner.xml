@@ -13,7 +13,6 @@
     <string name="module_card_style_icon">アイコン</string>
 
     <string name="settings_module_banner">モジュールバナー</string>
-    <string name="module_banner_title">モジュールバナー</string>
     <string name="module_banner_enabled">モジュールバナーを有効化</string>
     <string name="module_banner_enabled_summary">モジュールカードにバナー画像を表示します。</string>
     <string name="module_banner_folk">モジュールバナーをカスタマイズ</string>
@@ -43,12 +42,10 @@
     <string name="module_banner_reset">リセット</string>
 
     <string name="api_marketplace_title">APIマーケット</string>
-    <string name="api_marketplace_subtitle">共有バナーAPI</string>
     <string name="api_marketplace_empty">現在利用できるものはありません</string>
     <string name="api_marketplace_error">マーケットを読み込めませんでした</string>
     <string name="api_marketplace_retry">再試行</string>
     <string name="api_marketplace_apply">適用</string>
     <string name="api_marketplace_applied">適用済み</string>
-    <string name="api_marketplace_url">URL</string>
     <string name="api_marketplace_verify_failed">ソースが有効な画像を返しませんでした</string>
 </resources>

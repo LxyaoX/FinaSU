@@ -10,7 +10,6 @@
     <string name="sui_manage">Manage Sui permissions</string>
     <string name="sui_manage_summary">Read and change the Shizuku permission of each app</string>
     <string name="sui_api_title">Shizuku API</string>
-    <string name="sui_version">Payload %1$s</string>
     <string name="sui_not_installed">not installed</string>
     <string name="sui_dependency">Zygisk: %1$s</string>
     <string name="sui_state_disabled">Not enabled</string>
@@ -47,8 +46,6 @@
     <string name="sui_diag_management">Management channel</string>
     <string name="sui_permissions_loading">Reading Sui permissions…</string>
     <string name="sui_permissions_empty">No apps to show</string>
-    <string name="sui_permissions_search">Search apps</string>
-    <string name="sui_permissions_only_configured">Only apps with a rule</string>
     <string name="sui_default_mode">Default permission</string>
     <string name="sui_default_mode_summary">Used for apps without a rule of their own</string>
     <string name="sui_hidden_count">Apps hidden from Sui</string>
@@ -60,7 +57,6 @@
     <string name="sui_mode_shell">Allow shell</string>
     <string name="sui_mode_deny">Deny</string>
     <string name="sui_mode_hide">Hide Sui</string>
-    <string name="sui_mode_cancel">Cancel</string>
     <string name="sui_request_title">%1$s requests Shizuku access</string>
     <string name="sui_request_body">Choose how Sui should answer this app.</string>
     <string name="sui_request_root">Allow as root</string>

@@ -10,7 +10,6 @@
     <string name="sui_manage">Sui の権限を管理</string>
     <string name="sui_manage_summary">各アプリの Shizuku 権限を確認して変更します</string>
     <string name="sui_api_title">Shizuku API</string>
-    <string name="sui_version">ペイロード %1$s</string>
     <string name="sui_not_installed">未インストール</string>
     <string name="sui_dependency">Zygisk: %1$s</string>
     <string name="sui_state_disabled">未有効</string>
@@ -47,8 +46,6 @@
     <string name="sui_diag_management">管理チャンネル</string>
     <string name="sui_permissions_loading">Sui の権限を読み込み中…</string>
     <string name="sui_permissions_empty">表示できるアプリがありません</string>
-    <string name="sui_permissions_search">アプリを検索</string>
-    <string name="sui_permissions_only_configured">ルールのあるアプリのみ</string>
     <string name="sui_default_mode">既定の権限</string>
     <string name="sui_default_mode_summary">個別のルールがないアプリに適用されます</string>
     <string name="sui_hidden_count">Sui から隠すアプリ</string>
@@ -60,7 +57,6 @@
     <string name="sui_mode_shell">shell を許可</string>
     <string name="sui_mode_deny">拒否</string>
     <string name="sui_mode_hide">Sui を隠す</string>
-    <string name="sui_mode_cancel">キャンセル</string>
     <string name="sui_request_title">%1$s が Shizuku へのアクセスを要求しています</string>
     <string name="sui_request_body">Sui がこのアプリにどう応答するか選択してください。</string>
     <string name="sui_request_root">root として許可</string>

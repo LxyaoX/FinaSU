@@ -70,10 +70,8 @@
     <string name="sulog_filter_daemon_restart">デーモンの再起動</string>
     <string name="module_failed_to_enable">モジュールの有効化に失敗しました: %s</string>
     <string name="module_failed_to_disable">モジュールの無効化に失敗しました: %s</string>
-    <string name="module_empty">モジュールがインストールされていません</string>
     <string name="module">モジュール</string>
     <string name="module_install_prompt_with_name">次のモジュールがインストールされます: %1$s</string>
-    <string name="module_sort_action_first">並べ替え（アクション優先）</string>
     <string name="module_sort_enabled_first">並べ替え（最初に有効）</string>
     <string name="module_sort">並べ替え</string>
     <string name="module_sort_priority">並べ替えの優先度</string>
@@ -212,12 +210,6 @@
     <string name="settings_check_update_summary">アプリを開いたときにアップデートを自動的に確認する。</string>
     <string name="settings_enable_predictive_back">予測型戻るジェスチャー</string>
     <string name="settings_enable_predictive_back_summary">予測型戻るジェスチャーを有効にします。</string>
-    <string name="settings_enable_swipe_dismiss">スワイプで戻るジェスチャー</string>
-    <string name="settings_enable_swipe_dismiss_summary">画面端からスワイプして前のページに戻ります。</string>
-    <string name="settings_pager_gesture_mode">ページ操作のジェスチャーモード</string>
-    <string name="settings_pager_gesture_native">デフォルト</string>
-    <string name="settings_pager_gesture_cross_axis">クロス軸</string>
-    <string name="settings_pager_gesture_ios_like">iOS 風</string>
     <string name="settings_module_check_update">モジュールの更新を確認する</string>
     <string name="grant_root_failed">root の付与に失敗しました！</string>
     <string name="root_recovering">root アクセスを復元しています…</string>
@@ -362,11 +354,6 @@
     <string name="settings_mode_enable_by_default">有効 (デフォルト)</string>
     <string name="settings_mode_disable_until_reboot">再起動するまで無効</string>
     <string name="settings_mode_disable_always">常に無効</string>
-    <string name="processing">処理中…</string>
-    <string name="refresh_pulling">下に引いて更新</string>
-    <string name="refresh_release">リリースして更新</string>
-    <string name="refresh_refresh">更新中…</string>
-    <string name="refresh_complete">更新に成功しました</string>
     <string name="undo">元に戻す</string>
     <string name="module_undo_uninstall_success">%s のアンインストールを正常にキャンセルしました</string>
     <string name="module_undo_uninstall_failed">アンインストールを元に戻すことができませんでした: %s</string>
@@ -401,18 +388,12 @@
     <string name="settings_theme_mode_system">システムに従う</string>
     <string name="settings_theme_mode_light">ライト</string>
     <string name="settings_theme_mode_dark">ダーク</string>
-    <string name="settings_monet">Monet を有効にする</string>
-    <string name="settings_key_color">キーカラー</string>
     <string name="settings_key_color_default">移ろい</string>
-    <string name="settings_ui_mode">UI スタイル</string>
-    <string name="settings_ui_mode_summary">インターフェースのスタイルを選択します。</string>
     <string name="settings_page_scale">ページの拡大率</string>
     <string name="settings_page_scale_summary">全体の表示倍率を調整します。</string>
     <string name="settings_module_description_max_lines">モジュール説明の最大行数</string>
     <string name="settings_module_description_max_lines_summary">この行数を超える説明は自動的に折りたたまれます。</string>
     <string name="unit_lines">行</string>
-    <string name="settings_color_spec">カラースペック</string>
-    <string name="settings_color_style">カラースタイル</string>
     <string name="color_blue">蒼穹</string>
     <string name="color_red">緋</string>
     <string name="color_green">翠</string>
@@ -446,14 +427,7 @@
     <string name="no_such_module">モジュール %s は存在しません</string>
     <string name="module_unavailable">モジュール %s は無効、更新中、または削除の待機状態にあります</string>
     <string name="select_file_tip_nogki">パッチを適用する GKI デバイスのイメージファイルを選択してください</string>
-    <string name="current_kmi">このデバイスの KMI バージョン: %s</string>
     <string name="current_device_kmi">このデバイスの KMI</string>
-    <string name="settings_enable_blur">ぼかし</string>
-    <string name="settings_enable_blur_summary">上部と下部のバーにぼかし効果を有効にします。</string>
-    <string name="settings_floating_bottom_bar">フローティング下部バー</string>
-    <string name="settings_floating_bottom_bar_summary">Apple 風のフローティング下部バーを使用します。</string>
-    <string name="settings_enable_glass">リキッドグラス</string>
-    <string name="settings_enable_glass_summary">フローティング下部バーにリキッドグラス効果を有効にします。</string>
     <string name="show_only_primary_user_apps">プライマリユーザーのアプリのみ表示</string>
     <string name="settings_auto_jailbreak">自動脱獄</string>
     <string name="settings_auto_jailbreak_summary">起動時に SELinux が Permissive と検出された場合、Magica を使って自動的に権限昇格します。このアプリに自動起動の権限を付与する必要があります。</string>
@@ -485,8 +459,6 @@
     <string name="profile_flags_desc_no_new_privs">この root プロファイルのコンテキスト内で、KernelSU を介したさらなる権限昇格を防止します。</string>
     <string name="module_shortcut_copy_scheme">URL スキームをコピー</string>
     <string name="module_shortcut_scheme_copied">URL スキームをコピーしました</string>
-    <string name="nav_rail_expand">ナビゲーションレールを展開</string>
-    <string name="nav_rail_collapse">ナビゲーションレールを折りたたむ</string>
     <string name="settings_navigation_badge">ナビゲーションのバッジ</string>
     <string name="settings_navigation_badge_summary">許可されたアプリと有効なモジュールの数をナビゲーションバーに表示します</string>
     <string name="settings_nav_custom_icons">カスタムナビゲーションアイコン</string>
@@ -494,8 +466,6 @@
     <string name="settings_nav_layout_title">ナビゲーションのレイアウト</string>
     <string name="settings_show_superuser">Superuser を表示</string>
     <string name="settings_show_module">モジュールを表示</string>
-    <string name="settings_floating_bar">フローティングナビゲーションバー</string>
-    <string name="settings_floating_bar_summary">下部バーを分離してフローティングピルにします</string>
     <string name="settings_floating_bar_style">スタイル</string>
     <string name="settings_floating_bar_style_standard">標準</string>
     <string name="settings_floating_bar_style_drawer">ドロワー</string>
@@ -579,7 +549,6 @@
     <string name="wallpaper_removed">壁紙を削除しました</string>
     <string name="wallpaper_save_failed">画像の読み込みに失敗しました</string>
     <string name="wallpaper_work_card_section">ワークカード</string>
-    <string name="wallpaper_work_card_options_title">ワークカードの背景</string>
     <string name="wallpaper_work_card_enable">ワークカードの背景</string>
     <string name="wallpaper_work_card_enable_summary">グリッドのワークカードの背後に画像を表示します</string>
     <string name="wallpaper_work_card_pick">ワークカードの画像を選択</string>
@@ -618,7 +587,6 @@
     <string name="theme_store_mode_compat_hint">互換モード: ファイルはブラウザで開きます。保存して .fpt を開くとテーマを適用できます。</string>
     <string name="theme_store_mode_onboarding_title">テーマのダウンロード方法を選択</string>
     <string name="theme_store_mode_onboarding_msg">テーマの閲覧と適用方法を選んでください。あとで設定から変更できます。</string>
-    <string name="theme_store_search_hint">テーマを検索</string>
     <string name="theme_store_filter_title">フィルター</string>
     <string name="theme_store_filter_author">作者</string>
     <string name="theme_store_filter_source">ソース</string>
@@ -646,7 +614,6 @@
     <string name="theme_download_pause">一時停止</string>
     <string name="theme_download_resume">再開</string>
     <string name="my_themes_title">マイテーマ</string>
-    <string name="my_themes_search_hint">マイテーマを検索</string>
     <string name="my_themes_empty">ダウンロードしたテーマはまだありません</string>
     <string name="my_themes_delete">削除</string>
     <string name="my_themes_delete_title">テーマを削除</string>
@@ -657,7 +624,6 @@
     <string name="theme_store_download_complete">ダウンロード完了</string>
     <string name="theme_store_download_complete_message">\"%1$s\" がマイテーマで利用可能になりました</string>
     <string name="theme_store_go_my_themes">マイテーマへ移動</string>
-    <string name="my_themes_refresh">更新</string>
     <string name="settings_category_backup">バックアップ</string>
     <string name="backup_section_targets">バックアップ先</string>
     <string name="backup_section_content">バックアップする内容</string>
@@ -701,7 +667,6 @@
     <string name="install_backup_before_flash_summary">先にスナップショットをバックアップ先へ保存します</string>
     <string name="backup_restore_title">バックアップ</string>
     <string name="backup_open_list">バックアップを管理</string>
-    <string name="backup_restore_action">復元</string>
     <string name="backup_empty_list">バックアップはまだありません</string>
     <string name="backup_partitions">パーティション</string>
     <string name="backup_restored">%1$s を復元しました</string>
@@ -746,9 +711,6 @@
     <string name="settings_search_hint">設定を検索</string>
     <string name="settings_search_empty">設定が見つかりません</string>
     <string name="settings_folk_zygisk">FolkZygisk</string>
-<string name="support_or_donate">サポート / 寄付</string>
-    <string name="github">GitHub</string>
-    <string name="telegram">Telegram</string>
     <string name="module_more_actions">その他の操作</string>
     <string name="collapse">折りたたむ</string>
     <string name="kernel_modules">カーネルモジュール</string>

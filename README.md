@@ -64,7 +64,7 @@ SUSFS management is capability-gated. The controls appear only on kernels that s
 
 ### Folk-Mount
 
-Folk-Mount is the built-in module mount engine. Two modes are offered: NoMount (the VFS driver, the default) and off. The magic-mount engine only survives as the automatic fallback for a device whose NoMount driver is not installed.
+Folk-Mount is the name the manager gives its module-mount backend. Only two settings exist: NoMount (the VFS driver, the default) and off.
 
 ### NoMount
 

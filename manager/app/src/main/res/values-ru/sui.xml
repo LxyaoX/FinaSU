@@ -10,7 +10,6 @@
     <string name="sui_manage">Управление правами Sui</string>
     <string name="sui_manage_summary">Читать и изменять права Shizuku каждого приложения</string>
     <string name="sui_api_title">Shizuku API</string>
-    <string name="sui_version">Пейлоад %1$s</string>
     <string name="sui_not_installed">не установлен</string>
     <string name="sui_dependency">Zygisk: %1$s</string>
     <string name="sui_state_disabled">Не включено</string>
@@ -47,8 +46,6 @@
     <string name="sui_diag_management">Канал управления</string>
     <string name="sui_permissions_loading">Чтение прав Sui…</string>
     <string name="sui_permissions_empty">Нет приложений для показа</string>
-    <string name="sui_permissions_search">Поиск приложений</string>
-    <string name="sui_permissions_only_configured">Только приложения с правилом</string>
     <string name="sui_default_mode">Права по умолчанию</string>
     <string name="sui_default_mode_summary">Применяются к приложениям без собственного правила</string>
     <string name="sui_hidden_count">Приложения, скрытые от Sui</string>
@@ -60,7 +57,6 @@
     <string name="sui_mode_shell">Разрешить shell</string>
     <string name="sui_mode_deny">Запретить</string>
     <string name="sui_mode_hide">Скрыть Sui</string>
-    <string name="sui_mode_cancel">Отмена</string>
     <string name="sui_request_title">%1$s запрашивает доступ к Shizuku</string>
     <string name="sui_request_body">Выберите, как Sui должен ответить этому приложению.</string>
     <string name="sui_request_root">Разрешить как root</string>

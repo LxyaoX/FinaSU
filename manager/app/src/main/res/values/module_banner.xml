@@ -13,7 +13,6 @@
     <string name="module_card_style_icon">Icon</string>
 
     <string name="settings_module_banner">Module banner</string>
-    <string name="module_banner_title">Module banner</string>
     <string name="module_banner_enabled">Enable module banner</string>
     <string name="module_banner_enabled_summary">Show a banner image on module cards.</string>
     <string name="module_banner_folk">Customize module banner</string>
@@ -43,12 +42,10 @@
     <string name="module_banner_reset">Reset</string>
 
     <string name="api_marketplace_title">API marketplace</string>
-    <string name="api_marketplace_subtitle">Shared banner APIs</string>
     <string name="api_marketplace_empty">Nothing available right now</string>
     <string name="api_marketplace_error">Failed to load the marketplace</string>
     <string name="api_marketplace_retry">Retry</string>
     <string name="api_marketplace_apply">Apply</string>
     <string name="api_marketplace_applied">Applied</string>
-    <string name="api_marketplace_url">URL</string>
     <string name="api_marketplace_verify_failed">The source did not return a valid image</string>
 </resources>

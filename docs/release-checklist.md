@@ -76,26 +76,31 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 - `aapt2 dump badging` on the downloaded APK should report `package: name='me.yuki.fina'` with the
   expected version code and name.
 - The signing key must stay the same across releases, otherwise Android refuses to install the update
-  over an existing one. The current releases use `manager/key.jks` (CN=FolkSU, certificate SHA-256
-  `2d89b50a...4458`), which is also the `KEYSTORE` secret used by CI.
+  over an existing one. Releases are signed from the repository secrets (`KEYSTORE`, `KEY_ALIAS=neosu`,
+  `KEYSTORE_PASSWORD`, `KEY_PASSWORD`); the key is RSA-2048 and its certificate is 709 bytes of DER,
+  which matters because the kernel's `CERT_MAX_LENGTH` is 1024 - a larger certificate is rejected
+  silently and the manager then reports the app as not installed. Note that the kernel module embeds
+  the expected certificate hash at patch time, so swapping keys breaks both upgrades and the
+  manager check at once.
 
 ## 6. What the APK carries
 
-| Payload | arm64 | x86_64 | riscv64 |
-| --- | --- | --- | --- |
-| `kernelsu.ko` (8 KMIs) | yes | yes | no |
-| `nomount.ko` (8 KMIs) | yes | yes | no |
-| FolkZygisk, 32 and 64 bit | yes | yes | no |
-| Sui (`sui/payload.json` and its files) | yes | yes | no |
-| `ksuinit`, `waitsys`, `bootctl`, `busybox`, `mkbootfs` | yes | yes | yes |
+| Payload | arm64 |
+| --- | --- |
+| `kernelsu.ko` (4 KMIs) | yes |
+| `nomount.ko` (4 KMIs) | yes |
+| FolkZygisk, 32 and 64 bit | yes |
+| Sui (`sui/payload.json` and its files) | yes |
+| `ksuinit`, `waitsys`, `bootctl`, `busybox`, `mkbootfs` | yes |
 
 - The modules, the FolkZygisk tree and the Sui tree live under `userspace/ksud/bin/<abi>/`, are
   gitignored, and are staged by CI before `ksud` is compiled: modules in `ddk-lkm.yml`, FolkZygisk in
   `ksud.yml`, Sui in `sui.yml` plus `userspace/sui/package.py`. Whatever is not staged is silently
   absent from the APK.
-- riscv64 has no LKM, NoMount, FolkZygisk or Sui payload upstream. The manager reports the missing
-  module or driver instead of failing, and nothing is injected on that ABI (there is no second
-  mount engine to fall back to any more).
+- The manager ships `arm64-v8a` only (`abiFilters` in `manager/app/build.gradle.kts`) and the LKM
+  matrix in `build-lkm.yml` covers `android14-6.1`, `android15-6.6`, `android16-6.12` and
+  `android17-6.18`. There is no x86_64 or riscv64 artifact to miss, and no second mount engine to fall
+  back to: a device without a matching driver gets nothing injected and the manager says so.
 - Only the APK is a release asset. `lkm-*.ko`, `ksud-*`, `ksuinit-*` and the FolkZygisk source tarball
   stay on the run page as workflow artifacts, and GitHub attaches the tag's source archives, which
   also keeps the source available for the licenses bundled into the payload.
@@ -114,8 +119,8 @@ for p in 'android1[2-7]-[0-9]+\.[0-9]+_kernelsu\.ko' 'android1[2-7]-[0-9]+\.[0-9
 done
 ```
 
-Expect `8`, `8`, `1`, `1` on arm64 and x86_64 and `0` for all of them on riscv64. A zero where the
-table above says yes means a staging step was skipped and the APK shipped without that payload.
+Expect `4`, `4`, `1`, `1` on arm64. A zero where the table above says yes means a staging step was
+skipped and the APK shipped without that payload.
 
 ## 8. Pitfalls
 
