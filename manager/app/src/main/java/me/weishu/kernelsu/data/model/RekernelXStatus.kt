@@ -25,6 +25,13 @@ data class RekernelXStatus(
     val bundledDriver: String = "",
     /** A flashed ReKernel-X module owns the driver; the bundled build stays unused. */
     val externalModule: Boolean = false,
+    /**
+     * Why the last hot load failed, empty when it was never attempted or it worked.
+     *
+     * A load the kernel rejects fails the same way at boot, so this is the only place that can tell
+     * "wait for a reboot" apart from "this build does not fit this kernel".
+     */
+    val lastLoadError: String = "",
 ) {
     /** The switch reflects the boot decision, not the momentary module state. */
     val enabled: Boolean get() = autoLoad
@@ -81,6 +88,7 @@ data class RekernelXStatus(
                 kernelRelease = release,
                 kmi = kmi,
                 externalModule = values["module"] == "1",
+                lastLoadError = values["lasterror"].orEmpty(),
             )
         }
     }

@@ -797,8 +797,9 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="rekernel_x_read_error">Could not read the ReKernel-X state</string>
     <string name="rekernel_x_external_module">A flashed ReKernel-X module loads the driver; the bundled build stays unused</string>
     <string name="rekernel_x_kmi_unsupported">No bundled driver matches this kernel (%1$s)</string>
-    <string name="rekernel_x_loaded">Bundled driver %1$s loaded (%2$s)</string>
-    <string name="rekernel_x_pending">Enabled for %2$s (bundle v%1$s); the driver loads at the next boot</string>
+    <string name="rekernel_x_loaded">Loaded %1$s (%2$s)</string>
+    <string name="rekernel_x_pending">Enabled for %2$s; %1$s loads at the next boot</string>
+    <string name="rekernel_x_load_failed">Enabled, but the driver did not load: %1$s (the next boot fails the same way)</string>
     <string name="rekernel_x_still_loaded">The driver is still loaded; it unloads on the next reboot</string>
     <string name="rekernel_x_off">Off; turning this on needs no module flash and loads the bundled driver %1$s at boot</string>
     <string name="rekernel_x_loaded_toast">ReKernel-X driver loaded</string>

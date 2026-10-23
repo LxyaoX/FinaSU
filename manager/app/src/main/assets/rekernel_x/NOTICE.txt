@@ -1,5 +1,5 @@
-ReKernel-X driver binaries bundled with NeoSU
-=============================================
+ReKernel-X driver binaries bundled with FinaSU
+==============================================
 
 The .ko files in this directory come from ReKernel-X 1.6:
 
@@ -16,7 +16,9 @@ Only the 6.1 and newer builds are shipped (android14-6.1, android15-6.6,
 android16-6.12, android17-6.18); the 5.10 / 5.15 builds were dropped together
 with their kernel targets.
 
-NeoSU loads one of them from /data/adb/rekernel_x at boot through
+FinaSU stages the build matching the running kernel as
+/data/adb/rekernel_x/<file>.ko, records that name in
+/data/adb/rekernel_x/driver, and loads it at boot through
 /data/adb/post-fs-data.d/neosu_rekernel_x.sh. Removing that script and the
 /data/adb/rekernel_x directory removes every bundled copy installed on the
 device.

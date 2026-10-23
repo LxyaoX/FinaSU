@@ -42,20 +42,31 @@ internal fun RekernelXStatusItem(state: SettingsUiState, actions: SettingsScreen
 @Composable
 private fun rekernelXSummary(status: RekernelXStatus): String {
     val release = status.kernelRelease.ifBlank { "-" }
+    // Name the file the boot script will load: with several builds per KMI in circulation, the
+    // bundle version alone would not say which one is in memory.
+    val driver = status.stagedDriver.ifBlank { RekernelXInstaller.VERSION }
     return when {
         // A flashed module wins: staging a second copy would just race it at boot.
         status.externalModule -> stringResource(R.string.rekernel_x_external_module)
         !status.kmiSupported -> stringResource(R.string.rekernel_x_kmi_unsupported, release)
         status.enabled && status.loaded -> stringResource(
             R.string.rekernel_x_loaded,
-            RekernelXInstaller.VERSION,
+            driver,
             status.kmi,
         )
+        // The one case worth spelling out: the switch is on, the driver is not in memory, and the
+        // same load will fail at boot.
+        status.enabled && status.lastLoadError.isNotBlank() -> stringResource(
+            R.string.rekernel_x_load_failed,
+            status.lastLoadError,
+        )
+
         status.enabled -> stringResource(
             R.string.rekernel_x_pending,
-            RekernelXInstaller.VERSION,
+            driver,
             status.kmi,
         )
+
         status.loaded -> stringResource(R.string.rekernel_x_still_loaded)
         else -> stringResource(R.string.rekernel_x_off, RekernelXInstaller.VERSION)
     }
