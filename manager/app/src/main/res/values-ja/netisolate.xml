@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">ローカルプロキシはループバック通信をインターネットへ転送できます。必要な場合のみ有効にしてください</string>
     <string name="netisolate_loopback_blocked">ループバック IPv4 および IPv6 接続はブロックされます</string>
     <string name="netisolate_strict_loopback_conflict">厳格なソケットブロックが有効です。ループバックを許可する前に無効にしてください</string>
+    <string name="netisolate_strict_allow_conflict">厳格なソケットブロックが有効です。許可例外を有効にする前に無効にしてください</string>
+    <string name="netisolate_allow_private_network">プライベートネットワークを許可</string>
+    <string name="netisolate_allow_private_network_summary">RFC1918、IPv6 ULA、IPv4/IPv6 リンクローカル宛先を許可します。ルーターや LAN 内の端末への経路が開きます</string>
+    <string name="netisolate_allow_private_network_unsupported">このカーネルはプライベートネットワーク免除に対応していません</string>
+    <string name="netisolate_allow_local_discovery">ローカル検出を許可</string>
+    <string name="netisolate_allow_local_discovery_summary">固定の mDNS と SSDP 検出先のみを許可します。プライベートネットワークも必要な場合があります</string>
+    <string name="netisolate_allow_local_discovery_unsupported">このカーネルはローカル検出免除に対応していません</string>
+    <string name="netisolate_private_network_allowed">プライベートネットワークとリンクローカル接続は許可されます</string>
+    <string name="netisolate_private_network_blocked">プライベートネットワークとリンクローカル接続はブロックされます</string>
+    <string name="netisolate_local_discovery_allowed">mDNS と SSDP の検出先は許可されます</string>
+    <string name="netisolate_local_discovery_blocked">mDNS と SSDP の検出先はブロックされます</string>
     <string name="netisolate_manager_exempt">マネージャーはワークプロファイル内も含めて常に除外されます</string>
     <string name="netisolate_compat_supported">32 ビットと 64 ビットの両方のアプリに対応します</string>
     <string name="netisolate_compat_unsupported">このカーネルは 32 ビットアプリに対応していません</string>

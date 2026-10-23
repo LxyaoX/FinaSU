@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">A local proxy can forward loopback traffic to the internet; enable this only when required</string>
     <string name="netisolate_loopback_blocked">Loopback IPv4 and IPv6 connections are blocked</string>
     <string name="netisolate_strict_loopback_conflict">Strict socket blocking is active; turn it off before allowing loopback</string>
+    <string name="netisolate_strict_allow_conflict">Strict socket blocking is active; turn it off before enabling any allow exemption</string>
+    <string name="netisolate_allow_private_network">Allow private network</string>
+    <string name="netisolate_allow_private_network_summary">Permit RFC1918, IPv6 ULA, and IPv4/IPv6 link-local targets; this opens access to routers and LAN devices</string>
+    <string name="netisolate_allow_private_network_unsupported">This kernel does not support private network exemption</string>
+    <string name="netisolate_allow_local_discovery">Allow local discovery</string>
+    <string name="netisolate_allow_local_discovery_summary">Permit only fixed mDNS and SSDP targets; private network may also be required</string>
+    <string name="netisolate_allow_local_discovery_unsupported">This kernel does not support local discovery exemption</string>
+    <string name="netisolate_private_network_allowed">Private network and link-local connections are allowed</string>
+    <string name="netisolate_private_network_blocked">Private network and link-local connections are blocked</string>
+    <string name="netisolate_local_discovery_allowed">mDNS and SSDP discovery targets are allowed</string>
+    <string name="netisolate_local_discovery_blocked">mDNS and SSDP discovery targets are blocked</string>
     <string name="netisolate_manager_exempt">The Manager is always exempt, including work profiles</string>
     <string name="netisolate_compat_supported">32-bit and 64-bit apps are covered</string>
     <string name="netisolate_compat_unsupported">32-bit apps are not covered by this kernel</string>

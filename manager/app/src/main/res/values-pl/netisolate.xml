@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">Lokalne proxy może przekazywać ruch pętli zwrotnej do internetu; włącz tylko w razie potrzeby</string>
     <string name="netisolate_loopback_blocked">Połączenia pętli zwrotnej IPv4 i IPv6 są blokowane</string>
     <string name="netisolate_strict_loopback_conflict">Rygorystyczne blokowanie socketów jest aktywne; wyłącz je przed zezwoleniem na pętlę zwrotną</string>
+    <string name="netisolate_strict_allow_conflict">Rygorystyczne blokowanie socketów jest aktywne; wyłącz je przed włączeniem dowolnego wyjątku</string>
+    <string name="netisolate_allow_private_network">Zezwalaj na sieć prywatną</string>
+    <string name="netisolate_allow_private_network_summary">Zezwalaj na adresy RFC1918, IPv6 ULA i link-local IPv4/IPv6; otwiera dostęp do routerów i urządzeń LAN</string>
+    <string name="netisolate_allow_private_network_unsupported">To jądro nie obsługuje wyjątku dla sieci prywatnej</string>
+    <string name="netisolate_allow_local_discovery">Zezwalaj na wykrywanie lokalne</string>
+    <string name="netisolate_allow_local_discovery_summary">Zezwalaj tylko na stałe cele mDNS i SSDP; sieć prywatna może być również wymagana</string>
+    <string name="netisolate_allow_local_discovery_unsupported">To jądro nie obsługuje wyjątku dla wykrywania lokalnego</string>
+    <string name="netisolate_private_network_allowed">Połączenia z siecią prywatną i adresami link-local są dozwolone</string>
+    <string name="netisolate_private_network_blocked">Połączenia z siecią prywatną i adresami link-local są blokowane</string>
+    <string name="netisolate_local_discovery_allowed">Cele wykrywania mDNS i SSDP są dozwolone</string>
+    <string name="netisolate_local_discovery_blocked">Cele wykrywania mDNS i SSDP są blokowane</string>
     <string name="netisolate_manager_exempt">Menedżer jest zawsze wyjątkiem, także w profilach służbowych</string>
     <string name="netisolate_compat_supported">Obsługiwane są aplikacje 32- i 64-bitowe</string>
     <string name="netisolate_compat_unsupported">To jądro nie obsługuje aplikacji 32-bitowych</string>

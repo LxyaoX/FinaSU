@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">Proksi lokal dapat meneruskan lalu lintas loopback ke internet; aktifkan hanya bila diperlukan</string>
     <string name="netisolate_loopback_blocked">Koneksi loopback IPv4 dan IPv6 diblokir</string>
     <string name="netisolate_strict_loopback_conflict">Pemblokiran socket ketat aktif; nonaktifkan sebelum mengizinkan loopback</string>
+    <string name="netisolate_strict_allow_conflict">Pemblokiran socket ketat aktif; nonaktifkan sebelum mengaktifkan pengecualian izin apa pun</string>
+    <string name="netisolate_allow_private_network">Izinkan jaringan privat</string>
+    <string name="netisolate_allow_private_network_summary">Izinkan RFC1918, ULA IPv6, dan alamat link-local IPv4/IPv6; ini membuka akses ke router dan perangkat LAN</string>
+    <string name="netisolate_allow_private_network_unsupported">Kernel ini tidak mendukung pengecualian jaringan privat</string>
+    <string name="netisolate_allow_local_discovery">Izinkan penemuan lokal</string>
+    <string name="netisolate_allow_local_discovery_summary">Izinkan hanya target tetap mDNS dan SSDP; jaringan privat mungkin juga diperlukan</string>
+    <string name="netisolate_allow_local_discovery_unsupported">Kernel ini tidak mendukung pengecualian penemuan lokal</string>
+    <string name="netisolate_private_network_allowed">Koneksi jaringan privat dan link-local diizinkan</string>
+    <string name="netisolate_private_network_blocked">Koneksi jaringan privat dan link-local diblokir</string>
+    <string name="netisolate_local_discovery_allowed">Target penemuan mDNS dan SSDP diizinkan</string>
+    <string name="netisolate_local_discovery_blocked">Target penemuan mDNS dan SSDP diblokir</string>
     <string name="netisolate_manager_exempt">Manajer selalu dikecualikan, termasuk di profil kerja</string>
     <string name="netisolate_compat_supported">Mencakup aplikasi 32-bit dan 64-bit</string>
     <string name="netisolate_compat_unsupported">Kernel ini tidak mencakup aplikasi 32-bit</string>

@@ -9,8 +9,10 @@
 #define KSU_NETISOLATE_FLAG_MASK 0xffffu
 #define KSU_NETISOLATE_SUPPORTED_SHIFT 16u
 
-#define KSU_NETISOLATE_FLAG_STRICT_SOCKET (1u << 0)  /* Mutually exclusive with loopback */
-#define KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK (1u << 1) /* Allow IPv4/IPv6 loopback targets */
+#define KSU_NETISOLATE_FLAG_STRICT_SOCKET (1u << 0) /* Mutually exclusive with all allow flags */
+#define KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK (1u << 1)
+#define KSU_NETISOLATE_FLAG_ALLOW_PRIVATE_NETWORK (1u << 2)
+#define KSU_NETISOLATE_FLAG_ALLOW_LOCAL_DISCOVERY (1u << 3)
 
 struct ksu_netisolate_config {
     __u32 enabled;          /* Input/Output */

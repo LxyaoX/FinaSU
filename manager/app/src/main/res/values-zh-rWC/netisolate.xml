@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">本机代理可引回环之流越出天幕；唯有所需时方可开启</string>
     <string name="netisolate_loopback_blocked">IPv4 与 IPv6 的回环通路仍被天幕封住</string>
     <string name="netisolate_strict_loopback_conflict">严封网窍已启；须先解封，方可允通回环</string>
+    <string name="netisolate_strict_allow_conflict">严封网窍已启；须先解封，方可开任何放行</string>
+    <string name="netisolate_allow_private_network">允通私域</string>
+    <string name="netisolate_allow_private_network_summary">许所选凡器通 RFC1918、IPv6 ULA 与 IPv4/IPv6 链路本地之址；亦开往路由与局域器物之路</string>
+    <string name="netisolate_allow_private_network_unsupported">此道核尚无私域豁免之力</string>
+    <string name="netisolate_allow_local_discovery">允通本地探知</string>
+    <string name="netisolate_allow_local_discovery_summary">唯许 mDNS 与 SSDP 固定之所；或亦需私域同行</string>
+    <string name="netisolate_allow_local_discovery_unsupported">此道核尚无本地探知豁免之力</string>
+    <string name="netisolate_private_network_allowed">私域与链路本地通路已开</string>
+    <string name="netisolate_private_network_blocked">私域与链路本地通路仍被天幕封住</string>
+    <string name="netisolate_local_discovery_allowed">mDNS 与 SSDP 探知之所已开</string>
+    <string name="netisolate_local_discovery_blocked">mDNS 与 SSDP 探知之所仍被天幕封住</string>
     <string name="netisolate_manager_exempt">管理器永得天幕豁免，工作资料中的管理器亦然</string>
     <string name="netisolate_compat_supported">32 位与 64 位凡器皆在天幕之下</string>
     <string name="netisolate_compat_unsupported">此道核无法笼罩 32 位凡器</string>

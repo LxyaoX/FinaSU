@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">로컬 프록시가 루프백 트래픽을 인터넷으로 전달할 수 있습니다. 필요한 경우에만 활성화하세요</string>
     <string name="netisolate_loopback_blocked">루프백 IPv4 및 IPv6 연결이 차단됩니다</string>
     <string name="netisolate_strict_loopback_conflict">엄격한 소켓 차단이 활성화되어 있습니다. 루프백을 허용하기 전에 끄세요</string>
+    <string name="netisolate_strict_allow_conflict">엄격한 소켓 차단이 활성화되어 있습니다. 허용 예외를 켜기 전에 끄세요</string>
+    <string name="netisolate_allow_private_network">사설 네트워크 허용</string>
+    <string name="netisolate_allow_private_network_summary">RFC1918, IPv6 ULA 및 IPv4/IPv6 링크 로컬 대상 허용; 공유기와 LAN 장치로 가는 경로가 열립니다</string>
+    <string name="netisolate_allow_private_network_unsupported">이 커널은 사설 네트워크 예외를 지원하지 않습니다</string>
+    <string name="netisolate_allow_local_discovery">로컬 검색 허용</string>
+    <string name="netisolate_allow_local_discovery_summary">고정된 mDNS 및 SSDP 대상만 허용; 사설 네트워크도 필요할 수 있습니다</string>
+    <string name="netisolate_allow_local_discovery_unsupported">이 커널은 로컬 검색 예외를 지원하지 않습니다</string>
+    <string name="netisolate_private_network_allowed">사설 네트워크 및 링크 로컬 연결이 허용됩니다</string>
+    <string name="netisolate_private_network_blocked">사설 네트워크 및 링크 로컬 연결이 차단됩니다</string>
+    <string name="netisolate_local_discovery_allowed">mDNS 및 SSDP 검색 대상이 허용됩니다</string>
+    <string name="netisolate_local_discovery_blocked">mDNS 및 SSDP 검색 대상이 차단됩니다</string>
     <string name="netisolate_manager_exempt">관리자는 작업 프로필을 포함해 항상 예외입니다</string>
     <string name="netisolate_compat_supported">32비트 및 64비트 앱을 모두 지원합니다</string>
     <string name="netisolate_compat_unsupported">이 커널은 32비트 앱을 지원하지 않습니다</string>

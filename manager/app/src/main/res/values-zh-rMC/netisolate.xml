@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">本机代理可将回环流量转往互联网，仅在需要时开启</string>
     <string name="netisolate_loopback_blocked">IPv4 与 IPv6 回环连接会被拦截</string>
     <string name="netisolate_strict_loopback_conflict">严格封锁套接字已启用，请先关闭再允许回环</string>
+    <string name="netisolate_strict_allow_conflict">严格封锁套接字已启用，请先关闭再启用任何允许例外</string>
+    <string name="netisolate_allow_private_network">允许私有网络</string>
+    <string name="netisolate_allow_private_network_summary">允许 RFC1918、IPv6 ULA 与 IPv4/IPv6 链路本地地址；会开放到路由器与局域网设备的通路</string>
+    <string name="netisolate_allow_private_network_unsupported">当前核心不支持私有网络豁免</string>
+    <string name="netisolate_allow_local_discovery">允许本地发现</string>
+    <string name="netisolate_allow_local_discovery_summary">仅放行固定的 mDNS 与 SSDP 目标；可能还需要同时开启私有网络</string>
+    <string name="netisolate_allow_local_discovery_unsupported">当前核心不支持本地发现豁免</string>
+    <string name="netisolate_private_network_allowed">私有网络与链路本地连接已放行</string>
+    <string name="netisolate_private_network_blocked">私有网络与链路本地连接会被拦截</string>
+    <string name="netisolate_local_discovery_allowed">mDNS 与 SSDP 发现目标已放行</string>
+    <string name="netisolate_local_discovery_blocked">mDNS 与 SSDP 发现目标会被拦截</string>
     <string name="netisolate_manager_exempt">管理器始终豁免，包括工作资料中的管理器</string>
     <string name="netisolate_compat_supported">32 位与 64 位应用均可覆盖</string>
     <string name="netisolate_compat_unsupported">当前核心无法覆盖 32 位应用</string>

@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">本机代理可能把回环单子转去外网，真要用再开</string>
     <string name="netisolate_loopback_blocked">IPv4 和 IPv6 的回环通道还关着</string>
     <string name="netisolate_strict_loopback_conflict">新接口还锁着，先开锁再放行回环</string>
+    <string name="netisolate_strict_allow_conflict">新接口还锁着，先开锁再放行任何豁免</string>
+    <string name="netisolate_allow_private_network">放行私有网络</string>
+    <string name="netisolate_allow_private_network_summary">让点单应用能连 RFC1918、IPv6 ULA 和 IPv4/IPv6 链路本地地址，路由器跟局域网设备也能找上</string>
+    <string name="netisolate_allow_private_network_unsupported">这口内核还不会给私有网络免单</string>
+    <string name="netisolate_allow_local_discovery">放行本地发现</string>
+    <string name="netisolate_allow_local_discovery_summary">只放行固定的 mDNS 和 SSDP 目标，私有网络可能也得一起开</string>
+    <string name="netisolate_allow_local_discovery_unsupported">这口内核还不会给本地发现免单</string>
+    <string name="netisolate_private_network_allowed">私有网络和链路本地通道开着</string>
+    <string name="netisolate_private_network_blocked">私有网络和链路本地通道还关着</string>
+    <string name="netisolate_local_discovery_allowed">mDNS 和 SSDP 发现目标已放行</string>
+    <string name="netisolate_local_discovery_blocked">mDNS 和 SSDP 发现目标还关着</string>
     <string name="netisolate_manager_exempt">管理器始终免单，工作资料里的也算</string>
     <string name="netisolate_compat_supported">32 位和 64 位应用都照看</string>
     <string name="netisolate_compat_unsupported">这口内核照看不了 32 位应用</string>

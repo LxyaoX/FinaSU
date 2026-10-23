@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">本機代理可能將回送流量轉送至網際網路，請僅在需要時開啟</string>
     <string name="netisolate_loopback_blocked">回送 IPv4 與 IPv6 連線會被封鎖</string>
     <string name="netisolate_strict_loopback_conflict">嚴格封鎖通訊端已開啟，請先關閉再允許回送</string>
+    <string name="netisolate_strict_allow_conflict">嚴格封鎖通訊端已開啟，請先關閉再啟用任何允許例外</string>
+    <string name="netisolate_allow_private_network">允許私有網路</string>
+    <string name="netisolate_allow_private_network_summary">允許 RFC1918、IPv6 ULA 與 IPv4/IPv6 連結本機位址；會開放通往路由器與區域網路裝置的路徑</string>
+    <string name="netisolate_allow_private_network_unsupported">目前核心不支援私有網路豁免</string>
+    <string name="netisolate_allow_local_discovery">允許本機探索</string>
+    <string name="netisolate_allow_local_discovery_summary">僅允許固定的 mDNS 與 SSDP 目標；可能也需要開啟私有網路</string>
+    <string name="netisolate_allow_local_discovery_unsupported">目前核心不支援本機探索豁免</string>
+    <string name="netisolate_private_network_allowed">私有網路與連結本機連線已允許</string>
+    <string name="netisolate_private_network_blocked">私有網路與連結本機連線會被封鎖</string>
+    <string name="netisolate_local_discovery_allowed">mDNS 與 SSDP 探索目標已允許</string>
+    <string name="netisolate_local_discovery_blocked">mDNS 與 SSDP 探索目標會被封鎖</string>
     <string name="netisolate_manager_exempt">管理員程式一律豁免，包括工作資料中的管理員程式</string>
     <string name="netisolate_compat_supported">同時涵蓋 32 位元與 64 位元應用程式</string>
     <string name="netisolate_compat_unsupported">目前核心無法涵蓋 32 位元應用程式</string>

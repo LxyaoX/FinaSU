@@ -17,6 +17,9 @@ const FLAG_MASK: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_MASK;
 const SUPPORTED_SHIFT: u32 = ksu_uapi::KSU_NETISOLATE_SUPPORTED_SHIFT;
 const STRICT_SOCKET_FLAG: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_STRICT_SOCKET;
 const ALLOW_LOOPBACK_FLAG: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK;
+const ALLOW_PRIVATE_NETWORK_FLAG: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_ALLOW_PRIVATE_NETWORK;
+const ALLOW_LOCAL_DISCOVERY_FLAG: u32 = ksu_uapi::KSU_NETISOLATE_FLAG_ALLOW_LOCAL_DISCOVERY;
+const LAN_ALLOW_FLAGS: u32 = ALLOW_PRIVATE_NETWORK_FLAG | ALLOW_LOCAL_DISCOVERY_FLAG;
 
 #[derive(Debug, Clone, clap::Subcommand)]
 pub enum Command {
@@ -40,6 +43,7 @@ pub enum Command {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+#[allow(clippy::struct_excessive_bools)]
 struct ConfigFile {
     enabled: bool,
     uids: Vec<u32>,
@@ -47,6 +51,10 @@ struct ConfigFile {
     strict_socket: bool,
     #[serde(default)]
     allow_loopback: bool,
+    #[serde(default)]
+    allow_private_network: bool,
+    #[serde(default)]
+    allow_local_discovery: bool,
     #[serde(default)]
     policies: Option<Vec<NetIsolatePolicy>>,
 }
@@ -65,6 +73,8 @@ const fn empty_config() -> ConfigFile {
         uids: Vec::new(),
         strict_socket: false,
         allow_loopback: false,
+        allow_private_network: false,
+        allow_local_discovery: false,
         policies: Some(Vec::new()),
     }
 }
@@ -139,8 +149,8 @@ fn normalize(mut config: ConfigFile) -> Result<ConfigFile> {
     if config.uids.contains(&0) {
         bail!("UID 0 is permanently exempt and cannot be isolated");
     }
-    if config.policies.is_none() && config.strict_socket && config.allow_loopback {
-        bail!("Strict socket mode and loopback exemption cannot be enabled together");
+    if strict_conflict(&config) {
+        bail!("Strict socket mode cannot be combined with an allow exemption");
     }
 
     let mut policies = if let Some(policies) = config.policies.take() {
@@ -166,11 +176,13 @@ fn normalize(mut config: ConfigFile) -> Result<ConfigFile> {
     if policies.iter().any(|policy| policy.uid == 0) {
         bail!("UID 0 is permanently exempt and cannot be isolated");
     }
-    if policies
-        .iter()
-        .any(|policy| policy.strict_socket && policy.allow_loopback)
-    {
-        bail!("Strict socket mode and loopback exemption cannot be enabled together");
+    if policies.iter().any(|policy| {
+        policy.strict_socket
+            && (policy.allow_loopback
+                || config.allow_private_network
+                || config.allow_local_discovery)
+    }) {
+        bail!("Strict socket mode cannot be combined with an allow exemption");
     }
     let policy_uids: Vec<u32> = policies.iter().map(|policy| policy.uid).collect();
     if policy_uids != config.uids {
@@ -195,7 +207,26 @@ const fn requested_flags(config: &ConfigFile) -> u32 {
     if config.allow_loopback {
         flags |= ALLOW_LOOPBACK_FLAG;
     }
+    if config.allow_private_network {
+        flags |= ALLOW_PRIVATE_NETWORK_FLAG;
+    }
+    if config.allow_local_discovery {
+        flags |= ALLOW_LOCAL_DISCOVERY_FLAG;
+    }
     flags
+}
+
+const fn lan_allow_flags(config: &ConfigFile) -> u32 {
+    requested_flags(config) & LAN_ALLOW_FLAGS
+}
+
+const fn strict_conflict(config: &ConfigFile) -> bool {
+    config.strict_socket
+        && (config.allow_loopback || config.allow_private_network || config.allow_local_discovery)
+}
+
+const fn effective_policy_flags(config: &ConfigFile, policy: &NetIsolatePolicy) -> u32 {
+    policy_flags(policy) | lan_allow_flags(config)
 }
 
 const fn policy_flags(policy: &NetIsolatePolicy) -> u32 {
@@ -229,6 +260,17 @@ fn common_policy_flags(policies: &[NetIsolatePolicy]) -> u32 {
         })
 }
 
+fn common_kernel_policy_flags(policies: &[ksu_uapi::ksu_netisolate_policy]) -> u32 {
+    let Some(first) = policies.first() else {
+        return 0;
+    };
+    policies[1..]
+        .iter()
+        .fold(first.flags & FLAG_MASK, |common, policy| {
+            common & policy.flags
+        })
+}
+
 fn policies_have_same_flags(policies: &[NetIsolatePolicy]) -> bool {
     policies.first().is_none_or(|first| {
         policies
@@ -256,13 +298,42 @@ struct KernelSnapshot {
     policies: Option<ksu_uapi::ksu_netisolate_policies>,
 }
 
+fn supported_flags(snapshot: &KernelSnapshot) -> u32 {
+    snapshot
+        .policies
+        .as_ref()
+        .map(|kernel| kernel.supported_flags & FLAG_MASK)
+        .or_else(|| {
+            snapshot
+                .legacy
+                .as_ref()
+                .map(|kernel| kernel_flags(kernel).1)
+        })
+        .unwrap_or(0)
+}
+
+fn config_with_supported_flags(mut config: ConfigFile, supported: u32) -> ConfigFile {
+    config.strict_socket &= supported & STRICT_SOCKET_FLAG != 0;
+    config.allow_loopback &= supported & ALLOW_LOOPBACK_FLAG != 0;
+    config.allow_private_network &= supported & ALLOW_PRIVATE_NETWORK_FLAG != 0;
+    config.allow_local_discovery &= supported & ALLOW_LOCAL_DISCOVERY_FLAG != 0;
+    if let Some(policies) = config.policies.as_mut() {
+        for policy in policies {
+            policy.strict_socket &= supported & STRICT_SOCKET_FLAG != 0;
+            policy.allow_loopback &= supported & ALLOW_LOOPBACK_FLAG != 0;
+        }
+    }
+    config
+}
+
 fn ensure_policy_flags_supported(config: &ConfigFile, snapshot: &KernelSnapshot) -> Result<()> {
     let policies = config.policies.as_deref().unwrap_or_default();
     if let Some(kernel) = snapshot.policies.as_ref() {
         let supported = kernel.supported_flags & FLAG_MASK;
-        if policies
-            .iter()
-            .any(|policy| policy_flags(policy) & !supported != 0)
+        if requested_flags(config) & !supported != 0
+            || policies
+                .iter()
+                .any(|policy| effective_policy_flags(config, policy) & !supported != 0)
         {
             bail!("Kernel does not support the requested network isolation flags");
         }
@@ -277,9 +348,10 @@ fn ensure_policy_flags_supported(config: &ConfigFile, snapshot: &KernelSnapshot)
         .as_ref()
         .context("Kernel does not support network isolation")?;
     let supported = kernel_flags(legacy).1;
-    if policies
-        .iter()
-        .any(|policy| policy_flags(policy) & !supported != 0)
+    if requested_flags(config) & !supported != 0
+        || policies
+            .iter()
+            .any(|policy| effective_policy_flags(config, policy) & !supported != 0)
     {
         bail!("Kernel does not support the requested network isolation flags");
     }
@@ -390,7 +462,7 @@ fn kernel_policies(config: &ConfigFile) -> ksu_uapi::ksu_netisolate_policies {
     output.count = policies.len() as u32;
     for (slot, policy) in output.policies.iter_mut().zip(policies) {
         slot.uid = policy.uid;
-        slot.flags = policy_flags(policy);
+        slot.flags = effective_policy_flags(config, policy);
     }
     output
 }
@@ -520,30 +592,35 @@ fn status() -> Result<()> {
     let compat_supported = legacy
         .as_ref()
         .is_some_and(|config| config.compat_supported != 0);
-    let (supported_flags, policies) = match (policies_kernel.as_ref(), legacy.as_ref()) {
-        (Some(config), _) => {
-            let count = (config.count as usize).min(ksu_uapi::KSU_NETISOLATE_MAX_POLICIES as usize);
-            (
-                config.supported_flags & FLAG_MASK,
-                config.policies[..count]
-                    .iter()
-                    .map(|policy| policy_from_flags(policy.uid, policy.flags))
-                    .collect::<Vec<_>>(),
-            )
-        }
-        (None, Some(config)) => {
-            let count = (config.count as usize).min(ksu_uapi::KSU_NETISOLATE_MAX_UIDS as usize);
-            let active = kernel_flags(config).0;
-            (
-                kernel_flags(config).1,
-                config.uids[..count]
-                    .iter()
-                    .map(|&uid| policy_from_flags(uid, active))
-                    .collect::<Vec<_>>(),
-            )
-        }
-        (None, None) => (0, Vec::new()),
-    };
+    let (supported_flags, policies, active_flags) =
+        match (policies_kernel.as_ref(), legacy.as_ref()) {
+            (Some(config), _) => {
+                let count =
+                    (config.count as usize).min(ksu_uapi::KSU_NETISOLATE_MAX_POLICIES as usize);
+                let active = common_kernel_policy_flags(&config.policies[..count]);
+                (
+                    config.supported_flags & FLAG_MASK,
+                    config.policies[..count]
+                        .iter()
+                        .map(|policy| policy_from_flags(policy.uid, policy.flags))
+                        .collect::<Vec<_>>(),
+                    active,
+                )
+            }
+            (None, Some(config)) => {
+                let count = (config.count as usize).min(ksu_uapi::KSU_NETISOLATE_MAX_UIDS as usize);
+                let active = kernel_flags(config).0;
+                (
+                    kernel_flags(config).1,
+                    config.uids[..count]
+                        .iter()
+                        .map(|&uid| policy_from_flags(uid, active))
+                        .collect::<Vec<_>>(),
+                    active,
+                )
+            }
+            (None, None) => (0, Vec::new(), 0),
+        };
     let common = common_policy_flags(&policies);
     let uids = policies.iter().map(|policy| policy.uid).collect::<Vec<_>>();
     println!(
@@ -557,6 +634,12 @@ fn status() -> Result<()> {
             "strict_socket": common & STRICT_SOCKET_FLAG != 0,
             "allow_loopback_supported": supported_flags & ALLOW_LOOPBACK_FLAG != 0,
             "allow_loopback": common & ALLOW_LOOPBACK_FLAG != 0,
+            "allow_private_network_supported":
+                supported_flags & ALLOW_PRIVATE_NETWORK_FLAG != 0,
+            "allow_private_network": active_flags & ALLOW_PRIVATE_NETWORK_FLAG != 0,
+            "allow_local_discovery_supported":
+                supported_flags & ALLOW_LOCAL_DISCOVERY_FLAG != 0,
+            "allow_local_discovery": active_flags & ALLOW_LOCAL_DISCOVERY_FLAG != 0,
             "uids": uids,
             "policies": policies,
         })
@@ -689,10 +772,11 @@ fn disable() -> Result<()> {
     }
     let mut config = existing.unwrap_or_else(empty_config);
     config.enabled = false;
+    let effective = config_with_supported_flags(config.clone(), supported_flags(&snapshot));
     if snapshot.policies.is_some() {
-        apply_kernel_policies(&kernel_policies(&config))?;
+        apply_kernel_policies(&kernel_policies(&effective))?;
     } else {
-        apply_legacy_kernel_config(&legacy_kernel_config(&config))?;
+        apply_legacy_kernel_config(&legacy_kernel_config(&effective))?;
     }
     if let Err(error) = write_config(&config) {
         if let Err(rollback) = restore(&snapshot) {
@@ -768,6 +852,8 @@ mod tests {
             uids: vec![10123],
             strict_socket,
             allow_loopback,
+            allow_private_network: false,
+            allow_local_discovery: false,
             policies: None,
         }
     }
@@ -786,6 +872,8 @@ mod tests {
             uids: policies.iter().map(|policy| policy.uid).collect(),
             strict_socket: false,
             allow_loopback: false,
+            allow_private_network: false,
+            allow_local_discovery: false,
             policies: Some(policies),
         }
     }
@@ -820,6 +908,34 @@ mod tests {
             serde_json::from_str(r#"{"enabled":true,"uids":[10123]}"#).unwrap();
         let config = normalize(config).unwrap();
         assert_eq!(Some(vec![policy(10123, false, false)]), config.policies);
+        assert!(!config.allow_private_network);
+        assert!(!config.allow_local_discovery);
+    }
+
+    #[test]
+    fn lan_flags_round_trip_as_global_flags() {
+        let config: ConfigFile = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "uids": [10123, 10200],
+                "allow_private_network": true,
+                "allow_local_discovery": true
+            }"#,
+        )
+        .unwrap();
+        let config = normalize(config).unwrap();
+        let legacy = legacy_kernel_config(&config);
+        assert_eq!(
+            ALLOW_PRIVATE_NETWORK_FLAG | ALLOW_LOCAL_DISCOVERY_FLAG,
+            legacy.reserved
+        );
+        let policies = kernel_policies(&config);
+        for policy in &policies.policies[..2] {
+            assert_eq!(
+                ALLOW_PRIVATE_NETWORK_FLAG | ALLOW_LOCAL_DISCOVERY_FLAG,
+                policy.flags
+            );
+        }
     }
 
     #[test]
@@ -853,6 +969,8 @@ mod tests {
         let serialized = serde_json::to_value(config).unwrap();
         assert_eq!(Some(false), serialized["strict_socket"].as_bool());
         assert_eq!(Some(false), serialized["allow_loopback"].as_bool());
+        assert_eq!(Some(false), serialized["allow_private_network"].as_bool());
+        assert_eq!(Some(false), serialized["allow_local_discovery"].as_bool());
         assert_eq!(10123, serialized["policies"][0]["uid"].as_u64().unwrap());
         assert_eq!(
             true,
@@ -902,8 +1020,23 @@ mod tests {
     #[test]
     fn strict_and_loopback_are_mutually_exclusive() {
         let error = normalize(config(true, true, true)).unwrap_err();
-        assert!(error.to_string().contains("cannot be enabled together"));
+        assert!(error.to_string().contains("allow exemption"));
         assert!(normalize(policy_config(true, vec![policy(10123, true, true)])).is_err());
+    }
+
+    #[test]
+    fn strict_is_mutually_exclusive_with_lan_allow_flags() {
+        let mut private = config(true, true, false);
+        private.allow_private_network = true;
+        assert!(normalize(private).is_err());
+
+        let mut discovery = config(true, true, false);
+        discovery.allow_local_discovery = true;
+        assert!(normalize(discovery).is_err());
+
+        let mut per_app = policy_config(true, vec![policy(10123, true, false)]);
+        per_app.allow_private_network = true;
+        assert!(normalize(per_app).is_err());
     }
 
     #[test]
@@ -945,6 +1078,12 @@ mod tests {
             )
             .is_err()
         );
+        let mut private = config(true, false, false);
+        private.allow_private_network = true;
+        assert!(ensure_policy_flags_supported(&normalize(private).unwrap(), &snapshot).is_err());
+        let mut discovery = config(true, false, false);
+        discovery.allow_local_discovery = true;
+        assert!(ensure_policy_flags_supported(&normalize(discovery).unwrap(), &snapshot).is_err());
     }
 
     #[test]
@@ -994,6 +1133,13 @@ mod tests {
     }
 
     #[test]
+    fn active_flags_are_empty_without_policy_entries() {
+        let policies = policy_kernel(&[policy(10123, false, false)], FLAG_MASK);
+        assert_eq!(0, common_kernel_policy_flags(&policies.policies[..0]));
+        assert_eq!(0, common_kernel_policy_flags(&[]));
+    }
+
+    #[test]
     fn legacy_restore_uses_only_active_flag_bits() {
         let snapshot = legacy_kernel(1, STRICT_SOCKET_FLAG, STRICT_SOCKET_FLAG);
         assert_eq!(STRICT_SOCKET_FLAG, normalize_snapshot(snapshot).reserved);
@@ -1007,6 +1153,35 @@ mod tests {
 
         let wrong_active = legacy_kernel(1, 0, ALLOW_LOOPBACK_FLAG);
         assert!(!legacy_readback_matches(&request, &wrong_active));
+    }
+
+    #[test]
+    fn readback_detects_missing_lan_flags() {
+        let request_flags = ALLOW_PRIVATE_NETWORK_FLAG | ALLOW_LOCAL_DISCOVERY_FLAG;
+        let request = legacy_kernel(1, request_flags, request_flags);
+        let readback = legacy_kernel(1, 0, request_flags);
+        assert!(!legacy_readback_matches(&request, &readback));
+
+        let policies = vec![policy(10123, false, false)];
+        let policy_request = policy_kernel(&policies, request_flags);
+        let mut policy_readback = policy_request;
+        policy_readback.policies[0].flags = 0;
+        assert!(!policies_readback_matches(
+            &policy_request,
+            &policy_readback
+        ));
+    }
+
+    #[test]
+    fn disable_masks_unsupported_lan_flags_without_dropping_disk_values() {
+        let mut config = config(true, false, false);
+        config.allow_private_network = true;
+        config.allow_local_discovery = true;
+        let masked = config_with_supported_flags(config.clone(), 0);
+        assert!(!masked.allow_private_network);
+        assert!(!masked.allow_local_discovery);
+        assert!(config.allow_private_network);
+        assert!(config.allow_local_discovery);
     }
 
     #[test]

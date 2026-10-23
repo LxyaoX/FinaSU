@@ -44,7 +44,7 @@ class NetIsolateStatusTest {
     @Test
     fun `parses the ksud status contract`() {
         val status = NetIsolateStatus.parse(
-            """{"supported":true,"enabled":true,"compat_supported":true,"policy_supported":true,"strict_socket_supported":true,"strict_socket":false,"allow_loopback_supported":true,"allow_loopback":false,"uids":[10123,10200],"policies":[{"uid":10123,"strict_socket":false,"allow_loopback":true},{"uid":10200,"strict_socket":true,"allow_loopback":false}]}""",
+            """{"supported":true,"enabled":true,"compat_supported":true,"policy_supported":true,"strict_socket_supported":true,"strict_socket":false,"allow_loopback_supported":true,"allow_loopback":false,"allow_private_network_supported":true,"allow_private_network":true,"allow_local_discovery_supported":true,"allow_local_discovery":true,"uids":[10123,10200],"policies":[{"uid":10123,"strict_socket":false,"allow_loopback":true},{"uid":10200,"strict_socket":true,"allow_loopback":false}]}""",
         )
 
         assertTrue(status.supported)
@@ -55,6 +55,10 @@ class NetIsolateStatusTest {
         assertFalse(status.strictSocket)
         assertTrue(status.allowLoopbackSupported)
         assertFalse(status.allowLoopback)
+        assertTrue(status.allowPrivateNetworkSupported)
+        assertTrue(status.allowPrivateNetwork)
+        assertTrue(status.allowLocalDiscoverySupported)
+        assertTrue(status.allowLocalDiscovery)
         assertEquals(listOf(10123, 10200), status.uids)
         assertEquals(
             listOf(
@@ -77,6 +81,10 @@ class NetIsolateStatusTest {
         assertFalse(status.strictSocket)
         assertFalse(status.allowLoopbackSupported)
         assertFalse(status.allowLoopback)
+        assertFalse(status.allowPrivateNetworkSupported)
+        assertFalse(status.allowPrivateNetwork)
+        assertFalse(status.allowLocalDiscoverySupported)
+        assertFalse(status.allowLocalDiscovery)
         assertTrue(status.uids.isEmpty())
         assertTrue(status.policies.isEmpty())
     }

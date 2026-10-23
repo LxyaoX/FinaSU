@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">Un proxy local puede reenviar el tráfico de loopback a internet; actívalo solo cuando sea necesario</string>
     <string name="netisolate_loopback_blocked">Las conexiones de loopback IPv4 e IPv6 están bloqueadas</string>
     <string name="netisolate_strict_loopback_conflict">El bloqueo estricto de sockets está activo; desactívalo antes de permitir loopback</string>
+    <string name="netisolate_strict_allow_conflict">El bloqueo estricto de sockets está activo; desactívalo antes de activar cualquier excepción de permiso</string>
+    <string name="netisolate_allow_private_network">Permitir red privada</string>
+    <string name="netisolate_allow_private_network_summary">Permite destinos RFC1918, ULA IPv6 y enlace local IPv4/IPv6; abre el acceso a routers y dispositivos de la red local</string>
+    <string name="netisolate_allow_private_network_unsupported">Este kernel no admite la excepción de red privada</string>
+    <string name="netisolate_allow_local_discovery">Permitir descubrimiento local</string>
+    <string name="netisolate_allow_local_discovery_summary">Permite solo los destinos fijos mDNS y SSDP; también puede ser necesaria la red privada</string>
+    <string name="netisolate_allow_local_discovery_unsupported">Este kernel no admite la excepción de descubrimiento local</string>
+    <string name="netisolate_private_network_allowed">Las conexiones de red privada y enlace local están permitidas</string>
+    <string name="netisolate_private_network_blocked">Las conexiones de red privada y enlace local están bloqueadas</string>
+    <string name="netisolate_local_discovery_allowed">Los destinos de descubrimiento mDNS y SSDP están permitidos</string>
+    <string name="netisolate_local_discovery_blocked">Los destinos de descubrimiento mDNS y SSDP están bloqueados</string>
     <string name="netisolate_manager_exempt">El gestor siempre queda exento, incluso en perfiles de trabajo</string>
     <string name="netisolate_compat_supported">Se cubren apps de 32 y 64 bits</string>
     <string name="netisolate_compat_unsupported">Este kernel no cubre apps de 32 bits</string>

@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">يمكن لوكيل محلي تمرير حركة الاسترجاع إلى الإنترنت؛ فعّل هذا الخيار عند الحاجة فقط</string>
     <string name="netisolate_loopback_blocked">تُحظر اتصالات الاسترجاع IPv4 وIPv6</string>
     <string name="netisolate_strict_loopback_conflict">الحظر الصارم للمقابس مفعّل؛ أوقفه قبل السماح بالاسترجاع</string>
+    <string name="netisolate_strict_allow_conflict">الحظر الصارم للمقابس مفعّل؛ أوقفه قبل تفعيل أي استثناء سماح</string>
+    <string name="netisolate_allow_private_network">السماح بالشبكة الخاصة</string>
+    <string name="netisolate_allow_private_network_summary">السماح بعناوين RFC1918 وULA IPv6 والارتباط المحلي IPv4/IPv6؛ يفتح ذلك الوصول إلى الراوترات وأجهزة الشبكة المحلية</string>
+    <string name="netisolate_allow_private_network_unsupported">هذه النواة لا تدعم استثناء الشبكة الخاصة</string>
+    <string name="netisolate_allow_local_discovery">السماح بالاكتشاف المحلي</string>
+    <string name="netisolate_allow_local_discovery_summary">السماح فقط بأهداف mDNS وSSDP الثابتة؛ قد تحتاج أيضًا إلى الشبكة الخاصة</string>
+    <string name="netisolate_allow_local_discovery_unsupported">هذه النواة لا تدعم استثناء الاكتشاف المحلي</string>
+    <string name="netisolate_private_network_allowed">اتصالات الشبكة الخاصة والارتباط المحلي مسموح بها</string>
+    <string name="netisolate_private_network_blocked">اتصالات الشبكة الخاصة والارتباط المحلي محظورة</string>
+    <string name="netisolate_local_discovery_allowed">أهداف اكتشاف mDNS وSSDP مسموح بها</string>
+    <string name="netisolate_local_discovery_blocked">أهداف اكتشاف mDNS وSSDP محظورة</string>
     <string name="netisolate_manager_exempt">مدير التطبيق معفى دائمًا، بما في ذلك في ملفات العمل</string>
     <string name="netisolate_compat_supported">تغطي التطبيقات 32 بت و64 بت</string>
     <string name="netisolate_compat_unsupported">هذه النواة لا تغطي تطبيقات 32 بت</string>

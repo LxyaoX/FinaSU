@@ -358,6 +358,48 @@ fun NetIsolateScreen() {
                             onCheckedChange = viewModel::setAllowLoopback,
                         )
                     }
+                    item {
+                        SegmentedSwitchItem(
+                            icon = Icons.Filled.Info,
+                            title = stringResource(R.string.netisolate_allow_private_network),
+                            summary = stringResource(
+                                when {
+                                    !status.allowPrivateNetworkSupported ->
+                                        R.string.netisolate_allow_private_network_unsupported
+                                    status.strictSocket ->
+                                        R.string.netisolate_strict_allow_conflict
+                                    else ->
+                                        R.string.netisolate_allow_private_network_summary
+                                },
+                            ),
+                            checked = status.allowPrivateNetwork,
+                            enabled = canEdit &&
+                                status.allowPrivateNetworkSupported &&
+                                !status.strictSocket,
+                            onCheckedChange = viewModel::setAllowPrivateNetwork,
+                        )
+                    }
+                    item {
+                        SegmentedSwitchItem(
+                            icon = Icons.Filled.Info,
+                            title = stringResource(R.string.netisolate_allow_local_discovery),
+                            summary = stringResource(
+                                when {
+                                    !status.allowLocalDiscoverySupported ->
+                                        R.string.netisolate_allow_local_discovery_unsupported
+                                    status.strictSocket ->
+                                        R.string.netisolate_strict_allow_conflict
+                                    else ->
+                                        R.string.netisolate_allow_local_discovery_summary
+                                },
+                            ),
+                            checked = status.allowLocalDiscovery,
+                            enabled = canEdit &&
+                                status.allowLocalDiscoverySupported &&
+                                !status.strictSocket,
+                            onCheckedChange = viewModel::setAllowLocalDiscovery,
+                        )
+                    }
                 }
             }
 
@@ -436,6 +478,38 @@ fun NetIsolateScreen() {
                                         R.string.netisolate_allow_loopback_proxy_warning
                                     } else {
                                         R.string.netisolate_loopback_blocked
+                                    },
+                                ),
+                            )
+                        },
+                        leadingContent = { Icon(Icons.Filled.Security, null) },
+                    )
+                }
+                item(visible = status.enabled) {
+                    SegmentedListItem(
+                        headlineContent = {
+                            Text(
+                                stringResource(
+                                    if (status.allowPrivateNetwork) {
+                                        R.string.netisolate_private_network_allowed
+                                    } else {
+                                        R.string.netisolate_private_network_blocked
+                                    },
+                                ),
+                            )
+                        },
+                        leadingContent = { Icon(Icons.Filled.Security, null) },
+                    )
+                }
+                item(visible = status.enabled) {
+                    SegmentedListItem(
+                        headlineContent = {
+                            Text(
+                                stringResource(
+                                    if (status.allowLocalDiscovery) {
+                                        R.string.netisolate_local_discovery_allowed
+                                    } else {
+                                        R.string.netisolate_local_discovery_blocked
                                     },
                                 ),
                             )
@@ -798,7 +872,10 @@ private fun NetIsolatePolicySheet(
                             PolicyChoice(
                                 title = strictLabel,
                                 selected = policy.strictSocket,
-                                enabled = !busy && status.strictSocketSupported,
+                                enabled = !busy &&
+                                    status.strictSocketSupported &&
+                                    !status.allowPrivateNetwork &&
+                                    !status.allowLocalDiscovery,
                                 onClick = { onSetPolicy(target.uid, true, false) },
                             )
                         }

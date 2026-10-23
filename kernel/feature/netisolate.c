@@ -37,7 +37,11 @@ static_assert(sizeof(struct ksu_netisolate_events) == 2576, "netisolate events A
 #define NI_SYSCALL_LIMIT 1024
 #define NI_SENDMMSG_CHECK_MAX 16
 #define NI_SUPPORTED_FLAGS \
-    (KSU_NETISOLATE_FLAG_STRICT_SOCKET | KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK)
+    (KSU_NETISOLATE_FLAG_STRICT_SOCKET | KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK | \
+     KSU_NETISOLATE_FLAG_ALLOW_PRIVATE_NETWORK | KSU_NETISOLATE_FLAG_ALLOW_LOCAL_DISCOVERY)
+#define NI_ALLOW_FLAGS \
+    (KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK | KSU_NETISOLATE_FLAG_ALLOW_PRIVATE_NETWORK | \
+     KSU_NETISOLATE_FLAG_ALLOW_LOCAL_DISCOVERY)
 
 enum ni_operation {
     NI_CONNECT,
@@ -70,6 +74,14 @@ struct ni_endpoint {
     u8 family;
     u8 address[16];
     u16 port;
+};
+
+enum ni_target_class {
+    NI_TARGET_NONE,
+    NI_TARGET_LOOPBACK,
+    NI_TARGET_PRIVATE_NETWORK,
+    NI_TARGET_LOCAL_DISCOVERY,
+    NI_TARGET_OTHER_IP,
 };
 
 struct ni_event_ring {
@@ -187,40 +199,69 @@ static bool ni_policy_match(uid_t uid, enum ni_operation op, u32 *policy_flags)
     return false;
 }
 
-static bool ni_ipv4_loopback(const struct in_addr *address)
+static enum ni_target_class ni_ipv4_target(const struct in_addr *address)
 {
-    return ((const u8 *)&address->s_addr)[0] == 127;
+    const u8 *bytes = (const u8 *)&address->s_addr;
+
+    if (bytes[0] == 127)
+        return NI_TARGET_LOOPBACK;
+    if (bytes[0] == 224 && bytes[1] == 0 && bytes[2] == 0 && bytes[3] == 251)
+        return NI_TARGET_LOCAL_DISCOVERY;
+    if (bytes[0] == 239 && bytes[1] == 255 && bytes[2] == 255 && bytes[3] == 250)
+        return NI_TARGET_LOCAL_DISCOVERY;
+    if (bytes[0] == 10 || (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) ||
+        (bytes[0] == 192 && bytes[1] == 168) ||
+        (bytes[0] == 169 && bytes[1] == 254))
+        return NI_TARGET_PRIVATE_NETWORK;
+    return NI_TARGET_OTHER_IP;
 }
 
-static bool ni_ipv6_loopback(const struct in6_addr *address)
+static enum ni_target_class ni_ipv6_target(const struct in6_addr *address)
 {
     const u8 *bytes = address->s6_addr;
+    struct in_addr mapped;
+    bool zero_prefix = true;
     u32 i;
 
     for (i = 0; i < 10; i++) {
-        if (bytes[i])
-            return false;
+        if (bytes[i]) {
+            zero_prefix = false;
+            break;
+        }
     }
 
-    if (!bytes[10] && !bytes[11]) {
+    if (zero_prefix && !bytes[10] && !bytes[11]) {
         for (i = 12; i < 15; i++) {
             if (bytes[i])
-                return false;
+                break;
         }
-        return bytes[15] == 1;
+        if (i == 15 && bytes[15] == 1)
+            return NI_TARGET_LOOPBACK;
     }
 
-    return bytes[10] == 0xff && bytes[11] == 0xff && bytes[12] == 127;
+    if (zero_prefix && bytes[10] == 0xff && bytes[11] == 0xff) {
+        memcpy(&mapped, &bytes[12], sizeof(mapped));
+        return ni_ipv4_target(&mapped);
+    }
+    if (bytes[0] == 0xff && bytes[1] == 0x02) {
+        for (i = 2; i < 15; i++) {
+            if (bytes[i])
+                return NI_TARGET_OTHER_IP;
+        }
+        return bytes[15] == 0xfb ? NI_TARGET_LOCAL_DISCOVERY : NI_TARGET_OTHER_IP;
+    }
+    if ((bytes[0] & 0xfe) == 0xfc || (bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0x80))
+        return NI_TARGET_PRIVATE_NETWORK;
+    return NI_TARGET_OTHER_IP;
 }
 
 static int ni_sockaddr_target(const void __user *address, unsigned int address_length,
-                              struct ni_endpoint *endpoint, bool *target, bool *loopback)
+                              struct ni_endpoint *endpoint, enum ni_target_class *target_class)
 {
     __u16 family;
 
     memset(endpoint, 0, sizeof(*endpoint));
-    *target = false;
-    *loopback = false;
+    *target_class = NI_TARGET_NONE;
     if (!address)
         return 0;
     if (copy_from_user(&family, address, sizeof(family)))
@@ -236,8 +277,7 @@ static int ni_sockaddr_target(const void __user *address, unsigned int address_l
         endpoint->family = AF_INET;
         memcpy(endpoint->address, &addr.sin_addr, sizeof(addr.sin_addr));
         endpoint->port = ntohs(addr.sin_port);
-        *target = true;
-        *loopback = ni_ipv4_loopback(&addr.sin_addr);
+        *target_class = ni_ipv4_target(&addr.sin_addr);
     } else if (family == AF_INET6) {
         struct sockaddr_in6 addr;
 
@@ -248,19 +288,31 @@ static int ni_sockaddr_target(const void __user *address, unsigned int address_l
         endpoint->family = AF_INET6;
         memcpy(endpoint->address, &addr.sin6_addr, sizeof(addr.sin6_addr));
         endpoint->port = ntohs(addr.sin6_port);
-        *target = true;
-        *loopback = ni_ipv6_loopback(&addr.sin6_addr);
+        *target_class = ni_ipv6_target(&addr.sin6_addr);
     }
     return 0;
 }
 
-static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool allow_loopback,
+static bool ni_target_allowed(enum ni_target_class target_class, u32 policy_flags)
+{
+    switch (target_class) {
+    case NI_TARGET_LOOPBACK:
+        return policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK;
+    case NI_TARGET_PRIVATE_NETWORK:
+        return policy_flags & KSU_NETISOLATE_FLAG_ALLOW_PRIVATE_NETWORK;
+    case NI_TARGET_LOCAL_DISCOVERY:
+        return policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOCAL_DISCOVERY;
+    default:
+        return false;
+    }
+}
+
+static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, u32 policy_flags,
                              struct ni_endpoint *endpoint, bool *target)
 {
     void __user *name;
     int name_length;
-    bool address_target;
-    bool loopback;
+    enum ni_target_class target_class;
     int ret;
 
     *target = false;
@@ -292,14 +344,14 @@ static int ni_sendmsg_target(const struct pt_regs *regs, bool compat, bool allow
 
     if (name_length < 0)
         return 0;
-    ret = ni_sockaddr_target(name, name_length, endpoint, &address_target, &loopback);
+    ret = ni_sockaddr_target(name, name_length, endpoint, &target_class);
     if (ret)
         return ret;
-    *target = address_target && !(allow_loopback && loopback);
+    *target = target_class != NI_TARGET_NONE && !ni_target_allowed(target_class, policy_flags);
     return 0;
 }
 
-static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allow_loopback,
+static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, u32 policy_flags,
                               struct ni_endpoint *endpoint, bool *target)
 {
     unsigned long base = ni_arg(regs, 1, compat);
@@ -313,8 +365,7 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allo
 
     for (i = 0; i < count; i++) {
         void __user *name;
-        bool address_target;
-        bool loopback;
+        enum ni_target_class target_class;
         int name_length;
         int ret;
 
@@ -348,10 +399,11 @@ static int ni_sendmmsg_target(const struct pt_regs *regs, bool compat, bool allo
             continue;
         if (name_length < 0)
             continue;
-        ret = ni_sockaddr_target(name, name_length, endpoint, &address_target, &loopback);
+        ret = ni_sockaddr_target(name, name_length, endpoint, &target_class);
         if (ret)
             return ret;
-        if (address_target && !(allow_loopback && loopback)) {
+        if (target_class != NI_TARGET_NONE &&
+            !ni_target_allowed(target_class, policy_flags)) {
             *target = true;
             return 0;
         }
@@ -363,35 +415,34 @@ static bool __nocfi ni_should_refuse(const struct pt_regs *regs, enum ni_operati
                                      struct ni_endpoint *endpoint)
 {
     u32 policy_flags = 0;
-    bool address_target;
-    bool allow_loopback;
-    bool loopback;
+    enum ni_target_class target_class;
     bool target = false;
 
     memset(endpoint, 0, sizeof(*endpoint));
     if (!ni_policy_match(current_uid().val, op, &policy_flags))
         return false;
-    allow_loopback = policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK;
 
     switch (op) {
     case NI_CONNECT:
         if (ni_sockaddr_target(ni_user_ptr(regs, 1, compat), ni_arg(regs, 2, compat),
-                               endpoint, &address_target, &loopback))
+                               endpoint, &target_class))
             return false;
-        target = address_target && !(allow_loopback && loopback);
+        target = target_class != NI_TARGET_NONE &&
+                 !ni_target_allowed(target_class, policy_flags);
         break;
     case NI_SENDTO:
         if (ni_sockaddr_target(ni_user_ptr(regs, 4, compat), ni_arg(regs, 5, compat),
-                               endpoint, &address_target, &loopback))
+                               endpoint, &target_class))
             return false;
-        target = address_target && !(allow_loopback && loopback);
+        target = target_class != NI_TARGET_NONE &&
+                 !ni_target_allowed(target_class, policy_flags);
         break;
     case NI_SENDMSG:
-        if (ni_sendmsg_target(regs, compat, allow_loopback, endpoint, &target))
+        if (ni_sendmsg_target(regs, compat, policy_flags, endpoint, &target))
             return false;
         break;
     case NI_SENDMMSG:
-        if (ni_sendmmsg_target(regs, compat, allow_loopback, endpoint, &target))
+        if (ni_sendmmsg_target(regs, compat, policy_flags, endpoint, &target))
             return false;
         break;
     case NI_SOCKET:
@@ -634,8 +685,7 @@ static int ni_validate_config(const struct ksu_netisolate_config *config)
     if (config->reserved & ~NI_SUPPORTED_FLAGS)
         return -EINVAL;
     policy_flags = config->reserved & KSU_NETISOLATE_FLAG_MASK;
-    if ((policy_flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET) &&
-        (policy_flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK))
+    if ((policy_flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET) && (policy_flags & NI_ALLOW_FLAGS))
         return -EINVAL;
     if (config->count > KSU_NETISOLATE_MAX_UIDS)
         return -EINVAL;
@@ -668,8 +718,7 @@ static int ni_validate_policies(const struct ksu_netisolate_policies *config)
         flags = config->policies[i].flags;
         if (!config->policies[i].uid || flags & ~NI_SUPPORTED_FLAGS)
             return -EINVAL;
-        if ((flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET) &&
-            (flags & KSU_NETISOLATE_FLAG_ALLOW_LOOPBACK))
+        if ((flags & KSU_NETISOLATE_FLAG_STRICT_SOCKET) && (flags & NI_ALLOW_FLAGS))
             return -EINVAL;
         for (j = 0; j < i; j++) {
             if (config->policies[j].uid == config->policies[i].uid)

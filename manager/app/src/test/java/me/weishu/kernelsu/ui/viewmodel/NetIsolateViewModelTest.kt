@@ -270,6 +270,101 @@ class NetIsolateViewModelTest {
     }
 
     @Test
+    fun `private network and discovery toggles are independent`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            allowPrivateNetworkSupported = true,
+            allowLocalDiscoverySupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setAllowPrivateNetwork(true)
+        advanceUntilIdle()
+        model.setAllowLocalDiscovery(true)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(
+                SaveCall(true, listOf(10123), false, false, true, false),
+                SaveCall(true, listOf(10123), false, false, true, true),
+            ),
+            repository.saves,
+        )
+        assertTrue(model.uiState.value.status.allowPrivateNetwork)
+        assertTrue(model.uiState.value.status.allowLocalDiscovery)
+    }
+
+    @Test
+    fun `enabling a lan allow flag clears strict socket`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            strictSocket = true,
+            allowPrivateNetworkSupported = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setAllowPrivateNetwork(true)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(SaveCall(true, listOf(10123), false, false, true, false)),
+            repository.saves,
+        )
+        assertFalse(model.uiState.value.status.strictSocket)
+    }
+
+    @Test
+    fun `enabling strict socket clears lan allow flags`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            strictSocketSupported = true,
+            allowPrivateNetworkSupported = true,
+            allowPrivateNetwork = true,
+            allowLocalDiscoverySupported = true,
+            allowLocalDiscovery = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setStrictSocket(true)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(SaveCall(true, listOf(10123), true, false, false, false)),
+            repository.saves,
+        )
+        assertFalse(model.uiState.value.status.allowPrivateNetwork)
+        assertFalse(model.uiState.value.status.allowLocalDiscovery)
+    }
+
+    @Test
+    fun `lan flags are rejected when unsupported`() = runTest(dispatcher) {
+        repository.current = NetIsolateStatus(
+            supported = true,
+            enabled = true,
+            uids = listOf(10123),
+        )
+        val model = model()
+        advanceUntilIdle()
+
+        model.setAllowPrivateNetwork(true)
+        model.setAllowLocalDiscovery(true)
+        advanceUntilIdle()
+
+        assertTrue(repository.saves.isEmpty())
+        assertEquals("message", model.uiState.value.message)
+    }
+
+    @Test
     fun `standard mode saves both flags off`() = runTest(dispatcher) {
         repository.current = NetIsolateStatus(
             supported = true,
@@ -507,25 +602,48 @@ class NetIsolateViewModelTest {
             uids: List<Int>,
             strictSocket: Boolean,
             allowLoopback: Boolean,
+            allowPrivateNetwork: Boolean,
+            allowLocalDiscovery: Boolean,
         ) {
             val normalized = uids.distinct().sorted()
-            saves += SaveCall(enabled, normalized, strictSocket, allowLoopback)
+            saves += SaveCall(
+                enabled,
+                normalized,
+                strictSocket,
+                allowLoopback,
+                allowPrivateNetwork,
+                allowLocalDiscovery,
+            )
             savePolicies(
                 enabled,
                 normalized.map { uid ->
                     NetIsolatePolicy(uid, strictSocket, allowLoopback)
                 },
+                allowPrivateNetwork,
+                allowLocalDiscovery,
             )
         }
 
-        override suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>) {
+        override suspend fun savePolicies(
+            enabled: Boolean,
+            policies: List<NetIsolatePolicy>,
+            allowPrivateNetwork: Boolean,
+            allowLocalDiscovery: Boolean,
+        ) {
             val normalized = policies.sortedBy(NetIsolatePolicy::uid)
-            policySaves += PolicySaveCall(enabled, normalized)
+            policySaves += PolicySaveCall(
+                enabled,
+                normalized,
+                allowPrivateNetwork,
+                allowLocalDiscovery,
+            )
             current = current.copy(
                 enabled = enabled,
                 uids = normalized.map(NetIsolatePolicy::uid),
                 strictSocket = normalized.isNotEmpty() && normalized.all(NetIsolatePolicy::strictSocket),
                 allowLoopback = normalized.isNotEmpty() && normalized.all(NetIsolatePolicy::allowLoopback),
+                allowPrivateNetwork = allowPrivateNetwork,
+                allowLocalDiscovery = allowLocalDiscovery,
                 policies = normalized,
             )
         }
@@ -553,10 +671,14 @@ class NetIsolateViewModelTest {
         val uids: List<Int>,
         val strictSocket: Boolean,
         val allowLoopback: Boolean,
+        val allowPrivateNetwork: Boolean = false,
+        val allowLocalDiscovery: Boolean = false,
     )
 
     private data class PolicySaveCall(
         val enabled: Boolean,
         val policies: List<NetIsolatePolicy>,
+        val allowPrivateNetwork: Boolean = false,
+        val allowLocalDiscovery: Boolean = false,
     )
 }

@@ -37,6 +37,10 @@ data class NetIsolateStatus(
     val strictSocket: Boolean = false,
     val allowLoopbackSupported: Boolean = false,
     val allowLoopback: Boolean = false,
+    val allowPrivateNetworkSupported: Boolean = false,
+    val allowPrivateNetwork: Boolean = false,
+    val allowLocalDiscoverySupported: Boolean = false,
+    val allowLocalDiscovery: Boolean = false,
     val uids: List<Int> = emptyList(),
     val policies: List<NetIsolatePolicy> = emptyList(),
 ) {
@@ -47,6 +51,8 @@ data class NetIsolateStatus(
             val uids = List(array.length()) { index -> array.getInt(index) }
             val strictSocket = json.optBoolean("strict_socket")
             val allowLoopback = json.optBoolean("allow_loopback")
+            val allowPrivateNetwork = json.optBoolean("allow_private_network")
+            val allowLocalDiscovery = json.optBoolean("allow_local_discovery")
             val policyArray = json.optJSONArray("policies")
             val policies = if (policyArray != null) {
                 List(policyArray.length()) { index ->
@@ -71,6 +77,12 @@ data class NetIsolateStatus(
                 strictSocket = strictSocket,
                 allowLoopbackSupported = json.optBoolean("allow_loopback_supported"),
                 allowLoopback = allowLoopback,
+                allowPrivateNetworkSupported =
+                    json.optBoolean("allow_private_network_supported"),
+                allowPrivateNetwork = allowPrivateNetwork,
+                allowLocalDiscoverySupported =
+                    json.optBoolean("allow_local_discovery_supported"),
+                allowLocalDiscovery = allowLocalDiscovery,
                 uids = uids,
                 policies = policies,
             )
@@ -140,8 +152,15 @@ interface NetIsolateDataSource {
         uids: List<Int>,
         strictSocket: Boolean,
         allowLoopback: Boolean,
+        allowPrivateNetwork: Boolean,
+        allowLocalDiscovery: Boolean,
     )
-    suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>)
+    suspend fun savePolicies(
+        enabled: Boolean,
+        policies: List<NetIsolatePolicy>,
+        allowPrivateNetwork: Boolean = false,
+        allowLocalDiscovery: Boolean = false,
+    )
     suspend fun disable()
     suspend fun clear()
     suspend fun clearEvents()
@@ -224,16 +243,25 @@ class NetIsolateRepository(
         uids: List<Int>,
         strictSocket: Boolean,
         allowLoopback: Boolean,
+        allowPrivateNetwork: Boolean,
+        allowLocalDiscovery: Boolean,
     ) {
         savePolicies(
             enabled,
             uids.distinct().sorted().map { uid ->
                 NetIsolatePolicy(uid, strictSocket, allowLoopback)
             },
+            allowPrivateNetwork,
+            allowLocalDiscovery,
         )
     }
 
-    override suspend fun savePolicies(enabled: Boolean, policies: List<NetIsolatePolicy>) {
+    override suspend fun savePolicies(
+        enabled: Boolean,
+        policies: List<NetIsolatePolicy>,
+        allowPrivateNetwork: Boolean,
+        allowLocalDiscovery: Boolean,
+    ) {
         val sorted = policies.sortedBy { it.uid }
         require(sorted.map(NetIsolatePolicy::uid).distinct().size == sorted.size) {
             "Network isolation policy UIDs must be unique"
@@ -260,6 +288,8 @@ class NetIsolateRepository(
                 .put("uids", array)
                 .put("strict_socket", strictSocket)
                 .put("allow_loopback", allowLoopback)
+                .put("allow_private_network", allowPrivateNetwork)
+                .put("allow_local_discovery", allowLocalDiscovery)
                 .put("policies", policyArray)
                 .toString(),
         )

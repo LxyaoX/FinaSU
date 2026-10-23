@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">本機代理可引回環之流至外網；非必要勿啟</string>
     <string name="netisolate_loopback_blocked">IPv4 與 IPv6 之回環網途仍阻</string>
     <string name="netisolate_strict_loopback_conflict">嚴鎖網竅已啟；須先止之，方可允通回環</string>
+    <string name="netisolate_strict_allow_conflict">嚴鎖網竅已啟；須先止之，方可開任何豁免</string>
+    <string name="netisolate_allow_private_network">允通私網</string>
+    <string name="netisolate_allow_private_network_summary">許蒙選凡器通 RFC1918、IPv6 ULA 與 IPv4/IPv6 鏈路本地之址；亦開往路由與局域器物之路</string>
+    <string name="netisolate_allow_private_network_unsupported">此核尚無私網豁免之能</string>
+    <string name="netisolate_allow_local_discovery">允通本地發現</string>
+    <string name="netisolate_allow_local_discovery_summary">唯許 mDNS 與 SSDP 固定之標；或亦需私網</string>
+    <string name="netisolate_allow_local_discovery_unsupported">此核尚無本地發現豁免之能</string>
+    <string name="netisolate_private_network_allowed">私網與鏈路本地之途已通</string>
+    <string name="netisolate_private_network_blocked">私網與鏈路本地之途仍阻</string>
+    <string name="netisolate_local_discovery_allowed">mDNS 與 SSDP 發現之標已通</string>
+    <string name="netisolate_local_discovery_blocked">mDNS 與 SSDP 發現之標仍阻</string>
     <string name="netisolate_manager_exempt">管理器永蒙豁免，工作資料亦然</string>
     <string name="netisolate_compat_supported">32 位與 64 位凡器皆受此界</string>
     <string name="netisolate_compat_unsupported">此核不能覆 32 位凡器</string>

@@ -32,6 +32,17 @@
     <string name="netisolate_allow_loopback_proxy_warning">Proxy cục bộ có thể chuyển lưu lượng loopback ra internet; chỉ bật khi cần thiết</string>
     <string name="netisolate_loopback_blocked">Kết nối loopback IPv4 và IPv6 bị chặn</string>
     <string name="netisolate_strict_loopback_conflict">Chặn socket nghiêm ngặt đang bật; hãy tắt trước khi cho phép loopback</string>
+    <string name="netisolate_strict_allow_conflict">Chặn socket nghiêm ngặt đang bật; hãy tắt trước khi bật bất kỳ miễn trừ cho phép nào</string>
+    <string name="netisolate_allow_private_network">Cho phép mạng riêng</string>
+    <string name="netisolate_allow_private_network_summary">Cho phép các đích RFC1918, IPv6 ULA và link-local IPv4/IPv6; mở quyền truy cập tới router và thiết bị LAN</string>
+    <string name="netisolate_allow_private_network_unsupported">Kernel này không hỗ trợ miễn trừ mạng riêng</string>
+    <string name="netisolate_allow_local_discovery">Cho phép phát hiện cục bộ</string>
+    <string name="netisolate_allow_local_discovery_summary">Chỉ cho phép các đích cố định mDNS và SSDP; mạng riêng cũng có thể cần thiết</string>
+    <string name="netisolate_allow_local_discovery_unsupported">Kernel này không hỗ trợ miễn trừ phát hiện cục bộ</string>
+    <string name="netisolate_private_network_allowed">Kết nối mạng riêng và link-local được cho phép</string>
+    <string name="netisolate_private_network_blocked">Kết nối mạng riêng và link-local bị chặn</string>
+    <string name="netisolate_local_discovery_allowed">Các đích phát hiện mDNS và SSDP được cho phép</string>
+    <string name="netisolate_local_discovery_blocked">Các đích phát hiện mDNS và SSDP bị chặn</string>
     <string name="netisolate_manager_exempt">Trình quản lý luôn được miễn trừ, kể cả trong hồ sơ công việc</string>
     <string name="netisolate_compat_supported">Bao phủ ứng dụng 32 bit và 64 bit</string>
     <string name="netisolate_compat_unsupported">Kernel này không bao phủ ứng dụng 32 bit</string>

@@ -83,7 +83,12 @@ class NetIsolateViewModel(
         }
         operate {
             if (enabled) {
-                repository.savePolicies(true, status.policies)
+                repository.savePolicies(
+                    true,
+                    status.policies,
+                    status.allowPrivateNetwork,
+                    status.allowLocalDiscovery,
+                )
             } else {
                 repository.disable()
             }
@@ -104,6 +109,8 @@ class NetIsolateViewModel(
                 status.uids,
                 mode == NetIsolateMode.Strict,
                 mode == NetIsolateMode.Loopback,
+                false,
+                false,
             )
         }
     }
@@ -124,7 +131,12 @@ class NetIsolateViewModel(
             )
         }
         operate {
-            repository.savePolicies(status.enabled, policies)
+            repository.savePolicies(
+                status.enabled,
+                policies,
+                status.allowPrivateNetwork,
+                status.allowLocalDiscovery,
+            )
         }
     }
 
@@ -149,6 +161,12 @@ class NetIsolateViewModel(
             return
         }
         if (strictSocket && allowLoopback) return
+        if (strictSocket && (status.allowPrivateNetwork || status.allowLocalDiscovery)) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_strict_allow_conflict))
+            }
+            return
+        }
         val policies = status.policies.map { policy ->
             if (policy.uid == uid) {
                 policy.copy(
@@ -161,7 +179,12 @@ class NetIsolateViewModel(
         }
         if (policies.none { it.uid == uid }) return
         operate {
-            repository.savePolicies(status.enabled, policies)
+            repository.savePolicies(
+                status.enabled,
+                policies,
+                status.allowPrivateNetwork,
+                status.allowLocalDiscovery,
+            )
         }
     }
 
@@ -179,6 +202,8 @@ class NetIsolateViewModel(
                 status.uids,
                 strictSocket,
                 if (strictSocket) false else status.allowLoopback,
+                if (strictSocket) false else status.allowPrivateNetwork,
+                if (strictSocket) false else status.allowLocalDiscovery,
             )
         }
     }
@@ -197,6 +222,48 @@ class NetIsolateViewModel(
                 status.uids,
                 if (allowLoopback) false else status.strictSocket,
                 allowLoopback,
+                status.allowPrivateNetwork,
+                status.allowLocalDiscovery,
+            )
+        }
+    }
+
+    fun setAllowPrivateNetwork(allowPrivateNetwork: Boolean) {
+        val status = _uiState.value.status
+        if (allowPrivateNetwork && !status.allowPrivateNetworkSupported) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_allow_private_network_unsupported))
+            }
+            return
+        }
+        operate {
+            repository.save(
+                status.enabled,
+                status.uids,
+                if (allowPrivateNetwork) false else status.strictSocket,
+                status.allowLoopback,
+                allowPrivateNetwork,
+                status.allowLocalDiscovery,
+            )
+        }
+    }
+
+    fun setAllowLocalDiscovery(allowLocalDiscovery: Boolean) {
+        val status = _uiState.value.status
+        if (allowLocalDiscovery && !status.allowLocalDiscoverySupported) {
+            _uiState.update {
+                it.copy(message = getString(R.string.netisolate_allow_local_discovery_unsupported))
+            }
+            return
+        }
+        operate {
+            repository.save(
+                status.enabled,
+                status.uids,
+                if (allowLocalDiscovery) false else status.strictSocket,
+                status.allowLoopback,
+                status.allowPrivateNetwork,
+                allowLocalDiscovery,
             )
         }
     }
