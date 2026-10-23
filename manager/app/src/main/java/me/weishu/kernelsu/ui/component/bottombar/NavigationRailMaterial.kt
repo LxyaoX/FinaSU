@@ -62,7 +62,6 @@ fun NavigationRailMaterial(
                     onClick = {
                         if (!selected) {
                             mainPagerState.animateToDestination(destination)
-                            me.weishu.kernelsu.media.MediaFeedback.navigation()
                         }
                     },
                     icon = {

@@ -70,7 +70,6 @@ fun CategorySettingsScreen(categoryKey: String) {
                 SettingsCategory.BEHAVIOR -> BehaviorCategoryContent(uiState, actions)
                 SettingsCategory.FUNCTION -> FunctionCategoryContent(uiState, actions)
                 SettingsCategory.SECURITY -> SecurityCategoryContent(uiState, actions)
-                SettingsCategory.MULTIMEDIA -> MultimediaCategoryContent()
                 SettingsCategory.BACKUP -> BackupSettingsContent()
                 null -> Unit
             }

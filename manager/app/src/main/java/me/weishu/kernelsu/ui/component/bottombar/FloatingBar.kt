@@ -139,7 +139,6 @@ internal fun FloatingBar(
                             if (it == mainPagerState.selectedDestination) return@FloatingBarDrawer
                             onUserInteraction()
                             mainPagerState.animateToDestination(it)
-                            me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
                         selectionColor = selectionColor,
                         selectionContentColor = selectionContentColor,
@@ -152,7 +151,6 @@ internal fun FloatingBar(
                         onSelect = {
                             onUserInteraction()
                             mainPagerState.animateToDestination(it)
-                            me.weishu.kernelsu.media.MediaFeedback.navigation()
                         },
                         selectionColor = selectionColor,
                         selectionContentColor = selectionContentColor,

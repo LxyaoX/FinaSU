@@ -15,8 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -39,9 +36,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.R
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import me.weishu.kernelsu.media.MusicConfig
-import me.weishu.kernelsu.media.MusicManager
 import me.weishu.kernelsu.data.HomeMetrics
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
@@ -139,15 +133,6 @@ private fun TopBar(state: HomeUiState, actions: HomeActions) {
             if (state.susfs.detected) {
                 IconButton(onClick = actions.onSusfs) {
                     Icon(androidx.compose.material.icons.Icons.Rounded.VisibilityOff, stringResource(R.string.susfs_title))
-                }
-            }
-            if (MusicConfig.isMusicEnabled && MusicConfig.getMusicFile(LocalContext.current) != null) {
-                val playing by MusicManager.isPlaying.collectAsStateWithLifecycle()
-                IconButton(onClick = { MusicManager.toggle() }) {
-                    Icon(
-                        imageVector = if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = stringResource(if (playing) R.string.media_pause else R.string.media_play),
-                    )
                 }
             }
             IconButton(

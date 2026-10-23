@@ -39,7 +39,7 @@ FinaSU provides:
 
 - Multiple home layouts, including GridUI and dashboard-style pages
 - Configurable theming: colors, wallpapers, and fonts
-- A category-based settings hub covering general, appearance, behavior, function, security, and multimedia options
+- A category-based settings hub covering general, appearance, behavior, function, security, and backup options
 - Optional update checks and boot-time module blocking
 
 ## Modules and Extensions

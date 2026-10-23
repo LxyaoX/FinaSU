@@ -14,7 +14,7 @@ internal interface ThemedAsset {
     suspend fun reset(context: Context)
 }
 
-/** Exact archive entry names are owned by the group, for example musicFilename. */
+/** Exact archive entry names are owned by the group, for example the nav icon names. */
 internal interface ThemedAssetGroup {
     fun writeConfig(json: JSONObject)
     fun currentFiles(context: Context): Map<String, File>

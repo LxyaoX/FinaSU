@@ -65,7 +65,7 @@ object ThemeExportService {
                     ?.let { JSONObject(it.readText()) }
                 // An unsupported enum is retained until the corresponding local setting changes.
                 listOf("customColor", "colorGenerationMode", "colorStandard", "colorStyle", "colorContrast",
-                    "fontMode", "homeLayoutStyle", "statsTopLayout", "soundEffectScope").forEach { field ->
+                    "fontMode", "homeLayoutStyle", "statsTopLayout").forEach { field ->
                     if (original.has(field) && applied != null &&
                         applied.opt(field) == json.opt(field) && original.opt(field) != applied.opt(field)) {
                         json.put(field, original.get(field))
@@ -79,7 +79,6 @@ object ThemeExportService {
                 val entries = linkedMapOf<String, File>()
                 val ownedBases = FolkThemeIO.assets.map { it.base }.toSet()
                 val ownedNames = buildSet {
-                    listOf("musicFilename", "soundEffectFilename").forEach { add(original.optString(it)) }
                     original.optJSONObject("navIcons")?.let { icons ->
                         BottomBarDestination.entries.map { it.themeKey }.forEach { add(icons.optString(it)) }
                     }

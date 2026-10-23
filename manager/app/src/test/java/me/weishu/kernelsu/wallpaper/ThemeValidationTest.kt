@@ -17,19 +17,16 @@ class ThemeValidationTest {
     @Test fun optionalSettingsAndMissingPayloadsDoNotRejectTheTheme() {
         listOf(
             JSONObject().put("nightModeEnabled", "true"),
-            JSONObject().put("musicVolume", 2),
             JSONObject().put("titleImageOffsetX", 3),
             JSONObject().put("folksu_keyColor", 1.5),
             JSONObject().put("isBackgroundEnabled", true),
             JSONObject().put("fontMode", "custom"),
-            JSONObject().put("isMusicEnabled", true).put("musicFilename", "missing.mp3"),
             JSONObject().put("navIcons", JSONObject().put("Home", "missing.png")),
             JSONObject().put("appLanguage", "not_a_locale"),
             JSONObject().put("isDashboardCardBackgroundEnabled", true).put("hasDashboardCardBg", false),
             JSONObject().put("hasFocusCardKernelBg", true),
             JSONObject().put("isVideoBackgroundEnabled", true),
             JSONObject().put("isAdvancedTitleStyleEnabled", true),
-            JSONObject().put("isSoundEffectEnabled", true).put("soundEffectFilename", "missing.wav"),
             JSONObject().put("navIcons", "legacy"),
         ).forEach { json ->
             ThemeValidation.validate(json, emptyMap())
@@ -37,16 +34,14 @@ class ThemeValidationTest {
     }
 
     @Test fun optAccessorCoercionAndSafeRangesAreNormalized() {
-        val json = JSONObject().put("nightModeEnabled", "TRUE").put("musicVolume", "2")
+        val json = JSONObject().put("nightModeEnabled", "TRUE")
             .put("titleImageOffsetX", 3).put("folksu_keyColor", 1.5)
-            .put("backgroundBlur", "invalid").put("isAutoPlayEnabled", 1)
+            .put("backgroundBlur", "invalid")
         val warnings = ThemeValidation.validate(json, emptyMap())
         assertTrue(json.getBoolean("nightModeEnabled"))
-        assertEquals(1.0, json.getDouble("musicVolume"), 0.0)
         assertEquals(2.0, json.getDouble("titleImageOffsetX"), 0.0)
         assertEquals(1, json.getInt("folksu_keyColor"))
         assertFalse(json.has("backgroundBlur"))
-        assertFalse(json.has("isAutoPlayEnabled"))
         assertTrue(warnings.any { it.contains("adjusted") })
     }
 

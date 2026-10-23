@@ -23,7 +23,7 @@ object FolkThemeIO {
         add(FontAsset)
         add(HomeLayoutAsset)
     }
-    internal val groups = listOf(NavIconsAsset, MusicThemeAsset, SoundThemeAsset)
+    internal val groups = listOf(NavIconsAsset)
 
     suspend fun exportBackground(context: Context, target: Uri, name: String): Boolean =
         ThemeExportService.export(context, target, ThemeMetadata.current(context).copy(name = name)).isSuccess

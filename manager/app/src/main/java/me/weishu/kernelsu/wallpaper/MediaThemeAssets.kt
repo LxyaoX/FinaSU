@@ -3,93 +3,11 @@ package me.weishu.kernelsu.wallpaper
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.weishu.kernelsu.media.MusicConfig
-import me.weishu.kernelsu.media.MusicManager
-import me.weishu.kernelsu.media.SoundEffectConfig
 import me.weishu.kernelsu.media.VisualMediaConfig
 import org.json.JSONObject
 import java.io.File
 
 /** FP's JSON filename is also its ZIP entry name; these assets therefore use the group API. */
-internal object MusicThemeAsset : ThemedAssetGroup {
-    override fun writeConfig(json: JSONObject) {
-        json.put("isMusicEnabled", MusicConfig.isMusicEnabled)
-        json.put("musicFilename", MusicConfig.musicFilename ?: "")
-        json.put("musicVolume", MusicConfig.volume.toDouble())
-        json.put("isAutoPlayEnabled", MusicConfig.isAutoPlayEnabled)
-        json.put("isLoopingEnabled", MusicConfig.isLoopingEnabled)
-    }
-
-    override fun currentFiles(context: Context): Map<String, File> =
-        MusicConfig.getMusicFile(context)?.takeIf { MusicConfig.isMusicEnabled }
-            ?.let { mapOf(it.name to it) } ?: emptyMap()
-
-    override suspend fun apply(context: Context, json: JSONObject, imported: Map<String, File>) {
-        val name = json.optString("musicFilename")
-        val source = if (json.optBoolean("isMusicEnabled")) imported[name] else null
-        // Never turn untrusted theme metadata into a filesystem path.
-        val target = source?.let {
-            File(MusicConfig.getMusicDir(context), it.name).also { target -> it.copyTo(target, true) }
-        }
-        withContext(Dispatchers.Main) {
-            MusicManager.stop()
-            val old = MusicConfig.getMusicFile(context)
-            if (old != target) old?.delete()
-            MusicConfig.setMusicFilenameValue(target?.name)
-            MusicConfig.setMusicEnabledState(json.optBoolean("isMusicEnabled"))
-            MusicConfig.setVolumeValue(json.optDouble("musicVolume", 1.0).toFloat().coerceIn(0f, 1f))
-            MusicConfig.setAutoPlayEnabledState(json.optBoolean("isAutoPlayEnabled"))
-            MusicConfig.setLoopingEnabledState(json.optBoolean("isLoopingEnabled"))
-            MusicConfig.save(context)
-            MusicManager.reload()
-        }
-    }
-
-    override suspend fun reset(context: Context) = apply(context, JSONObject(), emptyMap())
-}
-
-internal object SoundThemeAsset : ThemedAssetGroup {
-    private val presetEntry: String
-        get() = "sound_effect_preset_${SoundEffectConfig.presetName}.wav"
-
-    override fun writeConfig(json: JSONObject) {
-        json.put("isSoundEffectEnabled", SoundEffectConfig.isSoundEffectEnabled)
-        json.put("soundEffectFilename", if (SoundEffectConfig.sourceType == SoundEffectConfig.SOURCE_TYPE_PRESET)
-            presetEntry else SoundEffectConfig.soundEffectFilename ?: "")
-        json.put("soundEffectScope", SoundEffectConfig.scope)
-    }
-
-    override fun currentFiles(context: Context): Map<String, File> {
-        if (!SoundEffectConfig.isSoundEffectEnabled) return emptyMap()
-        val file = if (SoundEffectConfig.sourceType == SoundEffectConfig.SOURCE_TYPE_PRESET) {
-            File(context.cacheDir, presetEntry).also { target ->
-                context.assets.open("sound/${SoundEffectConfig.presetName}.wav").use { input ->
-                    target.outputStream().use { output -> input.copyTo(output) }
-                }
-            }
-        } else SoundEffectConfig.getSoundEffectFile(context)?.takeIf { it.isFile }
-        return file?.let { mapOf(it.name to it) } ?: emptyMap()
-    }
-
-    override suspend fun apply(context: Context, json: JSONObject, imported: Map<String, File>) {
-        val source = if (json.optBoolean("isSoundEffectEnabled")) imported[json.optString("soundEffectFilename")] else null
-        val target = source?.let {
-            File(SoundEffectConfig.getSoundEffectDir(context), it.name).also { target -> it.copyTo(target, true) }
-        }
-        withContext(Dispatchers.Main) {
-            val old = SoundEffectConfig.getSoundEffectFile(context)
-            if (old != target) old?.delete()
-            SoundEffectConfig.setFilenameValue(target?.name)
-            SoundEffectConfig.setEnabledState(json.optBoolean("isSoundEffectEnabled"))
-            SoundEffectConfig.setSourceTypeValue(SoundEffectConfig.SOURCE_TYPE_LOCAL)
-            SoundEffectConfig.setScopeValue(json.optString("soundEffectScope", SoundEffectConfig.SCOPE_GLOBAL))
-            SoundEffectConfig.save(context)
-        }
-    }
-
-    override suspend fun reset(context: Context) = apply(context, JSONObject(), emptyMap())
-}
-
 internal class VisualMediaThemeAsset(private val video: Boolean) : ThemedAsset {
     override val base = if (video) "video_background" else "title_image"
     override fun currentFile(context: Context): File? = VisualMediaConfig.file(context, video)

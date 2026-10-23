@@ -3,8 +3,6 @@ package me.weishu.kernelsu.ui.screen.settings.search
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
-import androidx.compose.material.icons.automirrored.filled.QueueMusic
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Rule
@@ -31,13 +29,9 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
-import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Policy
-import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
@@ -45,10 +39,8 @@ import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.Cloud
@@ -860,96 +852,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_shell_su_adb_only_summary,
             icon = Icons.Filled.VerifiedUser,
             aliases = listOf("shell", "su", "adb", "terminal"),
-        )
-    )
-
-    // Multimedia
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.vibration",
-            titleRes = R.string.media_vibration,
-            icon = Icons.Filled.Vibration,
-            aliases = listOf("vibration", "haptic", "feedback"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.music",
-            titleRes = R.string.media_music,
-            icon = Icons.Filled.MusicNote,
-            aliases = listOf("music", "audio", "background"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.autoplay",
-            titleRes = R.string.media_autoplay,
-            icon = Icons.Filled.PlayArrow,
-            aliases = listOf("music", "autoplay", "play"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.loop",
-            titleRes = R.string.media_loop,
-            icon = Icons.Filled.Repeat,
-            aliases = listOf("music", "loop", "repeat"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.startup_sound",
-            titleRes = R.string.media_startup,
-            icon = Icons.AutoMirrored.Filled.VolumeUp,
-            aliases = listOf("startup", "boot", "sound", "effect"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.sound",
-            titleRes = R.string.media_sound,
-            icon = Icons.AutoMirrored.Filled.VolumeUp,
-            aliases = listOf("sound", "effect", "click"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.sound_source",
-            titleRes = R.string.media_source,
-            icon = Icons.Filled.LibraryMusic,
-            aliases = listOf("sound", "source", "local", "preset"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.sound_preset",
-            titleRes = R.string.media_preset,
-            icon = Icons.AutoMirrored.Filled.QueueMusic,
-            aliases = listOf("sound", "preset", "tone"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.sound_scope",
-            titleRes = R.string.media_scope,
-            icon = Icons.Filled.Tune,
-            aliases = listOf("sound", "scope", "global", "navigation"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.select_file",
-            titleRes = R.string.media_select_file,
-            icon = Icons.Filled.FolderOpen,
-            aliases = listOf("file", "select", "import", "choose"),
-        )
-    )
-    add(
-        SettingsCategory.MULTIMEDIA.row(
-            id = "multimedia.clear_file",
-            titleRes = R.string.media_clear,
-            icon = Icons.Filled.Delete,
-            aliases = listOf("clear", "remove", "delete"),
         )
     )
 

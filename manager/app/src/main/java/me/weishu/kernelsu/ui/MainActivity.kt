@@ -170,18 +170,6 @@ import me.weishu.kernelsu.ui.theme.FontConfig
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
 
 open class MainActivity : FragmentActivity() {
-    override fun dispatchTouchEvent(event: android.view.MotionEvent?): Boolean {
-        if (event?.action == android.view.MotionEvent.ACTION_UP) {
-            me.weishu.kernelsu.media.MediaFeedback.touch(this)
-        }
-        return super.dispatchTouchEvent(event)
-    }
-
-    override fun onStop() {
-        me.weishu.kernelsu.media.SoundEffectManager.release()
-        super.onStop()
-    }
-
     private val intentChannel = Channel<Intent>(capacity = Channel.BUFFERED)
     private var contentReady = false
     private var splashStartedAt = 0L
@@ -222,14 +210,9 @@ open class MainActivity : FragmentActivity() {
         // Activity recreation must not overwrite a slider edit still waiting for its debounce.
         me.weishu.kernelsu.modulebanner.ModuleBannerConfig.loadOnce()
         me.weishu.kernelsu.modulebanner.ModuleCardConfig.load()
-        me.weishu.kernelsu.media.MusicConfig.load(this)
-        me.weishu.kernelsu.media.SoundEffectConfig.load(this)
-        me.weishu.kernelsu.media.VibrationConfig.load(this)
         me.weishu.kernelsu.ui.component.material.SwitchIconConfig.load(this)
         me.weishu.kernelsu.ui.component.material.SliderTrackConfig.load(this)
         me.weishu.kernelsu.media.VisualMediaConfig.load(this)
-        me.weishu.kernelsu.media.MusicManager.init(this)
-        if (savedInstanceState == null) me.weishu.kernelsu.media.SoundEffectManager.playStartup(this)
 
         setContent {
             val viewModel = viewModel<MainActivityViewModel>()

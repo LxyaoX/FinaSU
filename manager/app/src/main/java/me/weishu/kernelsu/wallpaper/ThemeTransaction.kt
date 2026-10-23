@@ -6,9 +6,6 @@ import android.os.Build
 import android.os.LocaleList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.weishu.kernelsu.media.MusicConfig
-import me.weishu.kernelsu.media.MusicManager
-import me.weishu.kernelsu.media.SoundEffectConfig
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarIconConfig
 import me.weishu.kernelsu.ui.theme.FontConfig
@@ -74,11 +71,8 @@ internal class ThemeTransaction(private val context: Context, private val backup
             WallpaperConfig.load(context)
             SurfaceStore.load(context)
             FontConfig.load(context)
-            MusicConfig.load(context)
-            SoundEffectConfig.load(context)
             VisualMediaConfig.load(context)
             BottomBarIconConfig.notifyChanged()
-            MusicManager.reload()
         }
     }
 

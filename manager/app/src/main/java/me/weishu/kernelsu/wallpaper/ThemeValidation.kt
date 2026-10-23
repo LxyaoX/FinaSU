@@ -30,13 +30,12 @@ internal object ThemeValidation {
             "isBackgroundEnabled", "isDualBackgroundDimEnabled", "isMultiBackgroundEnabled",
             "wallpaper_use_color", "isFontEnabled", "nightModeEnabled", "nightModeFollowSys",
             "useSystemDynamicColor", "isListWorkingCardModeHidden", "navIconCustomEnabled",
-            "isMusicEnabled", "isAutoPlayEnabled", "isLoopingEnabled", "isSoundEffectEnabled",
             "isVideoBackgroundEnabled", "isAdvancedTitleStyleEnabled",
         )
         val numbers = mutableMapOf(
             "backgroundOpacity" to 0.0..1.0, "backgroundBlur" to 0.0..100.0,
             "backgroundDim" to 0.0..1.0, "backgroundDayDim" to 0.0..1.0,
-            "backgroundNightDim" to 0.0..1.0, "musicVolume" to 0.0..1.0,
+            "backgroundNightDim" to 0.0..1.0,
             "videoVolume" to 0.0..1.0, "titleImageDayOpacity" to 0.0..1.0,
             "titleImageNightOpacity" to 0.0..1.0, "titleImageDim" to 0.0..1.0,
             "titleImageOffsetX" to -2.0..2.0,
@@ -83,7 +82,6 @@ internal object ThemeValidation {
             "statsTopLayout" to setOf("list", "grid"),
             "fontMode" to setOf("app", "system", "custom"),
             "homeLayoutStyle" to setOf("kernelsu", "circle", "focus", "dashboard_ui", "stats", "default", "sign"),
-            "soundEffectScope" to setOf("global", "bottom_bar"),
         )
         enums.filterKeys(json::has).forEach { (key, values) ->
             json.put(key, json.optString(key))
@@ -138,10 +136,6 @@ internal object ThemeValidation {
                 if (enableKey != null) requireAsset(enableKey, slot.themeBase ?: slot.id.value)
                 if (SurfaceField.Enabled in slot.fields) requireAsset(SurfaceStore.key(slot.id, SurfaceField.Enabled), slot.themeBase ?: slot.id.value)
             }
-        }
-        listOf("isMusicEnabled" to "musicFilename", "isSoundEffectEnabled" to "soundEffectFilename").forEach { (enabled, key) ->
-            if (json.has(key)) json.put(key, json.optString(key))
-            if (json.optBoolean(enabled) && !files.containsKey(json.optString(key))) warnings += "$key resource is missing; no audio file installed"
         }
         if (json.has("navIcons")) {
             val icons = json.optJSONObject("navIcons")
