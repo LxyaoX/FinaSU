@@ -884,6 +884,15 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
         )
     )
     add(
+        SettingsCategory.FUNCTION.row(
+            id = "function.mount_view_filter",
+            titleRes = R.string.settings_mount_view_filter,
+            summaryRes = R.string.settings_mount_view_filter_summary,
+            icon = Icons.Rounded.VisibilityOff,
+            aliases = listOf("mount", "hide", "proc", "mountinfo", "mounts", "挂载"),
+        )
+    )
+    add(
         SettingsCategory.SECURITY.row(
             id = "security.selinux_mode",
             titleRes = R.string.settings_selinux_mode,

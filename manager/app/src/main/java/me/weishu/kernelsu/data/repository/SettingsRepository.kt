@@ -85,6 +85,10 @@ interface SettingsRepository {
     fun isSelinuxHideEnabled(): Boolean
     fun setSelinuxHideEnabled(enabled: Boolean): Int
 
+    suspend fun getMountViewFilterStatus(): String
+    suspend fun isMountViewFilterEnabled(): Boolean
+    suspend fun setMountViewFilterEnabled(enabled: Boolean): Result<Unit>
+
     suspend fun getSELinuxMode(): String
     suspend fun setSELinuxMode(enforcing: Boolean): Boolean
 

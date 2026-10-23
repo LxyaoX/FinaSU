@@ -279,6 +279,12 @@
     <string name="settings_selinux_hide_summary">Uygulamaların SELinux değişikliklerini algılamasını önle</string>
     <string name="settings_selinux_hide_reboot_required">Etkili olması için yeniden başlatın</string>
     <string name="settings_selinux_hide_failed">Hata: %d</string>
+
+    <string name="settings_mount_view_filter">Bağlama kayıtlarını gizle</string>
+    <string name="settings_mount_view_filter_summary">Uygulamaların ve yalıtılmış süreçlerin /proc bağlama görünümlerinden root ve modül bağlama kayıtlarını kaldır</string>
+    <string name="settings_mount_view_filter_unavailable">Bağlama görünümü filtreleme bu çekirdekte kullanılamıyor</string>
+    <string name="settings_mount_view_filter_failed">Bağlama görünümü filtreleme etkinleştirilemedi</string>
+    <string name="settings_mount_view_filter_save_failed">Bağlama görünümü filtreleme değiştirildi ancak yeniden başlatma için kaydedilemedi</string>
     <string name="settings_selinux_mode">SELinux modu</string>
     <string name="settings_selinux_mode_enforcing">Etkin (Enforcing)</string>
     <string name="settings_selinux_mode_permissive">Serbest (Permissive)</string>

@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">阻止应用窥见 SELinux 的修改</string>
     <string name="settings_selinux_hide_reboot_required">重新觉醒后生效</string>
     <string name="settings_selinux_hide_failed">错误：%d</string>
+
+    <string name="settings_mount_view_filter">隐遁挂载之录</string>
+    <string name="settings_mount_view_filter_summary">自应用与幽闭进程之 /proc 挂载境中，隐去本机 root 与模块所留挂载</string>
+    <string name="settings_mount_view_filter_unavailable">此内核不授挂载视图过滤之能</string>
+    <string name="settings_mount_view_filter_failed">挂载视图过滤启用未成</string>
+    <string name="settings_mount_view_filter_save_failed">挂载视图过滤已易，然未能存于重启之制</string>
     <string name="settings_selinux_mode">SELinux 模式</string>
     <string name="settings_selinux_mode_enforcing">强制守护</string>
     <string name="settings_selinux_mode_permissive">宽容模式</string>

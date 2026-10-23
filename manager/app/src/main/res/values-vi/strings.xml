@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">Ngăn chặn các ứng dụng phát hiện các thay đổi của SELinux.</string>
     <string name="settings_selinux_hide_reboot_required">Khởi động lại để có hiệu lực!</string>
     <string name="settings_selinux_hide_failed">Lỗi: %d</string>
+
+    <string name="settings_mount_view_filter">Ẩn bản ghi gắn kết</string>
+    <string name="settings_mount_view_filter_summary">Xóa bản ghi gắn kết của root và mô-đun khỏi chế độ xem /proc của ứng dụng và tiến trình cô lập</string>
+    <string name="settings_mount_view_filter_unavailable">Lọc chế độ xem gắn kết không khả dụng trên kernel này</string>
+    <string name="settings_mount_view_filter_failed">Không thể bật lọc chế độ xem gắn kết</string>
+    <string name="settings_mount_view_filter_save_failed">Đã thay đổi lọc chế độ xem gắn kết nhưng không thể lưu cho lần khởi động lại</string>
     <string name="settings_selinux_mode">Chế độ SELinux</string>
     <string name="settings_selinux_mode_enforcing">Enforcing</string>
     <string name="settings_selinux_mode_permissive">Permissive</string>

@@ -299,6 +299,7 @@ pub fn list_features() {
         FeatureId::AvcSpoof,
         FeatureId::ShellSuAdbOnly,
         FeatureId::UtsView,
+        FeatureId::MountViewFilter,
     ];
 
     for feature_id in &all_features {
@@ -368,6 +369,7 @@ pub fn save_config() -> Result<()> {
         FeatureId::SelinuxHide,
         FeatureId::AvcSpoof,
         FeatureId::ShellSuAdbOnly,
+        FeatureId::MountViewFilter,
     ];
 
     for feature_id in &all_features {

@@ -279,6 +279,12 @@
     <string name="settings_selinux_hide_summary">Impedir que os aplicativos detectem modificações do SELinux</string>
     <string name="settings_selinux_hide_reboot_required">Reinicie para entrar em vigor</string>
     <string name="settings_selinux_hide_failed">Erro: %d</string>
+
+    <string name="settings_mount_view_filter">Ocultar registros de montagem</string>
+    <string name="settings_mount_view_filter_summary">Remover registros de montagem do root e de módulos das visualizações /proc de aplicativos e processos isolados</string>
+    <string name="settings_mount_view_filter_unavailable">A filtragem da visualização de montagem não está disponível neste kernel</string>
+    <string name="settings_mount_view_filter_failed">Falha ao ativar a filtragem da visualização de montagem</string>
+    <string name="settings_mount_view_filter_save_failed">A filtragem da visualização de montagem foi alterada, mas não pôde ser salva para a reinicialização</string>
     <string name="settings_selinux_mode">Modo do SELinux</string>
     <string name="settings_selinux_mode_enforcing">Impondo</string>
     <string name="settings_selinux_mode_permissive">Permissivo</string>

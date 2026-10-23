@@ -335,6 +335,17 @@ class SettingsRepositoryImpl : SettingsRepository {
 
     override fun setSelinuxHideEnabled(enabled: Boolean): Int = Natives.setSelinuxHideEnabled(enabled)
 
+    override suspend fun getMountViewFilterStatus(): String = getFeatureStatus("mount_view_filter")
+
+    override suspend fun isMountViewFilterEnabled(): Boolean = getFeatureValue("mount_view_filter") == 1L
+
+    override suspend fun setMountViewFilterEnabled(enabled: Boolean): Result<Unit> = runCatching {
+        requireKsud(
+            execKsudResult("feature set mount_view_filter ${if (enabled) 1 else 0}"),
+            "Mount view filter configuration failed",
+        )
+    }
+
     override suspend fun getSELinuxMode(): String = withContext(Dispatchers.IO) { getSELinuxStatusRaw() }
 
     override suspend fun setSELinuxMode(enforcing: Boolean): Boolean =

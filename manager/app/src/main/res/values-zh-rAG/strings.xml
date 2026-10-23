@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">不让应用发现 SELinux 被改过喵</string>
     <string name="settings_selinux_hide_reboot_required">重启生效喵</string>
     <string name="settings_selinux_hide_failed">出错啦喵：%d</string>
+
+    <string name="settings_mount_view_filter">藏起挂载记录喵</string>
+    <string name="settings_mount_view_filter_summary">从应用和隔离进程的 /proc 挂载视图里，把本机 root 和模块的挂载记录藏掉喵</string>
+    <string name="settings_mount_view_filter_unavailable">这个内核用不了挂载视图过滤喵</string>
+    <string name="settings_mount_view_filter_failed">挂载视图过滤没开起来喵</string>
+    <string name="settings_mount_view_filter_save_failed">挂载视图过滤变啦，但没法存到重启配置里喵</string>
     <string name="settings_selinux_mode">SELinux 模式喵</string>
     <string name="settings_selinux_mode_enforcing">强制开着喵！</string>
     <string name="settings_selinux_mode_permissive">宽松模式喵！</string>

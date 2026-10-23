@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">别让应用瞧出 SELinux 动过手脚</string>
     <string name="settings_selinux_hide_reboot_required">重新开火才认</string>
     <string name="settings_selinux_hide_failed">出岔子了：%d</string>
+
+    <string name="settings_mount_view_filter">把挂载记录藏起来</string>
+    <string name="settings_mount_view_filter_summary">别让应用和隔离进程从 /proc 挂载视图里瞧见本机 root 和模块的挂载</string>
+    <string name="settings_mount_view_filter_unavailable">这内核做不了挂载记录过滤</string>
+    <string name="settings_mount_view_filter_failed">挂载记录过滤没开成</string>
+    <string name="settings_mount_view_filter_save_failed">挂载记录过滤动过了，但没存进重启配方</string>
     <string name="settings_selinux_mode">SELinux 模式</string>
     <string name="settings_selinux_mode_enforcing">严格检查</string>
     <string name="settings_selinux_mode_permissive">宽松模式</string>

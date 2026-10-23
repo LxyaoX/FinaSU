@@ -79,6 +79,8 @@ class SettingsViewModel(
             val isKernelUmountEnabled = repo.isKernelUmountEnabled()
             val selinuxHideStatus = repo.getSelinuxHideStatus()
             val isSelinuxHideEnabled = repo.isSelinuxHideEnabled()
+            val mountViewFilterStatus = repo.getMountViewFilterStatus()
+            val isMountViewFilterEnabled = repo.isMountViewFilterEnabled()
             val selinuxMode = repo.getSELinuxMode()
             val sulogStatus = repo.getSulogStatus()
             val avcSpoofStatus = repo.getAvcSpoofStatus()
@@ -157,6 +159,8 @@ class SettingsViewModel(
                     isKernelUmountEnabled = isKernelUmountEnabled,
                     selinuxHideStatus = selinuxHideStatus,
                     isSelinuxHideEnabled = isSelinuxHideEnabled,
+                    mountViewFilterStatus = mountViewFilterStatus,
+                    isMountViewFilterEnabled = isMountViewFilterEnabled,
                     selinuxMode = selinuxMode,
                     sulogStatus = sulogStatus,
                     avcSpoofStatus = avcSpoofStatus,
@@ -471,6 +475,34 @@ class SettingsViewModel(
                         Toast.makeText(ksuApp, ksuApp.getString(R.string.settings_selinux_hide_failed, status),
                             Toast.LENGTH_LONG).show()
                     }
+                }
+            }
+        }
+    }
+
+    fun setMountViewFilterEnabled(enabled: Boolean) {
+        if (_uiState.value.isMountViewFilterWriting) return
+        _uiState.update { it.copy(isMountViewFilterWriting = true) }
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = repo.setMountViewFilterEnabled(enabled)
+            val status = if (result.isFailure) "unavailable" else repo.getMountViewFilterStatus()
+            val actualEnabled = repo.isMountViewFilterEnabled()
+            val saved = result.isSuccess && repo.execKsudFeatureSave()
+            _uiState.update {
+                it.copy(
+                    mountViewFilterStatus = status,
+                    isMountViewFilterEnabled = actualEnabled,
+                    isMountViewFilterWriting = false,
+                )
+            }
+            val message = when {
+                result.isFailure -> R.string.settings_mount_view_filter_failed
+                !saved -> R.string.settings_mount_view_filter_save_failed
+                else -> null
+            }
+            if (message != null) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
                 }
             }
         }

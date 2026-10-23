@@ -14,6 +14,7 @@ enum ksu_feature_id {
     /* Additive: the kernel honours the authorized-appid list for dynamic managers. */
     KSU_FEATURE_DYNAMIC_MANAGER_GRANTS = 8,
     KSU_FEATURE_UTS_VIEW = 9,
+    KSU_FEATURE_MOUNT_VIEW_FILTER = 10,
 
     KSU_FEATURE_MAX
 };

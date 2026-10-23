@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">阻止圣器察觉 SELinux 之变更</string>
     <string name="settings_selinux_hide_reboot_required">神翼再生后生效</string>
     <string name="settings_selinux_hide_failed">谬误：%d</string>
+
+    <string name="settings_mount_view_filter">隐匿挂载之录</string>
+    <string name="settings_mount_view_filter_summary">自凡器与幽闭之灵的 /proc 挂载视界中，隐去本机 root 与模块所留之挂载</string>
+    <string name="settings_mount_view_filter_unavailable">此核心未蒙挂载视界过滤之能</string>
+    <string name="settings_mount_view_filter_failed">挂载视界过滤未能启明</string>
+    <string name="settings_mount_view_filter_save_failed">挂载视界过滤已更易，然未能铭刻于重启之制</string>
     <string name="settings_selinux_mode">SELinux 结界模式</string>
     <string name="settings_selinux_mode_enforcing">结界强制执行</string>
     <string name="settings_selinux_mode_permissive">结界宽容模式</string>

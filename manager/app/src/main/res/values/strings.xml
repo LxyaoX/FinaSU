@@ -278,6 +278,12 @@
     <string name="settings_selinux_hide_summary">Prevent applications from detecting SELinux modifications</string>
     <string name="settings_selinux_hide_reboot_required">Reboot to take effect</string>
     <string name="settings_selinux_hide_failed">Error: %d</string>
+
+    <string name="settings_mount_view_filter">Hide mount records</string>
+    <string name="settings_mount_view_filter_summary">Remove root and module mount records from app and isolated-process /proc mount views</string>
+    <string name="settings_mount_view_filter_unavailable">Mount view filtering is unavailable on this kernel</string>
+    <string name="settings_mount_view_filter_failed">Failed to enable mount view filtering</string>
+    <string name="settings_mount_view_filter_save_failed">Mount view filtering changed but could not be saved for reboot</string>
     <string name="settings_selinux_mode">SELinux mode</string>
     <string name="settings_selinux_mode_enforcing">Enforcing</string>
     <string name="settings_selinux_mode_permissive">Permissive</string>

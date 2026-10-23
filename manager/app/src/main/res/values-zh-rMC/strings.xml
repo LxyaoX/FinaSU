@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">阻止应用检测 SELinux 修改</string>
     <string name="settings_selinux_hide_reboot_required">重生生效</string>
     <string name="settings_selinux_hide_failed">错误：%d</string>
+
+    <string name="settings_mount_view_filter">藏起挂载记录</string>
+    <string name="settings_mount_view_filter_summary">把本机 root 和模块挂载从应用及隔离进程的 /proc 挂载视图里抹掉</string>
+    <string name="settings_mount_view_filter_unavailable">当前基岩核心不支持挂载视图过滤</string>
+    <string name="settings_mount_view_filter_failed">挂载视图过滤启用失败</string>
+    <string name="settings_mount_view_filter_save_failed">挂载视图过滤已改变，但未能保存到重启配置</string>
     <string name="settings_selinux_mode">SELinux 模式</string>
     <string name="settings_selinux_mode_enforcing">强制执行</string>
     <string name="settings_selinux_mode_permissive">宽容模式</string>

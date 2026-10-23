@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">アプリによる SELinux の改変検出を防ぎます</string>
     <string name="settings_selinux_hide_reboot_required">再起動すると有効化されます</string>
     <string name="settings_selinux_hide_failed">エラー: %d</string>
+
+    <string name="settings_mount_view_filter">マウント記録を隠す</string>
+    <string name="settings_mount_view_filter_summary">アプリと分離プロセスの /proc マウント表示から root とモジュールのマウント記録を削除します</string>
+    <string name="settings_mount_view_filter_unavailable">このカーネルではマウント表示のフィルタリングを利用できません</string>
+    <string name="settings_mount_view_filter_failed">マウント表示のフィルタリングを有効にできませんでした</string>
+    <string name="settings_mount_view_filter_save_failed">マウント表示のフィルタリングは変更されましたが、再起動用に保存できませんでした</string>
     <string name="settings_selinux_mode">SELinux モード</string>
     <string name="settings_selinux_mode_enforcing">Enforcing</string>
     <string name="settings_selinux_mode_permissive">Permissive</string>

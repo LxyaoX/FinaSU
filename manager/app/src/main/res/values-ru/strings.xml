@@ -279,6 +279,12 @@
     <string name="settings_selinux_hide_summary">Не позволять приложениям обнаруживать изменения SELinux</string>
     <string name="settings_selinux_hide_reboot_required">Требуется перезагрузка</string>
     <string name="settings_selinux_hide_failed">Ошибка: %d</string>
+
+    <string name="settings_mount_view_filter">Скрыть записи монтирования</string>
+    <string name="settings_mount_view_filter_summary">Удалять записи монтирования root и модулей из представлений /proc приложений и изолированных процессов</string>
+    <string name="settings_mount_view_filter_unavailable">Фильтрация списка монтирований недоступна в этом ядре</string>
+    <string name="settings_mount_view_filter_failed">Не удалось включить фильтрацию списка монтирований</string>
+    <string name="settings_mount_view_filter_save_failed">Фильтрация списка монтирований изменена, но не сохранена для перезагрузки</string>
     <string name="settings_selinux_mode">Режим SELinux</string>
     <string name="settings_selinux_mode_enforcing">Принудительный</string>
     <string name="settings_selinux_mode_permissive">Разрешающий</string>

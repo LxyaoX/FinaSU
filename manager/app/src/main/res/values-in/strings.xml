@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">Mencegah aplikasi mendeteksi modifikasi SELinux</string>
     <string name="settings_selinux_hide_reboot_required">Mulai ulang untuk menerapkan</string>
     <string name="settings_selinux_hide_failed">Kesalahan: %d</string>
+
+    <string name="settings_mount_view_filter">Sembunyikan catatan mount</string>
+    <string name="settings_mount_view_filter_summary">Hapus catatan mount root dan modul dari tampilan /proc aplikasi dan proses terisolasi</string>
+    <string name="settings_mount_view_filter_unavailable">Pemfilteran tampilan mount tidak tersedia pada kernel ini</string>
+    <string name="settings_mount_view_filter_failed">Gagal mengaktifkan pemfilteran tampilan mount</string>
+    <string name="settings_mount_view_filter_save_failed">Pemfilteran tampilan mount berubah tetapi tidak dapat disimpan untuk reboot</string>
     <string name="settings_selinux_mode">Mode SELinux</string>
     <string name="settings_selinux_mode_enforcing">Enforcing</string>
     <string name="settings_selinux_mode_permissive">Permissive</string>

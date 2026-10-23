@@ -281,6 +281,12 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="settings_selinux_hide_summary">Uniemożliwia aplikacjom wykrycie modyfikacji SELinux</string>
     <string name="settings_selinux_hide_reboot_required">Wymaga ponownego uruchomienia</string>
     <string name="settings_selinux_hide_failed">Błąd: %d</string>
+
+    <string name="settings_mount_view_filter">Ukryj wpisy montowania</string>
+    <string name="settings_mount_view_filter_summary">Usuń wpisy montowania roota i modułów z widoków /proc aplikacji i procesów izolowanych</string>
+    <string name="settings_mount_view_filter_unavailable">Filtrowanie widoku montowania nie jest dostępne w tym jądrze</string>
+    <string name="settings_mount_view_filter_failed">Nie udało się włączyć filtrowania widoku montowania</string>
+    <string name="settings_mount_view_filter_save_failed">Filtrowanie widoku montowania zmieniono, ale nie udało się zapisać go na następne uruchomienie</string>
     <string name="settings_selinux_mode">Tryb SELinux</string>
     <string name="settings_selinux_mode_enforcing">Enforcing</string>
     <string name="settings_selinux_mode_permissive">Dozwolony</string>

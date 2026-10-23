@@ -15,10 +15,11 @@ pub enum FeatureId {
     AvcSpoof = 6,
     ShellSuAdbOnly = 7,
     UtsView = 9,
+    MountViewFilter = 10,
 }
 
 impl FeatureId {
-    pub const ALL: [Self; 8] = [
+    pub const ALL: [Self; 9] = [
         Self::SuCompat,
         Self::KernelUmount,
         Self::Sulog,
@@ -27,6 +28,7 @@ impl FeatureId {
         Self::AvcSpoof,
         Self::ShellSuAdbOnly,
         Self::UtsView,
+        Self::MountViewFilter,
     ];
 
     pub const fn from_u32(id: u32) -> Option<Self> {
@@ -39,6 +41,7 @@ impl FeatureId {
             6 => Some(Self::AvcSpoof),
             7 => Some(Self::ShellSuAdbOnly),
             9 => Some(Self::UtsView),
+            10 => Some(Self::MountViewFilter),
             _ => None,
         }
     }
@@ -53,6 +56,7 @@ impl FeatureId {
             Self::AvcSpoof => "avc_spoof",
             Self::ShellSuAdbOnly => "shell_su_adb_only",
             Self::UtsView => "uts_view",
+            Self::MountViewFilter => "mount_view_filter",
         }
     }
 
@@ -79,6 +83,9 @@ impl FeatureId {
             }
             Self::UtsView => {
                 "UTS View - expose a configured kernel identity to selected apps or the initial UTS namespace"
+            }
+            Self::MountViewFilter => {
+                "Mount View Filter - hide root and module mounts from app and isolated-process proc mount views"
             }
         }
     }
@@ -108,9 +115,11 @@ mod tests {
         assert_eq!(FeatureId::AvcSpoof as u32, 6);
         assert_eq!(FeatureId::ShellSuAdbOnly as u32, 7);
         assert_eq!(FeatureId::UtsView as u32, 9);
+        assert_eq!(FeatureId::MountViewFilter as u32, 10);
         assert_eq!(FeatureId::from_u32(6), Some(FeatureId::AvcSpoof));
         assert_eq!(FeatureId::from_u32(7), Some(FeatureId::ShellSuAdbOnly));
         assert_eq!(FeatureId::from_u32(9), Some(FeatureId::UtsView));
+        assert_eq!(FeatureId::from_u32(10), Some(FeatureId::MountViewFilter));
         assert!(FeatureId::UtsView.has_dedicated_manager());
         assert!(!FeatureId::KernelUmount.has_dedicated_manager());
         assert!(parse_feature_id("5").is_err());

@@ -279,6 +279,12 @@
     <string name="settings_selinux_hide_summary">منع التطبيقات من اكتشاف تعديلات SELinux</string>
     <string name="settings_selinux_hide_reboot_required">أعد التشغيل لتفعيل التغيير</string>
     <string name="settings_selinux_hide_failed">خطأ: %d</string>
+
+    <string name="settings_mount_view_filter">إخفاء سجلات التركيب</string>
+    <string name="settings_mount_view_filter_summary">إزالة سجلات تركيب root والوحدات من عروض /proc للتطبيقات والعمليات المعزولة</string>
+    <string name="settings_mount_view_filter_unavailable">تصفية عرض التركيب غير متاحة على هذا النواة</string>
+    <string name="settings_mount_view_filter_failed">فشل تفعيل تصفية عرض التركيب</string>
+    <string name="settings_mount_view_filter_save_failed">تم تغيير تصفية عرض التركيب لكن تعذر حفظه لإعادة التشغيل</string>
     <string name="settings_selinux_mode">وضع SELinux</string>
     <string name="settings_selinux_mode_enforcing">مفروض</string>
     <string name="settings_selinux_mode_permissive">متساهل</string>

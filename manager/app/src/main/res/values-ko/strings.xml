@@ -277,6 +277,12 @@
     <string name="settings_selinux_hide_summary">애플리케이션이 SELinux 수정을 감지하지 못하게 합니다</string>
     <string name="settings_selinux_hide_reboot_required">다시 시작하여 변경 사항 적용</string>
     <string name="settings_selinux_hide_failed">오류: %d</string>
+
+    <string name="settings_mount_view_filter">마운트 기록 숨기기</string>
+    <string name="settings_mount_view_filter_summary">앱 및 격리된 프로세스의 /proc 마운트 보기에서 root 및 모듈 마운트 기록을 제거합니다</string>
+    <string name="settings_mount_view_filter_unavailable">이 커널에서는 마운트 보기 필터링을 사용할 수 없습니다</string>
+    <string name="settings_mount_view_filter_failed">마운트 보기 필터링을 활성화하지 못했습니다</string>
+    <string name="settings_mount_view_filter_save_failed">마운트 보기 필터링이 변경되었지만 재부팅 설정으로 저장하지 못했습니다</string>
     <string name="settings_selinux_mode">SELinux 모드</string>
     <string name="settings_selinux_mode_enforcing">강제</string>
     <string name="settings_selinux_mode_permissive">허용</string>
