@@ -197,7 +197,7 @@ static bool ksu_mvf_in_umount_list(const char *mountpoint, size_t len)
     bool found = false;
 
     down_read(&mount_list_lock);
-    list_for_each_entry(entry, &mount_list, list) {
+    list_for_each_entry (entry, &mount_list, list) {
         if (entry->umountable && ksu_mvf_path_equal(mountpoint, len, entry->umountable)) {
             found = true;
             break;
@@ -207,8 +207,7 @@ static bool ksu_mvf_in_umount_list(const char *mountpoint, size_t len)
     return found;
 }
 
-static bool ksu_mvf_record_hidden(struct seq_file *m, size_t start, enum ksu_mvf_format format,
-                                  struct vfsmount *mnt)
+static bool ksu_mvf_record_hidden(struct seq_file *m, size_t start, enum ksu_mvf_format format, struct vfsmount *mnt)
 {
     const char *text = m->buf + start;
     const char *mountpoint;
@@ -225,8 +224,7 @@ static bool ksu_mvf_record_hidden(struct seq_file *m, size_t start, enum ksu_mvf
     return ksu_mvf_has_root_marker(mnt);
 }
 
-static int ksu_mvf_show(struct seq_file *m, struct vfsmount *mnt, enum ksu_mvf_format format,
-                        ksu_mvf_show_fn original)
+static int ksu_mvf_show(struct seq_file *m, struct vfsmount *mnt, enum ksu_mvf_format format, ksu_mvf_show_fn original)
 {
     size_t start = m->count;
     int ret = ksu_mvf_call_show(original, m, mnt);
