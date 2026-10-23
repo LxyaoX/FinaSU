@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.repository.ModuleRepositoryImpl
+import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.ui.util.AppIconCache
 import me.weishu.kernelsu.ui.util.createRootShell
 import me.weishu.kernelsu.ui.util.withMainUserUid
@@ -60,6 +61,14 @@ internal suspend fun prepareWebView(
         if (!moduleInfo.hasWebUi || !moduleInfo.enabled || moduleInfo.update || moduleInfo.remove) {
             withContext(Dispatchers.Main) {
                 webUIState.uiEvent = WebUIEvent.Error(activity.getString(R.string.module_unavailable, moduleInfo.name))
+            }
+            return@withContext
+        }
+        if (moduleInfo.zygiskRequired &&
+            SettingsRepositoryImpl().getFolkZygiskStatus().getOrNull()?.providesImplementation() == false
+        ) {
+            withContext(Dispatchers.Main) {
+                webUIState.uiEvent = WebUIEvent.Error(activity.getString(R.string.sui_reason_zygisk_disabled))
             }
             return@withContext
         }

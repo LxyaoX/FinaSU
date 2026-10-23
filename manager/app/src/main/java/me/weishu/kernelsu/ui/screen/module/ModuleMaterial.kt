@@ -387,6 +387,7 @@ fun ModulePagerMaterial(
                         listState = searchListState,
                         displayModules = uiState.searchResults,
                         updateInfoMap = uiState.updateInfo,
+                        zygiskAvailable = uiState.zygiskAvailable,
                         actions = actions,
                         onModuleAddShortcut = { module, type -> onModuleAddShortcut(module, type) },
                         onModuleLongPress = { bannerDialogModule = it },
@@ -519,6 +520,7 @@ fun ModulePagerMaterial(
                 listState = listState,
                 displayModules = displayModules,
                 updateInfoMap = uiState.updateInfo,
+                zygiskAvailable = uiState.zygiskAvailable,
                 actions = actions,
                 onModuleAddShortcut = { module, type -> onModuleAddShortcut(module, type) },
                 onModuleLongPress = { bannerDialogModule = it },
@@ -575,6 +577,7 @@ private fun ModuleList(
     listState: LazyListState = rememberLazyListState(),
     displayModules: List<Module>,
     updateInfoMap: Map<String, ModuleUpdateInfo>,
+    zygiskAvailable: Boolean,
     actions: ModuleActions,
     onModuleAddShortcut: (Module, ShortcutType) -> Unit,
     onModuleLongPress: (Module) -> Unit,
@@ -595,6 +598,7 @@ private fun ModuleList(
             buttonStyle = ModuleButtonStyle.fromKey(ModuleCardConfig.buttonStyle),
             showMoreInfo = ModuleCardConfig.showMoreInfo,
             foldSystemModule = ModuleCardConfig.foldSystemModule,
+            zygiskAvailable = zygiskAvailable,
             expanded = expandedModuleId == module.id,
             onExpandToggle = {
                 expandedModuleId = if (expandedModuleId == module.id) null else module.id

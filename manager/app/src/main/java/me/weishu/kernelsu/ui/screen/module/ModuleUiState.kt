@@ -58,6 +58,7 @@ data class ModuleUiState(
     val checkModuleUpdate: Boolean = true,
     val isSafeMode: Boolean = false,
     val magiskInstalled: Boolean = false,
+    val zygiskAvailable: Boolean = true,
     val confirmDialogState: ModuleConfirmDialogState? = null,
 ) {
     val installButtonVisible: Boolean

@@ -2,8 +2,10 @@ package me.weishu.kernelsu.data.model
 
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FolkZygiskTest {
@@ -56,5 +58,18 @@ class FolkZygiskTest {
         )
         assertEquals(null, status.startupFailureCode)
         assertEquals(null, status.startupFailureDetail)
+    }
+
+    @Test fun implementationAvailabilityRequiresTheEngineOrAnExternalProvider() {
+        val disabled = FolkZygiskStatus.fromJson(payload())
+        assertFalse(disabled.providesImplementation())
+
+        val builtIn = FolkZygiskStatus.fromJson(payload().put("enabled", true))
+        assertTrue(builtIn.providesImplementation())
+
+        val external = FolkZygiskStatus.fromJson(
+            payload().put("external_providers", org.json.JSONArray().put("rezygisk")),
+        )
+        assertTrue(external.providesImplementation())
     }
 }

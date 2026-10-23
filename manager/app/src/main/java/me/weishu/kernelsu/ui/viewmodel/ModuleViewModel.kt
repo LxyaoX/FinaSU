@@ -260,6 +260,7 @@ class ModuleViewModel(
     }
 
     suspend fun loadModuleList(resort: Boolean = true) {
+        val zygiskAvailable = settingsRepo.getFolkZygiskStatus().getOrNull()?.providesImplementation()
         val parsedModules = withContext(Dispatchers.IO) {
             repo.getModules().getOrElse {
                 Log.e(TAG, "fetchModuleList: ", it)
@@ -271,6 +272,7 @@ class ModuleViewModel(
             _uiState.update {
                 it.copy(
                     modules = parsedModules,
+                    zygiskAvailable = zygiskAvailable ?: it.zygiskAvailable,
                 )
             }
             // Forget banners of modules that are no longer installed.

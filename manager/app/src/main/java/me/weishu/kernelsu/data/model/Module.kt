@@ -16,6 +16,7 @@ data class Module(
     val updateJson: String,
     val hasWebUi: Boolean,
     val hasActionScript: Boolean,
+    val zygiskRequired: Boolean,
     val metamodule: Boolean,
     val actionIconPath: String?,
     val webUiIconPath: String?,

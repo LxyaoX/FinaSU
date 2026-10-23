@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,6 +60,7 @@ fun ModuleItemCard(
     buttonStyle: ModuleButtonStyle,
     showMoreInfo: Boolean,
     foldSystemModule: Boolean,
+    zygiskAvailable: Boolean,
     expanded: Boolean,
     onExpandToggle: () -> Unit,
     onUninstallClicked: () -> Unit,
@@ -71,7 +73,8 @@ fun ModuleItemCard(
     closeSearch: () -> Unit,
 ) {
     val iconOnly = buttonStyle == ModuleButtonStyle.IconOnly
-    val canOpenWebUi = module.hasWebUi && !module.remove && module.enabled
+    val zygiskBlocked = module.zygiskRequired && !zygiskAvailable && !module.remove
+    val canOpenWebUi = module.hasWebUi && !module.remove && module.enabled && !zygiskBlocked
 
     FolkCardFrame(
         banner = visual.banner,
@@ -93,6 +96,7 @@ fun ModuleItemCard(
             updateUrl = updateUrl,
             showMoreInfo = showMoreInfo,
             foldSystemModule = foldSystemModule,
+            zygiskBlocked = zygiskBlocked,
             expanded = expanded,
             iconOnly = iconOnly,
             opacity = cardSurfaceOpacity(),
@@ -114,6 +118,7 @@ private fun ModuleCardContent(
     updateUrl: String,
     showMoreInfo: Boolean,
     foldSystemModule: Boolean,
+    zygiskBlocked: Boolean,
     expanded: Boolean,
     iconOnly: Boolean,
     opacity: Float,
@@ -135,7 +140,8 @@ private fun ModuleCardContent(
     val displayAuthor = customInfo?.author?.takeIf { it.isNotBlank() } ?: module.author
     val displayDescription = customInfo?.description?.takeIf { it.isNotBlank() } ?: module.description
 
-    val hasAnyLabel = showMoreInfo || module.remove || (hasUpdate && !module.update) || module.update
+    val hasAnyLabel =
+        showMoreInfo || module.remove || zygiskBlocked || (hasUpdate && !module.update) || module.update
     val preinitWarning = when (module.preinit) {
         "no_space" -> R.string.module_preinit_no_space
         "error" -> R.string.module_preinit_error
@@ -148,9 +154,10 @@ private fun ModuleCardContent(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f)) {
                 if (hasAnyLabel) {
-                    Row(
+                    FlowRow(
                         modifier = Modifier.padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         if (showMoreInfo) {
                             ModuleLabel(
@@ -178,14 +185,21 @@ private fun ModuleCardContent(
                                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                             )
                         }
-                        if (showMoreInfo && module.hasWebUi && module.enabled && !module.remove) {
+                        if (zygiskBlocked) {
+                            ModuleLabel(
+                                text = stringResource(R.string.sui_reason_zygisk_disabled),
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                        }
+                        if (showMoreInfo && module.hasWebUi && module.enabled && !module.remove && !zygiskBlocked) {
                             ModuleLabel(
                                 text = "WebUI",
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
                         }
-                        if (showMoreInfo && module.hasActionScript && module.enabled && !module.remove) {
+                        if (showMoreInfo && module.hasActionScript && module.enabled && !module.remove && !zygiskBlocked) {
                             ModuleLabel(
                                 text = stringResource(R.string.action),
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -269,6 +283,7 @@ private fun ModuleCardContent(
                 hasUpdate = hasUpdate,
                 iconOnly = iconOnly,
                 opacity = opacity,
+                zygiskBlocked = zygiskBlocked,
                 onUninstallClicked = onUninstallClicked,
                 onUpdate = onUpdate,
                 onAddShortcut = onAddShortcut,
@@ -286,6 +301,7 @@ private fun ModuleActionRow(
     hasUpdate: Boolean,
     iconOnly: Boolean,
     opacity: Float,
+    zygiskBlocked: Boolean,
     onUninstallClicked: () -> Unit,
     onUpdate: () -> Unit,
     onAddShortcut: (ShortcutType) -> Unit,
@@ -306,6 +322,7 @@ private fun ModuleActionRow(
                         closeSearch()
                     },
                     onLongClick = { onAddShortcut(ShortcutType.WebUI) },
+                    enabled = !zygiskBlocked,
                 ),
             )
         }
@@ -320,6 +337,7 @@ private fun ModuleActionRow(
                         closeSearch()
                     },
                     onLongClick = { onAddShortcut(ShortcutType.Action) },
+                    enabled = !zygiskBlocked,
                 ),
             )
         }

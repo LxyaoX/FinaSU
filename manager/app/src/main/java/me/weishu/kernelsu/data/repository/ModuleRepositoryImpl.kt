@@ -41,6 +41,7 @@ class ModuleRepositoryImpl : ModuleRepository {
                         updateJson = obj.optString("updateJson"),
                         hasWebUi = obj.optBoolean("web"),
                         hasActionScript = obj.optBoolean("action"),
+                        zygiskRequired = obj.optBoolean("zygiskRequired"),
                         metamodule = (obj.optInt("metamodule") != 0) || obj.optBoolean("metamodule"),
                         actionIconPath = obj.optString("actionIcon").takeIf { it.isNotBlank() },
                         webUiIconPath = obj.optString("webuiIcon").takeIf { it.isNotBlank() },

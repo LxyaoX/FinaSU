@@ -1140,6 +1140,10 @@ fn list_module(path: &str) -> Vec<HashMap<String, String>> {
         let remove = path.join(defs::REMOVE_FILE_NAME).exists();
         let web = path.join(defs::MODULE_WEB_DIR).exists();
         let action = path.join(defs::MODULE_ACTION_SH).exists();
+        let zygisk_required = path
+            .join("zygisk")
+            .read_dir()
+            .is_ok_and(|mut entries| entries.next().is_some());
         let need_mount =
             path.join("system").exists() && !path.join(defs::SKIP_MOUNT_FILE_NAME).exists();
 
@@ -1148,6 +1152,7 @@ fn list_module(path: &str) -> Vec<HashMap<String, String>> {
         module_prop_map.insert("remove".to_owned(), remove.to_string());
         module_prop_map.insert("web".to_owned(), web.to_string());
         module_prop_map.insert("action".to_owned(), action.to_string());
+        module_prop_map.insert("zygiskRequired".to_owned(), zygisk_required.to_string());
         module_prop_map.insert("mount".to_owned(), need_mount.to_string());
         if let Some(id) = module_prop_map.get("id")
             && let Some(state) = preinit_states.get(id)
