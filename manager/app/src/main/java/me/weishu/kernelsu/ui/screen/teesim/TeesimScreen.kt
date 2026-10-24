@@ -101,18 +101,29 @@ fun TeesimScreen() {
                 item {
                     val status = state.status
                     // What is on disk wins: an asset update without a reinstall then shows the old
-                    // version here instead of claiming the runtime was upgraded with the app.
+                    // version here instead of claiming the runtime was upgraded with the app. The
+                    // "not installed" wording belongs to exactly one case - nothing staged - because
+                    // it used to be the fallback for any missing version, which made this row deny a
+                    // runtime the line right below it reported as running.
                     val installedVersion = status?.installedVersion.orEmpty()
+                    val bundled = TeesimInstaller.VERSION
                     SegmentedListItem(
                         headlineContent = {
                             Text(
-                                if (status?.installed == true && installedVersion.isNotBlank()) {
-                                    installedVersion
-                                } else {
-                                    stringResource(
-                                        R.string.teesim_bundled_version,
-                                        TeesimInstaller.VERSION,
+                                when {
+                                    status?.installed != true ->
+                                        stringResource(R.string.teesim_bundled_version, bundled)
+
+                                    installedVersion.isBlank() ->
+                                        stringResource(R.string.teesim_runtime_unversioned)
+
+                                    installedVersion != bundled -> stringResource(
+                                        R.string.teesim_runtime_bundled_pair,
+                                        installedVersion,
+                                        bundled,
                                     )
+
+                                    else -> installedVersion
                                 }
                             )
                         },
@@ -265,6 +276,11 @@ private fun teesimSummary(state: TeesimUiState): String {
     return when {
         state.loading -> stringResource(R.string.teesim_loading)
         status == null -> stringResource(R.string.teesim_read_error)
+        // A daemon can outlive the files it was started from, and "not installed" would then deny
+        // what the process list says. Naming the half-state points at the one action that fixes it.
+        !status.installed && status.daemonRunning ->
+            stringResource(R.string.teesim_state_partial)
+
         !status.installed -> stringResource(R.string.teesim_state_missing)
         !status.enabled -> stringResource(R.string.teesim_state_disabled)
         // Without a keybox the interceptor stays a no-op, so say that instead of "ready".

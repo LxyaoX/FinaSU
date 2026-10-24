@@ -825,9 +825,12 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="teesim_search_summary">Runs AOSP\'s reference KeyMint in-process for the apps you pick; no module to flash, keys come from the keybox you import</string>
     <string name="teesim_title">TEESimulator</string>
     <string name="teesim_bundled_version">Bundled %1$s, not installed</string>
+    <string name="teesim_runtime_unversioned">Runtime staged (version not recorded)</string>
+    <string name="teesim_runtime_bundled_pair">%1$s - bundled %2$s, reinstall to update</string>
     <string name="teesim_loading">Reading the TEESimulator state…</string>
     <string name="teesim_read_error">Could not read the TEESimulator state</string>
     <string name="teesim_state_missing">Not installed; enabling stages the bundled runtime</string>
+    <string name="teesim_state_partial">Runtime files are gone, but a daemon from an earlier install is still running; reinstall to repair it</string>
     <string name="teesim_state_disabled">Installed but turned off</string>
     <string name="teesim_state_no_keybox">Enabled, but no keybox yet, so every key still goes to the real hardware</string>
     <string name="teesim_state_running">Daemon running; targets in the default profile: %1$d</string>

@@ -824,9 +824,12 @@
     <string name="teesim_search_summary">在进程内运行 AOSP 参考 KeyMint，为选定应用生成认证链；无需刷模块，密钥来自你导入的 keybox</string>
     <string name="teesim_title">TEESimulator</string>
     <string name="teesim_bundled_version">内置 %1$s，尚未安装</string>
+    <string name="teesim_runtime_unversioned">运行时已部署（未记录版本）</string>
+    <string name="teesim_runtime_bundled_pair">%1$s，内置 %2$s，重装可更新</string>
     <string name="teesim_loading">正在读取 TEESimulator 状态…</string>
     <string name="teesim_read_error">无法读取 TEESimulator 状态</string>
     <string name="teesim_state_missing">未安装；开启后会部署内置运行时</string>
+    <string name="teesim_state_partial">运行时文件已不在，但上一次安装的守护进程仍在运行；重装即可修复</string>
     <string name="teesim_state_disabled">已安装但已关闭</string>
     <string name="teesim_state_no_keybox">已启用，但还没导入 keybox，所有密钥仍走真实硬件</string>
     <string name="teesim_state_running">守护进程运行中，默认档目标数：%1$d</string>
