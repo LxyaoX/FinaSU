@@ -86,7 +86,6 @@ internal object ThemeSettingsMapping {
         repo.keyColor = 0
         repo.useSystemDynamicColor = true
         repo.colorStyle = PaletteStyle.TonalSpot.name
-        repo.colorSpec = "SPEC_2025"
         repo.colorGenerationMode = "custom"
         repo.colorContrast = "STANDARD"
         repo.statsTopLayout = "list"
