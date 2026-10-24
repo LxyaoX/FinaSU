@@ -170,3 +170,8 @@ yarn docs:build  # Production build
 - Prefer one scope; if multiple areas change, pick the primary one rather than chaining scopes. For doc-only changes use `docs:`; for multi-lang string updates use `translations:` if that matches log history.
 - Keep subject lines brief (target ≤72 chars), no body unless necessary. If referencing a PR/issue, append `(#1234)` at the end as seen in history.
 - Before committing, glance at recent `git log --oneline` to stay consistent with current prefixes and capitalization used in this repo.
+- When a commit comes from somewhere else - a merge of another repository, a cherry-pick, an upstream patch - keep the people who wrote it on the commit. Add one trailer per original author, taken from the source commit:
+  ```
+  Co-authored-by: Name <email>
+  ```
+  (`git log <range> --format='%an <%ae>' | sort -u` gives the list for a merge; `git log -1 --format='%an <%ae>' <sha>` for a single pick.) Cherry-picks also take `-x`, so the source sha is recorded. A merge commit that swallows five upstream commits credits nobody on GitHub otherwise, and this repository lives on upstream work.
