@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Bố cục trên</string>
+    <string name="settings_stats_top_layout_list">Danh sách</string>
+    <string name="settings_stats_top_layout_grid">Lưới</string>
+    <string name="settings_home_hide_status_tag">Ẩn nhãn trạng thái</string>
+    <string name="settings_home_hide_status_tag_summary">Ẩn nhãn chế độ chạy trên thẻ trạng thái trang chủ.</string>
     <string name="settings_support_links">Thẻ dưới cùng trang chủ</string>
     <string name="settings_support_links_summary">Chọn nội dung hiển thị ở cuối màn hình trang chủ.</string>
     <string name="settings_support_links_finasu">Tìm hiểu về FinaSU</string>
@@ -679,8 +684,8 @@
     <string name="wallpaper_import_success">Đã nhập gói chủ đề</string>
     <string name="wallpaper_import_failed">Nhập thất bại</string>
     <string name="wallpaper_reset_theme">Khôi phục chủ đề mặc định</string>
-    <string name="wallpaper_reset_theme_summary">Xoá hình nền, phông chữ, bố cục trang chủ và biểu tượng điều hướng</string>
-    <string name="wallpaper_reset_theme_confirm">Khôi phục chủ đề mặc định? Thao tác này sẽ xoá hình nền tuỳ chỉnh, phông chữ và biểu tượng điều hướng.</string>
+    <string name="wallpaper_reset_theme_summary">Xoá hình nền, phông chữ, bố cục trang chủ, màu chủ đề và ngôn ngữ</string>
+    <string name="wallpaper_reset_theme_confirm">Khôi phục chủ đề mặc định? Thao tác này sẽ xoá hình nền tuỳ chỉnh, phông chữ, màu chủ đề và ngôn ngữ.</string>
     <string name="wallpaper_theme_reset">Đã đặt lại chủ đề về mặc định</string>
     <string name="wallpaper_theme_reset_failed">Đặt lại chủ đề thất bại</string>
     <string name="wallpaper_crop_title">Cắt hình ảnh</string>

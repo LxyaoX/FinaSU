@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Diseño superior</string>
+    <string name="settings_stats_top_layout_list">Lista</string>
+    <string name="settings_stats_top_layout_grid">Cuadrícula</string>
+    <string name="settings_home_hide_status_tag">Ocultar etiqueta de estado</string>
+    <string name="settings_home_hide_status_tag_summary">Oculta la etiqueta del modo de ejecución en la tarjeta de estado de inicio.</string>
     <string name="settings_support_links">Tarjeta inferior de inicio</string>
     <string name="settings_support_links_summary">Elige qué mostrar en la parte inferior de la pantalla de inicio.</string>
     <string name="settings_support_links_finasu">Aprende sobre FinaSU</string>
@@ -679,8 +684,8 @@
     <string name="wallpaper_import_success">Paquete de tema importado</string>
     <string name="wallpaper_import_failed">Error al importar</string>
     <string name="wallpaper_reset_theme">Restaurar el tema predeterminado</string>
-    <string name="wallpaper_reset_theme_summary">Borrar fondos de pantalla, fuente, diseño de inicio e iconos de navegación</string>
-    <string name="wallpaper_reset_theme_confirm">¿Restaurar el tema predeterminado? Esto borra los fondos de pantalla personalizados, la fuente y los iconos de navegación.</string>
+    <string name="wallpaper_reset_theme_summary">Borrar fondos de pantalla, fuente, diseño de inicio, colores del tema e idioma</string>
+    <string name="wallpaper_reset_theme_confirm">¿Restaurar el tema predeterminado? Esto borra los fondos de pantalla personalizados, la fuente, los colores del tema y el idioma.</string>
     <string name="wallpaper_theme_reset">Tema restablecido a los valores predeterminados</string>
     <string name="wallpaper_theme_reset_failed">Error al restablecer el tema</string>
     <string name="wallpaper_crop_title">Recortar imagen</string>

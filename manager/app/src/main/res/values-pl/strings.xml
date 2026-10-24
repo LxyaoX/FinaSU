@@ -403,6 +403,11 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Górny układ</string>
+    <string name="settings_stats_top_layout_list">Lista</string>
+    <string name="settings_stats_top_layout_grid">Siatka</string>
+    <string name="settings_home_hide_status_tag">Ukryj etykietę stanu</string>
+    <string name="settings_home_hide_status_tag_summary">Ukrywa etykietę trybu pracy na karcie stanu strony głównej.</string>
     <string name="settings_support_links">Dolna karta ekranu głównego</string>
     <string name="settings_support_links_summary">Wybierz, co ma się pojawiać na dole ekranu głównego.</string>
     <string name="settings_support_links_finasu">Poznaj FinaSU</string>
@@ -683,8 +688,8 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="wallpaper_import_success">Zaimportowano pakiet motywu</string>
     <string name="wallpaper_import_failed">Import nie powiódł się</string>
     <string name="wallpaper_reset_theme">Przywróć domyślny motyw</string>
-    <string name="wallpaper_reset_theme_summary">Wyczyść tapety, czcionkę, układ strony głównej i ikony nawigacji</string>
-    <string name="wallpaper_reset_theme_confirm">Przywrócić domyślny motyw? Spowoduje to wyczyszczenie własnych tapet, czcionki i ikon nawigacji.</string>
+    <string name="wallpaper_reset_theme_summary">Wyczyść tapety, czcionkę, układ strony głównej, kolory motywu i język</string>
+    <string name="wallpaper_reset_theme_confirm">Przywrócić domyślny motyw? Spowoduje to wyczyszczenie własnych tapet, czcionki, kolorów motywu i języka.</string>
     <string name="wallpaper_theme_reset">Motyw przywrócony do domyślnego</string>
     <string name="wallpaper_theme_reset_failed">Nie udało się przywrócić motywu</string>
     <string name="wallpaper_crop_title">Przytnij obraz</string>

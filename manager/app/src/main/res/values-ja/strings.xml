@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">上部レイアウト</string>
+    <string name="settings_stats_top_layout_list">リスト</string>
+    <string name="settings_stats_top_layout_grid">グリッド</string>
+    <string name="settings_home_hide_status_tag">ステータスタグを隠す</string>
+    <string name="settings_home_hide_status_tag_summary">ホームのステータスカードにある実行モードのタグを隠します。</string>
     <string name="settings_support_links">ホーム下部のカード</string>
     <string name="settings_support_links_summary">ホーム画面の下部に表示する内容を選択します。</string>
     <string name="settings_support_links_finasu">FinaSU について</string>
@@ -679,8 +684,8 @@
     <string name="wallpaper_import_success">テーマパッケージをインポートしました</string>
     <string name="wallpaper_import_failed">インポートに失敗しました</string>
     <string name="wallpaper_reset_theme">デフォルトテーマに戻す</string>
-    <string name="wallpaper_reset_theme_summary">壁紙、フォント、ホームのレイアウト、ナビゲーションアイコンを消去します</string>
-    <string name="wallpaper_reset_theme_confirm">デフォルトテーマに戻しますか？カスタム壁紙、フォント、ナビゲーションアイコンが消去されます。</string>
+    <string name="wallpaper_reset_theme_summary">壁紙、フォント、ホームのレイアウト、テーマの配色、言語を消去します</string>
+    <string name="wallpaper_reset_theme_confirm">デフォルトテーマに戻しますか？カスタム壁紙、フォント、テーマの配色、言語が消去されます。</string>
     <string name="wallpaper_theme_reset">テーマをデフォルトに戻しました</string>
     <string name="wallpaper_theme_reset_failed">テーマのリセットに失敗しました</string>
     <string name="wallpaper_crop_title">画像を切り抜く</string>

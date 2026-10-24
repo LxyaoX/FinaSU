@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">顶部圣光阵</string>
+    <string name="settings_stats_top_layout_list">列表圣卡</string>
+    <string name="settings_stats_top_layout_grid">网格圣卡</string>
+    <string name="settings_home_hide_status_tag">隐匿状态印记</string>
+    <string name="settings_home_hide_status_tag_summary">隐匿圣光之殿状态卡上之运行模式印记。</string>
     <string name="settings_section_layout">格局</string>
     <string name="settings_support_links">首页底部圣牌</string>
     <string name="settings_support_links_summary">择首页底端所显之圣物。</string>
@@ -688,8 +693,8 @@
     <string name="wallpaper_import_success">圣光主题匣已唤醒</string>
     <string name="wallpaper_import_failed">唤醒未至</string>
     <string name="wallpaper_reset_theme">归元天意圣光主题</string>
-    <string name="wallpaper_reset_theme_summary">涤净圣光壁纸、圣言字体、圣光之殿阵式与导航圣印</string>
-    <string name="wallpaper_reset_theme_confirm">确定归元天意圣光主题吗？此举将涤净自定义圣光壁纸、圣言字体与导航圣印。</string>
+    <string name="wallpaper_reset_theme_summary">涤净圣光壁纸、圣言字体、圣光之殿阵式、主题色彩与圣域语言</string>
+    <string name="wallpaper_reset_theme_confirm">确定归元天意圣光主题吗？此举将涤净自定义圣光壁纸、圣言字体、主题色彩与圣域语言。</string>
     <string name="wallpaper_theme_reset">圣光主题已归元</string>
     <string name="wallpaper_theme_reset_failed">归元圣光主题未至</string>
     <string name="wallpaper_crop_title">裁切圣图</string>

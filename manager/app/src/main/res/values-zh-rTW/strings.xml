@@ -400,6 +400,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">頂部佈局</string>
+    <string name="settings_stats_top_layout_list">列表樣式</string>
+    <string name="settings_stats_top_layout_grid">網格樣式</string>
+    <string name="settings_home_hide_status_tag">隱藏狀態標籤</string>
+    <string name="settings_home_hide_status_tag_summary">隱藏首頁狀態卡上的執行模式標籤。</string>
     <string name="settings_section_layout">版面</string>
     <string name="settings_support_links">首頁底部卡片</string>
     <string name="settings_support_links_summary">選擇首頁底部顯示的內容。</string>
@@ -690,8 +695,8 @@
     <string name="wallpaper_import_success">主題套件已匯入</string>
     <string name="wallpaper_import_failed">匯入失敗</string>
     <string name="wallpaper_reset_theme">恢復預設主題</string>
-    <string name="wallpaper_reset_theme_summary">清除桌布、字型、首頁版面與導覽圖示</string>
-    <string name="wallpaper_reset_theme_confirm">要恢復預設主題嗎？這會清除自訂桌布、字型與導覽圖示。</string>
+    <string name="wallpaper_reset_theme_summary">清除桌布、字型、首頁版面、主題配色與語言</string>
+    <string name="wallpaper_reset_theme_confirm">要恢復預設主題嗎？這會清除自訂桌布、字型、主題配色與語言。</string>
     <string name="wallpaper_theme_reset">主題已恢復預設</string>
     <string name="wallpaper_theme_reset_failed">恢復主題失敗</string>
     <string name="wallpaper_crop_title">裁切圖片</string>

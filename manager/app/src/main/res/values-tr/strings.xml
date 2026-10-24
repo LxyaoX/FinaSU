@@ -401,6 +401,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Üst düzen</string>
+    <string name="settings_stats_top_layout_list">Liste</string>
+    <string name="settings_stats_top_layout_grid">Izgara</string>
+    <string name="settings_home_hide_status_tag">Durum etiketini gizle</string>
+    <string name="settings_home_hide_status_tag_summary">Ana sayfa durum kartındaki çalışma modu etiketini gizler.</string>
     <string name="settings_support_links">Ana ekran alt kartı</string>
     <string name="settings_support_links_summary">Ana ekranın altında neyin görüneceğini seçin.</string>
     <string name="settings_support_links_finasu">FinaSU hakkında bilgi edinin</string>
@@ -681,8 +686,8 @@
     <string name="wallpaper_import_success">Tema paketi içe aktarıldı</string>
     <string name="wallpaper_import_failed">İçe aktarma başarısız</string>
     <string name="wallpaper_reset_theme">Varsayılan temayı geri yükle</string>
-    <string name="wallpaper_reset_theme_summary">Duvar kağıtlarını, yazı tipini, ana sayfa düzenini ve gezinme simgelerini temizle</string>
-    <string name="wallpaper_reset_theme_confirm">Varsayılan tema geri yüklensin mi? Bu, özel duvar kağıtlarını, yazı tipini ve gezinme simgelerini temizler.</string>
+    <string name="wallpaper_reset_theme_summary">Duvar kağıtlarını, yazı tipini, ana sayfa düzenini, tema renklerini ve dili temizle</string>
+    <string name="wallpaper_reset_theme_confirm">Varsayılan tema geri yüklensin mi? Bu, özel duvar kağıtlarını, yazı tipini, tema renklerini ve dili temizler.</string>
     <string name="wallpaper_theme_reset">Tema varsayılana sıfırlandı</string>
     <string name="wallpaper_theme_reset_failed">Tema sıfırlanamadı</string>
     <string name="wallpaper_crop_title">Görseli kırp</string>
