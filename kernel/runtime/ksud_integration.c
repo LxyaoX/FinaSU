@@ -477,6 +477,7 @@ static void ksu_handle_sys_read(unsigned int fd, char __user **buf_ptr, size_t *
 }
 
 static unsigned int volumedown_pressed_count = 0;
+static bool input_hook_stopped;
 
 static bool is_volumedown_enough(unsigned int count)
 {
@@ -485,6 +486,9 @@ static bool is_volumedown_enough(unsigned int count)
 
 int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value)
 {
+    if (READ_ONCE(input_hook_stopped))
+        return 0;
+
     if (*type == EV_KEY && *code == KEY_VOLUMEDOWN) {
         int val = *value;
         pr_info("KEY_VOLUMEDOWN val: %d\n", val);
@@ -644,11 +648,10 @@ static void stop_init_rc_hook()
 
 void ksu_stop_input_hook_runtime(void)
 {
-    static bool input_hook_stopped = false;
-    if (input_hook_stopped) {
+    if (READ_ONCE(input_hook_stopped)) {
         return;
     }
-    input_hook_stopped = true;
+    WRITE_ONCE(input_hook_stopped, true);
     bool ret = schedule_work(&stop_input_hook_work);
     pr_info("unregister input kprobe: %d!\n", ret);
 }

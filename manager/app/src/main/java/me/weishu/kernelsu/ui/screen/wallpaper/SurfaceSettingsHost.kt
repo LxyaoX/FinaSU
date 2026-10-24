@@ -49,7 +49,7 @@ fun SurfaceSettingsHost(
     actions: WallpaperScreenActions,
 ) {
     val layout = LocalHomeLayoutStyle.current
-    SurfaceRegistry.forLayout(layout).forEach { descriptor ->
+    SurfaceRegistry.forLayout(layout, state.statsTopLayout).forEach { descriptor ->
         // A grouped child (the focus cards) only appears once its shared master switch is on,
         // mirroring the theme's own nesting so a card can never be configured while its parent is off.
         val parent = descriptor.parentId?.let { SurfaceRegistry.descriptor(it) }

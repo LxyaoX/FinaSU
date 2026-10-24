@@ -103,6 +103,7 @@
     <string name="module_repo_modules_count">%1$d 個模組</string>
     <string name="module_repo_empty">此倉庫尚無模組</string>
     <string name="module_repo_no_matches">沒有符合的模組</string>
+    <string name="module_empty">查無已安裝的模組</string>
     <string name="module_repo_error">載入模組失敗</string>
     <string name="module_repo_license">授權條款</string>
     <string name="module_repo_homepage">首頁</string>
@@ -374,6 +375,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">頂部佈局</string>
+    <string name="settings_stats_top_layout_list">列表樣式</string>
+    <string name="settings_stats_top_layout_grid">網格樣式</string>
+    <string name="settings_home_hide_status_tag">隱藏狀態標籤</string>
+    <string name="settings_home_hide_status_tag_summary">隱藏首頁狀態卡上的執行模式標籤。</string>
     <string name="settings_section_layout">版面</string>
     <string name="superuser_search_hint">搜尋應用程式</string>
     <string name="module_search_hint">搜尋模組</string>
@@ -544,8 +550,8 @@
     <string name="wallpaper_import_success">主題套件已匯入</string>
     <string name="wallpaper_import_failed">匯入失敗</string>
     <string name="wallpaper_reset_theme">恢復預設主題</string>
-    <string name="wallpaper_reset_theme_summary">清除桌布、字型、首頁版面與導覽圖示</string>
-    <string name="wallpaper_reset_theme_confirm">要恢復預設主題嗎？這會清除自訂桌布、字型與導覽圖示。</string>
+    <string name="wallpaper_reset_theme_summary">清除桌布、字型、首頁版面、主題配色與語言</string>
+    <string name="wallpaper_reset_theme_confirm">要恢復預設主題嗎？這會清除自訂桌布、字型、主題配色與語言。</string>
     <string name="wallpaper_theme_reset">主題已恢復預設</string>
     <string name="wallpaper_theme_reset_failed">恢復主題失敗</string>
     <string name="wallpaper_crop_title">裁切圖片</string>
@@ -738,4 +744,25 @@
     <string name="kernel_modules_log_outcome">結果</string>
     <string name="kernel_modules_log_boot">開機 ID</string>
     <string name="kernel_modules_unknown">未知</string>
+    <string name="settings_theme_options">主題選項</string>
+    <string name="settings_amoled_theme">AMOLED 純黑主題</string>
+    <string name="settings_amoled_theme_desc">為深色模式使用純黑背景</string>
+    <string name="settings_switch_icon">啟用按鈕指示器</string>
+    <string name="settings_switch_icon_desc">為開關按鈕添加狀態指示圖標</string>
+    <string name="settings_discrete_slider">離散滑塊</string>
+    <string name="settings_discrete_slider_desc">在滑塊軌道上顯示刻度標記</string>
+    <string name="palette_style_tonal_spot">色調</string>
+    <string name="palette_style_neutral">中性</string>
+    <string name="palette_style_vibrant">活力</string>
+    <string name="palette_style_expressive">表現</string>
+    <string name="palette_style_rainbow">彩虹</string>
+    <string name="palette_style_fruit_salad">水果沙拉</string>
+    <string name="palette_style_monochrome">單色</string>
+    <string name="palette_style_fidelity">保真</string>
+    <string name="palette_style_content">內容</string>
+    <string name="home_title_kernelsu">KernelSU</string>
+    <string name="module_preinit_no_space">預初始化未同步：metadata 空間不足</string>
+    <string name="module_preinit_error">預初始化同步失敗，保留上次設定</string>
+    <string name="module_preinit_bootloop">多次啟動未完成，預初始化已暫停</string>
+    <string name="module_preinit_unsupported">目前核心或載入模式不支援預初始化</string>
 </resources>

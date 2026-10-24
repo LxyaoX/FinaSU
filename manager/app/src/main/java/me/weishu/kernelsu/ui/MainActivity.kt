@@ -682,7 +682,7 @@ fun MainScreen(
             Box(modifier = Modifier.navBarLiquefiable(floatingLiquidState)) {
                 HorizontalPager(
                     state = mainPagerState.pagerState,
-                    beyondViewportPageCount = if (renderPagerPages) 3 else 0,
+                    beyondViewportPageCount = if (renderPagerPages) 1 else 0,
                     overscrollEffect = null,
                     userScrollEnabled = userScrollEnabled,
                     pageNestedScrollConnection = pageNestedScrollConnection(

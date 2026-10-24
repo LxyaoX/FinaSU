@@ -111,6 +111,8 @@ fun rememberSettingsActions(
         onSetDefaultUmountModules = viewModel::setDefaultUmountModules,
         onSetEnableWebDebugging = viewModel::setEnableWebDebugging,
         onSetHomeLayoutStyle = viewModel::setHomeLayoutStyle,
+        onSetStatsTopLayout = viewModel::setStatsTopLayout,
+        onSetListWorkingCardModeHidden = viewModel::setListWorkingCardModeHidden,
         onSetHideHomeFingerprint = viewModel::setHideHomeFingerprint,
         onSetHideHomeZygisk = viewModel::setHideHomeZygisk,
         onSetHideHomeSusfs = viewModel::setHideHomeSusfs,

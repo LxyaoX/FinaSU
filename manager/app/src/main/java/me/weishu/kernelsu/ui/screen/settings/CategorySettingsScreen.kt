@@ -13,13 +13,19 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.R
@@ -42,6 +48,14 @@ fun CategorySettingsScreen(categoryKey: String) {
     val viewModel = viewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val actions = rememberSettingsActions(navigator, viewModel)
+    // A pushed theme or wallpaper screen can change theme-owned settings; re-read them on return.
+    var initialResumeHandled by rememberSaveable { mutableStateOf(false) }
+    val activity = LocalActivity.current
+    LifecycleResumeEffect(Unit, activity ?: LocalLifecycleOwner.current) {
+        if (initialResumeHandled) viewModel.refresh()
+        initialResumeHandled = true
+        onPauseOrDispose { }
+    }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     ExpressiveScaffold(

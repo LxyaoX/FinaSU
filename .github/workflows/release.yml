@@ -16,12 +16,15 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout release scripts
+        uses: actions/checkout@v7
+
       - name: Download artifacts
         uses: actions/download-artifact@v8
 
-      # The APK is the only published asset. It already carries ksud, the kernel
-      # modules, ksuinit and the Sui payload for every supported ABI, so the other
-      # build outputs stay on the run page as workflow artifacts instead.
+      # The APK already carries ksud, the kernel modules, ksuinit and the Sui
+      # payload for every supported ABI. The separate zip exposes the standalone
+      # kernelsu.ko and ksud builds; other outputs stay on the run page.
       - name: Check the release APK
         run: |
           apk=$(ls manager/*.apk)
@@ -36,6 +39,10 @@ jobs:
             exit 1
           fi
 
+      - name: Package kernel bundle
+        run: |
+          ./scripts/package-release-kernel-bundle.sh . "FinaSU_${GITHUB_REF_NAME}_kernel-bundle.zip"
+
       - name: release
         uses: softprops/action-gh-release@v3
         with:
@@ -44,4 +51,6 @@ jobs:
           # offers test builds to users on a release build. A bare tag (v0.1.0) is published as a
           # full release and becomes `/releases/latest` on its own, which is what users receive.
           prerelease: ${{ contains(github.ref_name, '-') }}
-          files: manager/*.apk
+          files: |
+            manager/*.apk
+            FinaSU_*_kernel-bundle.zip

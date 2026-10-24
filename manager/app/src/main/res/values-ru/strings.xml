@@ -5,7 +5,7 @@
     <string name="feature_status_forced_summary">Принудительно задано конфигурацией загрузки; изменить здесь нельзя</string>
     <string name="install_anykernel">Прошить ZIP AnyKernel3</string>
     <string name="install_anykernel_summary">Запустить доверенный установщик ядра в текущем слоте. Требуется root.</string>
-    <string name="install_anykernel_warning">Этот ZIP запускается с правами root и может изменить несколько разделов. Установщик сам определяет, какие разделы и слоты будут записаны; KernelSU не переопределяет слот и не обновляет ksud. Успешная установка не гарантирует загрузку, а при сбое могут остаться частичные изменения. Существующие резервные копии boot-образа могут не покрывать эти изменения. Убедитесь в совместимости устройства и подготовьте образ для восстановления, прежде чем продолжать.</string>
+    <string name="install_anykernel_warning">Этот ZIP запускается с правами root и может изменить несколько разделов. Установщик сам определяет, какие разделы и слоты будут записаны; FinaSU не переопределяет слот и не обновляет ksud. Успешная установка не гарантирует загрузку, а при сбое могут остаться частичные изменения. Существующие резервные копии boot-образа могут не покрывать эти изменения. Убедитесь в совместимости устройства и подготовьте образ для восстановления, прежде чем продолжать.</string>
     <string name="install_anykernel_root_required">Для прошивки AnyKernel3 требуются права root.</string>
     <string name="install_anykernel_read_failed">Не удалось прочитать ZIP-файл AnyKernel3.</string>
     <string name="home">Главная</string>
@@ -13,7 +13,7 @@
     <string name="home_click_to_install">Нажмите, чтобы установить</string>
     <string name="home_working">Работает</string>
     <string name="home_tile_status">KernelSU</string>
-    <string name="home_tile_manager">KernelSU</string>
+    <string name="home_tile_manager">FinaSU</string>
     <string name="home_tile_system">Системная информация</string>
     <string name="home_tile_device">Устройство</string>
     <string name="home_tile_storage">Хранилище</string>
@@ -103,6 +103,7 @@
     <string name="module_repo_modules_count">%1$d модулей</string>
     <string name="module_repo_empty">В этом репозитории нет модулей</string>
     <string name="module_repo_no_matches">Нет подходящих модулей</string>
+    <string name="module_empty">Нет установленных модулей</string>
     <string name="module_repo_error">Не удалось загрузить модули</string>
     <string name="module_repo_license">Лицензия</string>
     <string name="module_repo_homepage">Домашняя страница</string>
@@ -287,7 +288,7 @@
     <string name="settings_folk_mount_unavailable_summary">Недоступно. Требуется root-доступ, а ksud должен быть обновлён.</string>
     <string name="settings_folk_mount_mode_nomount">Built-in (VFS)</string>
     <string name="settings_folk_mount_mode_off">Монтирование отключено</string>
-    <string name="settings_folk_mount_mode_nomount_summary">Внедрять модули через драйвер NoMount VFS.</string>
+    <string name="settings_folk_mount_mode_nomount_summary">Внедрять модули через драйвер NoMount VFS. Если драйвер недоступен, используется встроенный движок.</string>
     <string name="settings_folk_mount_mode_off_summary">Ничего не внедрять. Установленные модули остаются неактивными, пока не будет выбран бэкенд.</string>
     <string name="settings_folk_mount_provider_builtin">Built-in (Magic Mount)</string>
     <string name="settings_folk_mount_provider_metamodule">Метамодуль</string>
@@ -296,7 +297,7 @@
     <string name="settings_folk_mount_boot_provider">Эта загрузка: %1$s</string>
     <string name="settings_folk_mount_boot_provider_unknown">Ещё не смонтировано при этой загрузке</string>
     <string name="settings_folk_mount_reboot_hint">Вступит в силу после перезагрузки.</string>
-    <string name="settings_folk_mount_nomount_unavailable_hint">Драйвер NoMount не отвечает, поэтому в этой загрузке ничего не внедрено.</string>
+    <string name="settings_folk_mount_nomount_unavailable_hint">Драйвер NoMount не отвечает; в этой загрузке используется встроенный движок.</string>
     <string name="settings_folk_mount_write_failed">Не удалось изменить режим Folk Mount.</string>
     <string name="settings_nomount">NoMount</string>
     <string name="nomount_section_driver">Драйвер</string>
@@ -308,7 +309,7 @@
     <string name="nomount_driver_ready">Готово</string>
     <string name="nomount_driver_kind_builtin">встроенный в ядро</string>
     <string name="nomount_driver_kind_module">модуль ядра</string>
-    <string name="nomount_unavailable_no_asset">В этом пакете нет модуля NoMount для %1$s, поэтому на этом ядре внедрение модулей невозможно.</string>
+    <string name="nomount_unavailable_no_asset">В этом пакете нет модуля NoMount для %1$s; используйте «Автоматически» или «Встроенный Folk Mount».</string>
     <string name="nomount_unavailable_outdated">В ядре есть NoMount %1$s, но для этой сборки требуется API 22 или новее; обновите ядро.</string>
     <string name="nomount_unavailable_not_loaded">Драйвер ещё не загружен; перезагрузитесь или выполните внедрение один раз, чтобы загрузить его.</string>
     <string name="nomount_unavailable_unknown_kmi">Не удалось сопоставить версию ядра с модулем NoMount.</string>
@@ -324,10 +325,8 @@
     <string name="nomount_uid_exclusions_value">%1$d приложений видят стоковую файловую систему</string>
     <string name="nomount_uid_exclusions_none">Все приложения видят внедрённые файлы; выберите приложения ниже, чтобы скрыть их</string>
     <string name="nomount_visibility_model">Видимость по умолчанию</string>
-    <string name="nomount_visibility_model_hint">NoMount запускается без исключений, поэтому до отметки здесь внедрённые файлы видны всем приложениям.</string>
-    <string name="settings_folk_mount_nomount_confirm">NoMount показывает внедрённые файлы всем приложениям.
-
-Переключение вступает в силу после перезагрузки. Чтобы скрыть их от приложения, отметьте его в NoMount → Исключённые приложения.</string>
+    <string name="nomount_visibility_model_hint">Встроенный Folk Mount скрывает внедрённые файлы от приложений, в профиле которых указано "Размонтировать модули" (по умолчанию — от всех приложений без root). NoMount начинает без исключений, поэтому эти приложения видят файлы, пока вы не отметите их здесь.</string>
+    <string name="settings_folk_mount_nomount_confirm">Сначала NoMount показывает внедрённые файлы всем приложениям; встроенный Folk Mount скрывает их от приложений, в профиле которых указано "Размонтировать модули" (по умолчанию — от всех приложений без root).\n\nПереключение вступит в силу после перезагрузки. Чтобы сохранить прежнее поведение, отметьте приложения в разделе NoMount → Исключённые приложения.</string>
     <string name="settings_folk_mount_nomount_confirm_ok">Переключить и перезагрузить позже</string>
     <string name="nomount_uid_source_hint">Копируется из профилей приложений по запросу</string>
     <string name="nomount_block_isolated">Скрывать от изолированных процессов</string>
@@ -375,6 +374,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Макет верхней части</string>
+    <string name="settings_stats_top_layout_list">Список</string>
+    <string name="settings_stats_top_layout_grid">Сетка</string>
+    <string name="settings_home_hide_status_tag">Скрыть метку состояния</string>
+    <string name="settings_home_hide_status_tag_summary">Скрыть метку режима работы на карточке состояния главного экрана.</string>
     <string name="superuser_search_hint">Поиск приложений</string>
     <string name="module_search_hint">Поиск модулей</string>
     <string name="settings_home_info">Информация на главной</string>
@@ -543,8 +547,8 @@
     <string name="wallpaper_import_success">Пакет темы импортирован</string>
     <string name="wallpaper_import_failed">Не удалось импортировать</string>
     <string name="wallpaper_reset_theme">Восстановить тему по умолчанию</string>
-    <string name="wallpaper_reset_theme_summary">Очистить обои, шрифт, макет главного экрана и значки навигации</string>
-    <string name="wallpaper_reset_theme_confirm">Восстановить тему по умолчанию? Это очистит пользовательские обои, шрифт и значки навигации.</string>
+    <string name="wallpaper_reset_theme_summary">Очистить обои, шрифт, макет главного экрана, цвета темы и язык</string>
+    <string name="wallpaper_reset_theme_confirm">Восстановить тему по умолчанию? Это очистит пользовательские обои, шрифт, цвета темы и язык.</string>
     <string name="wallpaper_theme_reset">Тема сброшена по умолчанию</string>
     <string name="wallpaper_theme_reset_failed">Не удалось сбросить тему</string>
     <string name="wallpaper_crop_title">Обрезать изображение</string>
@@ -738,4 +742,27 @@
     <string name="kernel_modules_log_outcome">Результат</string>
     <string name="kernel_modules_log_boot">ID загрузки</string>
     <string name="kernel_modules_unknown">Неизвестно</string>
+    <string name="settings_theme_options">Параметры темы</string>
+    <string name="settings_section_layout">Макет</string>
+    <string name="settings_amoled_theme">Чёрная тема AMOLED</string>
+    <string name="settings_amoled_theme_desc">Чисто чёрный фон для тёмного режима</string>
+    <string name="settings_switch_icon">Индикатор кнопки</string>
+    <string name="settings_switch_icon_desc">Показать значки состояния на переключателях</string>
+    <string name="settings_discrete_slider">Дискретный ползунок</string>
+    <string name="settings_discrete_slider_desc">Показать отметки на дорожке ползунка</string>
+    <string name="palette_style_tonal_spot">Тональный акцент</string>
+    <string name="palette_style_neutral">Нейтральный</string>
+    <string name="palette_style_vibrant">Яркий</string>
+    <string name="palette_style_expressive">Экспрессивный</string>
+    <string name="palette_style_rainbow">Радуга</string>
+    <string name="palette_style_fruit_salad">Фруктовый салат</string>
+    <string name="palette_style_monochrome">Монохромный</string>
+    <string name="palette_style_fidelity">Точность</string>
+    <string name="palette_style_content">Контент</string>
+    <string name="media_title_image_summary">Показывать своё изображение вместо заголовка верхней панели.</string>
+    <string name="home_title_kernelsu">KernelSU</string>
+    <string name="module_preinit_no_space">Предынициализация не синхронизирована: недостаточно места в metadata</string>
+    <string name="module_preinit_error">Не удалось синхронизировать предынициализацию; прежняя конфигурация сохранена</string>
+    <string name="module_preinit_bootloop">Предынициализация приостановлена после нескольких попыток загрузки</string>
+    <string name="module_preinit_unsupported">Предынициализация недоступна в этом ядре или режиме загрузки</string>
 </resources>

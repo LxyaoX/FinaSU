@@ -24,6 +24,8 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
  * [available] is the single source of truth for layout gating. The settings UI asks the registry
  * for the descriptors of the active layout instead of testing layout tokens itself, so a
  * layout-exclusive surface (the grid work card, for example) can never leak into another layout.
+ * The Stats layout's header form is part of the decision, because its grid header draws the grid
+ * work card.
  *
  * A descriptor is pure data: its [rows] drive the settings UI, its [fields]/[flags] drive storage
  * and the theme container, and [storageStem]/[themeBase] name the image file and the zip entry.
@@ -58,8 +60,11 @@ data class SurfaceDescriptor(
     /** Historical `theme.json` keys kept for interop with themes from the wider ecosystem. */
     val legacyThemeFields: Map<SurfaceField, String> = emptyMap(),
     val legacyThemeFlags: Map<SurfaceFlag, String> = emptyMap(),
-    /** Whether this surface is available for a home layout token such as [HomeLayoutStyle.GRID]. */
-    val available: (String) -> Boolean = { true },
+    /**
+     * Whether this surface is available for a home layout token such as [HomeLayoutStyle.GRID],
+     * given the Stats layout's header form (`list` or `grid`).
+     */
+    val available: (String, String) -> Boolean = { _, _ -> true },
     /**
      * Id of the surface that owns this one's shared master switch, when this is a child of a grouped
      * feature. The focus cards are children of [FOCUS], whose `enabled` bit is the single gate the
@@ -178,7 +183,9 @@ object SurfaceRegistry {
             SurfaceFlag.HideText to "isGridWorkingCardTextHidden",
             SurfaceFlag.HideMode to "isGridWorkingCardModeHidden",
         ),
-        available = { layout -> layout == HomeLayoutStyle.GRID },
+        available = { layout, statsTop ->
+            layout == HomeLayoutStyle.GRID || (layout == HomeLayoutStyle.STATS && statsTop == "grid")
+        },
     )
 
     /**
@@ -256,7 +263,7 @@ object SurfaceRegistry {
                 dayNightIcon = Icons.Filled.Contrast,
             ),
         ),
-        available = { layout -> layout == HomeLayoutStyle.FOCUS },
+        available = { layout, _ -> layout == HomeLayoutStyle.FOCUS },
     )
 
     private val focusCards = listOf(
@@ -373,7 +380,7 @@ object SurfaceRegistry {
             SurfaceField.DayOpacity to "dashboardCardBgDayOpacity",
             SurfaceField.NightOpacity to "dashboardCardBgNightOpacity",
         ),
-        available = { layout -> layout == HomeLayoutStyle.DASHBOARD },
+        available = { layout, _ -> layout == HomeLayoutStyle.DASHBOARD },
     )
 
     /**
@@ -408,29 +415,17 @@ object SurfaceRegistry {
         themeBase = themeBase,
         aspect = 1.4f,
         legacyThemeFields = mapOf(SurfaceField.Enabled to legacyKey),
-        available = { layout -> layout == HomeLayoutStyle.FOCUS },
+        available = { layout, _ -> layout == HomeLayoutStyle.FOCUS },
         parentId = FOCUS,
-    )
-
-    /** Reserved slot for the stats layout; the model is in place but exposes no controls yet. */
-    private val statsTopCard = reservedSlot("layout.stats.topCard", R.string.home_tile_status, Icons.Outlined.SdStorage)
-
-    private fun reservedSlot(id: String, titleRes: Int, icon: ImageVector): SurfaceDescriptor = SurfaceDescriptor(
-        id = SurfaceId(id),
-        titleRes = titleRes,
-        icon = icon,
-        scope = SurfaceScope.Slot,
-        fields = emptySet(),
-        available = { false },
     )
 
     /** Every registered surface. */
     val all: List<SurfaceDescriptor> =
-        listOf(gridWorkCard, focus) + focusCards + listOf(dashboardHero, statsTopCard)
+        listOf(gridWorkCard, focus) + focusCards + listOf(dashboardHero)
 
     /** The surfaces available for a home layout token, in registration order. */
-    fun forLayout(layout: String): List<SurfaceDescriptor> =
-        all.filter { it.available(layout) }
+    fun forLayout(layout: String, statsTopLayout: String = "list"): List<SurfaceDescriptor> =
+        all.filter { it.available(layout, statsTopLayout) }
 
     /** The descriptor registered under [id], or null when no surface uses it. */
     fun descriptor(id: SurfaceId): SurfaceDescriptor? = all.firstOrNull { it.id == id }

@@ -77,6 +77,22 @@ internal object ThemeSettingsMapping {
         if (json.has("isListWorkingCardModeHidden")) repo.listWorkingCardModeHidden = json.getBoolean("isListWorkingCardModeHidden")
     }
 
+    /**
+     * Restores every setting a theme can carry to the app defaults. Layout and the asset files
+     * reset through their own assets, so only the preference-backed values live here.
+     */
+    fun reset(repo: SettingsRepository = SettingsRepositoryImpl()) {
+        repo.themeMode = ColorMode.SYSTEM.value
+        repo.keyColor = 0
+        repo.useSystemDynamicColor = true
+        repo.colorStyle = PaletteStyle.TonalSpot.name
+        repo.colorSpec = "SPEC_2025"
+        repo.colorGenerationMode = "custom"
+        repo.colorContrast = "STANDARD"
+        repo.statsTopLayout = "list"
+        repo.listWorkingCardModeHidden = false
+    }
+
     fun applyLanguage(json: JSONObject) {
         if (!json.has("appLanguage")) return
         ThemeLanguage.setTags(ksuApp, json.getString("appLanguage"))

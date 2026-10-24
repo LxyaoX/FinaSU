@@ -58,6 +58,7 @@ import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Opacity
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.RoundedCorner
+import androidx.compose.material.icons.automirrored.rounded.LabelOff
 import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.SwapHoriz
@@ -70,6 +71,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalResources
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
@@ -265,6 +267,29 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_home_layout_summary,
             icon = Icons.Filled.GridView,
             aliases = listOf("home", "layout", "grid", "dashboard", "circle", "focus"),
+        )
+    )
+    add(
+        SettingsCategory.APPEARANCE.row(
+            id = "appearance.stats_top_layout",
+            titleRes = R.string.settings_stats_top_layout,
+            icon = Icons.Rounded.SpaceDashboard,
+            aliases = listOf("stats", "top", "layout", "list", "grid"),
+            available = { it.homeLayoutStyle == HomeLayoutStyle.STATS },
+        )
+    )
+    add(
+        SettingsCategory.APPEARANCE.row(
+            id = "appearance.hide_status_tag",
+            titleRes = R.string.settings_home_hide_status_tag,
+            summaryRes = R.string.settings_home_hide_status_tag_summary,
+            icon = Icons.AutoMirrored.Rounded.LabelOff,
+            aliases = listOf("status", "tag", "badge", "mode", "hide"),
+            available = {
+                it.homeLayoutStyle == HomeLayoutStyle.CIRCLE ||
+                    (it.homeLayoutStyle == HomeLayoutStyle.STATS &&
+                        it.statsTopLayout != "grid")
+            },
         )
     )
     add(
