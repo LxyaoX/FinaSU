@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="fpt_import_title">確認匯入主題</string>
-    <string name="fpt_resources">資源：%1$d 項</string>
-    <string name="fpt_name">名稱</string>
-    <string name="fpt_version">版本</string>
-    <string name="fpt_author">作者</string>
-    <string name="fpt_description">描述</string>
-</resources>
