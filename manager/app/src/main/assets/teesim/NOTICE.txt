@@ -12,6 +12,12 @@ that it carries only what actually runs here. Two groups of files are removed:
     `arm64-v8a/libteesim_logcat.so` (the native logd reader behind the WebUI's
     Logs panel; LogTail disables itself when it is missing).
 
+What is left is stored as a zip inside an XZ stream (`teesim-arm64.zip.xz`)
+rather than a plain zip: nine tenths of the payload is native code, where LZMA
+saves about a third over deflate - 5.9MB instead of 9.0MB. The manager decodes
+it on the fly when staging. Every file inside that zip is byte-identical to the
+upstream release.
+
   Project : https://github.com/JingMatrix/TEESimulator
   Release : canary-76, TEESimulator-v4.0-76-06f9f2e-Release.zip
   Build   : v4.0 (76-06f9f2e-release), versionCode 76

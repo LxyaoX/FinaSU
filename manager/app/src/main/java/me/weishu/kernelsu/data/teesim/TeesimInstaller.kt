@@ -5,6 +5,7 @@ import com.topjohnwu.superuser.Shell
 import java.io.BufferedInputStream
 import java.io.File
 import java.util.zip.ZipInputStream
+import org.tukaani.xz.XZInputStream
 import me.weishu.kernelsu.data.model.TeesimConfig
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.ksuApp
@@ -62,7 +63,7 @@ object TeesimInstaller {
     /** Boot hook: ksud runs every executable in this directory, module or not. */
     const val BOOT_SCRIPT = "/data/adb/post-fs-data.d/neosu_teesim.sh"
 
-    private const val ASSET_ZIP = "teesim/teesim-arm64.zip"
+    private const val ASSET_ARCHIVE = "teesim/teesim-arm64.zip.xz"
     private const val STAGE_DIR = "teesim-stage"
 
     /**
@@ -424,23 +425,35 @@ done
         )
     }
 
+    /**
+     * Unpacks the bundled payload into [stage].
+     *
+     * The asset is a zip inside an XZ stream. About nine tenths of the payload is native code,
+     * which is where deflate gives up and LZMA does not: the same entries weigh 5.9MB here against
+     * 9.0MB as a plain zip. XZ decodes sequentially, so the reader wraps the stream and the zip
+     * entries come straight out of it - nothing is unpacked to disk first. The dictionary is
+     * capped at 16MiB when the archive is built, which keeps the decoder's footprint well under
+     * what any supported device has to spare.
+     */
     private fun extract(stage: File) {
         val root = stage.canonicalPath + File.separator
-        ksuApp.assets.open(ASSET_ZIP).use { input ->
-            ZipInputStream(BufferedInputStream(input)).use { zip ->
-                while (true) {
-                    val entry = zip.nextEntry ?: break
-                    val target = File(stage, entry.name)
-                    check(target.canonicalPath.startsWith(root)) {
-                        "zip entry escapes the staging directory: ${entry.name}"
+        ksuApp.assets.open(ASSET_ARCHIVE).use { input ->
+            XZInputStream(BufferedInputStream(input)).use { xz ->
+                ZipInputStream(xz).use { zip ->
+                    while (true) {
+                        val entry = zip.nextEntry ?: break
+                        val target = File(stage, entry.name)
+                        check(target.canonicalPath.startsWith(root)) {
+                            "zip entry escapes the staging directory: ${entry.name}"
+                        }
+                        if (entry.isDirectory) {
+                            target.mkdirs()
+                        } else {
+                            target.parentFile?.mkdirs()
+                            target.outputStream().use { out -> zip.copyTo(out) }
+                        }
+                        zip.closeEntry()
                     }
-                    if (entry.isDirectory) {
-                        target.mkdirs()
-                    } else {
-                        target.parentFile?.mkdirs()
-                        target.outputStream().use { out -> zip.copyTo(out) }
-                    }
-                    zip.closeEntry()
                 }
             }
         }
