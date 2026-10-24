@@ -9,7 +9,7 @@ experience. Keep it in sync with `.github/workflows/release.yml`,
 1. Pushing a `v*` tag runs the `Release` workflow: the DDK matrix builds `kernelsu.ko` and
    `nomount.ko` per KMI, `sui.yml` builds the Sui payload, `ksuinit` and `ksud` follow, the manager
    APK is built and repacked with that `ksud`, and `softprops/action-gh-release` publishes the APK
-   as the only release asset.
+   plus a zip containing the standalone `kernelsu.ko` and `ksud` builds.
 2. The manager calls `GET https://api.github.com/repos/LyraVoid/FinaSU/releases/latest` every time
    the Home screen becomes visible or the app returns to the foreground (`checkNewVersion()`),
    unless the "Check for updates" setting is off.
@@ -70,7 +70,8 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 - The APK asset name follows `<AppName>_<versionName>_<versionCode>-release.apk`; the embedded version
   code must exceed the previous release. A name that does not match the regex (for example
   `app-release.apk`) makes the update invisible to every user.
-- One APK asset per release: the parser returns the first match it finds.
+- One APK asset per release: the parser returns the first match it finds. The accompanying
+  `FinaSU_<tag>_kernel-bundle.zip` is ignored by the updater.
 - The release job fails early when the asset name does not match
   `<app>_v<versionName>_<versionCode>-<buildType>.apk`, so a silent update outage is caught in CI.
 - `aapt2 dump badging` on the downloaded APK should report `package: name='me.yuki.fina'` with the
@@ -95,9 +96,11 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
   absent from the APK.
 - riscv64 has no LKM, NoMount, FolkZygisk or Sui payload upstream. The manager reports the missing
   module or driver instead of failing, and NoMount falls back to the built-in Folk Mount engine.
-- Only the APK is a release asset. `lkm-*.ko`, `ksud-*`, `ksuinit-*` and the FolkZygisk source tarball
-  stay on the run page as workflow artifacts, and GitHub attaches the tag's source archives, which
-  also keeps the source available for the licenses bundled into the payload.
+- Release assets are the APK and `FinaSU_<tag>_kernel-bundle.zip`. The zip contains `arm64/` and
+  `x86_64/` directories with all eight KMI `kernelsu.ko` files for each architecture, plus `ksud/`
+  with the Android and desktop builds. Other build outputs stay on the run page as workflow
+  artifacts, and GitHub attaches the tag's source archives, which also keeps the source available
+  for the licenses bundled into the payload.
 - Users in LKM mode see "A newer bundled LKM is available. Tap to update." on Home whenever the
   running module version differs from the APK version code; they install it from the Install page and
   reboot, with no PC and no boot image flashing.
@@ -115,6 +118,13 @@ done
 
 Expect `8`, `8`, `1`, `1` on arm64 and x86_64 and `0` for all of them on riscv64. A zero where the
 table above says yes means a staging step was skipped and the APK shipped without that payload.
+
+```bash
+unzip -Z1 FinaSU_<tag>_kernel-bundle.zip |
+  awk '/_kernelsu\.ko$/ { ko++ } /^ksud\// { ksud++ } END { print ko, ksud, (ko == 16 && ksud == 8 ? "ok" : "bad") }'
+```
+
+The bundle must contain 16 `kernelsu.ko` files and eight `ksud` binaries.
 
 ## 8. Pitfalls
 
