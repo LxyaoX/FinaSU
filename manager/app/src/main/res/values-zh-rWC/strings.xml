@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">顶部仙法阵</string>
+    <string name="settings_stats_top_layout_list">列表仙卡</string>
+    <string name="settings_stats_top_layout_grid">网格仙卡</string>
+    <string name="settings_home_hide_status_tag">隐遁状态符记</string>
+    <string name="settings_home_hide_status_tag_summary">隐遁主殿状态卡上之运行模式符记。</string>
     <string name="settings_section_layout">格局</string>
     <string name="settings_support_links">首页底下道牌</string>
     <string name="settings_support_links_summary">择首页底端所现之道。</string>
@@ -688,8 +693,8 @@
     <string name="wallpaper_import_success">道韵卷宗已引入</string>
     <string name="wallpaper_import_failed">引入败陨</string>
     <string name="wallpaper_reset_theme">复归本初道韵</string>
-    <string name="wallpaper_reset_theme_summary">涤除画卷、字体、主殿布局与导航道印</string>
-    <string name="wallpaper_reset_theme_confirm">欲复归本初道韵乎？此举将涤除自定画卷、字体与导航道印。</string>
+    <string name="wallpaper_reset_theme_summary">涤除画卷、字体、主殿布局、主题色韵与仙音道语</string>
+    <string name="wallpaper_reset_theme_confirm">欲复归本初道韵乎？此举将涤除自定画卷、字体、主题色韵与仙音道语。</string>
     <string name="wallpaper_theme_reset">道韵已复本初</string>
     <string name="wallpaper_theme_reset_failed">复归道韵败陨</string>
     <string name="wallpaper_crop_title">裁炼画卷</string>

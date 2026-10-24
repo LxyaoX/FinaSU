@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">顶部魔法阵</string>
+    <string name="settings_stats_top_layout_list">列表魔法卡</string>
+    <string name="settings_stats_top_layout_grid">网格魔法卡</string>
+    <string name="settings_home_hide_status_tag">隐遁状态标签</string>
+    <string name="settings_home_hide_status_tag_summary">隐遁魔法大厅状态卡上的运行模式标签。</string>
     <string name="settings_support_links">首页底部魔法阵</string>
     <string name="settings_support_links_summary">选择首页底部要缔造的魔法。</string>
     <string name="settings_support_links_finasu">了解 FinaSU</string>
@@ -679,8 +684,8 @@
     <string name="wallpaper_import_success">星幻主题包已导入</string>
     <string name="wallpaper_import_failed">导入变身失败</string>
     <string name="wallpaper_reset_theme">恢复默认主题</string>
-    <string name="wallpaper_reset_theme_summary">清除星幻壁纸、魔法字体、魔法大厅布局与星图导航图标</string>
-    <string name="wallpaper_reset_theme_confirm">确定要恢复默认主题吗？这将清除自定义星幻壁纸、字体与星图导航图标。</string>
+    <string name="wallpaper_reset_theme_summary">清除星幻壁纸、魔法字体、魔法大厅布局、主题颜色与魔法语言</string>
+    <string name="wallpaper_reset_theme_confirm">确定要恢复默认主题吗？这将清除自定义星幻壁纸、字体、主题颜色与魔法语言。</string>
     <string name="wallpaper_theme_reset">主题已恢复默认</string>
     <string name="wallpaper_theme_reset_failed">恢复主题变身失败</string>
     <string name="wallpaper_crop_title">裁剪图片</string>

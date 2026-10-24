@@ -401,6 +401,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">تخطيط علوي</string>
+    <string name="settings_stats_top_layout_list">قائمة</string>
+    <string name="settings_stats_top_layout_grid">شبكة</string>
+    <string name="settings_home_hide_status_tag">إخفاء وسم الحالة</string>
+    <string name="settings_home_hide_status_tag_summary">إخفاء وسم وضع التشغيل على بطاقة حالة الصفحة الرئيسية.</string>
     <string name="settings_support_links">بطاقة أسفل الرئيسية</string>
     <string name="settings_support_links_summary">اختر ما يظهر أسفل الشاشة الرئيسية.</string>
     <string name="settings_support_links_finasu">تعرّف على FinaSU</string>
@@ -681,8 +686,8 @@
     <string name="wallpaper_import_success">تم استيراد حزمة المظهر</string>
     <string name="wallpaper_import_failed">فشل الاستيراد</string>
     <string name="wallpaper_reset_theme">استعادة المظهر الافتراضي</string>
-    <string name="wallpaper_reset_theme_summary">مسح الخلفيات والخط وتخطيط الرئيسية وأيقونات التنقل</string>
-    <string name="wallpaper_reset_theme_confirm">استعادة المظهر الافتراضي؟ سيؤدي هذا إلى مسح الخلفيات المخصصة والخط وأيقونات التنقل.</string>
+    <string name="wallpaper_reset_theme_summary">مسح الخلفيات والخط وتخطيط الرئيسية وألوان المظهر واللغة</string>
+    <string name="wallpaper_reset_theme_confirm">استعادة المظهر الافتراضي؟ سيؤدي هذا إلى مسح الخلفيات المخصصة والخط وألوان المظهر واللغة.</string>
     <string name="wallpaper_theme_reset">تمت إعادة تعيين المظهر إلى الافتراضي</string>
     <string name="wallpaper_theme_reset_failed">فشل إعادة تعيين المظهر</string>
     <string name="wallpaper_crop_title">قص الصورة</string>

@@ -401,6 +401,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Layout superior</string>
+    <string name="settings_stats_top_layout_list">Lista</string>
+    <string name="settings_stats_top_layout_grid">Grade</string>
+    <string name="settings_home_hide_status_tag">Ocultar etiqueta de status</string>
+    <string name="settings_home_hide_status_tag_summary">Oculta a etiqueta do modo de execução no cartão de status da tela inicial.</string>
     <string name="settings_support_links">Cartão inferior da tela inicial</string>
     <string name="settings_support_links_summary">Escolha o que exibir na parte inferior da tela inicial.</string>
     <string name="settings_support_links_finasu">Saiba mais sobre o FinaSU</string>
@@ -681,8 +686,8 @@
     <string name="wallpaper_import_success">Pacote de tema importado</string>
     <string name="wallpaper_import_failed">Falha na importação</string>
     <string name="wallpaper_reset_theme">Restaurar tema padrão</string>
-    <string name="wallpaper_reset_theme_summary">Limpar papéis de parede, fonte, layout da tela inicial e ícones de navegação</string>
-    <string name="wallpaper_reset_theme_confirm">Restaurar o tema padrão? Isso limpa papéis de parede personalizados, fonte e ícones de navegação.</string>
+    <string name="wallpaper_reset_theme_summary">Limpar papéis de parede, fonte, layout da tela inicial, cores do tema e idioma</string>
+    <string name="wallpaper_reset_theme_confirm">Restaurar o tema padrão? Isso limpa papéis de parede personalizados, fonte, cores do tema e idioma.</string>
     <string name="wallpaper_theme_reset">Tema restaurado ao padrão</string>
     <string name="wallpaper_theme_reset_failed">Falha ao restaurar o tema</string>
     <string name="wallpaper_crop_title">Recortar imagem</string>

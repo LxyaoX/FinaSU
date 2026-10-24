@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">顶部摆盘</string>
+    <string name="settings_stats_top_layout_list">列表摆盘</string>
+    <string name="settings_stats_top_layout_grid">网格摆盘</string>
+    <string name="settings_home_hide_status_tag">藏起状态记号</string>
+    <string name="settings_home_hide_status_tag_summary">把首页状态卡上的运行模式记号藏起来。</string>
     <string name="settings_section_layout">摆盘</string>
     <string name="settings_support_links">首页底部小灶</string>
     <string name="settings_support_links_summary">挑挑首页底下摆哪道菜。</string>
@@ -688,8 +693,8 @@
     <string name="wallpaper_import_success">门面包引进来了</string>
     <string name="wallpaper_import_failed">引进翻车了</string>
     <string name="wallpaper_reset_theme">恢复照旧门面</string>
-    <string name="wallpaper_reset_theme_summary">清掉背景、字体、操作台摆法和导航图标</string>
-    <string name="wallpaper_reset_theme_confirm">真要恢复照旧门面？自个儿的背景、字体和导航图标都会清掉。</string>
+    <string name="wallpaper_reset_theme_summary">清掉背景、字体、操作台摆法、主题着色和方言</string>
+    <string name="wallpaper_reset_theme_confirm">真要恢复照旧门面？自个儿的背景、字体、主题着色和方言都会清掉。</string>
     <string name="wallpaper_theme_reset">门面恢复照旧了</string>
     <string name="wallpaper_theme_reset_failed">门面没恢复成</string>
     <string name="wallpaper_crop_title">裁图</string>

@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">顶部布局喵</string>
+    <string name="settings_stats_top_layout_list">列表样式喵</string>
+    <string name="settings_stats_top_layout_grid">网格样式喵</string>
+    <string name="settings_home_hide_status_tag">藏起状态标签喵</string>
+    <string name="settings_home_hide_status_tag_summary">把首页状态卡上的运行模式标签藏起来喵</string>
     <string name="settings_section_layout">布局喵</string>
     <string name="settings_support_links">首页底部小卡片喵</string>
     <string name="settings_support_links_summary">挑挑首页底下要显示什么喵～</string>
@@ -688,8 +693,8 @@
     <string name="wallpaper_import_success">主题包导入好啦喵！</string>
     <string name="wallpaper_import_failed">导入失败啦…呜喵</string>
     <string name="wallpaper_reset_theme">恢复默认主题喵</string>
-    <string name="wallpaper_reset_theme_summary">清掉壁纸、字体、首页布局和导航图标喵</string>
-    <string name="wallpaper_reset_theme_confirm">真的要恢复默认主题吗喵？自定义壁纸、字体和导航图标都会被清掉哦</string>
+    <string name="wallpaper_reset_theme_summary">清掉壁纸、字体、首页布局、主题颜色和语言喵</string>
+    <string name="wallpaper_reset_theme_confirm">真的要恢复默认主题吗喵？自定义壁纸、字体、主题颜色和语言都会被清掉哦</string>
     <string name="wallpaper_theme_reset">主题恢复默认啦喵</string>
     <string name="wallpaper_theme_reset_failed">恢复主题失败了喵…</string>
     <string name="wallpaper_crop_title">裁剪图片喵</string>

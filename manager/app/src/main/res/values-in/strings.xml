@@ -399,6 +399,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Tata letak atas</string>
+    <string name="settings_stats_top_layout_list">Daftar</string>
+    <string name="settings_stats_top_layout_grid">Grid</string>
+    <string name="settings_home_hide_status_tag">Sembunyikan label status</string>
+    <string name="settings_home_hide_status_tag_summary">Sembunyikan label mode berjalan pada kartu status beranda.</string>
     <string name="settings_support_links">Kartu bawah beranda</string>
     <string name="settings_support_links_summary">Pilih apa yang ditampilkan di bagian bawah layar beranda.</string>
     <string name="settings_support_links_finasu">Pelajari FinaSU</string>
@@ -679,8 +684,8 @@
     <string name="wallpaper_import_success">Paket tema diimpor</string>
     <string name="wallpaper_import_failed">Impor gagal</string>
     <string name="wallpaper_reset_theme">Pulihkan tema bawaan</string>
-    <string name="wallpaper_reset_theme_summary">Hapus wallpaper, font, tata letak beranda, dan ikon navigasi</string>
-    <string name="wallpaper_reset_theme_confirm">Pulihkan tema bawaan? Ini akan menghapus wallpaper kustom, font, dan ikon navigasi.</string>
+    <string name="wallpaper_reset_theme_summary">Hapus wallpaper, font, tata letak beranda, warna tema, dan bahasa</string>
+    <string name="wallpaper_reset_theme_confirm">Pulihkan tema bawaan? Ini akan menghapus wallpaper kustom, font, warna tema, dan bahasa.</string>
     <string name="wallpaper_theme_reset">Tema diatur ulang ke bawaan</string>
     <string name="wallpaper_theme_reset_failed">Gagal mengatur ulang tema</string>
     <string name="wallpaper_crop_title">Pangkas gambar</string>

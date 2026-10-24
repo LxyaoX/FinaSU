@@ -401,6 +401,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Макет верхней части</string>
+    <string name="settings_stats_top_layout_list">Список</string>
+    <string name="settings_stats_top_layout_grid">Сетка</string>
+    <string name="settings_home_hide_status_tag">Скрыть метку состояния</string>
+    <string name="settings_home_hide_status_tag_summary">Скрыть метку режима работы на карточке состояния главного экрана.</string>
     <string name="settings_support_links">Нижняя карточка главной</string>
     <string name="settings_support_links_summary">Выберите, что показывать внизу главного экрана.</string>
     <string name="settings_support_links_finasu">Узнайте о FinaSU</string>
@@ -681,8 +686,8 @@
     <string name="wallpaper_import_success">Пакет темы импортирован</string>
     <string name="wallpaper_import_failed">Не удалось импортировать</string>
     <string name="wallpaper_reset_theme">Восстановить тему по умолчанию</string>
-    <string name="wallpaper_reset_theme_summary">Очистить обои, шрифт, макет главного экрана и значки навигации</string>
-    <string name="wallpaper_reset_theme_confirm">Восстановить тему по умолчанию? Это очистит пользовательские обои, шрифт и значки навигации.</string>
+    <string name="wallpaper_reset_theme_summary">Очистить обои, шрифт, макет главного экрана, цвета темы и язык</string>
+    <string name="wallpaper_reset_theme_confirm">Восстановить тему по умолчанию? Это очистит пользовательские обои, шрифт, цвета темы и язык.</string>
     <string name="wallpaper_theme_reset">Тема сброшена по умолчанию</string>
     <string name="wallpaper_theme_reset_failed">Не удалось сбросить тему</string>
     <string name="wallpaper_crop_title">Обрезать изображение</string>
