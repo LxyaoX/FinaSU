@@ -136,6 +136,8 @@ cp ../userspace/ksud/target/aarch64-linux-android/release/ksud app/src/main/jniL
 
 Important: Manager build REQUIRES ksud binaries to be present in `jniLibs` before building.
 
+`res/font/xiaolai.ttf` is a subset, not the upstream font: GB2312 plus ASCII and common punctuation, 7.5k of the original 17.5k glyphs and 2.9MB instead of 8.2MB (5.4MB of the release APK). Regenerate it with `fonttools` and `subset.Options(hinting=False, name_IDs=["*"], name_languages=["*"], recalc_bounds=True, layout_features=["kern","liga","calt","ccmp","locl","mark","mkmk"])`; the copyright and family records are deliberately kept, and a character outside the set falls back to the system font instead of a missing glyph.
+
 ### Website (`website/`)
 
 The committed lockfile is `website/yarn.lock` and CI installs with `--frozen-lockfile`, so use yarn:

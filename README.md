@@ -117,6 +117,7 @@ See [AGENTS.md](./AGENTS.md) for the per-component build and check commands.
 - [Shizuku-API](https://github.com/RikkaApps/Shizuku-API) - the Shizuku client API library
 - [FolkPatch](https://github.com/LyraVoid/FolkPatch) - theme format and design reference
 - [MMRL](https://github.com/MMRLApp/MMRL) - module repository format reference
+- [Xiaolai](https://github.com/lxgw/kose-font) - the bundled app font (Copyright 2020-2024 LXGW). It ships as a subset: GB2312 plus ASCII and common punctuation, because the full font is 8.2MB of a manager APK. A character outside that set renders in the system font instead.
 
 ## License
 

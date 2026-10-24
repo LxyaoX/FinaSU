@@ -117,6 +117,7 @@ TEESimulator 为选定的应用回应密钥认证请求：它把 AOSP 的参考 
 - [Shizuku-API](https://github.com/RikkaApps/Shizuku-API)：扩展实现的 Shizuku 客户端 API 库
 - [FolkPatch](https://github.com/LyraVoid/FolkPatch)：主题格式与设计参考
 - [MMRL](https://github.com/MMRLApp/MMRL)：模块仓库格式参考
+- [小赖字体](https://github.com/lxgw/kose-font)：内置应用字体（Copyright 2020-2024 LXGW）。以子集形式分发：GB2312 + ASCII + 常用标点，因为完整字体要占管理器 APK 的 8.2MB；集合外的字会回落到系统字体。
 
 ## 许可证
 
