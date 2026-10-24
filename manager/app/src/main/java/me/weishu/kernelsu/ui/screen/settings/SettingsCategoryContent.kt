@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.automirrored.rounded.LabelOff
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.TextFields
@@ -282,6 +283,33 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                         supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
                     )
                 }
+            )
+        }
+        item(visible = uiState.homeLayoutStyle == HomeLayoutStyle.STATS) {
+            val statsTopItems = listOf(
+                stringResource(R.string.settings_stats_top_layout_list),
+                stringResource(R.string.settings_stats_top_layout_grid),
+            )
+            SegmentedDropdownItem(
+                icon = Icons.Rounded.SpaceDashboard,
+                title = stringResource(id = R.string.settings_stats_top_layout),
+                items = statsTopItems,
+                selectedIndex = if (uiState.statsTopLayout == "grid") 1 else 0,
+                onItemSelected = { index ->
+                    actions.onSetStatsTopLayout(if (index == 1) "grid" else "list")
+                }
+            )
+        }
+        item(
+            visible = uiState.homeLayoutStyle == HomeLayoutStyle.CIRCLE ||
+                (uiState.homeLayoutStyle == HomeLayoutStyle.STATS && uiState.statsTopLayout != "grid")
+        ) {
+            SegmentedSwitchItem(
+                icon = Icons.AutoMirrored.Rounded.LabelOff,
+                title = stringResource(id = R.string.settings_home_hide_status_tag),
+                summary = stringResource(id = R.string.settings_home_hide_status_tag_summary),
+                checked = uiState.listWorkingCardModeHidden,
+                onCheckedChange = actions.onSetListWorkingCardModeHidden
             )
         }
         item {

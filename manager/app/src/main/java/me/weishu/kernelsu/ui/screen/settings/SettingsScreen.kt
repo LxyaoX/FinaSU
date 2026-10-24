@@ -109,6 +109,8 @@ fun rememberSettingsActions(
         onSetDefaultUmountModules = viewModel::setDefaultUmountModules,
         onSetEnableWebDebugging = viewModel::setEnableWebDebugging,
         onSetHomeLayoutStyle = viewModel::setHomeLayoutStyle,
+        onSetStatsTopLayout = viewModel::setStatsTopLayout,
+        onSetListWorkingCardModeHidden = viewModel::setListWorkingCardModeHidden,
         onSetSupportLinksStyle = viewModel::setSupportLinksStyle,
         onSetSupportLinksCustomTitle = viewModel::setSupportLinksCustomTitle,
         onSetSupportLinksCustomSubtitle = viewModel::setSupportLinksCustomSubtitle,

@@ -53,6 +53,8 @@ class SettingsViewModel(
             val moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines
             val enableWebDebugging = repo.enableWebDebugging
             val homeLayoutStyle = repo.homeLayoutStyle
+            val statsTopLayout = repo.statsTopLayout
+            val listWorkingCardModeHidden = repo.listWorkingCardModeHidden
             val supportLinksStyle = repo.supportLinksStyle
             val supportLinksCustomTitle = repo.supportLinksCustomTitle
             val supportLinksCustomSubtitle = repo.supportLinksCustomSubtitle
@@ -135,6 +137,8 @@ class SettingsViewModel(
                     moduleDescriptionMaxLines = moduleDescriptionMaxLines,
                     enableWebDebugging = enableWebDebugging,
                     homeLayoutStyle = homeLayoutStyle,
+                    statsTopLayout = statsTopLayout,
+                    listWorkingCardModeHidden = listWorkingCardModeHidden,
                     supportLinksStyle = supportLinksStyle,
                     supportLinksCustomTitle = supportLinksCustomTitle,
                     supportLinksCustomSubtitle = supportLinksCustomSubtitle,
@@ -366,6 +370,17 @@ class SettingsViewModel(
         val normalized = HomeLayoutStyle.fromValue(style)
         repo.homeLayoutStyle = normalized
         _uiState.update { it.copy(homeLayoutStyle = normalized) }
+    }
+
+    fun setStatsTopLayout(layout: String) {
+        val normalized = if (layout == "grid") "grid" else "list"
+        repo.statsTopLayout = normalized
+        _uiState.update { it.copy(statsTopLayout = normalized) }
+    }
+
+    fun setListWorkingCardModeHidden(hidden: Boolean) {
+        repo.listWorkingCardModeHidden = hidden
+        _uiState.update { it.copy(listWorkingCardModeHidden = hidden) }
     }
 
     fun setSupportLinksStyle(style: String) {

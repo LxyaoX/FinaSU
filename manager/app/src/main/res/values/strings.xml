@@ -401,6 +401,11 @@
     <string name="settings_home_layout_focus">FocusUI</string>
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
+    <string name="settings_stats_top_layout">Top layout</string>
+    <string name="settings_stats_top_layout_list">ListUI</string>
+    <string name="settings_stats_top_layout_grid">GridUI</string>
+    <string name="settings_home_hide_status_tag">Hide status tag</string>
+    <string name="settings_home_hide_status_tag_summary">Hide the running-mode tag on the home status card.</string>
     <string name="settings_section_layout">Layout</string>
     <string name="settings_support_links">Home bottom card</string>
     <string name="settings_support_links_summary">Choose what appears at the bottom of the home screen.</string>
@@ -708,8 +713,8 @@
     <string name="wallpaper_import_success">Theme package imported</string>
     <string name="wallpaper_import_failed">Import failed</string>
     <string name="wallpaper_reset_theme">Restore default theme</string>
-    <string name="wallpaper_reset_theme_summary">Clear wallpapers, font, home layout and navigation icons</string>
-    <string name="wallpaper_reset_theme_confirm">Restore the default theme? This clears custom wallpapers, font and navigation icons.</string>
+    <string name="wallpaper_reset_theme_summary">Clear wallpapers, font, home layout, theme colors and language</string>
+    <string name="wallpaper_reset_theme_confirm">Restore the default theme? This clears custom wallpapers, font, theme colors and language.</string>
     <string name="wallpaper_theme_reset">Theme reset to default</string>
     <string name="wallpaper_theme_reset_failed">Failed to reset theme</string>
     <string name="wallpaper_crop_title">Crop image</string>
