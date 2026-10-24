@@ -38,7 +38,7 @@ enum class SuiPermissionDecision(val allowed: Boolean, val shell: Boolean, val o
 object SuiPermissionHost {
     private const val TAG = "SuiManagement"
     private const val API_VERSION = 13
-    private const val PACKAGE_NAME = "me.yuki.fina"
+    private const val PACKAGE_NAME = "me.fork.kernelsu"
 
     private const val KEY_PACKAGE_NAME = "shizuku:attach-package-name"
     private const val KEY_API_VERSION = "shizuku:attach-api-version"

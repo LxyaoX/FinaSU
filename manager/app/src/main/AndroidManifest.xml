@@ -35,7 +35,7 @@
         android:directBootAware="true"
         android:fullBackupContent="@xml/backup_rules"
         android:hasFragileUserData="true"
-        android:icon="@mipmap/ic_launcher_default"
+        android:icon="@mipmap/ic_launcher_kernelsu"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
@@ -120,50 +120,16 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.GeometryLauncherActivity"
-            android:exported="false"
-            android:theme="@style/Theme.KernelSU.Starting.Geometry"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.KernelSULauncherActivity"
-            android:exported="false"
-            android:theme="@style/Theme.KernelSU.Starting.KernelSU"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity-alias
-            android:name=".ui.MainActivityDefault"
-            android:enabled="true"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_default"
-            android:label="@string/app_name"
-            android:targetActivity=".ui.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
-            android:name=".ui.MainActivityGeometry"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_geometry"
-            android:label="@string/app_name"
-            android:targetActivity=".ui.GeometryLauncherActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
+        <!-- One launcher entry with KernelSU's icon. The icon switcher is gone: an install that
+             still has MainActivityDefault or MainActivityGeometry enabled loses that alias with this
+             manifest and falls back to this one. -->
         <activity-alias
             android:name=".ui.MainActivityKernelSU"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_kernelsu"
             android:label="@string/app_name"
-            android:targetActivity=".ui.KernelSULauncherActivity">
+            android:targetActivity=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

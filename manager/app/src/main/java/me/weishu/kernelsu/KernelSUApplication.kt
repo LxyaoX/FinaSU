@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.data.backup.SecretStore
 import me.weishu.kernelsu.data.backup.device.KeystoreSecretStore
-import me.weishu.kernelsu.ui.util.LauncherIconUtils
 import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
 import okhttp3.Cache
 import okhttp3.OkHttpClient
@@ -50,8 +49,6 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
         if (!isUserUnlocked()) {
             return
         }
-
-        LauncherIconUtils.applySaved(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val enable = SettingsRepositoryImpl().enablePredictiveBack

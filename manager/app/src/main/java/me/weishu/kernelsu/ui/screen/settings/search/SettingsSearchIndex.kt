@@ -260,14 +260,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
     )
     add(
         SettingsCategory.APPEARANCE.row(
-            id = "appearance.launcher_icon",
-            titleRes = R.string.settings_launcher_icon,
-            icon = Icons.Filled.Apps,
-            aliases = listOf("launcher", "icon", "logo"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
             id = "appearance.home_layout",
             titleRes = R.string.settings_home_layout,
             summaryRes = R.string.settings_home_layout_summary,

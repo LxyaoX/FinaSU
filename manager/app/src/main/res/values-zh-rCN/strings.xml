@@ -5,7 +5,7 @@
     <string name="feature_status_forced_summary">已由启动配置强制指定，无法在此修改</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">以当前槽运行可信内核安装器，需要 root 权限。</string>
-    <string name="install_anykernel_warning">此 ZIP 将以 root 执行，可能修改多个分区。实际写入的分区和槽位由安装脚本决定，FinaSU 不覆盖槽位，也不更新 ksud。安装成功不保证能够启动，失败也可能已产生部分写入。现有启动镜像备份未必覆盖这些改动。请确认设备兼容性并准备回滚镜像，再继续。</string>
+    <string name="install_anykernel_warning">此 ZIP 将以 root 执行，可能修改多个分区。实际写入的分区和槽位由安装脚本决定，KernelSU 不覆盖槽位，也不更新 ksud。安装成功不保证能够启动，失败也可能已产生部分写入。现有启动镜像备份未必覆盖这些改动。请确认设备兼容性并准备回滚镜像，再继续。</string>
     <string name="install_anykernel_root_required">刷入 AnyKernel3 需要 root 权限。</string>
     <string name="install_anykernel_read_failed">无法读取 AnyKernel3 ZIP。</string>
     <string name="home">主页</string>
@@ -13,7 +13,7 @@
     <string name="home_click_to_install">点击安装</string>
     <string name="home_working">工作中</string>
     <string name="home_tile_status">KernelSU</string>
-    <string name="home_tile_manager">FinaSU</string>
+    <string name="home_tile_manager">KernelSU</string>
     <string name="home_tile_system">系统信息</string>
     <string name="home_tile_device">设备</string>
     <string name="home_tile_storage">存储</string>
@@ -669,10 +669,6 @@
     <string name="settings_app_language">语言</string>
     <string name="settings_app_language_summary">选择应用使用的语言。</string>
     <string name="system_default">系统默认</string>
-    <string name="settings_launcher_icon">启动器图标</string>
-    <string name="launcher_icon_style_default">默认</string>
-    <string name="launcher_icon_style_geometry">几何</string>
-    <string name="launcher_icon_style_kernelsu">KernelSU</string>
     <string name="sulog_filter_root_execve">Root execve</string>
     <string name="sulog_filter_sucompat">传统 SU</string>
     <string name="sulog_filter_ioctl_grant_root">授予 Root</string>

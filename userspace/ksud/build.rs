@@ -309,7 +309,7 @@ fn main() {
         }
     };
     if env::var("KSU_PACKAGE_NAME").is_err() {
-        println!("cargo:rustc-env=KSU_PACKAGE_NAME=me.yuki.fina");
+        println!("cargo:rustc-env=KSU_PACKAGE_NAME=me.fork.kernelsu");
     }
     println!("cargo:rustc-env=VERSION_CODE={code}");
     println!("cargo:rustc-env=VERSION_NAME={name}");

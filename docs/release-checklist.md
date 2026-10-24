@@ -73,7 +73,7 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 - One APK asset per release: the parser returns the first match it finds.
 - The release job fails early when the asset name does not match
   `<app>_v<versionName>_<versionCode>-<buildType>.apk`, so a silent update outage is caught in CI.
-- `aapt2 dump badging` on the downloaded APK should report `package: name='me.yuki.fina'` with the
+- `aapt2 dump badging` on the downloaded APK should report `package: name='me.fork.kernelsu'` with the
   expected version code and name.
 - The signing key must stay the same across releases, otherwise Android refuses to install the update
   over an existing one. Releases are signed from the repository secrets (`KEYSTORE`, `KEY_ALIAS=neosu`,
@@ -112,7 +112,7 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 ## 7. Verify the packaged payloads
 
 ```bash
-unzip -p FinaSU_vX.Y.Z_<code>-release.apk lib/arm64-v8a/libksud.so > /tmp/libksud.so
+unzip -p KernelSU_vX.Y.Z_<code>-release.apk lib/arm64-v8a/libksud.so > /tmp/libksud.so
 for p in 'android1[2-7]-[0-9]+\.[0-9]+_kernelsu\.ko' 'android1[2-7]-[0-9]+\.[0-9]+_nomount\.ko' \
          'folkzygisk/AGPL-3\.0\.txt' 'sui/payload\.json'; do
   printf '%-46s %s\n' "$p" "$(grep -a -o -E -- "$p" /tmp/libksud.so | wc -l)"

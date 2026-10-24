@@ -5,7 +5,7 @@
     <string name="feature_status_forced_summary">已由启动配置强制指定，无法在此修改</string>
     <string name="install_anykernel">锻造 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">以当前槽运行可信基岩核心合成器，需要 OP 权限。</string>
-    <string name="install_anykernel_warning">这个 ZIP 会以 OP 权限执行，可能改动多个分区。实际写入哪些分区和槽位由合成脚本决定，FinaSU 不会覆盖槽位，也不更新 ksud。合成成功不保证能启动，失败也可能已写入一部分。现有的启动镜像末影箱备份未必兜得住这些改动。合成与锻造有风险，请确保已备份存档到末影箱！</string>
+    <string name="install_anykernel_warning">这个 ZIP 会以 OP 权限执行，可能改动多个分区。实际写入哪些分区和槽位由合成脚本决定，KernelSU 不会覆盖槽位，也不更新 ksud。合成成功不保证能启动，失败也可能已写入一部分。现有的启动镜像末影箱备份未必兜得住这些改动。合成与锻造有风险，请确保已备份存档到末影箱！</string>
     <string name="install_anykernel_root_required">锻造 AnyKernel3 需要 OP 权限。</string>
     <string name="install_anykernel_read_failed">无法读取 AnyKernel3 ZIP。</string>
     <string name="home">主世界</string>
@@ -13,7 +13,7 @@
     <string name="home_click_to_install">点击合成</string>
     <string name="home_working">联机中</string>
     <string name="home_tile_status">KernelSU</string>
-    <string name="home_tile_manager">FinaSU</string>
+    <string name="home_tile_manager">KernelSU</string>
     <string name="home_tile_system">红石系统信息</string>
     <string name="home_tile_device">设备</string>
     <string name="home_tile_storage">存储</string>
@@ -660,10 +660,6 @@
     <string name="settings_app_language">语言</string>
     <string name="settings_app_language_summary">选择应用使用的语言。</string>
     <string name="system_default">红石系统默认</string>
-    <string name="settings_launcher_icon">主世界图标</string>
-    <string name="launcher_icon_style_default">默认</string>
-    <string name="launcher_icon_style_geometry">几何</string>
-    <string name="launcher_icon_style_kernelsu">KernelSU</string>
     <string name="settings_wallpaper_gallery">冒險圖鑑</string>
     <string name="wallpaper_gallery_device_phone">旅者手機</string>
     <string name="wallpaper_gallery_device_tablet">冒險平板</string>

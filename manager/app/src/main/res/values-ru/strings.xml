@@ -5,7 +5,7 @@
     <string name="feature_status_forced_summary">Принудительно задано конфигурацией загрузки; изменить здесь нельзя</string>
     <string name="install_anykernel">Прошить ZIP AnyKernel3</string>
     <string name="install_anykernel_summary">Запустить доверенный установщик ядра в текущем слоте. Требуется root.</string>
-    <string name="install_anykernel_warning">Этот ZIP запускается с правами root и может изменить несколько разделов. Установщик сам определяет, какие разделы и слоты будут записаны; FinaSU не переопределяет слот и не обновляет ksud. Успешная установка не гарантирует загрузку, а при сбое могут остаться частичные изменения. Существующие резервные копии boot-образа могут не покрывать эти изменения. Убедитесь в совместимости устройства и подготовьте образ для восстановления, прежде чем продолжать.</string>
+    <string name="install_anykernel_warning">Этот ZIP запускается с правами root и может изменить несколько разделов. Установщик сам определяет, какие разделы и слоты будут записаны; KernelSU не переопределяет слот и не обновляет ksud. Успешная установка не гарантирует загрузку, а при сбое могут остаться частичные изменения. Существующие резервные копии boot-образа могут не покрывать эти изменения. Убедитесь в совместимости устройства и подготовьте образ для восстановления, прежде чем продолжать.</string>
     <string name="install_anykernel_root_required">Для прошивки AnyKernel3 требуются права root.</string>
     <string name="install_anykernel_read_failed">Не удалось прочитать ZIP-файл AnyKernel3.</string>
     <string name="home">Главная</string>
@@ -13,7 +13,7 @@
     <string name="home_click_to_install">Нажмите, чтобы установить</string>
     <string name="home_working">Работает</string>
     <string name="home_tile_status">KernelSU</string>
-    <string name="home_tile_manager">FinaSU</string>
+    <string name="home_tile_manager">KernelSU</string>
     <string name="home_tile_system">Системная информация</string>
     <string name="home_tile_device">Устройство</string>
     <string name="home_tile_storage">Хранилище</string>
@@ -660,10 +660,6 @@
     <string name="settings_app_language">Язык</string>
     <string name="settings_app_language_summary">Выберите язык приложения.</string>
     <string name="system_default">Системный по умолчанию</string>
-    <string name="settings_launcher_icon">Значок лаунчера</string>
-    <string name="launcher_icon_style_default">По умолчанию</string>
-    <string name="launcher_icon_style_geometry">Геометрический</string>
-    <string name="launcher_icon_style_kernelsu">KernelSU</string>
     <string name="settings_wallpaper_gallery">Галерея обоев</string>
     <string name="wallpaper_gallery_device_phone">Телефон</string>
     <string name="wallpaper_gallery_device_tablet">Планшет</string>

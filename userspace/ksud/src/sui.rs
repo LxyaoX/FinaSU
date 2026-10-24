@@ -25,7 +25,7 @@ const DAEMON_LOG: &str = "/data/adb/ksu/sui/daemon.log";
 const WATCHDOG_LOCK: &str = "/data/adb/ksu/sui/watchdog.lock";
 const MANAGER_IDENTITY: &str = "/data/adb/ksu/sui/manager.json";
 /// Only the FinaSU manager may manage Sui; the signed package is the one the kernel trusts.
-const MANAGER_PACKAGES: [&str; 2] = ["me.yuki.fina", "me.yuki.fina.pr"];
+const MANAGER_PACKAGES: [&str; 2] = ["me.fork.kernelsu", "me.fork.kernelsu.pr"];
 const DAEMON_READY_TIMEOUT: Duration = Duration::from_secs(120);
 /// The zygote may only map and execute libraries labelled this way, and the injected processes
 /// have to read the dex and metadata below the module directory.

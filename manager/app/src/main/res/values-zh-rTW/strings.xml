@@ -5,7 +5,7 @@
     <string name="feature_status_forced_summary">已由開機設定強制指定，無法在此變更</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP</string>
     <string name="install_anykernel_summary">以目前槽位執行受信任的核心安裝程式，需要 Root 權限。</string>
-    <string name="install_anykernel_warning">此 ZIP 將以 root 執行，可能修改多個分割區。實際寫入的分割區與槽位由安裝程式決定；FinaSU 不會覆寫槽位，也不會重新整理 ksud。安裝成功不保證能開機，失敗也可能留下部分變更。現有的啟動映像備份未必涵蓋這些變更。請先確認裝置相容性並準備復原映像，再繼續。</string>
+    <string name="install_anykernel_warning">此 ZIP 將以 root 執行，可能修改多個分割區。實際寫入的分割區與槽位由安裝程式決定；KernelSU 不會覆寫槽位，也不會重新整理 ksud。安裝成功不保證能開機，失敗也可能留下部分變更。現有的啟動映像備份未必涵蓋這些變更。請先確認裝置相容性並準備復原映像，再繼續。</string>
     <string name="install_anykernel_root_required">刷入 AnyKernel3 需要 Root 權限。</string>
     <string name="install_anykernel_read_failed">無法讀取 AnyKernel3 ZIP。</string>
     <string name="home">首頁</string>
@@ -13,7 +13,7 @@
     <string name="home_click_to_install">點選開始安裝</string>
     <string name="home_working">已開始運作</string>
     <string name="home_tile_status">KernelSU</string>
-    <string name="home_tile_manager">FinaSU</string>
+    <string name="home_tile_manager">KernelSU</string>
     <string name="home_tile_system">系統資訊</string>
     <string name="home_tile_device">裝置</string>
     <string name="home_tile_storage">儲存空間</string>
@@ -662,10 +662,6 @@
     <string name="settings_app_language">語言</string>
     <string name="settings_app_language_summary">選擇應用程式使用的語言。</string>
     <string name="system_default">系統預設</string>
-    <string name="settings_launcher_icon">啟動器圖示</string>
-    <string name="launcher_icon_style_default">預設</string>
-    <string name="launcher_icon_style_geometry">幾何</string>
-    <string name="launcher_icon_style_kernelsu">KernelSU</string>
     <string name="settings_wallpaper_gallery">桌布圖鑑</string>
     <string name="wallpaper_gallery_device_phone">手機</string>
     <string name="wallpaper_gallery_device_tablet">平板</string>
