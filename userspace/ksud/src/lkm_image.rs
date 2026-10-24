@@ -1082,8 +1082,8 @@ fn recover_gki_abi(
         "kernel release has no patch version"
     );
     ensure!(
-        matches!((major, minor), (5, 10 | 15) | (6, 1 | 6 | 12)),
-        "unsupported GKI kernel series {major}.{minor}; validated series: 5.10, 5.15, 6.1, 6.6, 6.12"
+        matches!((major, minor), (6, 1 | 6 | 12 | 18)),
+        "unsupported GKI kernel series {major}.{minor}; this build covers 6.1 and newer (6.1, 6.6, 6.12, 6.18)"
     );
     let abi = match btf {
         Some(btf) => GKI_ABI.apply_btf(btf)?,

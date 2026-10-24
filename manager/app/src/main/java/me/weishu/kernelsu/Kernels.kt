@@ -12,19 +12,14 @@ data class KernelVersion(val major: Int, val patchLevel: Int, val subLevel: Int)
         return "$major.$patchLevel.$subLevel"
     }
 
+    /**
+     * Whether this kernel is one the manager supports at all: GKI 6.1 and newer, which is the
+     * Android 14 generation onward. Everything older (5.10, 5.15, the 4.x trees) is out of scope -
+     * the kernel module refuses to build for it, so asking the user to install anything there would
+     * only lead to a module that cannot load.
+     */
     fun isGKI(): Boolean {
-
-        // kernel 6.x
-        if (major > 5) {
-            return true
-        }
-
-        // kernel 5.10.x
-        if (major == 5) {
-            return patchLevel >= 10
-        }
-
-        return false
+        return major > 6 || (major == 6 && patchLevel >= 1)
     }
 }
 

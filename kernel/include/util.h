@@ -13,6 +13,18 @@
 
 #include "arch.h"
 
+/*
+ * This branch targets GKI kernels 6.1 and newer only - the Android 14 generation
+ * and later. Everything below that (5.10, 5.15, the 4.x Android trees) has been
+ * dropped rather than kept behind an #if: it is not tested, not built, and the
+ * compat arms it needed were the only reason several of these files had version
+ * branches at all. Building for one of them should fail loudly here instead of
+ * producing a module that loads and then misbehaves.
+ */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
+#error "FinaSU targets GKI kernels 6.1 and newer; there is no support path below 6.1"
+#endif
+
 #if defined(__aarch64__)
 #define KSU_SYS_PREFIX(name) __arm64_sys_##name
 #elif defined(__x86_64__)

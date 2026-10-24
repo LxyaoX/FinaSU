@@ -66,20 +66,8 @@ static bool add_typeattribute(struct policydb *db, const char *type, const char 
     for (i = 0; i < n_slot; ++i)                                                                                       \
         for (cur = node_ptr[i]; cur; cur = cur->next)
 
-// htable is a struct instead of pointer above 5.8.0:
-// https://elixir.bootlin.com/linux/v5.8-rc1/source/security/selinux/ss/symtab.h
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
+// `htable` is a struct, not a pointer, in every kernel this module targets (6.1+).
 #define ksu_hashtab_for_each(htab, cur) ksu_hash_for_each(htab.htable, htab.size, cur)
-#else
-#define ksu_hashtab_for_each(htab, cur) ksu_hash_for_each(htab->htable, htab->size, cur)
-#endif
-
-// symtab_search is introduced on 5.9.0:
-// https://elixir.bootlin.com/linux/v5.9-rc1/source/security/selinux/ss/symtab.h
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 9, 0)
-#define symtab_search(s, name) hashtab_search((s)->table, name)
-#define symtab_insert(s, name, datum) hashtab_insert((s)->table, name, datum)
-#endif
 
 #define avtab_for_each(avtab, cur) ksu_hash_for_each(avtab.htable, avtab.nslot, cur)
 
@@ -637,23 +625,6 @@ static bool add_genfscon(struct policydb *db, const char *fs_name, const char *p
 // https://github.com/torvalds/linux/commit/de2860f4636256836450c6543be744a50118fc66#diff-fa19cdd9c3369d7f59aa2e8404628109408dbf8e1b568d1157a27328f75b8410R638-R652
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
 #define ksu_kvrealloc(p, new_size, old_size) kvrealloc(p, old_size, new_size, GFP_KERNEL)
-#else
-// https://cs.android.com/android/_/android/kernel/common/+/f5f3e54f811679761c33526e695bd296190faade
-// Some 5.10 kernel don't have this backport, so copy one.
-void *ksu_kvrealloc_compat(const void *p, size_t oldsize, size_t newsize, gfp_t flags)
-{
-    void *newp;
-
-    if (oldsize >= newsize)
-        return (void *)p;
-    newp = kvmalloc(newsize, flags);
-    if (!newp)
-        return NULL;
-    memcpy(newp, p, oldsize);
-    kvfree(p);
-    return newp;
-}
-#define ksu_kvrealloc(p, new_size, old_size) ksu_kvrealloc_compat(p, old_size, new_size, GFP_KERNEL)
 #endif
 
 static bool add_type(struct policydb *db, const char *type_name, bool attr)

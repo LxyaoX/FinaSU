@@ -98,6 +98,7 @@ Key constraints:
 
 ### Kernel (`kernel/`)
 
+- The module targets **GKI 6.1 and newer** only (Android 14 onward). `kernel/include/util.h` fails the build below 6.1 with an `#error`, so the 5.10/5.15 compatibility arms were deleted rather than kept behind an `#if` - if you port code from elsewhere, drop its pre-6.1 branches too.
 - Kernel changes are C-only; keep interfaces aligned with supercall and allowlist expectations in userspace/Manager.
 - If you alter IOCTLs or profiles, update the corresponding wrappers in ksud (`ksucalls.rs`) and Manager JNI (`manager/app/src/main/cpp/ksu.cc`).
 

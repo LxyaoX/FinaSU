@@ -47,12 +47,10 @@
 #endif
 #endif
 
-// workaround for A12-5.10 kernel
-// Some third-party kernel (e.g. linegaeOS) uses wrong toolchain, which supports
-// CC_HAVE_STACKPROTECTOR_SYSREG while gki's toolchain doesn't.
-// Therefore, ksu lkm, which uses gki toolchain, requires this __stack_chk_guard,
-// while those third-party kernel can't provide.
-// Thus, we manually provide it instead of using kernel's
+// Third-party kernels (e.g. LineageOS builds) may use a toolchain that defines
+// CC_HAVE_STACKPROTECTOR_SYSREG while the GKI one does not. This module is built
+// with the GKI toolchain and so needs this __stack_chk_guard, which those kernels
+// do not provide; we define it ourselves instead of taking the kernel's.
 #if defined(CONFIG_STACKPROTECTOR) &&                                                                                  \
     (defined(CONFIG_ARM64) && defined(MODULE) && !defined(CONFIG_STACKPROTECTOR_PER_TASK))
 #include <linux/stackprotector.h>
@@ -192,7 +190,6 @@ int __init kernelsu_init(void)
         ksu_dynamic_manager_load();
 #endif
         ksu_observer_init();
-        ksu_file_wrapper_init();
 
         ksu_boot_completed = true;
         track_throne(false);
@@ -219,7 +216,6 @@ int __init kernelsu_init(void)
 
         ksu_preinit_init();
 
-        ksu_file_wrapper_init();
     }
 
 #ifdef MODULE

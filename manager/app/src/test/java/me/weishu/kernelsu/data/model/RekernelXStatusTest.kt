@@ -26,12 +26,12 @@ class RekernelXStatusTest {
     @Test
     fun `a core version with no bundled build still reports its own kmi`() {
         // Not "unsupported" by itself: kmiSupported is decided by the assets, not by this parse.
-        assertEquals("android12-5.10", RekernelXStatus.kmiOf("5.10.209-android12-9-gabc"))
+        assertEquals("android14-6.5", RekernelXStatus.kmiOf("6.5.10-android14-8-gabc"))
     }
 
     @Test
     fun `releases that cannot name a kmi report an empty one`() {
-        assertEquals("", RekernelXStatus.kmiOf("4.19.157-perf"))
+        assertEquals("", RekernelXStatus.kmiOf("6.7.12-perf"))
         // No patch level means no core version to derive, and guessing would pick a driver at random.
         assertEquals("", RekernelXStatus.kmiOf("6.1"))
         assertEquals("", RekernelXStatus.kmiOf(""))

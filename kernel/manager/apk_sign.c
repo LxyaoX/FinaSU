@@ -10,11 +10,7 @@
 #include <linux/moduleparam.h>
 #endif
 #include <crypto/hash.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
 #include <crypto/sha2.h>
-#else
-#include <crypto/sha.h>
-#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
 #include <linux/hex.h>
 #endif

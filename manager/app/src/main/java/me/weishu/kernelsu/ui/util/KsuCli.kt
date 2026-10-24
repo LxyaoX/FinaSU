@@ -8,7 +8,6 @@ import android.os.Environment
 import android.os.Parcelable
 import android.os.SystemClock
 import android.provider.OpenableColumns
-import android.system.Os
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.topjohnwu.superuser.CallbackList
@@ -739,7 +738,9 @@ suspend fun getDefaultPartition(): String = withContext(Dispatchers.IO) {
         val cmd = "boot-info default-partition"
         ShellUtils.fastCmd(shell, "${getKsuDaemonPath()} $cmd").trim()
     } else {
-        if (!Os.uname().release.contains("android12-")) "init_boot" else "boot"
+        // Every supported kernel is GKI 6.1 or newer, i.e. Android 14 and later, where the ramdisk
+        // lives in init_boot. The old "android12- means boot" guess is gone with those kernels.
+        "init_boot"
     }
 }
 

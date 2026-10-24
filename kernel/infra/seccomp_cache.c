@@ -19,9 +19,7 @@ struct seccomp_filter {
     refcount_t refs;
     refcount_t users;
     bool log;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
     bool wait_killable_recv;
-#endif
     struct action_cache cache;
     struct seccomp_filter *prev;
     struct bpf_prog *prog;
