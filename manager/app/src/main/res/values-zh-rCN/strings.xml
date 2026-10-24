@@ -1006,4 +1006,5 @@
     <string name="kernel_modules_log_outcome">结果</string>
     <string name="kernel_modules_log_boot">启动 ID</string>
     <string name="kernel_modules_unknown">未知</string>
+    <string name="home_title_kernelsu">KernelSU</string>
 </resources>
