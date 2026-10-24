@@ -432,6 +432,24 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     )
                 },
                 {
+                    val mountViewFilterSummary = when (uiState.mountViewFilterStatus) {
+                        "forced" -> stringResource(R.string.feature_status_forced_summary)
+                        "unsupported" -> stringResource(R.string.feature_status_unsupported_summary)
+                        "managed" -> stringResource(R.string.feature_status_managed_summary)
+                        "unavailable" -> stringResource(R.string.settings_mount_view_filter_unavailable)
+                        else -> stringResource(R.string.settings_mount_view_filter_summary)
+                    }
+                    SegmentedSwitchItem(
+                        icon = Icons.Rounded.VisibilityOff,
+                        title = stringResource(R.string.settings_mount_view_filter),
+                        summary = mountViewFilterSummary,
+                        enabled = uiState.mountViewFilterStatus == "supported" &&
+                            !uiState.isMountViewFilterWriting,
+                        checked = uiState.isMountViewFilterEnabled,
+                        onCheckedChange = actions.onSetMountViewFilterEnabled,
+                    )
+                },
+                {
                     val avcSpoofSummary = when (uiState.avcSpoofStatus) {
                         "forced" -> stringResource(R.string.feature_status_forced_summary)
                         "unsupported" -> stringResource(id = R.string.feature_status_unsupported_summary)

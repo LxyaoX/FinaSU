@@ -262,6 +262,12 @@
     <string name="settings_selinux_hide_summary">防止應用程式偵測 SELinux 修改</string>
     <string name="settings_selinux_hide_reboot_required">重新啟動後生效</string>
     <string name="settings_selinux_hide_failed">錯誤：%d</string>
+
+    <string name="settings_mount_view_filter">隱藏掛載記錄</string>
+    <string name="settings_mount_view_filter_summary">從應用程式與隔離程序的 /proc 掛載檢視中移除本機 root 與模組的掛載記錄</string>
+    <string name="settings_mount_view_filter_unavailable">目前核心無法使用掛載檢視過濾</string>
+    <string name="settings_mount_view_filter_failed">啟用掛載檢視過濾失敗</string>
+    <string name="settings_mount_view_filter_save_failed">掛載檢視過濾已變更，但無法儲存至重新開機設定</string>
     <string name="settings_selinux_mode">SELinux 模式</string>
     <string name="settings_selinux_mode_enforcing">強制執行</string>
     <string name="settings_selinux_mode_permissive">容許執行</string>
@@ -302,7 +308,7 @@
     <string name="nomount_driver_kind_builtin">核心內建</string>
     <string name="nomount_driver_kind_module">核心模組</string>
     <string name="nomount_unavailable_no_asset">本安裝套件沒有 %1$s 對應的 NoMount 模組，因此在此核心上無法注入模組。</string>
-    <string name="nomount_unavailable_outdated">核心搭載的是 NoMount %1$s，但本版本需要 API 21 以上；請更新核心。</string>
+    <string name="nomount_unavailable_outdated">核心搭載的是 NoMount %1$s，但本版本需要 API 22 以上；請更新核心。</string>
     <string name="nomount_unavailable_not_loaded">驅動程式尚未載入；請重新啟動或執行一次注入來載入。</string>
     <string name="nomount_unavailable_unknown_kmi">無法將目前的核心版本對應到 NoMount 模組。</string>
     <string name="nomount_driver_unavailable">驅動程式無法使用（%1$s）</string>

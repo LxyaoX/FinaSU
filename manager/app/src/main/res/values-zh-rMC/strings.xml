@@ -261,6 +261,12 @@
     <string name="settings_selinux_hide_summary">阻止应用检测 SELinux 修改</string>
     <string name="settings_selinux_hide_reboot_required">重生生效</string>
     <string name="settings_selinux_hide_failed">错误：%d</string>
+
+    <string name="settings_mount_view_filter">藏起挂载记录</string>
+    <string name="settings_mount_view_filter_summary">把本机 root 和模块挂载从应用及隔离进程的 /proc 挂载视图里抹掉</string>
+    <string name="settings_mount_view_filter_unavailable">当前基岩核心不支持挂载视图过滤</string>
+    <string name="settings_mount_view_filter_failed">挂载视图过滤启用失败</string>
+    <string name="settings_mount_view_filter_save_failed">挂载视图过滤已改变，但未能保存到重启配置</string>
     <string name="settings_selinux_mode">SELinux 模式</string>
     <string name="settings_selinux_mode_enforcing">强制执行</string>
     <string name="settings_selinux_mode_permissive">宽容模式</string>
@@ -301,7 +307,7 @@
     <string name="nomount_driver_kind_builtin">基岩核心内建</string>
     <string name="nomount_driver_kind_module">基岩核心模组</string>
     <string name="nomount_unavailable_no_asset">本安装包没有 %1$s 对应的 NoMount 模组，因此在当前内核上无法注入模组。</string>
-    <string name="nomount_unavailable_outdated">基岩核心携带 NoMount %1$s，但本版本需要 API 21 或更新；请更新基岩核心。</string>
+    <string name="nomount_unavailable_outdated">基岩核心携带 NoMount %1$s，但本版本需要 API 22 或更新；请更新基岩核心。</string>
     <string name="nomount_unavailable_not_loaded">驱动尚未加载；重生或注入一次即可加载。</string>
     <string name="nomount_unavailable_unknown_kmi">无法为当前基岩核心版本匹配到 NoMount 模组。</string>
     <string name="nomount_driver_unavailable">驱动不可用（%1$s）</string>

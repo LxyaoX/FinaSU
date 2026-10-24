@@ -101,7 +101,7 @@ fun NetIsolateScreen() {
     var confirmClear by rememberSaveable { mutableStateOf(false) }
     var confirmClearEvents by rememberSaveable { mutableStateOf(false) }
     val status = state.status
-    val canEdit = status.supported && !state.busy && !state.loading
+    val canEdit = state.hasLoaded && status.supported
     val currentMode = status.mode()
     val packageByUid = remember(state.apps) { state.apps.associate { it.uid to it.packageName } }
     val targets = remember(status.uids, packageByUid) {
@@ -566,7 +566,7 @@ fun NetIsolateScreen() {
                             Text(stringResource(R.string.netisolate_clear_summary))
                         },
                         leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
-                        enabled = !state.busy && !state.loading,
+                        enabled = state.hasLoaded,
                         onClick = { confirmClear = true },
                     )
                 }

@@ -21,6 +21,7 @@ static const char *const feature_names[KSU_FEATURE_MAX] = {
     [KSU_FEATURE_SHELL_SU_ADB_ONLY] = "shell_su_adb_only",
     [KSU_FEATURE_DYNAMIC_MANAGER_GRANTS] = "dynamic_manager_grants",
     [KSU_FEATURE_UTS_VIEW] = "uts_view",
+    [KSU_FEATURE_MOUNT_VIEW_FILTER] = "mount_view_filter",
 };
 
 // Parsed before init (possibly before slab), then read-only except pending bits.

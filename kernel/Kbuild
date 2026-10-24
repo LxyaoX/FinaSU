@@ -59,6 +59,7 @@ kernelsu-objs += feature/adb_root.o
 kernelsu-objs += feature/selinux_hide.o
 kernelsu-objs += feature/shell_su_adb_only.o
 kernelsu-objs += feature/avc_spoof.o
+kernelsu-objs += feature/mount_view_filter.o
 
 kernelsu-$(CONFIG_KSU_SUSFS) += extension/susfs.o
 

@@ -44,6 +44,11 @@ data class SettingsUiState(
     val selinuxHideStatus: String = "",
     val isSelinuxHideEnabled: Boolean = false,
 
+    // Mount View Filter
+    val mountViewFilterStatus: String = "",
+    val isMountViewFilterEnabled: Boolean = false,
+    val isMountViewFilterWriting: Boolean = false,
+
     // SELinux Mode
     val selinuxMode: String = "",
     val isSELinuxModeWriting: Boolean = false,
@@ -128,6 +133,7 @@ data class SettingsScreenActions(
     val onSetSuCompatMode: (Int) -> Unit,
     val onSetKernelUmountEnabled: (Boolean) -> Unit,
     val onSetSelinuxHideEnabled: (Boolean) -> Unit,
+    val onSetMountViewFilterEnabled: (Boolean) -> Unit,
     val onSetSELinuxMode: (Boolean) -> Unit,
     val onSetSulogEnabled: (Boolean) -> Unit,
     val onSetAvcSpoofEnabled: (Boolean) -> Unit,

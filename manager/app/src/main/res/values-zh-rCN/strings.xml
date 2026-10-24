@@ -366,6 +366,12 @@
     <string name="settings_selinux_hide_summary">阻止应用检测 SELinux 修改</string>
     <string name="settings_selinux_hide_reboot_required">重启生效</string>
     <string name="settings_selinux_hide_failed">错误：%d</string>
+
+    <string name="settings_mount_view_filter">隐藏挂载记录</string>
+    <string name="settings_mount_view_filter_summary">从应用与隔离进程的 /proc 挂载视图中移除本机 root 与模块的挂载记录</string>
+    <string name="settings_mount_view_filter_unavailable">当前内核无法使用挂载视图过滤</string>
+    <string name="settings_mount_view_filter_failed">启用挂载视图过滤失败</string>
+    <string name="settings_mount_view_filter_save_failed">挂载视图过滤已改变，但无法保存到重启配置</string>
     <string name="settings_selinux_mode">SELinux 模式</string>
     <string name="settings_selinux_mode_enforcing">强制执行</string>
     <string name="settings_selinux_mode_permissive">宽容模式</string>
@@ -417,7 +423,7 @@
     <string name="nomount_driver_kind_builtin">内核内建</string>
     <string name="nomount_driver_kind_module">内核模块</string>
     <string name="nomount_unavailable_no_asset">本安装包没有 %1$s 对应的 NoMount 模块，因此在当前内核上无法注入模块。</string>
-    <string name="nomount_unavailable_outdated">内核提供的是 NoMount %1$s，本版本需要 API 21 及以上；请升级内核。</string>
+    <string name="nomount_unavailable_outdated">内核提供的是 NoMount %1$s，本版本需要 API 22 及以上；请升级内核。</string>
     <string name="nomount_unavailable_not_loaded">驱动尚未加载；重启或执行一次注入即可。</string>
     <string name="nomount_unavailable_unknown_kmi">无法把当前内核版本匹配到 NoMount 模块。</string>
     <string name="nomount_driver_unavailable">驱动不可用（%1$s）</string>
