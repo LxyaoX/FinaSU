@@ -58,7 +58,6 @@ class SettingsViewModel(
             val moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines
             val enableWebDebugging = repo.enableWebDebugging
             val homeLayoutStyle = repo.homeLayoutStyle
-            val themeStoreMode = repo.themeStoreMode
             val colorStyle = repo.colorStyle
             val isLkmMode = repo.isLkmMode()
 
@@ -136,7 +135,6 @@ class SettingsViewModel(
                     moduleDescriptionMaxLines = moduleDescriptionMaxLines,
                     enableWebDebugging = enableWebDebugging,
                     homeLayoutStyle = homeLayoutStyle,
-                    themeStoreMode = themeStoreMode,
                     hideHomeFingerprint = repo.hideHomeFingerprint,
                     hideHomeZygisk = repo.hideHomeZygisk,
                     hideHomeSusfs = repo.hideHomeSusfs,
@@ -415,11 +413,6 @@ class SettingsViewModel(
         val normalized = HomeLayoutStyle.fromValue(style)
         repo.homeLayoutStyle = normalized
         _uiState.update { it.copy(homeLayoutStyle = normalized) }
-    }
-
-    fun setThemeStoreMode(mode: String) {
-        repo.themeStoreMode = mode
-        _uiState.update { it.copy(themeStoreMode = mode) }
     }
 
     fun setHideHomeFingerprint(hidden: Boolean) {

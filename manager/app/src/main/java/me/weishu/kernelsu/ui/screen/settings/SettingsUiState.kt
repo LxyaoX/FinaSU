@@ -10,7 +10,6 @@ import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.SuiStatus
-import me.weishu.kernelsu.data.themestore.ThemeStoreMode
 
 @Immutable
 data class SettingsUiState(
@@ -25,7 +24,6 @@ data class SettingsUiState(
     val moduleDescriptionMaxLines: Int = 4,
     val enableWebDebugging: Boolean = false,
     val homeLayoutStyle: String = HomeLayoutStyle.DEFAULT,
-    val themeStoreMode: String = ThemeStoreMode.UNSET,
     val hideHomeFingerprint: Boolean = false,
     val hideHomeZygisk: Boolean = false,
     val hideHomeSusfs: Boolean = false,
@@ -128,7 +126,6 @@ data class SettingsScreenActions(
     val onOpenWallpaper: () -> Unit,
     val onOpenGallery: () -> Unit,
     val onOpenFont: () -> Unit,
-    val onOpenThemeStore: () -> Unit,
     val onOpenProfileTemplate: () -> Unit,
     val onSetSuCompatMode: (Int) -> Unit,
     val onSetKernelUmountEnabled: (Boolean) -> Unit,
@@ -154,7 +151,6 @@ data class SettingsScreenActions(
     val onSetDefaultUmountModules: (Boolean) -> Unit,
     val onSetEnableWebDebugging: (Boolean) -> Unit,
     val onSetHomeLayoutStyle: (String) -> Unit,
-    val onSetThemeStoreMode: (String) -> Unit,
     val onSetHideHomeFingerprint: (Boolean) -> Unit,
     val onSetHideHomeZygisk: (Boolean) -> Unit,
     val onSetHideHomeSusfs: (Boolean) -> Unit,

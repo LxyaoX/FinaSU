@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.data.modulestore.RepoHttp
-import me.weishu.kernelsu.data.themestore.normalizeStoreUrl
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.modulebanner.ApiMarketplaceItem
 import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
@@ -105,4 +104,20 @@ class ApiMarketplaceViewModel : ViewModel() {
     companion object {
         private const val MARKETPLACE_URL = "https://folk.mysqil.com/api/banners"
     }
+}
+
+/** The old theme store shipped plain-http links; keep upgrading them when the host matches. */
+private const val API_STORE_HTTP_HOST = "folk.mysqil.com"
+
+private fun normalizeStoreUrl(url: String): String {
+    val trimmed = url.trim()
+    if (!trimmed.startsWith("http://", ignoreCase = true)) return trimmed
+    val authority = trimmed.substring(7).substringBefore('/').substringBefore('?').substringBefore('#')
+    val host = authority.substringAfter('@').substringBefore(':')
+    if (host.equals(API_STORE_HTTP_HOST, ignoreCase = true) ||
+        host.endsWith(".$API_STORE_HTTP_HOST", ignoreCase = true)
+    ) {
+        return "https://" + trimmed.substring(7)
+    }
+    return trimmed
 }

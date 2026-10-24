@@ -14,14 +14,12 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material.icons.filled.Translate
@@ -47,7 +45,6 @@ import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountDriverState
-import me.weishu.kernelsu.data.themestore.ThemeStoreMode
 import me.weishu.kernelsu.ui.component.KsuIsValid
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
@@ -177,43 +174,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                     leadingContent = { Icon(Icons.Filled.FontDownload, stringResource(id = R.string.font_title)) },
                     trailingContent = {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                    }
-                )
-            }
-            add {
-                SegmentedListItem(
-                    onClick = actions.onOpenThemeStore,
-                    headlineContent = { Text(stringResource(id = R.string.theme_store_title)) },
-                    supportingContent = { Text(stringResource(id = R.string.theme_store_subtitle)) },
-                    leadingContent = { Icon(Icons.Filled.ShoppingBag, stringResource(id = R.string.theme_store_title)) },
-                    trailingContent = {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                    }
-                )
-            }
-            add {
-                val storeModeValues = listOf(ThemeStoreMode.BUILTIN, ThemeStoreMode.COMPAT)
-                val storeModeItems = storeModeValues.map { mode ->
-                    stringResource(
-                        when (mode) {
-                            ThemeStoreMode.COMPAT -> R.string.theme_store_mode_compat
-                            else -> R.string.theme_store_mode_builtin
-                        }
-                    )
-                }
-                val selectedStoreMode =
-                    storeModeValues.indexOf(ThemeStoreMode.normalize(uiState.themeStoreMode))
-                        .coerceAtLeast(0)
-                SegmentedDropdownItem(
-                    icon = Icons.Filled.Language,
-                    title = stringResource(id = R.string.settings_theme_store_mode),
-                    summary = stringResource(id = R.string.settings_theme_store_mode_summary),
-                    items = storeModeItems,
-                    selectedIndex = selectedStoreMode,
-                    onItemSelected = { index ->
-                        actions.onSetThemeStoreMode(
-                            storeModeValues.getOrElse(index) { ThemeStoreMode.BUILTIN }
-                        )
                     }
                 )
             }

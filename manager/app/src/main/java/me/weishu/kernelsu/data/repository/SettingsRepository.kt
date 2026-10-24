@@ -34,8 +34,6 @@ interface SettingsRepository {
     var enableWebDebugging: Boolean
     var homeLayoutStyle: String
 
-    /** Theme store transfer mode; see `ThemeStoreMode`. Empty means no choice has been made yet. */
-    var themeStoreMode: String
     var moduleSortGroups: Set<ModuleSortGroup>
     var moduleSortEnabledFirst: Boolean
     var moduleSortCustomOrder: List<String>

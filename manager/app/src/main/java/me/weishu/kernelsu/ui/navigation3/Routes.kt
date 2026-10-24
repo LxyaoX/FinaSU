@@ -83,14 +83,6 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
-    data object ThemeStore : Route
-
-    @Parcelize
-    @Serializable
-    data object MyThemes : Route
-
-    @Parcelize
-    @Serializable
     data object ApiMarketplace : Route
 
     /** One settings category, opened from the settings hub's category grid. `key` matches

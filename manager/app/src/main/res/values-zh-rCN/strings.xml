@@ -261,8 +261,6 @@
     <string name="settings_home_layout_dashboard">DashboardUI</string>
     <string name="settings_home_layout_stats">StatsUI</string>
     <string name="settings_section_layout">布局</string>
-    <string name="settings_theme_store_mode">主题商店模式</string>
-    <string name="settings_theme_store_mode_summary">选择在应用内下载主题，还是交给浏览器下载。</string>
     <string name="superuser_search_hint">搜索应用</string>
     <string name="module_search_hint">搜索模块</string>
     <string name="settings_home_info">首页信息</string>
@@ -597,30 +595,9 @@
     <string name="font_apply_failed">字体应用失败</string>
     <string name="font_confirm">确定</string>
     <string name="font_cancel">取消</string>
-    <string name="theme_store_title">主题商店</string>
-    <string name="theme_store_subtitle">浏览并下载在线主题</string>
-    <string name="theme_store_mode_builtin">内置模式</string>
-    <string name="theme_store_mode_builtin_desc">在应用内浏览、下载并应用主题</string>
-    <string name="theme_store_mode_compat">兼容模式</string>
-    <string name="theme_store_mode_compat_desc">在浏览器中下载主题，适合内置下载或导入失败的设备</string>
-    <string name="theme_store_mode_compat_hint">兼容模式：文件会在浏览器中打开。保存后打开 .fpt 即可安装主题。</string>
-    <string name="theme_store_mode_onboarding_title">选择主题下载方式</string>
-    <string name="theme_store_mode_onboarding_msg">你想怎么浏览和安装主题？之后可以在设置里修改。</string>
-    <string name="theme_store_filter_title">筛选</string>
-    <string name="theme_store_filter_author">作者</string>
-    <string name="theme_store_filter_source">来源</string>
-    <string name="theme_store_filter_type">类型</string>
-    <string name="theme_store_filter_all">全部</string>
-    <string name="theme_store_filter_apply">应用</string>
-    <string name="theme_store_filter_reset">重置</string>
-    <string name="theme_store_retry">重试</string>
-    <string name="theme_store_empty">没有找到主题</string>
     <string name="theme_store_cancel">取消</string>
     <string name="theme_store_apply">应用</string>
-    <string name="theme_store_download">下载</string>
-    <string name="theme_store_author">作者：%1$s</string>
     <string name="theme_store_version">版本：%1$s</string>
-    <string name="theme_store_source_value">来源：%1$s</string>
     <string name="theme_source_official">官方</string>
     <string name="theme_source_third_party">第三方</string>
     <string name="theme_type_phone">手机</string>
@@ -629,14 +606,6 @@
     <string name="theme_download_paused">已暂停</string>
     <string name="theme_download_pause">暂停</string>
     <string name="theme_download_resume">继续</string>
-    <string name="my_themes_title">我的主题</string>
-    <string name="my_themes_empty">还没有下载任何主题</string>
-    <string name="my_themes_delete">删除</string>
-    <string name="my_themes_delete_title">删除主题</string>
-    <string name="my_themes_delete_message">确定删除「%1$s」？</string>
-    <string name="theme_store_applied">主题已应用</string>
-    <string name="theme_store_apply_failed">应用主题失败</string>
-    <string name="theme_store_download_failed">下载失败</string>
     <string name="settings_category_backup">备份</string>
     <string name="backup_section_targets">备份至</string>
     <string name="backup_section_content">备份内容</string>
@@ -711,9 +680,6 @@
     <string name="theme_download_progress">总进度 %1$d%%</string>
     <string name="theme_download_file">文件 %1$d%%</string>
     <string name="theme_download_image">封面 %1$d%%</string>
-    <string name="theme_store_download_complete">下载完成</string>
-    <string name="theme_store_download_complete_message">「%1$s」已就绪，可在我的主题中查看</string>
-    <string name="theme_store_go_my_themes">前往我的主题</string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_wallpaper_gallery">壁纸图鉴</string>

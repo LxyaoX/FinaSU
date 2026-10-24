@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material.icons.filled.Translate
@@ -257,25 +256,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Filled.FontDownload,
             route = Route.Font,
             aliases = listOf("font", "typeface", "typography"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.page(
-            id = "appearance.theme_store",
-            titleRes = R.string.theme_store_title,
-            summaryRes = R.string.theme_store_subtitle,
-            icon = Icons.Filled.ShoppingBag,
-            route = Route.ThemeStore,
-            aliases = listOf("theme", "store", "fpt", "import"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.row(
-            id = "appearance.theme_store_mode",
-            titleRes = R.string.settings_theme_store_mode,
-            summaryRes = R.string.settings_theme_store_mode_summary,
-            icon = Icons.Filled.Language,
-            aliases = listOf("browser", "compatibility", "compat", "webview"),
         )
     )
     add(

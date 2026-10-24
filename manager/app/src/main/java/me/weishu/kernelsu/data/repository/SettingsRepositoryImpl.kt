@@ -28,7 +28,6 @@ import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.sui.SuiBridge
 import me.weishu.kernelsu.data.model.ModuleSortPriorityStore
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
-import me.weishu.kernelsu.data.themestore.ThemeStoreMode
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.magica.BootCompletedReceiver
 import me.weishu.kernelsu.ui.util.execKsud
@@ -168,9 +167,6 @@ class SettingsRepositoryImpl : SettingsRepository {
         )
         set(value) = prefs.edit { putString("home_layout_style", HomeLayoutStyle.fromValue(value)) }
 
-    override var themeStoreMode: String
-        get() = prefs.getString("theme_store_mode", ThemeStoreMode.UNSET) ?: ThemeStoreMode.UNSET
-        set(value) = prefs.edit { putString("theme_store_mode", value) }
     override var moduleSortGroups: Set<ModuleSortGroup>
         get() = ModuleSortPriorityStore.decode(prefs.getString(ModuleSortPriorityStore.Key, null))
         set(value) = prefs.edit { putString(ModuleSortPriorityStore.Key, ModuleSortPriorityStore.encode(value)) }
