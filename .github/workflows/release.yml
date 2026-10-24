@@ -16,6 +16,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout release scripts
+        uses: actions/checkout@v7
+
       - name: Download artifacts
         uses: actions/download-artifact@v8
 
