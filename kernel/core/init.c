@@ -215,7 +215,6 @@ int __init kernelsu_init(void)
         ksu_ksud_init();
 
         ksu_preinit_init();
-
     }
 
 #ifdef MODULE
