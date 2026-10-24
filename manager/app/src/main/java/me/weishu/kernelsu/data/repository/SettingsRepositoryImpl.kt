@@ -31,6 +31,7 @@ import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.magica.BootCompletedReceiver
 import me.weishu.kernelsu.ui.util.execKsud
+import me.weishu.kernelsu.ui.util.execKsudBatch
 import me.weishu.kernelsu.ui.util.execKsudResult
 import me.weishu.kernelsu.ui.util.getFeaturePersistValue
 import me.weishu.kernelsu.ui.util.getFeatureValue
@@ -609,6 +610,84 @@ class SettingsRepositoryImpl : SettingsRepository {
                 ?: error("ksud nomount status returned no payload")
             NomountStatus.fromJson(JSONObject(payload))
         }
+    }
+
+    override suspend fun loadFeatureSnapshot(): FeatureSnapshot = withContext(Dispatchers.IO) {
+        // One batched round trip: `feature list` reports every status and current value in a
+        // single ksud run, and the four config reads and the JSON statuses ride the same job.
+        // A failing command degrades to the same empty status / failed Result its individual
+        // reader produces, so a partial batch is reported per feature instead of as a whole.
+        val segments = execKsudBatch(
+            listOf(
+                "feature list",
+                "feature get --config su_compat",
+                "feature get --config sulog",
+                "feature get --config adb_root",
+                "feature get --config shell_su_adb_only",
+                "mount status --json",
+                "zygisk status --json",
+                "sui status --json",
+                "nomount status --json",
+            )
+        )
+        fun segment(index: Int) = segments.getOrNull(index)
+
+        // `[ENABLED (1)] su_compat (ID=0) [FORCED]` / `[DISABLED] kernel_umount (ID=1)` /
+        // `[NOT_SUPPORTED] uts_view (ID=6) [MODULE_MANAGED]`, one line per feature.
+        val statuses = mutableMapOf<String, String>()
+        val values = mutableMapOf<String, Long?>()
+        val statusLine =
+            Regex("\\[(NOT_SUPPORTED|ENABLED \\((\\d+)\\)|DISABLED)\\] (\\w+) \\(ID=\\d+\\)(.*)")
+        segment(0)?.out?.forEach { line ->
+            val match = statusLine.matchEntire(line.trim()) ?: return@forEach
+            val state = match.groupValues[1]
+            val marks = match.groupValues[4]
+            statuses[match.groupValues[3]] = when {
+                marks.contains("[FORCED]") -> "forced"
+                marks.contains("[MODULE_MANAGED]") -> "managed"
+                state == "NOT_SUPPORTED" -> "unsupported"
+                else -> "supported"
+            }
+            values[match.groupValues[3]] = when (state) {
+                "NOT_SUPPORTED" -> null
+                "DISABLED" -> 0L
+                else -> match.groupValues[2].toLongOrNull()
+            }
+        }
+
+        fun persisted(index: Int): Long? = segment(index)?.out
+            ?.firstOrNull { it.trim().startsWith("Value:") }
+            ?.substringAfter("Value:")
+            ?.trim()
+            ?.toLongOrNull()
+
+        fun jsonBody(index: Int, command: String): Result<JSONObject> = runCatching {
+            val segment = segment(index) ?: error("ksud $command produced no output")
+            check(segment.isSuccess) { "ksud $command failed (exit ${segment.code})" }
+            segment.out.firstOrNull { it.isNotBlank() }
+                ?: error("ksud $command returned no payload")
+        }.mapCatching { JSONObject(it) }
+
+        FeatureSnapshot(
+            statuses = statuses,
+            values = values,
+            persists = mapOf(
+                "su_compat" to persisted(1),
+                "sulog" to persisted(2),
+                "adb_root" to persisted(3),
+                "shell_su_adb_only" to persisted(4),
+            ),
+            folkMount = jsonBody(5, "mount status").mapCatching { json ->
+                val schema = json.optInt("schema_version", -1)
+                check(schema == FolkMountStatus.SCHEMA_VERSION) {
+                    "unsupported folk mount schema_version $schema"
+                }
+                FolkMountStatus.fromJson(json)
+            },
+            folkZygisk = jsonBody(6, "zygisk status").mapCatching { FolkZygiskStatus.fromJson(it) },
+            sui = jsonBody(7, "sui status").mapCatching { SuiStatus.fromJson(it) },
+            nomount = jsonBody(8, "nomount status").mapCatching { NomountStatus.fromJson(it) },
+        )
     }
 
     override suspend fun setNomountIsolated(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {

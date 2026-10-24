@@ -12,6 +12,23 @@ import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 
+/**
+ * Everything the settings screens probe about kernel features, gathered by
+ * [SettingsRepository.loadFeatureSnapshot] in one batched root-shell round trip.
+ * [statuses] uses the same tokens as the individual readers (forced/managed/
+ * supported/unsupported, or "" when the probe failed); [values] holds the current
+ * kernel values and [persists] the stored configuration values (null = not set).
+ */
+data class FeatureSnapshot(
+    val statuses: Map<String, String>,
+    val values: Map<String, Long?>,
+    val persists: Map<String, Long?>,
+    val folkMount: Result<FolkMountStatus>,
+    val folkZygisk: Result<FolkZygiskStatus>,
+    val sui: Result<SuiStatus>,
+    val nomount: Result<NomountStatus>,
+)
+
 interface SettingsRepository {
     var checkUpdate: Boolean
     var checkModuleUpdate: Boolean
@@ -144,6 +161,13 @@ interface SettingsRepository {
     fun setDefaultUmountModules(enabled: Boolean): Boolean
 
     fun isLkmMode(): Boolean
+
+    /**
+     * Reads every feature status/value, the persisted feature config and the mount, Zygisk,
+     * Sui and NoMount statuses in a single batched shell round trip. A cold post-reboot
+     * settings open pays one command burst instead of one exec round trip per probe.
+     */
+    suspend fun loadFeatureSnapshot(): FeatureSnapshot
 
     fun execKsudFeatureSave(): Boolean
 }

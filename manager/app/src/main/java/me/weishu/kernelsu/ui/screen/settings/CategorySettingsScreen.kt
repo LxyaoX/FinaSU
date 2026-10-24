@@ -48,11 +48,13 @@ fun CategorySettingsScreen(categoryKey: String) {
     val viewModel = viewModel<SettingsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val actions = rememberSettingsActions(navigator, viewModel)
-    // A pushed theme or wallpaper screen can change theme-owned settings; re-read them on return.
+    // A pushed theme or wallpaper screen can change theme-owned settings; re-read the
+    // preference-backed values on return. Those screens cannot change the kernel feature
+    // states, so the batched probe round trip runs only in the full refresh.
     var initialResumeHandled by rememberSaveable { mutableStateOf(false) }
     val activity = LocalActivity.current
     LifecycleResumeEffect(Unit, activity ?: LocalLifecycleOwner.current) {
-        if (initialResumeHandled) viewModel.refresh()
+        if (initialResumeHandled) viewModel.refreshSettings()
         initialResumeHandled = true
         onPauseOrDispose { }
     }

@@ -64,10 +64,16 @@ class SettingsViewModel(
             val isLkmMode = repo.isLkmMode()
 
             // Async loading for natives/features
-            val suCompatStatus = repo.getSuCompatStatus()
-            val suCompatPersistValue = repo.getSuCompatPersistValue()
             val isSuEnabled = repo.isSuEnabled()
 
+            // One batched root-shell round trip replaces the per-feature exec chain: `feature
+            // list` covers every status/value probe, and the config reads and the JSON
+            // statuses ride the same job. A cold post-reboot open pays one command burst
+            // instead of ~20 sequential exec round trips.
+            val snapshot = repo.loadFeatureSnapshot()
+
+            val suCompatStatus = snapshot.statuses["su_compat"].orEmpty()
+            val suCompatPersistValue = snapshot.persists["su_compat"]
             val suCompatMode = when {
                 suCompatStatus == "forced" -> if (isSuEnabled) 0 else 2
                 suCompatPersistValue == 0L -> 2
@@ -75,27 +81,33 @@ class SettingsViewModel(
                 else -> 0
             }
 
-            val kernelUmountStatus = repo.getKernelUmountStatus()
+            val kernelUmountStatus = snapshot.statuses["kernel_umount"].orEmpty()
             val isKernelUmountEnabled = repo.isKernelUmountEnabled()
-            val selinuxHideStatus = repo.getSelinuxHideStatus()
+            val selinuxHideStatus = snapshot.statuses["selinux_hide"].orEmpty()
             val isSelinuxHideEnabled = repo.isSelinuxHideEnabled()
-            val mountViewFilterStatus = repo.getMountViewFilterStatus()
-            val isMountViewFilterEnabled = repo.isMountViewFilterEnabled()
+            val mountViewFilterStatus = snapshot.statuses["mount_view_filter"].orEmpty()
+            val isMountViewFilterEnabled = snapshot.values["mount_view_filter"] == 1L
             val selinuxMode = repo.getSELinuxMode()
-            val sulogStatus = repo.getSulogStatus()
-            val avcSpoofStatus = repo.getAvcSpoofStatus()
+            val sulogStatus = snapshot.statuses["sulog"].orEmpty()
+            val avcSpoofStatus = snapshot.statuses["avc_spoof"].orEmpty()
             val isAvcSpoofEnabled = repo.isAvcSpoofEnabled()
-            val isSulogEnabled = if (sulogStatus == "forced") repo.getSulogValue()?.let { it != 0L } == true
-                else repo.getSulogPersistValue() == 1L
-            val adbRootStatus = repo.getAdbRootStatus()
-            val isAdbRootEnabled = if (adbRootStatus == "forced") repo.getAdbRootValue()?.let { it != 0L } == true
-                else repo.getAdbRootPersistValue() == 1L
-            val isDefaultUmountModules = repo.isDefaultUmountModules()
-            val shellSuAdbOnlyStatus = repo.getShellSuAdbOnlyStatus()
-            val isShellSuAdbOnlyEnabled = if (shellSuAdbOnlyStatus == "forced") {
-                repo.getShellSuAdbOnlyValue()?.let { it != 0L } == true
+            val isSulogEnabled = if (sulogStatus == "forced") {
+                snapshot.values["sulog"]?.let { it != 0L } == true
             } else {
-                repo.getShellSuAdbOnlyPersistValue() == 1L
+                snapshot.persists["sulog"] == 1L
+            }
+            val adbRootStatus = snapshot.statuses["adb_root"].orEmpty()
+            val isAdbRootEnabled = if (adbRootStatus == "forced") {
+                snapshot.values["adb_root"]?.let { it != 0L } == true
+            } else {
+                snapshot.persists["adb_root"] == 1L
+            }
+            val isDefaultUmountModules = repo.isDefaultUmountModules()
+            val shellSuAdbOnlyStatus = snapshot.statuses["shell_su_adb_only"].orEmpty()
+            val isShellSuAdbOnlyEnabled = if (shellSuAdbOnlyStatus == "forced") {
+                snapshot.values["shell_su_adb_only"]?.let { it != 0L } == true
+            } else {
+                snapshot.persists["shell_su_adb_only"] == 1L
             }
             val autoJailbreak = repo.autoJailbreak
             val useSoftReboot = repo.useSoftReboot
@@ -103,12 +115,12 @@ class SettingsViewModel(
             val isDynamicManagerAvailable = Natives.isDynamicManagerEnabled()
             val isLateLoadMode = Natives.isLateLoadMode
 
-            val folkMountResult = repo.getFolkMountStatus()
-            val nomountResult = repo.getNomountStatus()
-            val folkZygiskResult = repo.getFolkZygiskStatus()
+            val folkMountResult = snapshot.folkMount
+            val nomountResult = snapshot.nomount
+            val folkZygiskResult = snapshot.folkZygisk
             val rekernelXResult = repo.getRekernelXStatus()
             val bootPropsResult = repo.getBootPropsStatus()
-            val suiResult = repo.getSuiStatus()
+            val suiResult = snapshot.sui
 
             // The home card's SUSFS row switch only makes sense when the kernel reports SUSFS.
             val susfsDetected = try {
@@ -189,6 +201,44 @@ class SettingsViewModel(
                     suiReadError = suiResult.isFailure,
                     isSuiLoading = false,
                     suiManagementAvailable = suiManagement,
+                )
+            }
+        }
+    }
+
+    /**
+     * Re-reads only the preference-backed settings and the cheap in-process kernel queries.
+     * Returned-to screens call this instead of [refresh]: a pushed theme or wallpaper page
+     * can change the stored values, but nothing it does can change the feature states, so
+     * the batched root-shell probe round trip is not paid again on every resume.
+     */
+    fun refreshSettings() {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    checkUpdate = repo.checkUpdate,
+                    checkModuleUpdate = repo.checkModuleUpdate,
+                    themeMode = repo.themeMode,
+                    keyColor = repo.keyColor,
+                    enablePredictiveBack = repo.enablePredictiveBack,
+                    enableNavigationBadge = repo.enableNavigationBadge,
+                    pageScale = repo.pageScale,
+                    moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines,
+                    enableWebDebugging = repo.enableWebDebugging,
+                    homeLayoutStyle = repo.homeLayoutStyle,
+                    statsTopLayout = repo.statsTopLayout,
+                    listWorkingCardModeHidden = repo.listWorkingCardModeHidden,
+                    hideHomeFingerprint = repo.hideHomeFingerprint,
+                    hideHomeZygisk = repo.hideHomeZygisk,
+                    hideHomeSusfs = repo.hideHomeSusfs,
+                    hideHomeMount = repo.hideHomeMount,
+                    colorStyle = repo.colorStyle,
+                    autoJailbreak = repo.autoJailbreak,
+                    useSoftReboot = repo.useSoftReboot,
+                    allowAnyDynamicManager = repo.allowAnyDynamicManager,
+                    isDynamicManagerAvailable = Natives.isDynamicManagerEnabled(),
+                    isLateLoadMode = Natives.isLateLoadMode,
+                    isLkmMode = repo.isLkmMode(),
                 )
             }
         }

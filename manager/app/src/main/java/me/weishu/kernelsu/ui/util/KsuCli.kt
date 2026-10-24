@@ -259,6 +259,50 @@ suspend fun execKsudResult(args: String): Shell.Result = withContext(Dispatchers
         .exec()
 }
 
+/** One command of an [execKsudBatch] run: its stdout lines and exit code. */
+data class KsudBatchSegment(val out: List<String>, val code: Int) {
+    val isSuccess: Boolean get() = code == 0
+}
+
+/**
+ * Runs several ksud invocations in ONE root-shell round trip, separated by echo markers,
+ * and reports each command's stdout and exit code. The settings probe chain uses this so a
+ * cold post-reboot open pays one command burst instead of one round trip per feature.
+ * Callers own the argument strings; command tokens must never be user-controlled.
+ */
+suspend fun execKsudBatch(argsList: List<String>): List<KsudBatchSegment> =
+    withContext(Dispatchers.IO) {
+        val daemon = getKsuDaemonPath()
+        val job = getRootShell().newJob()
+        argsList.forEachIndexed { index, args ->
+            job.add("echo @KSB$index")
+            job.add("$daemon $args")
+            job.add("echo @KSE$index=\$?")
+        }
+        val out = ArrayList<String>()
+        job.to(out, null).exec()
+        val outputs = List(argsList.size) { ArrayList<String>() }
+        val codes = IntArray(argsList.size) { -1 }
+        val beginMarker = Regex("@KSB(\\d+)")
+        val endMarker = Regex("@KSE(\\d+)=(\\d+)")
+        var current = -1
+        for (line in out) {
+            val begin = beginMarker.matchEntire(line)
+            if (begin != null) {
+                current = begin.groupValues[1].toInt()
+                continue
+            }
+            val end = endMarker.matchEntire(line)
+            if (end != null) {
+                codes[end.groupValues[1].toInt()] = end.groupValues[2].toInt()
+                current = -1
+                continue
+            }
+            if (current >= 0) outputs[current].add(line)
+        }
+        List(argsList.size) { index -> KsudBatchSegment(outputs[index], codes[index]) }
+    }
+
 suspend fun getFeatureStatus(feature: String): String = withContext(Dispatchers.IO) {
     val shell = getRootShell()
     val out = shell.newJob()
