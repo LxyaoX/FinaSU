@@ -74,6 +74,10 @@ NoMount 是内建的 VFS 路径重定向后端：不产生任何挂载，而是�
 
 目录型符号链接会被当作目录递归遍历并**逐文件合并**（带环路检测与按模块去重）；`.replace` 标记或 opaque 目录同样默认降级为逐文件合并，只有白名单里的 `/product/fonts`、且其原目录不存在或为空时才允许整目录替换。分区根目录，以及名为 `lib64`、`lib`、`bin`、`etc` 的目录，**永远不会**被整目录替换。降级会写进日志：`mount.log` 里带 `dir_replace=N`，`ksud nomount inject --dry-run --verbose` 也会分别标注文件重定向与目录替换。
 
+### TEESimulator
+
+TEESimulator 为选定的应用回应密钥认证请求：它把 AOSP 的参考 KeyMint 实现跑在进程内，因此返回的证书链是真实设备会产出的那一份，而不是自己拼的证书。载荷由管理器自己携带：打开开关后会把运行时部署到 `/data/adb/teesim/runtime`，把 `sepolicy.rule` 交给 `ksud sepolicy apply`，再由 `post-fs-data.d` 钩子拉起守护进程 —— 模块列表里不会多出条目，首次启用也不需要重启。认证链的成色取决于你导入的 keybox：没有 keybox 时拦截器保持不生效，所有密钥照旧走真实硬件。运行时的 logd 读取库不会被部署，所以 `/data/adb/teesim/log` 下不会再产生日志文件；管理器页面是唯一的配置入口。
+
 ## 安全提示
 
 管理器通过 APK 签名验证自身身份：只有受信任的管理器以及用户显式认领的应用才能管理内核。Root 权限基于白名单，只有被授权的应用才能访问 `su`。漏洞上报请参阅 [SECURITY.md](./SECURITY.md)。

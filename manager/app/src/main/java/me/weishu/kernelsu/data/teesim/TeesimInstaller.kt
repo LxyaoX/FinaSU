@@ -33,7 +33,7 @@ import org.json.JSONObject
  */
 object TeesimInstaller {
     /** Upstream build carried in the assets; keep in sync with the archive and its NOTICE. */
-    const val VERSION = "v4.0 (75-fcf1738-release)"
+    const val VERSION = "v4.0 (76-06f9f2e-release)"
 
     const val DATA_DIR = "/data/adb/teesim"
     const val RUNTIME_DIR = "/data/adb/teesim/runtime"

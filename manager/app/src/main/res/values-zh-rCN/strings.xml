@@ -821,7 +821,7 @@
     <string name="kernel_modules_log_boot">启动 ID</string>
     <string name="kernel_modules_unknown">未知</string>
     <string name="settings_teesim">TEESimulator 密钥认证</string>
-    <string name="teesim_search_summary">内置 KeyMint 运行时，为选定应用生成一致的认证链（无需额外模块，需导入 keybox）</string>
+    <string name="teesim_search_summary">在进程内运行 AOSP 参考 KeyMint，为选定应用生成认证链；无需刷模块，密钥来自你导入的 keybox</string>
     <string name="teesim_title">TEESimulator</string>
     <string name="teesim_bundled_version">内置 %1$s，尚未安装</string>
     <string name="teesim_loading">正在读取 TEESimulator 状态…</string>
@@ -830,7 +830,7 @@
     <string name="teesim_state_disabled">已安装但已关闭</string>
     <string name="teesim_state_no_keybox">已启用，但还没导入 keybox，所有密钥仍走真实硬件</string>
     <string name="teesim_state_running">守护进程运行中，默认档目标数：%1$d</string>
-    <string name="teesim_state_pending">已启用，但守护进程没起来；看 logcat 有没有崩溃，并确认 /data/adb/teesim/runtime/daemon 可执行</string>
+    <string name="teesim_state_pending">已启用，但守护进程没起来；在 logcat 里按 TEESimulator 标签找崩溃，并确认 /data/adb/teesim/runtime/daemon 可执行</string>
     <string name="teesim_enable">启用</string>
     <string name="teesim_enable_summary">立即注入并在开机时自启，不需要刷模块</string>
     <string name="teesim_keybox">Keybox</string>
@@ -851,7 +851,7 @@
     <string name="teesim_selected_count">已选：%1$d</string>
     <string name="teesim_select_all">全选当前列表</string>
     <string name="teesim_clear_selection">清除选择</string>
-<string name="teesim_install">安装内置运行时</string>
+    <string name="teesim_install">安装内置运行时</string>
     <string name="teesim_reinstall">重装内置运行时</string>
     <string name="teesim_install_summary">把 %1$s 部署到 /data/adb/teesim/runtime，配置与 keybox 保留</string>
     <string name="teesim_installed">运行时已就绪</string>
@@ -863,8 +863,8 @@
     <string name="teesim_uninstall_done">运行时已移除</string>
     <string name="teesim_uninstall_failed">移除运行时失败</string>
     <string name="teesim_write_failed">修改 TEESimulator 状态失败</string>
-<string name="teesim_disabled_toast">已关闭，守护进程已停止；已注入的钩子随 keystore2 重启消失</string>
-    <string name="teesim_enabled_toast">已启用</string>
+    <string name="teesim_disabled_toast">已关闭，守护进程已停止；已注入的钩子随 keystore2 重启消失</string>
+    <string name="teesim_enabled_toast">已启用；keystore 已挂钩，开机后同样生效</string>
     <string name="teesim_cancel">取消</string>
     <string name="teesim_save">保存</string>
     <string name="settings_boot_props">开机状态属性</string>

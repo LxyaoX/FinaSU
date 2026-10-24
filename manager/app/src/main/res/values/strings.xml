@@ -822,7 +822,7 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="kernel_modules_log_boot">Boot ID</string>
     <string name="kernel_modules_unknown">Unknown</string>
     <string name="settings_teesim">TEESimulator attestation</string>
-    <string name="teesim_search_summary">Bundled KeyMint runtime for the chosen apps, no extra module to flash; signs with an imported keybox</string>
+    <string name="teesim_search_summary">Runs AOSP\'s reference KeyMint in-process for the apps you pick; no module to flash, keys come from the keybox you import</string>
     <string name="teesim_title">TEESimulator</string>
     <string name="teesim_bundled_version">Bundled %1$s, not installed</string>
     <string name="teesim_loading">Reading the TEESimulator state…</string>
@@ -831,7 +831,7 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="teesim_state_disabled">Installed but turned off</string>
     <string name="teesim_state_no_keybox">Enabled, but no keybox yet, so every key still goes to the real hardware</string>
     <string name="teesim_state_running">Daemon running; targets in the default profile: %1$d</string>
-    <string name="teesim_state_pending">Enabled, but the daemon did not start; check logcat for a crash and that /data/adb/teesim/runtime/daemon is executable</string>
+    <string name="teesim_state_pending">Enabled, but the daemon did not start; look for a crash under the TEESimulator tag in logcat, and check that /data/adb/teesim/runtime/daemon is executable</string>
     <string name="teesim_enable">Enable</string>
     <string name="teesim_enable_summary">Hooks keystore now and at boot, without a module to flash</string>
     <string name="teesim_keybox">Keybox</string>
@@ -852,7 +852,7 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="teesim_selected_count">Selected: %1$d</string>
     <string name="teesim_select_all">Select all shown</string>
     <string name="teesim_clear_selection">Clear selection</string>
-<string name="teesim_install">Install the bundled runtime</string>
+    <string name="teesim_install">Install the bundled runtime</string>
     <string name="teesim_reinstall">Reinstall the bundled runtime</string>
     <string name="teesim_install_summary">Stages %1$s in /data/adb/teesim/runtime; configuration and keybox are kept</string>
     <string name="teesim_installed">Runtime staged</string>
@@ -864,8 +864,8 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="teesim_uninstall_done">Runtime removed</string>
     <string name="teesim_uninstall_failed">Could not remove the runtime</string>
     <string name="teesim_write_failed">Failed to change the TEESimulator state</string>
-<string name="teesim_disabled_toast">Disabled; the daemon is stopped, the injected hook goes with the next keystore2 restart</string>
-    <string name="teesim_enabled_toast">Enabled</string>
+    <string name="teesim_disabled_toast">Disabled; the daemon is stopped, the injected hook goes with the next keystore2 restart</string>
+    <string name="teesim_enabled_toast">Enabled; keystore is hooked now and at boot</string>
     <string name="teesim_cancel">Cancel</string>
     <string name="teesim_save">Save</string>
     <string name="settings_boot_props">Boot state properties</string>

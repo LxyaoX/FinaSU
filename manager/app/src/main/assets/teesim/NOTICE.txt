@@ -6,14 +6,18 @@ with one change: the x86_64 payload and the WebUI self-tests are removed,
 because FinaSU ships an arm64-v8a build only.
 
   Project : https://github.com/JingMatrix/TEESimulator
-  Release : canary-75, TEESimulator-v4.0-75-fcf1738-Release.zip
-  Build   : v4.0 (75-fcf1738-release), versionCode 75
+  Release : canary-76, TEESimulator-v4.0-76-06f9f2e-Release.zip
+  Build   : v4.0 (76-06f9f2e-release), versionCode 76
   Author  : JingMatrix and contributors
   License : GPL-3.0 (see the project's LICENSE)
 
 Everything else is upstream, byte for byte: classes.dex (the control daemon),
 arm64-v8a/inject, arm64-v8a/libteesim_*.so, arm64-v8a/teesim-uds, the shell
 entry points, module.prop, sepolicy.rule, config.default.json and webroot.
+Compared with the previously bundled canary-75, only classes.dex and three
+arm64-v8a libraries changed; the entry scripts, sepolicy.rule and
+config.default.json are byte-identical, so the staging and boot integration
+described below did not have to move.
 
 FinaSU does not flash it as a module. The payload is staged under
 /data/adb/teesim/runtime, its sepolicy.rule is handed to `ksud sepolicy apply`,
@@ -27,9 +31,9 @@ rotating files into /data/adb/teesim/log that nothing reads. Runtime state
 expects.
 
 Corresponding source for this GPL-3.0 binary is available at
-https://github.com/JingMatrix/TEESimulator (tag: the commit fcf1738, branch
+https://github.com/JingMatrix/TEESimulator (tag: the commit 06f9f2e, branch
 dev). Rebuilding upstream as-is and flashing the resulting zip produces the
-same module apart from the dropped x86_64 files.
+same module apart from the dropped x86_64 files and WebUI self-tests.
 
 No keybox is bundled: it holds private keys and is never redistributed. Until
 the user imports one under the TEESimulator settings page, the interceptor

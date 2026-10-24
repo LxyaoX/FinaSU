@@ -74,6 +74,10 @@ The manager exposes the driver state, the number of active rules, visibility exc
 
 Directory symlinks are traversed as directories and merged file by file, with cycle detection and per-module path deduplication. A `.replace` marker or opaque directory defaults to file merging; only the explicitly allowlisted `/product/fonts` target may become a directory redirect, and only when its stock target is absent or empty. Partition roots and directories named `lib64`, `lib`, `bin` or `etc` are never directory-replaced. Downgrades are logged, `mount.log` includes `dir_replace=N`, and `ksud nomount inject --dry-run --verbose` labels file redirects and directory replacements separately.
 
+### TEESimulator
+
+TEESimulator answers key-attestation requests for the apps you select from AOSP's reference KeyMint implementation running in-process, so the chain it returns is the one a real device would produce instead of a hand-rolled certificate. FinaSU ships the payload inside the manager: the switch stages it under `/data/adb/teesim/runtime`, hands its `sepolicy.rule` to `ksud sepolicy apply` and starts the daemon from a `post-fs-data.d` hook, so no module appears in the list and the first enable needs no reboot. Attestation is only as good as the keybox you import - with none, the interceptor stays inert and every key keeps going to the real hardware. The runtime's native logd reader is not deployed, so nothing is written to `/data/adb/teesim/log`; the manager page is the only configuration surface.
+
 ## Security
 
 The manager authenticates itself by APK signature: only the trusted manager and apps the user has explicitly claimed can manage the kernel. Root access is whitelist-based, so only granted apps can reach `su`. See [SECURITY.md](./SECURITY.md) for vulnerability reporting.
