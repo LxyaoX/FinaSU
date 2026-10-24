@@ -58,6 +58,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
@@ -127,8 +128,10 @@ import me.weishu.kernelsu.data.security.SecurityTarget
 import me.weishu.kernelsu.data.repository.isSoftRebootPreferred
 import me.weishu.kernelsu.modulebanner.ModuleCardConfig
 import me.weishu.kernelsu.ui.LocalLayoutVariant
+import me.weishu.kernelsu.ui.component.EmptyState
 import me.weishu.kernelsu.ui.component.ObserveAsEvents
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
+import me.weishu.kernelsu.ui.component.SearchStatus
 import me.weishu.kernelsu.ui.component.card.CardBannerDialog
 import me.weishu.kernelsu.ui.component.card.CardSubject
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
@@ -172,6 +175,14 @@ fun ModulePagerMaterial(
     val searchListState = rememberLazyListState()
 
     val m3eLayout = LocalLayoutVariant.current == LayoutVariant.M3E
+    val emptyTitle = if (uiState.hasLoaded) {
+        stringResource(
+            if (uiState.modules.isEmpty()) R.string.module_empty
+            else R.string.module_repo_no_matches
+        )
+    } else {
+        null
+    }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchBarScrollBehavior = rememberSearchAppBarScrollBehavior(topAppBarScrollBehavior)
     val refreshTick = remember { mutableIntStateOf(0) }
@@ -386,6 +397,9 @@ fun ModulePagerMaterial(
                         modifier = Modifier.fillMaxSize(),
                         listState = searchListState,
                         displayModules = uiState.searchResults,
+                        emptyTitle = emptyTitle.takeUnless {
+                            uiState.searchStatus.resultStatus == SearchStatus.ResultStatus.LOAD
+                        },
                         updateInfoMap = uiState.updateInfo,
                         zygiskAvailable = uiState.zygiskAvailable,
                         actions = actions,
@@ -519,6 +533,7 @@ fun ModulePagerMaterial(
                 },
                 listState = listState,
                 displayModules = displayModules,
+                emptyTitle = emptyTitle,
                 updateInfoMap = uiState.updateInfo,
                 zygiskAvailable = uiState.zygiskAvailable,
                 actions = actions,
@@ -576,6 +591,7 @@ private fun ModuleList(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     displayModules: List<Module>,
+    emptyTitle: String?,
     updateInfoMap: Map<String, ModuleUpdateInfo>,
     zygiskAvailable: Boolean,
     actions: ModuleActions,
@@ -583,6 +599,15 @@ private fun ModuleList(
     onModuleLongPress: (Module) -> Unit,
     closeSearch: () -> Unit? = {},
 ) {
+    if (displayModules.isEmpty() && emptyTitle != null) {
+        EmptyState(
+            icon = Icons.Outlined.Extension,
+            title = emptyTitle,
+            modifier = modifier.fillMaxSize(),
+        )
+        return
+    }
+
     val loadingDialog = rememberLoadingDialog()
     val spliced = ModuleCardConfig.splicedCardGroup
     var expandedModuleId by rememberSaveable { mutableStateOf<String?>(null) }

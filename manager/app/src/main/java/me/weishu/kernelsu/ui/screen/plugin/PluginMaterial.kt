@@ -41,6 +41,7 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -96,6 +97,7 @@ import me.weishu.kernelsu.data.model.PluginConfigField
 import me.weishu.kernelsu.modulebanner.ModuleCardConfig
 import me.weishu.kernelsu.modulebanner.PluginBannerSlot
 import me.weishu.kernelsu.ui.LocalLayoutVariant
+import me.weishu.kernelsu.ui.component.EmptyState
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
 import me.weishu.kernelsu.ui.component.bottombar.LocalFloatingBarReservedHeight
 import me.weishu.kernelsu.ui.component.bottombar.LocalFloatingBarVisible
@@ -143,6 +145,14 @@ fun PluginPagerMaterial(
     var searchText by rememberSaveable { mutableStateOf("") }
 
     val m3eLayout = LocalLayoutVariant.current == LayoutVariant.M3E
+    val emptyTitle = if (uiState.hasLoaded) {
+        stringResource(
+            if (uiState.plugins.isEmpty()) R.string.plugin_empty
+            else R.string.plugin_store_no_matches
+        )
+    } else {
+        null
+    }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchBarScrollBehavior = rememberSearchAppBarScrollBehavior(topAppBarScrollBehavior)
     val threshold = with(LocalDensity.current) { 100.dp.toPx() }
@@ -249,6 +259,7 @@ fun PluginPagerMaterial(
                         modifier = Modifier.fillMaxSize(),
                         listState = searchListState,
                         displayPlugins = results,
+                        emptyTitle = emptyTitle,
                         pending = uiState.pending,
                         actions = actions,
                         closeSearch = closeSearch,
@@ -339,6 +350,7 @@ fun PluginPagerMaterial(
                 } else {
                     uiState.plugins
                 },
+                emptyTitle = emptyTitle,
                 pending = uiState.pending,
                 actions = actions,
             )
@@ -356,10 +368,20 @@ private fun PluginList(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     displayPlugins: List<Plugin>,
+    emptyTitle: String?,
     pending: Set<String>,
     actions: PluginActions,
     closeSearch: () -> Unit = {},
 ) {
+    if (displayPlugins.isEmpty() && emptyTitle != null) {
+        EmptyState(
+            icon = Icons.Outlined.Widgets,
+            title = emptyTitle,
+            modifier = modifier.fillMaxSize(),
+        )
+        return
+    }
+
     val spliced = ModuleCardConfig.splicedCardGroup
     var expandedPluginId by rememberSaveable { mutableStateOf<String?>(null) }
     var bannerDialogPlugin by remember { mutableStateOf<Plugin?>(null) }
