@@ -24,8 +24,8 @@ FinaSU provides:
 - The built-in Sui extension, which serves the Shizuku API to supported apps
 - SUSFS support, gated by kernel capability
 - Kernel-level hiding: mount hiding, SELinux hiding, AVC log spoofing, and unmount policy
-- `.fpt` themes with FolkPatch-compatible exchange, plus an online theme store
-- Multi-page wallpapers, custom fonts, and a launcher icon switcher
+- `.fpt` themes with FolkPatch-compatible exchange
+- Multi-page wallpapers and custom fonts
 - Module repository browsing and one-tap installation
 - An in-app language picker with community translations
 

@@ -585,17 +585,8 @@
     <string name="theme_store_cancel">취소</string>
     <string name="theme_store_apply">적용</string>
     <string name="theme_store_version">버전: %1$s</string>
-    <string name="theme_source_official">공식</string>
-    <string name="theme_source_third_party">서드파티</string>
     <string name="theme_type_phone">휴대폰</string>
     <string name="theme_type_tablet">태블릿</string>
-    <string name="theme_download_title">테마 다운로드 중</string>
-    <string name="theme_download_progress">전체 %1$d%%</string>
-    <string name="theme_download_file">파일 %1$d%%</string>
-    <string name="theme_download_image">커버 %1$d%%</string>
-    <string name="theme_download_paused">일시 중지됨</string>
-    <string name="theme_download_pause">일시 중지</string>
-    <string name="theme_download_resume">계속</string>
     <string name="settings_category_backup">백업</string>
     <string name="backup_section_targets">백업 위치</string>
     <string name="backup_section_content">백업할 항목</string>

@@ -598,14 +598,8 @@
     <string name="theme_store_cancel">取消</string>
     <string name="theme_store_apply">应用</string>
     <string name="theme_store_version">版本：%1$s</string>
-    <string name="theme_source_official">官方</string>
-    <string name="theme_source_third_party">第三方</string>
     <string name="theme_type_phone">手机</string>
     <string name="theme_type_tablet">平板</string>
-    <string name="theme_download_title">正在下载主题</string>
-    <string name="theme_download_paused">已暂停</string>
-    <string name="theme_download_pause">暂停</string>
-    <string name="theme_download_resume">继续</string>
     <string name="settings_category_backup">备份</string>
     <string name="backup_section_targets">备份至</string>
     <string name="backup_section_content">备份内容</string>
@@ -673,9 +667,6 @@
     <string name="sulog_filter_sucompat">传统 SU</string>
     <string name="sulog_filter_ioctl_grant_root">授予 Root</string>
     <string name="sulog_filter_daemon_restart">守护进程重启</string>
-    <string name="theme_download_progress">总进度 %1$d%%</string>
-    <string name="theme_download_file">文件 %1$d%%</string>
-    <string name="theme_download_image">封面 %1$d%%</string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_wallpaper_gallery">壁纸图鉴</string>

@@ -604,17 +604,8 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="theme_store_cancel">Cancel</string>
     <string name="theme_store_apply">Apply</string>
     <string name="theme_store_version">Version: %1$s</string>
-    <string name="theme_source_official">Official</string>
-    <string name="theme_source_third_party">Third-party</string>
     <string name="theme_type_phone">Phone</string>
     <string name="theme_type_tablet">Tablet</string>
-    <string name="theme_download_title">Downloading theme</string>
-    <string name="theme_download_progress">Overall %1$d%%</string>
-    <string name="theme_download_file">File %1$d%%</string>
-    <string name="theme_download_image">Cover %1$d%%</string>
-    <string name="theme_download_paused">Paused</string>
-    <string name="theme_download_pause">Pause</string>
-    <string name="theme_download_resume">Resume</string>
     <string name="settings_category_backup">Backup</string>
     <string name="backup_section_targets">Backup to</string>
     <string name="backup_section_content">What to back up</string>

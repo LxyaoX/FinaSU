@@ -585,17 +585,8 @@
     <string name="theme_store_cancel">キャンセル</string>
     <string name="theme_store_apply">適用</string>
     <string name="theme_store_version">バージョン: %1$s</string>
-    <string name="theme_source_official">公式</string>
-    <string name="theme_source_third_party">サードパーティ</string>
     <string name="theme_type_phone">スマートフォン</string>
     <string name="theme_type_tablet">タブレット</string>
-    <string name="theme_download_title">テーマをダウンロード中</string>
-    <string name="theme_download_progress">全体 %1$d%%</string>
-    <string name="theme_download_file">ファイル %1$d%%</string>
-    <string name="theme_download_image">カバー %1$d%%</string>
-    <string name="theme_download_paused">一時停止中</string>
-    <string name="theme_download_pause">一時停止</string>
-    <string name="theme_download_resume">再開</string>
     <string name="settings_category_backup">バックアップ</string>
     <string name="backup_section_targets">バックアップ先</string>
     <string name="backup_section_content">バックアップする内容</string>
