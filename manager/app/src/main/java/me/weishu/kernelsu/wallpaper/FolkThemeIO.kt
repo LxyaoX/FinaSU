@@ -46,13 +46,20 @@ object FolkThemeIO {
         WallpaperConfig.save(context)
     }
 
-    suspend fun resetTheme(context: Context): Boolean = withContext(Dispatchers.IO) {
-        runCatching {
-            assets.forEach { it.reset(context) }
-            groups.forEach { it.reset(context) }
-            WallpaperConfig.reset()
-            WallpaperConfig.save(context)
-            true
-        }.getOrDefault(false)
+    suspend fun resetTheme(context: Context): Boolean {
+        val reset = withContext(Dispatchers.IO) {
+            runCatching {
+                assets.forEach { it.reset(context) }
+                groups.forEach { it.reset(context) }
+                WallpaperConfig.reset()
+                WallpaperConfig.save(context)
+                ThemeSettingsMapping.reset()
+                true
+            }.getOrDefault(false)
+        }
+        // A theme may have switched the app language; restoring it can recreate the activity, so
+        // it stays the final step exactly like the import path.
+        if (reset) withContext(Dispatchers.Main) { ThemeLanguage.setTags(context, "") }
+        return reset
     }
 }

@@ -34,6 +34,22 @@ class ThemeSettingsMappingTest {
         assertEquals(true, values["listWorkingCardModeHidden"])
     }
 
+    @Test fun resetRestoresEveryThemeOwnedSetting() {
+        val values = mutableMapOf<String, Any>(
+            "themeMode" to 6, "keyColor" to 1234, "useSystemDynamicColor" to false,
+            "colorStyle" to "Expressive", "colorSpec" to "SPEC_2021",
+            "colorGenerationMode" to "classic", "colorContrast" to "HIGH",
+            "statsTopLayout" to "grid", "listWorkingCardModeHidden" to true,
+        )
+        ThemeSettingsMapping.reset(repository(values))
+        assertEquals(mapOf(
+            "themeMode" to 0, "keyColor" to 0, "useSystemDynamicColor" to true,
+            "colorStyle" to "TonalSpot", "colorSpec" to "SPEC_2025",
+            "colorGenerationMode" to "custom", "colorContrast" to "STANDARD",
+            "statsTopLayout" to "list", "listWorkingCardModeHidden" to false,
+        ), values)
+    }
+
     @Test fun absentFieldsPreserveCurrentSettingsAndExtensionKeepsExactSeed() {
         val values = mutableMapOf<String, Any>("themeMode" to 6, "keyColor" to 1234)
         ThemeSettingsMapping.apply(JSONObject(), repository(values))

@@ -5,7 +5,9 @@ import me.weishu.kernelsu.ui.component.ThemeMetadataEditor
 import me.weishu.kernelsu.wallpaper.ThemeMetadata
 import me.weishu.kernelsu.wallpaper.ThemeExportService
 
+import android.app.Activity
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,6 +70,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.component.ImageCropPickerHost
 import me.weishu.kernelsu.ui.component.SurfaceImagePickerHost
@@ -119,6 +122,7 @@ data class WallpaperUiState(
     val superuserBackgroundSelected: Boolean,
     val moduleBackgroundSelected: Boolean,
     val settingsBackgroundSelected: Boolean,
+    val statsTopLayout: String,
     val videoEnabled: Boolean,
     val videoFilename: String?,
     val videoVolume: Float,
@@ -239,6 +243,8 @@ fun WallpaperScreen() {
     val resetTheme: () -> Unit = {
         scope.launch {
             val ok = FolkThemeIO.resetTheme(context)
+            // Android 12 and older only pick the restored locale up on recreation, matching import.
+            if (ok && Build.VERSION.SDK_INT < 33) (context as? Activity)?.recreate()
             snackbarHost.showSnackbar(
                 resources.getString(
                     if (ok) R.string.wallpaper_theme_reset else R.string.wallpaper_theme_reset_failed
@@ -368,6 +374,8 @@ fun WallpaperScreen() {
         superuserBackgroundSelected = !WallpaperConfig.superuserBackgroundUri.isNullOrEmpty(),
         moduleBackgroundSelected = !WallpaperConfig.moduleBackgroundUri.isNullOrEmpty(),
         settingsBackgroundSelected = !WallpaperConfig.settingsBackgroundUri.isNullOrEmpty(),
+        // The Stats grid header draws the grid work card, so its settings belong to this page too.
+        statsTopLayout = remember { SettingsRepositoryImpl().statsTopLayout },
         videoEnabled = VisualMediaConfig.videoEnabled,
         videoFilename = VisualMediaConfig.videoFilename,
         videoVolume = VisualMediaConfig.videoVolume,
