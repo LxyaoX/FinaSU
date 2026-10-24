@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.repository.ModuleRepositoryImpl
+import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.ui.util.runModuleAction
 import java.io.File
 import java.text.SimpleDateFormat
@@ -53,6 +54,13 @@ fun ExecuteModuleActionEffect(
         }
         if (!moduleInfo.enabled || moduleInfo.update || moduleInfo.remove) {
             Toast.makeText(context, moduleUnavailable.format(moduleInfo.name), Toast.LENGTH_SHORT).show()
+            onExit()
+            return@LaunchedEffect
+        }
+        if (moduleInfo.zygiskRequired &&
+            SettingsRepositoryImpl().getFolkZygiskStatus().getOrNull()?.providesImplementation() == false
+        ) {
+            Toast.makeText(context, R.string.sui_reason_zygisk_disabled, Toast.LENGTH_SHORT).show()
             onExit()
             return@LaunchedEffect
         }
