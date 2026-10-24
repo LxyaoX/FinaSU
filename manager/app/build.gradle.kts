@@ -204,7 +204,15 @@ android {
 
 androidComponents {
     onVariants(selector().withBuildType("release")) {
-        it.packaging.resources.excludes.addAll(listOf("META-INF/**", "kotlin/**", "**.bin"))
+        it.packaging.resources.excludes.addAll(
+            listOf(
+                "META-INF/**", "kotlin/**", "**.bin",
+                // Descriptor files protobuf ships as resources; nothing reads them at runtime.
+                "**.proto",
+                // OkHttp's cookie-domain table. This app never keeps cookies, so it is dead weight.
+                "**/PublicSuffixDatabase.list",
+            )
+        )
     }
 }
 

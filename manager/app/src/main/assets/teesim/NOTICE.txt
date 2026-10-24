@@ -1,9 +1,16 @@
 TEESimulator module bundled with FinaSU
 =======================================
 
-The archive in this directory is the TEESimulator flashable module, repacked
-with one change: the x86_64 payload and the WebUI self-tests are removed,
-because FinaSU ships an arm64-v8a build only.
+The archive in this directory is the TEESimulator flashable module, repacked so
+that it carries only what actually runs here. Two groups of files are removed:
+
+  * the x86_64 payload, because FinaSU ships an arm64-v8a build only;
+  * what the manager replaces at stage time, so shipping it would only cost
+    space in the APK - `webroot/` (the WebUI, whose panel this manager owns),
+    its self-tests, the module wrapper (`module.prop`, `customize.sh`,
+    `service.sh`, `update.json`, `changelog.md`) and
+    `arm64-v8a/libteesim_logcat.so` (the native logd reader behind the WebUI's
+    Logs panel; LogTail disables itself when it is missing).
 
   Project : https://github.com/JingMatrix/TEESimulator
   Release : canary-76, TEESimulator-v4.0-76-06f9f2e-Release.zip
@@ -11,29 +18,25 @@ because FinaSU ships an arm64-v8a build only.
   Author  : JingMatrix and contributors
   License : GPL-3.0 (see the project's LICENSE)
 
-Everything else is upstream, byte for byte: classes.dex (the control daemon),
-arm64-v8a/inject, arm64-v8a/libteesim_*.so, arm64-v8a/teesim-uds, the shell
-entry points, module.prop, sepolicy.rule, config.default.json and webroot.
-Compared with the previously bundled canary-75, only classes.dex and three
-arm64-v8a libraries changed; the entry scripts, sepolicy.rule and
-config.default.json are byte-identical, so the staging and boot integration
-described below did not have to move.
+Everything left is upstream, byte for byte: classes.dex (the control daemon),
+arm64-v8a/inject, arm64-v8a/libteesim_keymint.so,
+arm64-v8a/libteesim_keystore.so, arm64-v8a/teesim-uds, the daemon entry script,
+sepolicy.rule and config.default.json. Compared with the previously bundled
+canary-75, only classes.dex and three arm64-v8a libraries changed; the entry
+scripts, sepolicy.rule and config.default.json are byte-identical, so the
+staging and boot integration described below did not have to move.
 
 FinaSU does not flash it as a module. The payload is staged under
 /data/adb/teesim/runtime, its sepolicy.rule is handed to `ksud sepolicy apply`,
 and a post-fs-data.d hook starts the daemon, so nothing appears in the module
-list. The module wrapper (module.prop, customize.sh, service.sh, update.json)
-and webroot are dropped at that point, because the manager replaces them.
-arm64-v8a/libteesim_logcat.so is dropped too: it is the native logd reader
-behind the Logs panel, and without it LogTail disables itself instead of
-rotating files into /data/adb/teesim/log that nothing reads. Runtime state
-(configuration and the keybox) stays in /data/adb/teesim, exactly as upstream
-expects.
+list. Because the WebUI and the wrapper are not in the archive, the staged tree
+is exactly what runs; the runtime state it does keep (configuration and the
+keybox) stays in /data/adb/teesim, exactly as upstream expects.
 
 Corresponding source for this GPL-3.0 binary is available at
 https://github.com/JingMatrix/TEESimulator (tag: the commit 06f9f2e, branch
 dev). Rebuilding upstream as-is and flashing the resulting zip produces the
-same module apart from the dropped x86_64 files and WebUI self-tests.
+same module apart from the files listed at the top of this notice.
 
 No keybox is bundled: it holds private keys and is never redistributed. Until
 the user imports one under the TEESimulator settings page, the interceptor

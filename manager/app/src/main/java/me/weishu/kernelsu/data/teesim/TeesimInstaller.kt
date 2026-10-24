@@ -44,7 +44,7 @@ object TeesimInstaller {
     /**
      * Version of the runtime on disk, written by [install].
      *
-     * `module.prop` is deleted with the rest of the module wrapper, so without this the manager
+     * The wrapper that used to carry it (`module.prop`) is not shipped, so without this the manager
      * could only compare [VERSION] against itself and would never notice a runtime staged by an
      * older build.
      */
@@ -127,15 +127,11 @@ object TeesimInstaller {
             "mkdir -p $RUNTIME_DIR",
             "rm -rf $RUNTIME_DIR/*",
             "for f in '${stage.absolutePath}'/*; do cp -R \"\$f\" $RUNTIME_DIR/; done",
-            // The module wrapper and its WebUI are only useful when flashed; the manager replaces
-            // both, so they are dead weight in the runtime.
-            "rm -rf $RUNTIME_DIR/webroot $RUNTIME_DIR/module.prop $RUNTIME_DIR/customize.sh " +
-                "$RUNTIME_DIR/service.sh $RUNTIME_DIR/update.json $RUNTIME_DIR/changelog.md",
-            // libteesim_logcat.so is the native logd reader behind the WebUI's Logs panel, which
-            // this runtime does not have. Without it LogTail logs one line at start-up and disables
-            // itself - the documented degradation - so no thread tails logd and nothing is rotated
-            // into $LOG_DIR. Everything the daemon actually needs to say still goes to logcat.
-            "rm -f $RUNTIME_DIR/arm64-v8a/libteesim_logcat.so",
+            // The archive carries only what runs: the WebUI, the module wrapper (module.prop,
+            // customize.sh, service.sh, update.json, changelog.md) and the native logd reader are
+            // not in it. Without the reader LogTail logs one line at start-up and disables itself,
+            // so no thread tails logd and nothing is rotated into $LOG_DIR - which is why the boot
+            // hook still deletes that library from a runtime an older build left behind.
             "chown -R 0:0 $RUNTIME_DIR",
             // `X` gives the execute bit to directories only; the real entry points are fixed below.
             "chmod -R u+rwX,go+rX $RUNTIME_DIR",
@@ -150,8 +146,8 @@ object TeesimInstaller {
             "chmod 0600 $POLICY_PATH",
             "if [ ! -f $CONFIG_PATH ]; then cp $RUNTIME_DIR/config.default.json $CONFIG_PATH; fi",
             "chmod 0600 $CONFIG_PATH",
-            // The wrapper that carried a version is gone above; record what was actually staged so
-            // the page can tell a current runtime from one an older build left behind.
+            // module.prop used to carry the version; it is not shipped any more, so record what was
+            // actually staged instead, which lets the page tell a current runtime from an old one.
             "echo '$VERSION' > $VERSION_PATH.tmp",
             "chmod 0644 $VERSION_PATH.tmp",
             "mv -f $VERSION_PATH.tmp $VERSION_PATH",
