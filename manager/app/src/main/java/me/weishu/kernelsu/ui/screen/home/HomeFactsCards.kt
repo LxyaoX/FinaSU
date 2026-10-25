@@ -152,34 +152,42 @@ internal fun InfoCard(
     val seccompDisplay = seccompDisplayName(systemInfo.seccompStatus)
     val display = rememberHomeDisplaySettings()
 
-    val systemRows = buildList {
-        add(SpecRow(stringResource(R.string.home_manager_version), systemInfo.managerVersion))
-        add(SpecRow(stringResource(R.string.home_kernel), systemInfo.kernelVersion))
-        systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
-            add(SpecRow(stringResource(R.string.home_kernel_full_version), value))
+    // The labels are resolved here, in the composable body: `stringResource` cannot be called from
+    // inside a lambda that `buildList` would take.
+    val managerVersionLabel = stringResource(R.string.home_manager_version)
+    val kernelLabel = stringResource(R.string.home_kernel)
+    val kernelFullVersionLabel = stringResource(R.string.home_kernel_full_version)
+    val deviceModelLabel = stringResource(R.string.home_device_model)
+    val fingerprintLabel = stringResource(R.string.home_fingerprint)
+    val zygiskLabel = stringResource(R.string.home_zygisk_implement)
+    val mountLabel = stringResource(R.string.home_mount_implementation)
+    val susfsLabel = stringResource(R.string.susfs_title)
+
+    val systemRows = mutableListOf<SpecRow>()
+    systemRows += SpecRow(managerVersionLabel, systemInfo.managerVersion)
+    systemRows += SpecRow(kernelLabel, systemInfo.kernelVersion)
+    systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
+        systemRows += SpecRow(kernelFullVersionLabel, value)
+    }
+    systemRows += SpecRow(deviceModelLabel, systemInfo.deviceModel)
+    if (!display.hideFingerprint) {
+        systemRows += SpecRow(fingerprintLabel, systemInfo.fingerprint)
+    }
+    if (zygiskProvider != null && !display.hideZygisk) {
+        systemRows += SpecRow(zygiskLabel, zygiskProvider)
+    }
+    if (!display.hideMount) {
+        homeMountValue(mount)?.let { value ->
+            systemRows += SpecRow(mountLabel, value)
         }
-        add(SpecRow(stringResource(R.string.home_device_model), systemInfo.deviceModel))
-        if (!display.hideFingerprint) {
-            add(SpecRow(stringResource(R.string.home_fingerprint), systemInfo.fingerprint))
-        }
-        if (zygiskProvider != null && !display.hideZygisk) {
-            add(SpecRow(stringResource(R.string.home_zygisk_implement), zygiskProvider))
-        }
-        if (!display.hideMount) {
-            homeMountValue(mount)?.let { value ->
-                add(SpecRow(stringResource(R.string.home_mount_implementation), value))
-            }
-        }
-        if (susfs.detected && !display.hideSusfs) {
-            val management = me.weishu.kernelsu.ui.screen.susfsManagementLabel(susfs.management)
-            add(
-                SpecRow(
-                    label = stringResource(R.string.susfs_title),
-                    value = "${susfs.version} · ${susfs.implementation} · $management",
-                    onClick = onSusfs,
-                )
-            )
-        }
+    }
+    if (susfs.detected && !display.hideSusfs) {
+        val management = me.weishu.kernelsu.ui.screen.susfsManagementLabel(susfs.management)
+        systemRows += SpecRow(
+            label = susfsLabel,
+            value = "${susfs.version} · ${susfs.implementation} · $management",
+            onClick = onSusfs,
+        )
     }
     val securityRows = listOf(
         SpecRow(stringResource(R.string.home_selinux_status), selinuxDisplay),
