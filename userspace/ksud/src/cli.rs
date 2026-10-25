@@ -28,8 +28,17 @@ enum Commands {
         #[command(subcommand)]
         command: crate::zygisk::Command,
     },
-    /// Flash an AnyKernel3 ZIP to the current slot (requires root)
-    Anykernel3 { zip: PathBuf },
+    /// Hide the bootloader unlock state from system properties
+    BootHide {
+        #[command(subcommand)]
+        command: crate::boot_hide::Command,
+    },
+    /// Flash an AnyKernel3 ZIP to the current or unused A/B slot (requires root)
+    Anykernel3 {
+        zip: PathBuf,
+        #[arg(long)]
+        inactive_slot: bool,
+    },
     /// Manage existing SUSFS implementations (does not load modules)
     Susfs {
         #[command(subcommand)]
@@ -766,11 +775,14 @@ pub fn run() -> Result<()> {
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
-        Commands::Anykernel3 { zip } => crate::anykernel3::flash(&zip),
+        Commands::Anykernel3 { zip, inactive_slot } => {
+            crate::anykernel3::flash(&zip, inactive_slot)
+        }
         Commands::Susfs { command } => crate::susfs::run(command),
         Commands::UtsView { command } => crate::uts_view::run(&command),
         Commands::Netisolate { command } => crate::netisolate::run(&command),
         Commands::Zygisk { command } => crate::zygisk::run(&command),
+        Commands::BootHide { command } => crate::boot_hide::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();

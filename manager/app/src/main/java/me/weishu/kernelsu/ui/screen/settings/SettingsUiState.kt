@@ -91,6 +91,7 @@ data class SettingsUiState(
     // ADB Root
     val adbRootStatus: String = "",
     val isAdbRootEnabled: Boolean = false,
+    val isBootHideEnabled: Boolean = false,
     val shellSuAdbOnlyStatus: String = "",
     val isShellSuAdbOnlyEnabled: Boolean = false,
 
@@ -133,6 +134,7 @@ data class SettingsScreenActions(
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
     val onRecoverFolkZygisk: () -> Unit,
     val onSetAdbRootEnabled: (Boolean) -> Unit,
+    val onSetBootHideEnabled: (Boolean) -> Unit,
     val onSetShellSuAdbOnlyEnabled: (Boolean) -> Unit,
     val onOpenUtsView: () -> Unit,
     val onOpenNetIsolate: () -> Unit,

@@ -653,6 +653,12 @@ class SettingsRepositoryImpl : SettingsRepository {
             false
         }
 
+    override suspend fun getBootHideStatus(): String =
+        execKsudResult("boot-hide status").out.firstOrNull()?.trim().orEmpty()
+
+    override fun setBootHideEnabled(enabled: Boolean): Boolean =
+        execKsud("boot-hide ${if (enabled) "enable" else "disable"}", true)
+
     override fun isDefaultUmountModules(): Boolean = Natives.isDefaultUmountModules()
 
     override fun setDefaultUmountModules(enabled: Boolean): Boolean = Natives.setDefaultUmountModules(enabled)

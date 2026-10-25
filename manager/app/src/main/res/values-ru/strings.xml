@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">Дополнительная проверка при выдаче root оболочке Shell: использовать его могут только процессы, запущенные adbd или root-процессом KernelSU (например, модулем ADB), что не позволяет приложениям, получившим права оболочки, повысить их до root</string>
     <string name="feature_status_forced_summary">Принудительно задано конфигурацией загрузки; изменить здесь нельзя</string>
     <string name="install_anykernel">Прошить ZIP AnyKernel3</string>
-    <string name="install_anykernel_summary">Запустить доверенный установщик ядра в текущем слоте. Требуется root.</string>
+    <string name="install_anykernel_summary">Запускает доверенный установщик ядра в текущем или неиспользуемом слоте A/B. Требуются права Root.</string>
     <string name="install_anykernel_warning">Этот ZIP запускается с правами root и может изменить несколько разделов. Установщик сам определяет, какие разделы и слоты будут записаны; FinaSU не переопределяет слот и не обновляет ksud. Успешная установка не гарантирует загрузку, а при сбое могут остаться частичные изменения. Существующие резервные копии boot-образа могут не покрывать эти изменения. Убедитесь в совместимости устройства и подготовьте образ для восстановления, прежде чем продолжать.</string>
     <string name="install_anykernel_root_required">Для прошивки AnyKernel3 требуются права root.</string>
     <string name="install_anykernel_read_failed">Не удалось прочитать ZIP-файл AnyKernel3.</string>
@@ -448,6 +448,9 @@
     <string name="download">Скачать</string>
     <string name="download_cancel">Отмена</string>
     <string name="download_install">Установить</string>
+    <string name="settings_finasu_hide_summary">Частично скрывает состояние разблокировки Bootloader</string>
+    <string name="settings_finasu_hide_reboot_hint">После перезагрузки вернётся реальное значение</string>
+    <string name="settings_finasu_hide_failed">Не удалось изменить FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Запускать демон adbd с правами Root</string>
     <string name="menu_sort">Сортировка</string>
@@ -754,4 +757,36 @@
     <string name="module_preinit_bootloop">Предынициализация приостановлена после нескольких попыток загрузки</string>
     <string name="module_preinit_unsupported">Предынициализация недоступна в этом ядре или режиме загрузки</string>
     <string name="zygisk_required">Сначала включите Zygisk</string>
+    <string name="guide_welcome_title">Добро пожаловать в FinaSU</string>
+    <string name="guide_welcome_desc">Управление root на уровне ядра со встроенными движком Zygisk, бэкендом Shizuku API, перенаправлением путей VFS и движком монтирования модулей.</string>
+    <string name="guide_repo_title">Открытый исходный код на GitHub</string>
+    <string name="guide_repo_desc">Исходный код, сообщения о проблемах и примечания к выпускам находятся в репозитории.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Открыть репозиторий</string>
+    <string name="guide_features_title">Встроенные функции</string>
+    <string name="guide_features_desc">В менеджере работают четыре движка; дополнительный модуль не требуется.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — реализация Zygisk</string>
+    <string name="guide_feature_sui">Sui — бэкенд Shizuku API</string>
+    <string name="guide_feature_nomount">NoMount — перенаправление путей VFS</string>
+    <string name="guide_feature_mount">Folk Mount — движок монтирования модулей</string>
+    <string name="guide_docs_title">Не получается? Читайте документацию</string>
+    <string name="guide_docs_desc">Установка, модули и устранение неполадок описаны в документации. Это руководство можно снова открыть в разделе «Настройки → О приложении».</string>
+    <string name="guide_docs_action">Открыть документацию</string>
+    <string name="guide_next">Далее</string>
+    <string name="guide_prev">Назад</string>
+    <string name="guide_skip">Пропустить</string>
+    <string name="guide_start">Начать</string>
+    <string name="guide_page_indicator">Страница %1$d из %2$d</string>
+    <string name="guide_about_entry_title">Снова показать приветственное руководство</string>
+    <string name="guide_about_entry_summary">Повторить вводную при первом запуске</string>
+    <string name="install_anykernel_target_slot">Целевой слот</string>
+    <string name="install_anykernel_current_slot">Текущий слот (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">Текущий слот</string>
+    <string name="install_anykernel_inactive_slot">Неиспользуемый слот (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">Неизвестный файл</string>
+    <string name="install_anykernel_size_unknown">Неизвестный размер</string>
+    <string name="install_anykernel_confirm_details">Файл: %1$s\nРазмер: %2$s\nЦелевой слот: %3$s</string>
+    <string name="install_anykernel_confirm_note">Установщик по-прежнему определяет, какие разделы и слоты будут записаны. Для установки в неиспользуемый слот требуется поддержка SLOT_SELECT, которую ksud проверяет перед запуском. Активный слот не переключается автоматически; после перезагрузки устройство всё ещё может загружаться с текущего слота.</string>
+    <string name="flash_log_saved">Журнал сохранён в %1$s</string>
 </resources>

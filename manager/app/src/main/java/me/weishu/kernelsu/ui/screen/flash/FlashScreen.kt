@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,6 +22,7 @@ import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.repository.isSoftRebootPreferred
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
+import me.weishu.kernelsu.ui.util.getSlotSuffix
 import me.weishu.kernelsu.ui.util.reboot
 
 @Composable
@@ -31,6 +33,10 @@ fun FlashScreen(flashIt: FlashIt, onBackEnabledChange: (Boolean) -> Unit) {
     val logContent = remember { StringBuilder() }
     var showRebootAction by rememberSaveable { mutableStateOf(false) }
     var flashingStatus by rememberSaveable { mutableStateOf(FlashingStatus.FLASHING) }
+    val anyKernel = flashIt as? FlashIt.FlashAnyKernel
+    val currentSlotSuffix by produceState(initialValue = "", anyKernel) {
+        value = if (anyKernel == null) "" else getSlotSuffix(false)
+    }
     val needJailbreakWarning = flashIt is FlashIt.FlashBoot && Natives.isLateLoadMode
     // Soft reboot keeps the jailbreak and still applies modules
     val softReboot = flashIt is FlashIt.FlashModules && isSoftRebootPreferred()
@@ -61,9 +67,15 @@ fun FlashScreen(flashIt: FlashIt, onBackEnabledChange: (Boolean) -> Unit) {
         onTextUpdate = { text = it },
         onShowRebootChange = { showRebootAction = it },
         onFlashingStatusChange = { flashingStatus = it },
+        showStderr = anyKernel != null,
         enabled = flashingEnabled,
     )
 
+    val targetSlotSuffix = when {
+        anyKernel?.inactiveSlot != true -> currentSlotSuffix
+        currentSlotSuffix == "_a" -> "_b"
+        else -> "_a"
+    }
     val state = FlashUiState(
         text = text,
         showRebootAction = showRebootAction,
@@ -71,9 +83,16 @@ fun FlashScreen(flashIt: FlashIt, onBackEnabledChange: (Boolean) -> Unit) {
         showJailbreakWarning = needJailbreakWarning && !flashingEnabled,
         rebootLabelRes = if (softReboot) R.string.reboot_soft else R.string.reboot,
     )
+    val logFilePrefix = if (anyKernel != null) {
+        val target = if (anyKernel.inactiveSlot) "inactive" else "current"
+        val suffix = targetSlotSuffix.removePrefix("_").ifBlank { "unknown" }
+        "AnyKernel3_${target}_$suffix"
+    } else {
+        "KernelSU_install_log"
+    }
     val actions = FlashScreenActions(
         onBack = dropUnlessResumed { if (backEnabled) navigator.pop() },
-        onSaveLog = saveLog(logContent, scope) { showMessage(it) },
+        onSaveLog = saveLog(logContent, scope, logFilePrefix) { showMessage(it) },
         onReboot = {
             scope.launch {
                 withContext(Dispatchers.IO) {

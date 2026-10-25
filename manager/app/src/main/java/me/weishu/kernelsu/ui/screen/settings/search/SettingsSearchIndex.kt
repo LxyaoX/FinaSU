@@ -30,6 +30,9 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.PhonelinkLock
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
@@ -668,6 +671,15 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_umount_modules_default_summary,
             icon = Icons.AutoMirrored.Filled.Rule,
             aliases = listOf("umount", "unmount", "default", "app"),
+        )
+    )
+    add(
+        SettingsCategory.FUNCTION.row(
+            id = "function.boot_hide",
+            titleRes = R.string.settings_finasu_hide,
+            summaryRes = R.string.settings_finasu_hide_summary,
+            icon = Icons.Filled.PhonelinkLock,
+            aliases = listOf("bootloader", "unlock", "hide", "vbmeta", "verifiedboot", "锁定", "引导"),
         )
     )
     add(

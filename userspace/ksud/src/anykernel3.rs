@@ -8,6 +8,8 @@ use std::{
 use anyhow::{Result, bail};
 
 const UPDATE_BINARY_ENTRY: &str = "META-INF/com/google/android/update-binary";
+#[cfg(target_os = "android")]
+const AK3_CORE_ENTRY: &str = "tools/ak3-core.sh";
 const PATCH_MARKER: &[u8] = b"chmod -R 755 tools bin;";
 
 fn shell_quote(value: &str) -> String {
@@ -176,14 +178,51 @@ mod android {
     #[cfg(target_os = "android")]
     use crate::{
         anykernel3::{
-            UPDATE_BINARY_ENTRY, combine_results, ensure_installer_success,
+            AK3_CORE_ENTRY, UPDATE_BINARY_ENTRY, combine_results, ensure_installer_success,
             forward_installer_output, installer_arguments, patch_update_binary,
             select_update_binary,
         },
-        assets, defs, utils,
+        assets, boot_patch, defs, utils,
     };
 
     const MAX_UPDATE_BINARY_SIZE: u64 = 4 * 1024 * 1024;
+    #[cfg(target_os = "android")]
+    const MAX_AK3_CORE_SIZE: u64 = 2 * 1024 * 1024;
+
+    fn read_zip_entry(zip_path: &Path, entry_name: &str, max_size: u64) -> Result<Vec<u8>> {
+        let file = File::open(zip_path)
+            .with_context(|| format!("failed to open {}", zip_path.display()))?;
+        let mut archive = zip::ZipArchive::new(file)
+            .with_context(|| format!("invalid ZIP archive {}", zip_path.display()))?;
+        let mut entry = archive
+            .by_name(entry_name)
+            .with_context(|| format!("failed to open ZIP entry {entry_name}"))?;
+        ensure!(
+            !entry.is_dir(),
+            "{entry_name} is a directory instead of a file"
+        );
+        ensure!(
+            entry.size() <= max_size,
+            "{entry_name} exceeds the {max_size} byte safety limit"
+        );
+
+        let expected_size = entry.size();
+        let mut contents = Vec::with_capacity(expected_size as usize);
+        (&mut entry)
+            .take(max_size + 1)
+            .read_to_end(&mut contents)
+            .with_context(|| format!("failed to read ZIP entry {entry_name}"))?;
+        ensure!(
+            contents.len() as u64 <= max_size,
+            "{entry_name} exceeds the {max_size} byte safety limit"
+        );
+        ensure!(
+            contents.len() as u64 == expected_size,
+            "{entry_name} was truncated while reading"
+        );
+        ensure!(!contents.contains(&0), "{entry_name} contains a NUL byte");
+        Ok(contents)
+    }
 
     fn read_update_binary(zip_path: &Path) -> Result<Vec<u8>> {
         let file = File::open(zip_path)
@@ -250,37 +289,25 @@ mod android {
         );
         let index = select_update_binary(names.iter().map(|(index, name)| (*index, name)))?;
 
-        let mut entry = archive
-            .by_index(index)
-            .context("failed to open AnyKernel3 update-binary")?;
         ensure!(
-            !entry.is_dir(),
-            "{UPDATE_BINARY_ENTRY} is a directory instead of a script"
+            archive.by_index(index)?.name() == UPDATE_BINARY_ENTRY,
+            "ZIP entry index differs from central directory"
         );
-        ensure!(
-            entry.size() <= MAX_UPDATE_BINARY_SIZE,
-            "{UPDATE_BINARY_ENTRY} exceeds the {MAX_UPDATE_BINARY_SIZE} byte safety limit"
-        );
+        drop(archive);
+        read_zip_entry(zip_path, UPDATE_BINARY_ENTRY, MAX_UPDATE_BINARY_SIZE)
+    }
 
-        let expected_size = entry.size();
-        let mut script = Vec::with_capacity(expected_size as usize);
-        (&mut entry)
-            .take(MAX_UPDATE_BINARY_SIZE + 1)
-            .read_to_end(&mut script)
-            .context("failed to read AnyKernel3 update-binary")?;
+    #[cfg(target_os = "android")]
+    fn validate_inactive_slot_support(zip_path: &Path) -> Result<()> {
+        read_update_binary(zip_path)?;
+        let core = read_zip_entry(zip_path, AK3_CORE_ENTRY, MAX_AK3_CORE_SIZE)
+            .with_context(|| "AnyKernel3 package does not support inactive-slot installation")?;
         ensure!(
-            script.len() as u64 <= MAX_UPDATE_BINARY_SIZE,
-            "{UPDATE_BINARY_ENTRY} exceeds the {MAX_UPDATE_BINARY_SIZE} byte safety limit"
+            core.windows(b"SLOT_SELECT".len())
+                .any(|window| window == b"SLOT_SELECT"),
+            "AnyKernel3 package does not support inactive-slot installation"
         );
-        ensure!(
-            script.len() as u64 == expected_size,
-            "AnyKernel3 update-binary was truncated while reading"
-        );
-        ensure!(
-            !script.contains(&0),
-            "AnyKernel3 update-binary contains a NUL byte"
-        );
-        Ok(script)
+        Ok(())
     }
 
     #[cfg(target_os = "android")]
@@ -309,7 +336,12 @@ mod android {
     }
 
     #[cfg(target_os = "android")]
-    fn run_installer(temp_dir: &TempDir, update_binary: &Path, zip_path: &Path) -> Result<()> {
+    fn run_installer(
+        temp_dir: &TempDir,
+        update_binary: &Path,
+        zip_path: &Path,
+        inactive_slot: bool,
+    ) -> Result<()> {
         eprintln!("- Running AnyKernel3 installer");
         let mut command = Command::new("/system/bin/sh");
         command
@@ -321,6 +353,9 @@ mod android {
             .stdin(Stdio::inherit())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit());
+        if inactive_slot {
+            command.env("SLOT_SELECT", "inactive");
+        }
 
         let mut child = command
             .spawn()
@@ -347,13 +382,14 @@ mod android {
     }
 
     #[cfg(target_os = "android")]
-    fn flash_inner(temp_dir: &TempDir, zip_path: &Path) -> Result<()> {
+    fn flash_inner(temp_dir: &TempDir, zip_path: &Path, inactive_slot: bool) -> Result<()> {
         let update_binary = prepare(temp_dir, zip_path)?;
-        run_installer(temp_dir, &update_binary, zip_path)
+        run_installer(temp_dir, &update_binary, zip_path, inactive_slot)
     }
 
     #[cfg(target_os = "android")]
-    pub fn flash(zip_path: &Path) -> Result<()> {
+    pub fn flash(zip_path: &Path, inactive_slot: bool) -> Result<()> {
+        println!(include_str!("banner"));
         ensure!(
             unsafe { libc::geteuid() } == 0,
             "root is required to flash AnyKernel3"
@@ -368,6 +404,17 @@ mod android {
         let zip_path = fs::canonicalize(zip_path)
             .with_context(|| format!("failed to resolve {}", zip_path.display()))?;
 
+        if inactive_slot {
+            let current_slot = boot_patch::get_slot_suffix(false);
+            ensure!(
+                !current_slot.is_empty(),
+                "inactive slot requires an A/B device"
+            );
+            validate_inactive_slot_support(&zip_path)?;
+            let target_slot = if current_slot == "_a" { "_b" } else { "_a" };
+            eprintln!("- Target slot: inactive ({target_slot})");
+        }
+
         utils::ensure_dir_exists(defs::WORKING_DIR)
             .context("failed to create the KernelSU working directory")?;
         let lock = File::create(Path::new(defs::WORKING_DIR).join(".anykernel3.lock"))?;
@@ -378,7 +425,7 @@ mod android {
             .tempdir_in(defs::WORKING_DIR)
             .context("failed to create the AnyKernel3 working directory")?;
 
-        let flash_result = flash_inner(&temp_dir, &zip_path);
+        let flash_result = flash_inner(&temp_dir, &zip_path, inactive_slot);
         let cleanup_result = temp_dir
             .close()
             .context("failed to remove the AnyKernel3 working directory");

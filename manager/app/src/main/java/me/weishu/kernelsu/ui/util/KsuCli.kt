@@ -397,7 +397,8 @@ private fun flashWithIO(
 fun flashAnyKernel(
     uri: Uri,
     onStdout: (String) -> Unit,
-    onStderr: (String) -> Unit
+    onStderr: (String) -> Unit,
+    inactiveSlot: Boolean = false,
 ): FlashResult {
     var file: File? = null
     return try {
@@ -409,7 +410,12 @@ fun flashAnyKernel(
         }
         input.use { source -> archive.outputStream().use { source.copyTo(it) } }
         val quotedPath = "'" + archive.absolutePath.replace("'", "'\"'\"'") + "'"
-        val result = flashWithIO("${getKsuDaemonPath()} anykernel3 $quotedPath", onStdout, onStderr)
+        val inactiveArg = if (inactiveSlot) " --inactive-slot" else ""
+        val result = flashWithIO(
+            "${getKsuDaemonPath()} anykernel3 $quotedPath$inactiveArg",
+            onStdout,
+            onStderr,
+        )
         FlashResult(result, result.isSuccess)
     } catch (e: Exception) {
         onStderr(e.toString())

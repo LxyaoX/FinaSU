@@ -62,7 +62,11 @@ class RootPartitionAccess : PartitionAccess {
     /** Resolves [partition] to an absolute block device path, preferring the active slot. */
     private suspend fun resolveDevice(partition: String): String {
         val slot = backupResult { getSlotSuffix(false) }.getOrNull()?.trim().orEmpty()
-        val names = listOf(partition + slot, partition).distinct()
+        val names = if (partition.endsWith("_a") || partition.endsWith("_b")) {
+            listOf(partition)
+        } else {
+            listOf(partition + slot, partition).distinct()
+        }
         for (root in BY_NAME_ROOTS) {
             for (name in names) {
                 val path = "$root/$name"

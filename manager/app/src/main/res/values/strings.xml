@@ -4,10 +4,19 @@
     <string name="settings_shell_su_adb_only_summary">Extra check when Shell is granted root: only processes spawned by adbd or a KernelSU root process (e.g. an ADB module) can use it, preventing apps that obtain shell privileges from escalating to root</string>
     <string name="feature_status_forced_summary">Forced by boot configuration; cannot be changed here</string>
     <string name="install_anykernel">Flash AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">Run a trusted kernel installer using the current slot. Root required.</string>
+    <string name="install_anykernel_summary">Run a trusted kernel installer on the current or unused A/B slot. Root required.</string>
     <string name="install_anykernel_warning">This ZIP runs with root and may modify multiple partitions. The installer controls which partitions and slots are written; KernelSU does not override the slot or refresh ksud. A successful install does not guarantee bootability, and failure may leave partial changes. Existing boot-image backups may not cover these changes. Confirm device compatibility and prepare a recovery image before continuing.</string>
     <string name="install_anykernel_root_required">Root is required to flash AnyKernel3.</string>
     <string name="install_anykernel_read_failed">Unable to read the AnyKernel3 ZIP.</string>
+    <string name="install_anykernel_target_slot">Target slot</string>
+    <string name="install_anykernel_current_slot">Current slot (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">Current slot</string>
+    <string name="install_anykernel_inactive_slot">Unused slot (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">Unknown file</string>
+    <string name="install_anykernel_size_unknown">Unknown size</string>
+    <string name="install_anykernel_confirm_details">File: %1$s\nSize: %2$s\nTarget slot: %3$s</string>
+    <string name="install_anykernel_confirm_note">The installer still determines which partitions and slots are written. Inactive-slot installation requires SLOT_SELECT support, which ksud validates before running. The active slot is not switched automatically; after restarting, the device may still boot the current slot.</string>
     <string name="home">Home</string>
     <string name="home_not_installed">Not installed</string>
     <string name="home_click_to_install">Tap to install</string>
@@ -251,6 +260,7 @@
     <string name="flashing">Flashing</string>
     <string name="flash_success">Flash success</string>
     <string name="flash_failed">Flash failed</string>
+    <string name="flash_log_saved">Log saved to %1$s</string>
     <string name="flash_back_blocked">Flashing in progress, please wait</string>
     <string name="selected_lkm">Selected LKM: %s</string>
     <string name="save_log">Save logs</string>
@@ -465,6 +475,10 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="download">Download</string>
     <string name="download_cancel">Cancel</string>
     <string name="download_install">Install</string>
+    <string name="settings_finasu_hide" translatable="false">KernelSU Hide</string>
+    <string name="settings_finasu_hide_summary">Partially hide the Bootloader unlock state</string>
+    <string name="settings_finasu_hide_reboot_hint">The real value returns after reboot</string>
+    <string name="settings_finasu_hide_failed">Failed to change KernelSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Run adbd daemon with Root privileges</string>
     <string name="menu_sort">Sort</string>

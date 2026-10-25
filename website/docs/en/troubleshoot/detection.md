@@ -114,6 +114,8 @@ A wrong SELinux setting can also break app features directly. If an app cannot a
 
 **UTS View** only affects the `uname` fields that selected processes see. It cannot change hardware attestation, system properties, app caches or a full device fingerprint. See [UTS View](/en/builtin/uts-view/).
 
+**System properties**: after FinaSU Hide is enabled, only bootloader-state properties are overridden; other property surfaces remain outside its scope.
+
 **FolkZygisk and Sui** are feature providers, not hiding switches. They may themselves create new observable surfaces; do not assume the system is stealthier because Zygisk or Sui is enabled.
 
 ## Ask Four Questions First

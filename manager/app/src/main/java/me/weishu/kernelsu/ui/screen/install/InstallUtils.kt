@@ -7,14 +7,20 @@ import android.provider.OpenableColumns
 import androidx.annotation.StringRes
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
+import java.io.File
 
 @Parcelize
 internal sealed class InstallMethod : Parcelable {
     data class AnyKernel(
         val uri: Uri? = null,
         @get:StringRes override val label: Int = R.string.install_anykernel,
-        override val summary: String?
+        override val summary: String?,
+        val displayName: String? = null,
+        val sizeBytes: Long? = null,
+        val inactiveSlot: Boolean = false,
     ) : InstallMethod()
 
     data class SelectFile(
@@ -45,6 +51,50 @@ internal sealed class InstallMethod : Parcelable {
     @IgnoredOnParcel
     open val summary: String? = null
 }
+
+internal data class AnyKernelFileInfo(
+    val displayName: String?,
+    val sizeBytes: Long?,
+)
+
+internal suspend fun readAnyKernelFileInfo(context: Context, uri: Uri): AnyKernelFileInfo =
+    withContext(Dispatchers.IO) {
+        if (uri.scheme == "file") {
+            val file = uri.path?.let(::File)
+            return@withContext AnyKernelFileInfo(
+                displayName = file?.name,
+                sizeBytes = file?.takeIf(File::exists)?.length(),
+            )
+        }
+
+        var displayName: String? = null
+        var sizeBytes: Long? = null
+        try {
+            context.contentResolver.query(
+                uri,
+                arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+                null,
+                null,
+                null,
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex != -1 && !cursor.isNull(nameIndex)) {
+                        displayName = cursor.getString(nameIndex)?.takeIf(String::isNotBlank)
+                    }
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
+                        sizeBytes = cursor.getLong(sizeIndex).takeIf { it >= 0 }
+                    }
+                }
+            }
+        } catch (_: Throwable) {
+        }
+        AnyKernelFileInfo(
+            displayName = displayName ?: uri.lastPathSegment,
+            sizeBytes = sizeBytes,
+        )
+    }
 
 fun isKoFile(context: Context, uri: Uri): Boolean {
     val seg = uri.lastPathSegment ?: ""

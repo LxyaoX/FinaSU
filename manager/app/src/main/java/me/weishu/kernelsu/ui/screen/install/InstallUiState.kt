@@ -21,6 +21,11 @@ internal data class InstallUiState(
     val forceBackup: Boolean,
     val canForceBackup: Boolean,
     val backupBeforeFlash: Boolean,
+    val anyKernelFileName: String?,
+    val anyKernelSizeLabel: String?,
+    val anyKernelSlotOptions: List<String>,
+    val anyKernelSlotIndex: Int,
+    val showAnyKernelSlotSelector: Boolean,
 )
 
 @Immutable
@@ -30,6 +35,7 @@ internal data class InstallScreenActions(
     val onDownloadFile: () -> Unit,
     val onSelectBootImage: () -> Unit,
     val onSelectAnyKernel: () -> Unit,
+    val onSelectAnyKernelSlot: (Int) -> Unit,
     val onUploadLkm: () -> Unit,
     val onClearLkm: () -> Unit,
     val onSelectPartition: (Int) -> Unit,

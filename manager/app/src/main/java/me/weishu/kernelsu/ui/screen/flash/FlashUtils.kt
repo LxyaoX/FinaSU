@@ -40,6 +40,7 @@ import me.weishu.kernelsu.ui.util.LkmSelection
 import me.weishu.kernelsu.ui.util.downloadBoot
 import me.weishu.kernelsu.ui.util.flashModuleBatch
 import me.weishu.kernelsu.ui.util.getFileName
+import me.weishu.kernelsu.ui.util.getSlotSuffix
 import me.weishu.kernelsu.ui.util.installBoot
 import me.weishu.kernelsu.ui.util.restoreBoot
 import me.weishu.kernelsu.ui.util.uninstallPermanently
@@ -78,7 +79,12 @@ enum class UninstallType(val icon: ImageVector, val title: Int, val message: Int
 @Parcelize
 sealed class FlashIt : Parcelable {
     @Parcelize
-    data class FlashAnyKernel(val uri: Uri) : FlashIt()
+    data class FlashAnyKernel(
+        val uri: Uri,
+        val displayName: String? = null,
+        val sizeBytes: Long? = null,
+        val inactiveSlot: Boolean = false,
+    ) : FlashIt()
     @Parcelize
     data class FlashBoot(
         val boot: Uri? = null,
@@ -126,7 +132,7 @@ suspend fun flashIt(
     snapshotBeforeFlash(flashIt, onStdout)
     return when (flashIt) {
         is FlashIt.FlashAnyKernel -> me.weishu.kernelsu.ui.util.flashAnyKernel(
-            flashIt.uri, onStdout, onStderr
+            flashIt.uri, onStdout, onStderr, flashIt.inactiveSlot
         )
         is FlashIt.FlashBoot -> installBoot(
             flashIt.boot,
@@ -171,6 +177,7 @@ private fun FlashIt.preliminaryBackupKinds(): Set<BackupKind> = when (this) {
 
 /** Partitions a flash is about to write, so the snapshot can cover them even if not selected. */
 private fun FlashIt.overwrittenPartitions(): Set<String> = when (this) {
+    is FlashIt.FlashAnyKernel -> setOf("boot", "init_boot", "vendor_boot")
     is FlashIt.FlashBoot -> setOfNotNull(partition)
     is FlashIt.DownloadBoot -> setOf(partition)
     else -> emptySet()
@@ -185,7 +192,18 @@ private suspend fun snapshotBeforeFlash(flashIt: FlashIt, onStdout: (String) -> 
     var installers = emptyList<ModuleInstaller>()
     try {
         if (settings.backupModulesEnabled) installers = stageModuleInstallers(flashIt)
-        PreFlashBackup(settings = settings).run(kinds, flashIt.overwrittenPartitions(), installers, onStdout)
+        val slotSuffix = if ((flashIt as? FlashIt.FlashAnyKernel)?.inactiveSlot == true) {
+            getSlotSuffix(true)
+        } else {
+            null
+        }
+        PreFlashBackup(settings = settings).run(
+            kinds = kinds,
+            extraPartitions = flashIt.overwrittenPartitions(),
+            moduleInstallers = installers,
+            onLog = onStdout,
+            slotSuffix = slotSuffix,
+        )
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
@@ -233,7 +251,8 @@ fun FlashEffect(
     onTextUpdate: (String) -> Unit,
     onShowRebootChange: (Boolean) -> Unit,
     onFlashingStatusChange: (FlashingStatus) -> Unit,
-    enabled: Boolean = true
+    showStderr: Boolean = false,
+    enabled: Boolean = true,
 ) {
     LaunchedEffect(enabled) {
         if (!enabled || text.isNotEmpty()) {
@@ -255,6 +274,12 @@ fun FlashEffect(
                 logContent.append(it).append("\n")
             }, onStderr = {
                 logContent.append(it).append("\n")
+                if (showStderr) {
+                    currentText += "$it\n"
+                    mainHandler.post {
+                        onTextUpdate(currentText)
+                    }
+                }
             }).apply {
                 if (code != 0) {
                     currentText += "Error code: $code.\n $err Please save and check the log.\n"
@@ -280,7 +305,8 @@ fun FlashEffect(
 fun saveLog(
     logContent: StringBuilder,
     scope: CoroutineScope,
-    showMessage: (String) -> Unit
+    filePrefix: String = "KernelSU_install",
+    showMessage: (String) -> Unit,
 ): () -> Unit {
     return {
         scope.launch {
@@ -288,10 +314,10 @@ fun saveLog(
             val date = format.format(Date())
             val file = File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                "KernelSU_install_log_${date}.log"
+                "${filePrefix}_${date}.log"
             )
             file.writeText(logContent.toString())
-            showMessage("Log saved to ${file.absolutePath}")
+            showMessage(ksuApp.getString(R.string.flash_log_saved, file.absolutePath))
         }
     }
 }

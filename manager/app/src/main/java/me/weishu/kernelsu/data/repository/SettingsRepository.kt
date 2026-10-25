@@ -137,6 +137,8 @@ interface SettingsRepository {
     suspend fun getAdbRootPersistValue(): Long?
     suspend fun getAdbRootValue(): Long?
     fun setAdbRootEnabled(enabled: Boolean): Boolean
+    suspend fun getBootHideStatus(): String
+    fun setBootHideEnabled(enabled: Boolean): Boolean
     suspend fun getShellSuAdbOnlyStatus(): String
     suspend fun getShellSuAdbOnlyPersistValue(): Long?
     suspend fun getShellSuAdbOnlyValue(): Long?

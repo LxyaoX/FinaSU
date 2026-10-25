@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">Shell に root を付与する際の追加チェック: adbd または KernelSU の root プロセス (例: ADB モジュール) が起動したプロセスのみ使用でき、shell 権限を得たアプリが root へ昇格するのを防ぎます</string>
     <string name="feature_status_forced_summary">起動設定により強制されています。ここでは変更できません</string>
     <string name="install_anykernel">AnyKernel3 ZIP を書き込む</string>
-    <string name="install_anykernel_summary">現在のスロットで信頼できるカーネルインストーラーを実行します。root 権限が必要です。</string>
+    <string name="install_anykernel_summary">現在または未使用の A/B スロットで信頼済みカーネルインストーラーを実行します。Root 権限が必要です。</string>
     <string name="install_anykernel_warning">この ZIP は root 権限で実行され、複数のパーティションを変更する可能性があります。書き込まれるパーティションとスロットはインストーラーが制御し、FinaSU はスロットの上書きや ksud の更新を行いません。インストールが成功しても起動できるとは限らず、失敗すると変更が中途半端に残る可能性があります。既存の boot イメージのバックアップではこれらの変更をカバーできない場合があります。続行する前にデバイスの互換性を確認し、リカバリーイメージを用意してください。</string>
     <string name="install_anykernel_root_required">AnyKernel3 を書き込むには root 権限が必要です。</string>
     <string name="install_anykernel_read_failed">AnyKernel3 ZIP を読み込めませんでした。</string>
@@ -446,6 +446,9 @@
     <string name="download">ダウンロード</string>
     <string name="download_cancel">キャンセル</string>
     <string name="download_install">インストール</string>
+    <string name="settings_finasu_hide_summary">Bootloader のロック解除状態をある程度隠します</string>
+    <string name="settings_finasu_hide_reboot_hint">再起動後に実際の値に戻ります</string>
+    <string name="settings_finasu_hide_failed">FinaSU Hide を変更できませんでした</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">adbd デーモンを Root 権限で実行します</string>
     <string name="menu_sort">並べ替え</string>
@@ -752,4 +755,36 @@
     <string name="module_preinit_bootloop">起動の再試行が続いたためプリイニットを一時停止しました</string>
     <string name="module_preinit_unsupported">このカーネルまたは読み込みモードではプリイニットを利用できません</string>
     <string name="zygisk_required">先に Zygisk を有効にしてください</string>
+    <string name="guide_welcome_title">FinaSU へようこそ</string>
+    <string name="guide_welcome_desc">カーネルレベルの root 管理。Zygisk エンジン、Shizuku API バックエンド、VFS パスリダイレクト、モジュールマウントエンジンを内蔵。</string>
+    <string name="guide_repo_title">GitHub でオープンソース</string>
+    <string name="guide_repo_desc">ソースコード、問題報告、リリースノートはすべてリポジトリにあります。</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">リポジトリを開く</string>
+    <string name="guide_features_title">内蔵機能</string>
+    <string name="guide_features_desc">4つのエンジンをマネージャーに内蔵。追加モジュールは不要です。</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 実装</string>
+    <string name="guide_feature_sui">Sui — Shizuku API バックエンド</string>
+    <string name="guide_feature_nomount">NoMount — VFS パスリダイレクト</string>
+    <string name="guide_feature_mount">Folk Mount — モジュールマウントエンジン</string>
+    <string name="guide_docs_title">困ったときはドキュメントへ</string>
+    <string name="guide_docs_desc">インストール、モジュール、トラブルシューティングはすべて文書化されています。このガイドは「設定 → アプリについて」からいつでも再度開けます。</string>
+    <string name="guide_docs_action">ドキュメントを開く</string>
+    <string name="guide_next">次へ</string>
+    <string name="guide_prev">戻る</string>
+    <string name="guide_skip">スキップ</string>
+    <string name="guide_start">はじめる</string>
+    <string name="guide_page_indicator">%1$d / %2$d ページ</string>
+    <string name="guide_about_entry_title">ウェルカムガイドをもう一度表示</string>
+    <string name="guide_about_entry_summary">初回起動の紹介をもう一度再生</string>
+    <string name="install_anykernel_target_slot">対象スロット</string>
+    <string name="install_anykernel_current_slot">現在のスロット（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">現在のスロット</string>
+    <string name="install_anykernel_inactive_slot">未使用スロット（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">不明なファイル</string>
+    <string name="install_anykernel_size_unknown">不明なサイズ</string>
+    <string name="install_anykernel_confirm_details">ファイル：%1$s\nサイズ：%2$s\n対象スロット：%3$s</string>
+    <string name="install_anykernel_confirm_note">実際に書き込まれるパーティションとスロットはインストーラーが決定します。未使用スロットへのインストールには SLOT_SELECT 対応が必要で、ksud が実行前に検証します。アクティブスロットは自動で切り替わりません。再起動後も現在のスロットから起動する場合があります。</string>
+    <string name="flash_log_saved">ログを %1$s に保存しました</string>
 </resources>
