@@ -15,12 +15,10 @@ import org.junit.Test
 class HomeUiStateTest {
 
     @Test
-    fun `all home layouts share detected SUSFS state and navigation action`() {
+    fun `the home page carries detected SUSFS state and its navigation action`() {
         val susfs = me.weishu.kernelsu.data.susfs.SusfsStatus(protocol = "compatible", version = "v2.3.0")
-        for (layout in me.weishu.kernelsu.data.model.HomeLayoutStyle.supported) {
-            val home = state(RootShellStatus.Ready).copy(susfs = susfs)
-            assertTrue("$layout", home.susfs.detected)
-        }
+        val home = state(RootShellStatus.Ready).copy(susfs = susfs)
+        assertTrue(home.susfs.detected)
         var opened = false
         HomeActions({}, {}, onSusfs = { opened = true }).onSusfs()
         assertTrue(opened)
