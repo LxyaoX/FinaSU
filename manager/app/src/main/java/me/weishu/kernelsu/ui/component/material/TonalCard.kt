@@ -7,7 +7,9 @@ import androidx.compose.material3.Card as MaterialCard
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,7 +119,11 @@ fun TonalCard(
         // are made of. A card that carries a semantic colour (errorContainer, secondaryContainer…)
         // keeps Material's tinted card, because miuix would paint it as a plain surface.
         MiuixCard(modifier = modifier.then(originModifier).then(clickModifier)) {
-            content()
+            // miuix's card publishes miuix's own content colour; Material's `Text`/`Icon` read
+            // Material's local, so the card's colour is published again for them.
+            CompositionLocalProvider(LocalContentColor provides contentColor) {
+                content()
+            }
         }
     } else {
         MaterialCard(

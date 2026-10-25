@@ -1,5 +1,6 @@
 package me.weishu.kernelsu.ui.theme
 
+import androidx.compose.material3.LocalContentColor as MaterialLocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -63,6 +64,11 @@ fun MiuixKernelSUTheme(
             // miuix draws text with LocalContentColor, Material draws it with contentColorFor();
             // seeding it from the miuix surface keeps text readable on miuix backgrounds.
             LocalContentColor provides MiuixTheme.colorScheme.onBackground,
+            // Material's LocalContentColor is a different local with a black default. Nothing above a
+            // Material Scaffold/Surface seeds it - and miuix's scaffold, top bar and cards are not
+            // Material surfaces - so text and icons placed in them would fall back to black. Seed it
+            // here; any Material Surface inside still overrides it with its own content colour.
+            MaterialLocalContentColor provides MiuixTheme.colorScheme.onBackground,
             content = content,
         )
     }
