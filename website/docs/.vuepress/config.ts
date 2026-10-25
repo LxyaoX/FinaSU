@@ -44,6 +44,17 @@ export default defineUserConfig({
 
     search: { provider: 'local' },
 
+    llmstxt: {
+      domain: 'https://fina.mysqil.com',
+      locale: 'all',
+      llmsTxtTemplateGetter: {
+        alternateLinks: (_pages, state) =>
+          state.currentLocale === '/'
+            ? `\n\n## Alternate Language Versions\n\n- [en-US](${state.domain}/en/llms.txt)\n\n`
+            : '',
+      },
+    },
+
     codeHighlighter: {
       twoslash: false,
       whitespace: false,

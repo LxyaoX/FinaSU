@@ -26,6 +26,16 @@ export default defineThemeConfig({
 
       selectLanguageName: '简体中文',
 
+      copyPageText: '复制页面',
+      copiedPageText: '已复制',
+      copingPageText: '复制中…',
+      copyTagline: '复制为 Markdown，供 LLM 使用',
+      viewMarkdown: '查看 Markdown',
+      viewMarkdownTagline: '以纯文本查看此页',
+      askAIText: '在 {name} 中打开',
+      askAITagline: '向 {name} 询问此页',
+      askAIMessage: '阅读 {link}，并回答与页面内容相关的问题。',
+
       navbar: zhNavbar,
       sidebar: { '/': docsSidebar },
       collections: zhCollections,
@@ -39,6 +49,16 @@ export default defineThemeConfig({
       },
 
       selectLanguageName: 'English',
+
+      copyPageText: 'Copy page',
+      copiedPageText: 'Copied',
+      copingPageText: 'Copying…',
+      copyTagline: 'Copy page as Markdown for LLMs',
+      viewMarkdown: 'View Markdown',
+      viewMarkdownTagline: 'View this page as plain text',
+      askAIText: 'Open in {name}',
+      askAITagline: 'Ask {name} about this page',
+      askAIMessage: 'Read {link} and answer questions about this page.',
 
       navbar: enNavbar,
       sidebar: { '/': enDocsSidebar },
