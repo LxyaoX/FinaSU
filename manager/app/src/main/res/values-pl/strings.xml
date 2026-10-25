@@ -1011,4 +1011,26 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="module_preinit_error">Synchronizacja preinicjalizacji nie powiodła się; zachowano poprzednią konfigurację</string>
     <string name="module_preinit_bootloop">Preinicjalizacja wstrzymana po kilku próbach rozruchu</string>
     <string name="module_preinit_unsupported">Preinicjalizacja niedostępna w tym jądrze lub trybie ładowania</string>
+    <string name="guide_welcome_title">Witamy w FinaSU</string>
+    <string name="guide_welcome_desc">Zarządzanie rootem na poziomie jądra z wbudowanym silnikiem Zygisk, backendem Shizuku API, przekierowaniem ścieżek VFS i silnikiem montowania modułów.</string>
+    <string name="guide_repo_title">Otwarte źródła na GitHubie</string>
+    <string name="guide_repo_desc">Kod źródłowy, zgłoszenia problemów i informacje o wydaniach znajdują się w repozytorium.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Otwórz repozytorium</string>
+    <string name="guide_features_title">Wbudowane funkcje</string>
+    <string name="guide_features_desc">Cztery silniki działają w menedżerze, bez potrzeby instalowania dodatkowych modułów.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — implementacja Zygisk</string>
+    <string name="guide_feature_sui">Sui — backend Shizuku API</string>
+    <string name="guide_feature_nomount">NoMount — przekierowanie ścieżek VFS</string>
+    <string name="guide_feature_mount">Folk Mount — silnik montowania modułów</string>
+    <string name="guide_docs_title">Masz problem? Przeczytaj dokumentację</string>
+    <string name="guide_docs_desc">Instalacja, moduły i rozwiązywanie problemów są opisane w dokumentacji. Ten przewodnik możesz ponownie otworzyć w Ustawienia → Informacje.</string>
+    <string name="guide_docs_action">Otwórz dokumentację</string>
+    <string name="guide_next">Dalej</string>
+    <string name="guide_prev">Wstecz</string>
+    <string name="guide_skip">Pomiń</string>
+    <string name="guide_start">Rozpocznij</string>
+    <string name="guide_page_indicator">Strona %1$d z %2$d</string>
+    <string name="guide_about_entry_title">Pokaż przewodnik powitalny ponownie</string>
+    <string name="guide_about_entry_summary">Odtwórz ponownie wprowadzenie przy pierwszym uruchomieniu</string>
 </resources>

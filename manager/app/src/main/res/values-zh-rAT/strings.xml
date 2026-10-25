@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">预启同步未成，仍守旧制</string>
     <string name="module_preinit_bootloop">屡启未成，预启暂止</string>
     <string name="module_preinit_unsupported">此内核或加载之法不容预启</string>
+    <string name="guide_welcome_title">欢迎莅临 FinaSU</string>
+    <string name="guide_welcome_desc">内核级 Root 权柄，Zygisk 圣器、Shizuku API 圣座、VFS 路径引导与模块圣装法阵，皆已内置。</string>
+    <string name="guide_repo_title">GitHub 开源圣典</string>
+    <string name="guide_repo_desc">源码、问题奏报与版本谕示，皆藏于圣典库中。</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">开启圣典库</string>
+    <string name="guide_features_title">内置圣能</string>
+    <string name="guide_features_desc">四道引擎已驻守于管理器之内，无需额外圣装模块。</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 圣器</string>
+    <string name="guide_feature_sui">Sui — Shizuku API 圣座</string>
+    <string name="guide_feature_nomount">NoMount — VFS 路径引导</string>
+    <string name="guide_feature_mount">Folk Mount — 模块圣装法阵</string>
+    <string name="guide_docs_title">迷途了吗？请览圣典</string>
+    <string name="guide_docs_desc">安装、模块与疑难解答皆有圣典记载；可随时从「神谕圣所 → 创世之纪」重开此引导。</string>
+    <string name="guide_docs_action">开启圣典</string>
+    <string name="guide_next">续行</string>
+    <string name="guide_prev">回返</string>
+    <string name="guide_skip">略过</string>
+    <string name="guide_start">启程</string>
+    <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页</string>
+    <string name="guide_about_entry_title">重观迎接指引</string>
+    <string name="guide_about_entry_summary">重演初临圣域之引</string>
 </resources>

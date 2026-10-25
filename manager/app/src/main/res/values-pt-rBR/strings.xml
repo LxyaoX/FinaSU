@@ -1009,4 +1009,26 @@
     <string name="module_preinit_error">Falha ao sincronizar a pré-inicialização; a configuração anterior foi mantida</string>
     <string name="module_preinit_bootloop">Pré-inicialização pausada após várias tentativas de inicialização</string>
     <string name="module_preinit_unsupported">Pré-inicialização indisponível neste kernel ou modo de carregamento</string>
+    <string name="guide_welcome_title">Boas-vindas ao FinaSU</string>
+    <string name="guide_welcome_desc">Gerenciamento de root em nível de kernel com motor Zygisk, backend da API Shizuku, redirecionamento de caminhos VFS e motor de montagem de módulos integrados.</string>
+    <string name="guide_repo_title">Código aberto no GitHub</string>
+    <string name="guide_repo_desc">O código-fonte, os relatórios de problemas e as notas de versão ficam todos no repositório.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Abrir repositório</string>
+    <string name="guide_features_title">Recursos integrados</string>
+    <string name="guide_features_desc">Quatro motores executam no gerenciador, sem necessidade de módulos extras.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — implementação do Zygisk</string>
+    <string name="guide_feature_sui">Sui — backend da API Shizuku</string>
+    <string name="guide_feature_nomount">NoMount — redirecionamento de caminhos VFS</string>
+    <string name="guide_feature_mount">Folk Mount — motor de montagem de módulos</string>
+    <string name="guide_docs_title">Precisa de ajuda? Leia a documentação</string>
+    <string name="guide_docs_desc">Instalação, módulos e solução de problemas estão documentados. Você pode reabrir este guia em Configurações → Sobre a qualquer momento.</string>
+    <string name="guide_docs_action">Abrir documentação</string>
+    <string name="guide_next">Próximo</string>
+    <string name="guide_prev">Voltar</string>
+    <string name="guide_skip">Pular</string>
+    <string name="guide_start">Começar</string>
+    <string name="guide_page_indicator">Página %1$d de %2$d</string>
+    <string name="guide_about_entry_title">Mostrar novamente o guia de boas-vindas</string>
+    <string name="guide_about_entry_summary">Reproduzir novamente a introdução de primeira inicialização</string>
 </resources>

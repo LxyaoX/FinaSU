@@ -1009,4 +1009,26 @@
     <string name="module_preinit_error">فشلت مزامنة التهيئة المسبقة؛ تم الاحتفاظ بالإعداد السابق</string>
     <string name="module_preinit_bootloop">تم إيقاف التهيئة المسبقة مؤقتًا بعد محاولات إقلاع متكررة</string>
     <string name="module_preinit_unsupported">التهيئة المسبقة غير متاحة في هذا النواة أو وضع التحميل</string>
+    <string name="guide_welcome_title">مرحبًا بك في FinaSU</string>
+    <string name="guide_welcome_desc">إدارة Root على مستوى النواة مع محرك Zygisk وخلفية Shizuku API وإعادة توجيه مسارات VFS ومحرك تركيب الوحدات، كلها مدمجة.</string>
+    <string name="guide_repo_title">مفتوح المصدر على GitHub</string>
+    <string name="guide_repo_desc">الشيفرة المصدرية وتقارير المشكلات وملاحظات الإصدارات موجودة جميعها في المستودع.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">فتح المستودع</string>
+    <string name="guide_features_title">ميزات مدمجة</string>
+    <string name="guide_features_desc">تعمل أربعة محركات داخل المدير، دون الحاجة إلى وحدة إضافية.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — تطبيق Zygisk</string>
+    <string name="guide_feature_sui">Sui — خلفية Shizuku API</string>
+    <string name="guide_feature_nomount">NoMount — إعادة توجيه مسارات VFS</string>
+    <string name="guide_feature_mount">Folk Mount — محرك تركيب الوحدات</string>
+    <string name="guide_docs_title">هل تحتاج إلى مساعدة؟ اقرأ الوثائق</string>
+    <string name="guide_docs_desc">تتوفر وثائق التثبيت والوحدات واستكشاف الأخطاء وإصلاحها. يمكنك إعادة فتح هذا الدليل من الإعدادات ← حول في أي وقت.</string>
+    <string name="guide_docs_action">فتح الوثائق</string>
+    <string name="guide_next">التالي</string>
+    <string name="guide_prev">السابق</string>
+    <string name="guide_skip">تخطي</string>
+    <string name="guide_start">البدء</string>
+    <string name="guide_page_indicator">الصفحة %1$d من %2$d</string>
+    <string name="guide_about_entry_title">عرض دليل الترحيب مرة أخرى</string>
+    <string name="guide_about_entry_summary">إعادة عرض مقدمة التشغيل الأولى</string>
 </resources>

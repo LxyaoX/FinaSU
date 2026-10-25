@@ -1009,4 +1009,26 @@
     <string name="module_preinit_error">Не удалось синхронизировать предынициализацию; прежняя конфигурация сохранена</string>
     <string name="module_preinit_bootloop">Предынициализация приостановлена после нескольких попыток загрузки</string>
     <string name="module_preinit_unsupported">Предынициализация недоступна в этом ядре или режиме загрузки</string>
+    <string name="guide_welcome_title">Добро пожаловать в FinaSU</string>
+    <string name="guide_welcome_desc">Управление root на уровне ядра со встроенными движком Zygisk, бэкендом Shizuku API, перенаправлением путей VFS и движком монтирования модулей.</string>
+    <string name="guide_repo_title">Открытый исходный код на GitHub</string>
+    <string name="guide_repo_desc">Исходный код, сообщения о проблемах и примечания к выпускам находятся в репозитории.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Открыть репозиторий</string>
+    <string name="guide_features_title">Встроенные функции</string>
+    <string name="guide_features_desc">В менеджере работают четыре движка; дополнительный модуль не требуется.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — реализация Zygisk</string>
+    <string name="guide_feature_sui">Sui — бэкенд Shizuku API</string>
+    <string name="guide_feature_nomount">NoMount — перенаправление путей VFS</string>
+    <string name="guide_feature_mount">Folk Mount — движок монтирования модулей</string>
+    <string name="guide_docs_title">Не получается? Читайте документацию</string>
+    <string name="guide_docs_desc">Установка, модули и устранение неполадок описаны в документации. Это руководство можно снова открыть в разделе «Настройки → О приложении».</string>
+    <string name="guide_docs_action">Открыть документацию</string>
+    <string name="guide_next">Далее</string>
+    <string name="guide_prev">Назад</string>
+    <string name="guide_skip">Пропустить</string>
+    <string name="guide_start">Начать</string>
+    <string name="guide_page_indicator">Страница %1$d из %2$d</string>
+    <string name="guide_about_entry_title">Снова показать приветственное руководство</string>
+    <string name="guide_about_entry_summary">Повторить вводную при первом запуске</string>
 </resources>

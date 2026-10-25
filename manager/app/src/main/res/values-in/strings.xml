@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">Sinkronisasi pra-inisialisasi gagal; konfigurasi sebelumnya dipertahankan</string>
     <string name="module_preinit_bootloop">Pra-inisialisasi dijeda setelah beberapa kali percobaan boot</string>
     <string name="module_preinit_unsupported">Pra-inisialisasi tidak tersedia pada kernel atau mode muat ini</string>
+    <string name="guide_welcome_title">Selamat datang di FinaSU</string>
+    <string name="guide_welcome_desc">Manajemen root tingkat kernel dengan engine Zygisk, backend Shizuku API, pengalihan jalur VFS, dan engine pemasangan modul yang sudah terpasang.</string>
+    <string name="guide_repo_title">Sumber terbuka di GitHub</string>
+    <string name="guide_repo_desc">Kode sumber, laporan masalah, dan catatan rilis semuanya tersedia di repositori.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Buka repositori</string>
+    <string name="guide_features_title">Fitur bawaan</string>
+    <string name="guide_features_desc">Empat engine berjalan di dalam pengelola, tanpa perlu modul tambahan.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — implementasi Zygisk</string>
+    <string name="guide_feature_sui">Sui — backend Shizuku API</string>
+    <string name="guide_feature_nomount">NoMount — pengalihan jalur VFS</string>
+    <string name="guide_feature_mount">Folk Mount — engine pemasangan modul</string>
+    <string name="guide_docs_title">Bingung? Baca dokumentasi</string>
+    <string name="guide_docs_desc">Instalasi, modul, dan pemecahan masalah semuanya didokumentasikan. Anda dapat membuka panduan ini lagi dari Setelan → Tentang kapan saja.</string>
+    <string name="guide_docs_action">Buka dokumentasi</string>
+    <string name="guide_next">Berikutnya</string>
+    <string name="guide_prev">Kembali</string>
+    <string name="guide_skip">Lewati</string>
+    <string name="guide_start">Mulai</string>
+    <string name="guide_page_indicator">Halaman %1$d dari %2$d</string>
+    <string name="guide_about_entry_title">Tampilkan panduan selamat datang lagi</string>
+    <string name="guide_about_entry_summary">Putar ulang pengenalan saat pertama kali dibuka</string>
 </resources>

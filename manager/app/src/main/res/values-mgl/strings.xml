@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">预初始化同步失败，仍守旧有配置</string>
     <string name="module_preinit_bootloop">多次觉醒未成，预初始化已暂停</string>
     <string name="module_preinit_unsupported">当前心之契约或加载模式不支持预初始化</string>
+    <string name="guide_welcome_title">欢迎踏入 FinaSU 魔法领域</string>
+    <string name="guide_welcome_desc">以内核之力掌管 root，Zygisk 术式、Shizuku API 灵基、VFS 路径转移与模块召唤法阵皆已内置。</string>
+    <string name="guide_repo_title">GitHub 开源法卷</string>
+    <string name="guide_repo_desc">源码、问题反馈与版本更新，皆藏于法典库中。</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">开启法典库</string>
+    <string name="guide_features_title">内置魔法</string>
+    <string name="guide_features_desc">四道法阵已封入管理器，无须外加魔法模块。</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 术式</string>
+    <string name="guide_feature_sui">Sui — Shizuku API 灵基</string>
+    <string name="guide_feature_nomount">NoMount — VFS 路径转移</string>
+    <string name="guide_feature_mount">Folk Mount — 模块召唤法阵</string>
+    <string name="guide_docs_title">遇到阻碍？翻阅典藏</string>
+    <string name="guide_docs_desc">安装、模块与问题排解皆有典藏；随时可在「魔法设定 → 关于」重启本引路。</string>
+    <string name="guide_docs_action">翻阅典藏</string>
+    <string name="guide_next">下一则</string>
+    <string name="guide_prev">上一则</string>
+    <string name="guide_skip">跳过</string>
+    <string name="guide_start">开启旅程</string>
+    <string name="guide_page_indicator">第 %1$d 章，共 %2$d 章</string>
+    <string name="guide_about_entry_title">重观新手引路</string>
+    <string name="guide_about_entry_summary">重温初临此地的指引</string>
 </resources>

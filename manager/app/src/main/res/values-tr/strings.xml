@@ -1009,4 +1009,26 @@
     <string name="module_preinit_error">Ön başlatma eşitlemesi başarısız; önceki yapılandırma korundu</string>
     <string name="module_preinit_bootloop">Yinelenen açılış denemelerinden sonra ön başlatma duraklatıldı</string>
     <string name="module_preinit_unsupported">Ön başlatma bu çekirdekte veya yükleme modunda kullanılamıyor</string>
+    <string name="guide_welcome_title">FinaSU\'ya hoş geldiniz</string>
+    <string name="guide_welcome_desc">Zygisk motoru, Shizuku API arka ucu, VFS yol yönlendirmesi ve modül bağlama motoru yerleşik olarak sunulan çekirdek düzeyinde root yönetimi.</string>
+    <string name="guide_repo_title">GitHub\'da açık kaynak</string>
+    <string name="guide_repo_desc">Kaynak kodu, sorun bildirimleri ve sürüm notlarının tümü depoda bulunur.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Depoyu aç</string>
+    <string name="guide_features_title">Yerleşik özellikler</string>
+    <string name="guide_features_desc">Yöneticide dört motor çalışır; ek modül gerekmez.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk uygulaması</string>
+    <string name="guide_feature_sui">Sui — Shizuku API arka ucu</string>
+    <string name="guide_feature_nomount">NoMount — VFS yol yönlendirmesi</string>
+    <string name="guide_feature_mount">Folk Mount — modül bağlama motoru</string>
+    <string name="guide_docs_title">Takıldınız mı? Belgeleri okuyun</string>
+    <string name="guide_docs_desc">Kurulum, modüller ve sorun giderme belgelenmiştir. Bu kılavuzu istediğiniz zaman Ayarlar → Hakkında bölümünden yeniden açabilirsiniz.</string>
+    <string name="guide_docs_action">Belgeleri aç</string>
+    <string name="guide_next">İleri</string>
+    <string name="guide_prev">Geri</string>
+    <string name="guide_skip">Atla</string>
+    <string name="guide_start">Başla</string>
+    <string name="guide_page_indicator">Sayfa %1$d / %2$d</string>
+    <string name="guide_about_entry_title">Karşılama kılavuzunu tekrar göster</string>
+    <string name="guide_about_entry_summary">İlk açılış tanıtımını yeniden oynat</string>
 </resources>

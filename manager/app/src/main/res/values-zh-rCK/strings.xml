@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">预初始化同步砸了，先按老规矩来</string>
     <string name="module_preinit_bootloop">连开几回都没成，预初始化先歇着</string>
     <string name="module_preinit_unsupported">这口锅或这个开火法不支持预初始化</string>
+    <string name="guide_welcome_title">欢迎光临 FinaSU</string>
+    <string name="guide_welcome_desc">内核级 Root 管理这桌菜，Zygisk 做法、Shizuku API 配菜、VFS 路径改道和模块上桌引擎全都备齐了。</string>
+    <string name="guide_repo_title">GitHub 开源厨房</string>
+    <string name="guide_repo_desc">源码、问题反馈和版本更新都在仓库这口锅里。</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">打开仓库</string>
+    <string name="guide_features_title">内置招牌</string>
+    <string name="guide_features_desc">四个引擎都做进管理器里了，不用再额外加菜装模块。</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 做法</string>
+    <string name="guide_feature_sui">Sui — Shizuku API 配菜</string>
+    <string name="guide_feature_nomount">NoMount — VFS 路径改道</string>
+    <string name="guide_feature_mount">Folk Mount — 模块上桌引擎</string>
+    <string name="guide_docs_title">不会用？翻翻菜谱</string>
+    <string name="guide_docs_desc">安装、模块与常见问题都写成菜谱啦；随时能从「烹饪秘籍 → 咱家底细」再翻看这份新手指引。</string>
+    <string name="guide_docs_action">打开菜谱</string>
+    <string name="guide_next">下一道</string>
+    <string name="guide_prev">上一道</string>
+    <string name="guide_skip">跳过</string>
+    <string name="guide_start">开饭</string>
+    <string name="guide_page_indicator">第 %1$d 道，共 %2$d 道</string>
+    <string name="guide_about_entry_title">再看看新手指引</string>
+    <string name="guide_about_entry_summary">重播开张介绍</string>
 </resources>

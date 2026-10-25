@@ -1007,4 +1007,26 @@
     <string name="kernel_modules_log_outcome">Result</string>
     <string name="kernel_modules_log_boot">Boot ID</string>
     <string name="kernel_modules_unknown">Unknown</string>
+    <string name="guide_welcome_title">Welcome to FinaSU</string>
+    <string name="guide_welcome_desc">Kernel-level root management with a Zygisk engine, a Shizuku API backend, VFS path redirection and a module mount engine built in.</string>
+    <string name="guide_repo_title">Open source on GitHub</string>
+    <string name="guide_repo_desc">Source code, issue reports and release notes all live in the repository.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Open repository</string>
+    <string name="guide_features_title">What\'s built in</string>
+    <string name="guide_features_desc">Four engines run inside the manager, no extra module required.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk implementation</string>
+    <string name="guide_feature_sui">Sui — Shizuku API backend</string>
+    <string name="guide_feature_nomount">NoMount — VFS path redirection</string>
+    <string name="guide_feature_mount">Folk Mount — module mount engine</string>
+    <string name="guide_docs_title">Stuck? Read the docs</string>
+    <string name="guide_docs_desc">Installation, modules and troubleshooting are all documented. You can reopen this guide from Settings → About at any time.</string>
+    <string name="guide_docs_action">Open documentation</string>
+    <string name="guide_next">Next</string>
+    <string name="guide_prev">Back</string>
+    <string name="guide_skip">Skip</string>
+    <string name="guide_start">Get started</string>
+    <string name="guide_page_indicator">Page %1$d of %2$d</string>
+    <string name="guide_about_entry_title">Show welcome guide again</string>
+    <string name="guide_about_entry_summary">Replay the first-launch introduction</string>
 </resources>

@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">预启同步未成，仍守旧制</string>
     <string name="module_preinit_bootloop">屡启未成，预启暂歇</string>
     <string name="module_preinit_unsupported">此内核或加载之法不容预启</string>
+    <string name="guide_welcome_title">道友，欢迎踏入 FinaSU</string>
+    <string name="guide_welcome_desc">以内核之力执掌 Root，Zygisk 道法、Shizuku API 灵台、VFS 路径挪移与模块悬置法阵，皆已炼入其中。</string>
+    <string name="guide_repo_title">GitHub 开源道藏</string>
+    <string name="guide_repo_desc">源码、问题禀报与版本谕示，皆录于道藏之中。</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">开启道藏</string>
+    <string name="guide_features_title">内置道法</string>
+    <string name="guide_features_desc">四道引擎已炼入管理器，无须另寻模块法器。</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 道法</string>
+    <string name="guide_feature_sui">Sui — Shizuku API 灵台</string>
+    <string name="guide_feature_nomount">NoMount — VFS 路径挪移</string>
+    <string name="guide_feature_mount">Folk Mount — 模块悬置法阵</string>
+    <string name="guide_docs_title">道途受阻？且阅道藏</string>
+    <string name="guide_docs_desc">安装、模块与疑难排解皆有道藏可循；随时可在「天机阁 → 仙门叙略」重开此引。</string>
+    <string name="guide_docs_action">开启道藏</string>
+    <string name="guide_next">续行</string>
+    <string name="guide_prev">回返</string>
+    <string name="guide_skip">略过</string>
+    <string name="guide_start">启程</string>
+    <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页</string>
+    <string name="guide_about_entry_title">重观引路篇</string>
+    <string name="guide_about_entry_summary">重温初入仙门之引</string>
 </resources>

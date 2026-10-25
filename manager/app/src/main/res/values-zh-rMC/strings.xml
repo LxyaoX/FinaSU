@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">预初始化同步失败，保留上次配置</string>
     <string name="module_preinit_bootloop">多次启动未完成，预初始化已暂停</string>
     <string name="module_preinit_unsupported">当前内核或加载模式不支持预初始化</string>
+    <string name="guide_welcome_title">欢迎来到 FinaSU</string>
+    <string name="guide_welcome_desc">内核级 Root 管理，内置 Zygisk 实现、Shizuku API 后端、VFS 路径重定向和模块挂载引擎，像一套完整的红石装置。</string>
+    <string name="guide_repo_title">GitHub 开源工作台</string>
+    <string name="guide_repo_desc">源代码、问题反馈和版本更新都在仓库里。</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">打开仓库</string>
+    <string name="guide_features_title">内置能力</string>
+    <string name="guide_features_desc">四个引擎已装进管理器，无需额外合成模组。</string>
+    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 实现</string>
+    <string name="guide_feature_sui">Sui — Shizuku API 后端</string>
+    <string name="guide_feature_nomount">NoMount — VFS 路径重定向</string>
+    <string name="guide_feature_mount">Folk Mount — 模块挂载引擎</string>
+    <string name="guide_docs_title">不会用就看指南书</string>
+    <string name="guide_docs_desc">安装、模块与常见问题都记在指南书里；随时可在「设置 → 关于这个世界」重新打开。</string>
+    <string name="guide_docs_action">打开指南书</string>
+    <string name="guide_next">下一页</string>
+    <string name="guide_prev">上一页</string>
+    <string name="guide_skip">跳过</string>
+    <string name="guide_start">开始冒险</string>
+    <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页</string>
+    <string name="guide_about_entry_title">重新查看新手引导</string>
+    <string name="guide_about_entry_summary">再次播放首次启动介绍</string>
 </resources>

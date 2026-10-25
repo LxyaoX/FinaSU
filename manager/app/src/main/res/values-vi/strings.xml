@@ -1007,4 +1007,26 @@
     <string name="module_preinit_error">Đồng bộ tiền khởi tạo thất bại; cấu hình trước đó được giữ nguyên</string>
     <string name="module_preinit_bootloop">Tiền khởi tạo tạm dừng sau nhiều lần thử khởi động</string>
     <string name="module_preinit_unsupported">Tiền khởi tạo không khả dụng trên kernel hoặc chế độ tải này</string>
+    <string name="guide_welcome_title">Chào mừng bạn đến với FinaSU</string>
+    <string name="guide_welcome_desc">Quản lý root ở cấp hệ thống nhân với động cơ Zygisk, phụ trợ Shizuku API, chuyển hướng đường dẫn VFS và động cơ gắn kết mô-đun được tích hợp sẵn.</string>
+    <string name="guide_repo_title">Mã nguồn mở trên GitHub</string>
+    <string name="guide_repo_desc">Mã nguồn, báo cáo sự cố và ghi chú phát hành đều nằm trong kho lưu trữ.</string>
+    <string name="guide_repo_url">github.com/LyraVoid/FinaSU</string>
+    <string name="guide_repo_action">Mở kho lưu trữ</string>
+    <string name="guide_features_title">Tính năng tích hợp</string>
+    <string name="guide_features_desc">Bốn động cơ chạy bên trong trình quản lý, không cần cài thêm mô-đun.</string>
+    <string name="guide_feature_zygisk">FolkZygisk — triển khai Zygisk</string>
+    <string name="guide_feature_sui">Sui — phụ trợ Shizuku API</string>
+    <string name="guide_feature_nomount">NoMount — chuyển hướng đường dẫn VFS</string>
+    <string name="guide_feature_mount">Folk Mount — động cơ gắn kết mô-đun</string>
+    <string name="guide_docs_title">Gặp khó khăn? Hãy đọc tài liệu</string>
+    <string name="guide_docs_desc">Tài liệu về cài đặt, mô-đun và xử lý sự cố đều có sẵn. Bạn có thể mở lại hướng dẫn này từ Cài đặt → Thông tin bất cứ lúc nào.</string>
+    <string name="guide_docs_action">Mở tài liệu</string>
+    <string name="guide_next">Tiếp</string>
+    <string name="guide_prev">Quay lại</string>
+    <string name="guide_skip">Bỏ qua</string>
+    <string name="guide_start">Bắt đầu</string>
+    <string name="guide_page_indicator">Trang %1$d / %2$d</string>
+    <string name="guide_about_entry_title">Hiện lại hướng dẫn chào mừng</string>
+    <string name="guide_about_entry_summary">Phát lại phần giới thiệu lần đầu</string>
 </resources>
