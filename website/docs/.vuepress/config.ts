@@ -15,7 +15,11 @@ export default defineUserConfig({
       lang: 'zh-CN',
       description: '基于内核的 Android Root 方案',
     },
-    // 英文站预留：页面就绪后再挂载 '/en/' locale。
+    '/en/': {
+      title: 'FinaSU',
+      lang: 'en-US',
+      description: 'A kernel-based Root solution for Android',
+    },
   },
 
   head: [

@@ -3,11 +3,9 @@
  */
 
 import { defineThemeConfig } from 'vuepress-theme-plume'
-import { docsSidebar, zhCollections } from './collections'
-import { zhNavbar } from './navbar'
+import { docsSidebar, enCollections, enDocsSidebar, zhCollections } from './collections'
+import { enNavbar, zhNavbar } from './navbar'
 
-/**
- */
 export default defineThemeConfig({
   logo: '/icon.png',
 
@@ -26,11 +24,26 @@ export default defineThemeConfig({
         description: '基于内核的 Android Root 方案',
       },
 
+      selectLanguageName: '简体中文',
+
       navbar: zhNavbar,
       sidebar: { '/': docsSidebar },
       collections: zhCollections,
     },
-    // 英文站预留：页面就绪后再挂载 '/en/' locale。
+
+    '/en/': {
+      profile: {
+        avatar: '/icon.png',
+        name: 'FinaSU',
+        description: 'A kernel-based Root solution for Android',
+      },
+
+      selectLanguageName: 'English',
+
+      navbar: enNavbar,
+      sidebar: { '/': enDocsSidebar },
+      collections: enCollections,
+    },
   },
 
   footer: {
