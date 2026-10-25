@@ -201,11 +201,27 @@ jobs:
 
       - name: Build with Gradle
         run: |
+          set -o pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            ./gradlew clean testDebugUnitTest lintDebug assembleRelease -PIS_PR_BUILD=true
+            ./gradlew clean testDebugUnitTest lintDebug assembleRelease -PIS_PR_BUILD=true 2>&1 | tee "$RUNNER_TEMP/build.log"
           else
-            ./gradlew clean testDebugUnitTest lintDebug assembleRelease
+            ./gradlew clean testDebugUnitTest lintDebug assembleRelease 2>&1 | tee "$RUNNER_TEMP/build.log"
           fi
+
+      # The run log needs admin rights to download, but annotations of a public repository do not.
+      # Repeating the compiler's own error lines as annotations is how a failure is readable from
+      # outside without a token.
+      - name: Report build errors
+        if: failure()
+        run: |
+          if [ ! -f "$RUNNER_TEMP/build.log" ]; then
+            echo "::error title=Build::no log captured"
+            exit 0
+          fi
+          grep -E '^(e|w): |^\* What went wrong|^Execution failed|^> Task .* FAILED' "$RUNNER_TEMP/build.log" \
+            | grep -v '^w: ' | head -25 | while IFS= read -r line; do
+              echo "::error title=Gradle::${line//$'\n'/ }"
+            done
 
       - name: Upload Manager check reports
         if: always()
