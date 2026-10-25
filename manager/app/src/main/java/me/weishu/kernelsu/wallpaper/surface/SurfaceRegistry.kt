@@ -23,9 +23,7 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
  *
  * [available] is the single source of truth for layout gating. The settings UI asks the registry
  * for the descriptors of the active layout instead of testing layout tokens itself, so a
- * layout-exclusive surface (the grid work card, for example) can never leak into another layout.
- * The Stats layout's header form is part of the decision, because its grid header draws the grid
- * work card.
+ * layout-exclusive surface can never leak into another layout.
  *
  * A descriptor is pure data: its [rows] drive the settings UI, its [fields]/[flags] drive storage
  * and the theme container, and [storageStem]/[themeBase] name the image file and the zip entry.
@@ -61,14 +59,14 @@ data class SurfaceDescriptor(
     val legacyThemeFields: Map<SurfaceField, String> = emptyMap(),
     val legacyThemeFlags: Map<SurfaceFlag, String> = emptyMap(),
     /**
-     * Whether this surface is available for a home layout token such as [HomeLayoutStyle.HOME],
-     * given the Stats layout's header form (`list` or `grid`).
+     * Whether this surface is available for a home layout token such as [HomeLayoutStyle.HOME].
+     * With one layout left every registered surface answers true.
      */
     val available: (String, String) -> Boolean = { _, _ -> true },
     /**
      * Id of the surface that owns this one's shared master switch, when this is a child of a grouped
-     * feature. The focus cards are children of [FOCUS], whose `enabled` bit is the single gate the
-     * settings host and the renderer both consult. Null for top-level surfaces.
+     * feature, whose `enabled` bit is the single gate the settings host and the renderer both
+     * consult. Null for top-level surfaces.
      */
     val parentId: SurfaceId? = null,
 )
@@ -76,28 +74,14 @@ data class SurfaceDescriptor(
 /**
  * The registry of every configurable wallpaper surface.
  *
- * The grid work card, the focus cards and the dashboard hero are live surfaces: each renders its
- * stored image and exposes its rows for its own layout. The stats top card is described but stays
- * unavailable, so it renders nothing and its settings never leak; its values still round-trip
- * through the theme container. Flipping [SurfaceDescriptor.available] on is what turns one into a
- * live surface once its rendering exists.
+ * The home page draws a single layout, so the grid work card - which paints the status card on that
+ * page - is the only surface left. The focus cards, the dashboard hero and the stats top card went
+ * away with the layouts that rendered them.
  */
 object SurfaceRegistry {
 
     /** Stable id of the grid work-card background surface. */
     val GRID_WORK_CARD = SurfaceId("layout.grid.workCard")
-
-    /** Shared config of the focus layout's card backgrounds; its four cards own only their image. */
-    val FOCUS = SurfaceId("layout.focus")
-
-    /** The four focus-layout card slots, mirroring the wider ecosystem's card ids. */
-    val FOCUS_CARD_KERNEL = SurfaceId("layout.focus.card.kernel")
-    val FOCUS_CARD_APP = SurfaceId("layout.focus.card.app")
-    val FOCUS_CARD_DEVICE = SurfaceId("layout.focus.card.device")
-    val FOCUS_CARD_STORAGE = SurfaceId("layout.focus.card.storage")
-
-    /** The dashboard layout's hero card. */
-    val DASHBOARD_HERO = SurfaceId("layout.dashboard.hero")
 
     private val gridWorkCard = SurfaceDescriptor(
         id = GRID_WORK_CARD,
