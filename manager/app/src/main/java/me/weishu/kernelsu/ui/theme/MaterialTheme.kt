@@ -142,13 +142,20 @@ fun MaterialKernelSUTheme(
             } else {
                 LocalRippleConfiguration.current
             }
-            CompositionLocalProvider(
-                LocalRippleConfiguration provides rippleConfiguration,
-                LocalWallpaperDim provides renderDim,
-                LocalFolkWallpaperTokens provides wallpaperTokens,
+            MiuixKernelSUTheme(
+                seedColor = baseSeed,
+                isDark = darkTheme,
+                paletteStyle = appSettings.paletteStyle,
+                colorMode = appSettings.colorMode,
             ) {
-                MonetColorsProvider.UpdateCss(colorScheme)
-                content()
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides rippleConfiguration,
+                    LocalWallpaperDim provides renderDim,
+                    LocalFolkWallpaperTokens provides wallpaperTokens,
+                ) {
+                    MonetColorsProvider.UpdateCss(colorScheme)
+                    content()
+                }
             }
         }
     )
