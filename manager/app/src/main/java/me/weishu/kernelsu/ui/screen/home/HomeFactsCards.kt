@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.FilterList
@@ -24,22 +23,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
-import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
 import me.weishu.kernelsu.wallpaper.surface.SurfaceId
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** The manager build and the policy it runs under, or the system facts the stats board closes with. */
 @Composable
@@ -151,94 +152,108 @@ internal fun InfoCard(
     val seccompDisplay = seccompDisplayName(systemInfo.seccompStatus)
     val display = rememberHomeDisplaySettings()
 
-    HomeCard(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            InfoRow(
-                icon = Icons.Filled.Tag,
-                label = stringResource(R.string.home_manager_version),
-                value = systemInfo.managerVersion,
-            )
-            InfoRow(
-                icon = Icons.Filled.DeveloperBoard,
-                label = stringResource(R.string.home_kernel),
-                value = systemInfo.kernelVersion,
-            )
-            systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
-                InfoRow(
-                    icon = Icons.Filled.DeveloperBoard,
-                    label = stringResource(R.string.home_kernel_full_version),
-                    value = value,
-                )
+    val systemRows = buildList {
+        add(SpecRow(stringResource(R.string.home_manager_version), systemInfo.managerVersion))
+        add(SpecRow(stringResource(R.string.home_kernel), systemInfo.kernelVersion))
+        systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
+            add(SpecRow(stringResource(R.string.home_kernel_full_version), value))
+        }
+        add(SpecRow(stringResource(R.string.home_device_model), systemInfo.deviceModel))
+        if (!display.hideFingerprint) {
+            add(SpecRow(stringResource(R.string.home_fingerprint), systemInfo.fingerprint))
+        }
+        if (zygiskProvider != null && !display.hideZygisk) {
+            add(SpecRow(stringResource(R.string.home_zygisk_implement), zygiskProvider))
+        }
+        if (!display.hideMount) {
+            homeMountValue(mount)?.let { value ->
+                add(SpecRow(stringResource(R.string.home_mount_implementation), value))
             }
-            InfoRow(
-                icon = Icons.Filled.Smartphone,
-                label = stringResource(R.string.home_device_model),
-                value = systemInfo.deviceModel,
-            )
-            if (!display.hideFingerprint) {
-                InfoRow(
-                    icon = Icons.Filled.Fingerprint,
-                    label = stringResource(R.string.home_fingerprint),
-                    value = systemInfo.fingerprint,
-                )
-            }
-            InfoRow(
-                icon = Icons.Filled.Security,
-                label = stringResource(R.string.home_selinux_status),
-                value = selinuxDisplay,
-            )
-            InfoRow(
-                icon = Icons.Filled.FilterList,
-                label = stringResource(R.string.home_seccomp_status),
-                value = seccompDisplay,
-            )
-            if (zygiskProvider != null && !display.hideZygisk) {
-                InfoRow(
-                    icon = Icons.Filled.Vaccines,
-                    label = stringResource(R.string.home_zygisk_implement),
-                    value = zygiskProvider,
-                )
-            }
-            if (!display.hideMount) {
-                homeMountValue(mount)?.let { value ->
-                    InfoRow(
-                        icon = Icons.Filled.Layers,
-                        label = stringResource(R.string.home_mount_implementation),
-                        value = value,
-                    )
-                }
-            }
-            if (susfs.detected && !display.hideSusfs) {
-                val interactionSource = remember { MutableInteractionSource() }
-                val haptic = LocalHapticFeedback.current
-                val management = me.weishu.kernelsu.ui.screen.susfsManagementLabel(susfs.management)
-                InfoRow(
-                    icon = Icons.Rounded.VisibilityOff,
+        }
+        if (susfs.detected && !display.hideSusfs) {
+            val management = me.weishu.kernelsu.ui.screen.susfsManagementLabel(susfs.management)
+            add(
+                SpecRow(
                     label = stringResource(R.string.susfs_title),
                     value = "${susfs.version} · ${susfs.implementation} · $management",
-                    modifier = Modifier
-                        .folkPressScale(interactionSource)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onSusfs()
-                            },
-                        ),
-                    trailingContent = {
-                        Text(
-                            text = stringResource(R.string.susfs_manage),
-                            style = FolkType.Summary,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    },
+                    onClick = onSusfs,
                 )
+            )
+        }
+    }
+    val securityRows = listOf(
+        SpecRow(stringResource(R.string.home_selinux_status), selinuxDisplay),
+        SpecRow(stringResource(R.string.home_seccomp_status), seccompDisplay),
+    )
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        SpecSheet(rows = systemRows)
+        SpecSheet(rows = securityRows)
+    }
+}
+
+/** One line of a spec sheet: what is asked on the left, what was answered on the right. */
+private data class SpecRow(
+    val label: String,
+    val value: String,
+    /** Set on a row that leads somewhere; the value then reads as a link. */
+    val onClick: (() -> Unit)? = null,
+)
+
+/**
+ * A card of label/value lines separated by hairlines, the shape miuix gives a block of facts.
+ *
+ * The values are monospaced and right-aligned so a version string and a fingerprint line up under
+ * each other; the label column keeps its own width instead of pushing the value off the card.
+ */
+@Composable
+private fun SpecSheet(
+    rows: List<SpecRow>,
+    modifier: Modifier = Modifier,
+) {
+    val overColor = LocalHomeTileCardContentColor.current
+    val supportingColor = LocalWallpaperSupportingColor.current
+    HomeCard(modifier = modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+            rows.forEachIndexed { index, row ->
+                if (index > 0) HorizontalDivider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (row.onClick != null) {
+                                Modifier.clickable(onClick = row.onClick)
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .heightIn(min = 48.dp)
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text(
+                        text = row.label,
+                        fontSize = MiuixTheme.textStyles.body2.fontSize,
+                        fontWeight = FontWeight.Medium,
+                        color = overColor ?: MiuixTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = row.value,
+                        modifier = Modifier.weight(1f),
+                        fontSize = 13.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (row.onClick != null) {
+                            overColor ?: MaterialTheme.colorScheme.primary
+                        } else {
+                            supportingColor ?: MiuixTheme.colorScheme.onSurfaceVariantSummary
+                        },
+                        textAlign = TextAlign.End,
+                    )
+                }
             }
         }
     }

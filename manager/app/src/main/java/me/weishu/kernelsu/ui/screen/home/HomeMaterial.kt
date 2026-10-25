@@ -19,7 +19,6 @@ import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,12 +37,25 @@ import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.HomeMetrics
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
-import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.rebootlistpopup.RebootListPopup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navThemeSignature
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.TopAppBar as MaterialTopAppBar
+import me.weishu.kernelsu.media.VisualMediaConfig
+import me.weishu.kernelsu.ui.component.material.ChromeEdge
+import me.weishu.kernelsu.ui.component.material.WallpaperChromeZone
+import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 
 @Composable
@@ -55,14 +67,28 @@ fun HomePagerMaterial(
     moduleEnabledCount: Int = 0,
     metrics: HomeMetrics = HomeMetrics(),
 ) {
-    ExpressiveScaffold(
-        topBar = { TopBar(state = state, actions = actions) },
-        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+    val scrollBehavior = MiuixScrollBehavior()
+    val wallpaperActive = LocalFolkWallpaperTokens.current != null
+    // miuix's scaffold, not the Material one the rest of the app uses: it measures a top bar whose
+    // height changes as it collapses, which a Material scaffold would answer by moving the content.
+    MiuixScaffold(
+        topBar = {
+            if (wallpaperActive) {
+                WallpaperChromeZone(edge = ChromeEdge.Top) {
+                    TopBar(state = state, actions = actions, scrollBehavior = scrollBehavior)
+                }
+            } else {
+                TopBar(state = state, actions = actions, scrollBehavior = scrollBehavior)
+            }
+        },
+        containerColor = if (wallpaperActive) Color.Transparent else MiuixTheme.colorScheme.surface,
+        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -119,7 +145,16 @@ fun HomePagerMaterial(
 }
 
 @Composable
-private fun TopBar(state: HomeUiState, actions: HomeActions) {
+private fun TopBar(
+    state: HomeUiState,
+    actions: HomeActions,
+    scrollBehavior: ScrollBehavior,
+) {
+    val context = LocalContext.current
+    // A configured title image keeps the Material bar it was designed for: miuix's bar takes a
+    // string, and this app lets that string be replaced by a picture.
+    val customTitleImage = VisualMediaConfig.titleEnabled &&
+        VisualMediaConfig.file(context, false) != null
     val originState = LocalNavOriginState.current
     val density = LocalDensity.current
     val view = LocalView.current
@@ -127,40 +162,57 @@ private fun TopBar(state: HomeUiState, actions: HomeActions) {
     val originColor = originColorScheme.surfaceContainer
     val originThemeSignature = navThemeSignature(originColorScheme)
     var installBounds by remember { mutableStateOf(Rect.Zero) }
-    TopAppBar(
-        title = { me.weishu.kernelsu.ui.component.HomeTitleImage() },
-        actions = {
-            if (state.susfs.detected) {
-                IconButton(onClick = actions.onSusfs) {
-                    Icon(androidx.compose.material.icons.Icons.Rounded.VisibilityOff, stringResource(R.string.susfs_title))
-                }
-            }
-            IconButton(
-                onClick = {
-                    if (installBounds != Rect.Zero) {
-                        originState.recordOrigin(
-                            captureNavOrigin(
-                                view = view,
-                                rect = installBounds,
-                                cornerRadius = with(density) { 24.dp.toPx() },
-                                color = originColor,
-                                themeSignature = originThemeSignature,
-                            ),
-                        )
-                    }
-                    actions.onInstallClick()
-                },
-                modifier = Modifier.onGloballyPositioned { installBounds = it.boundsInRoot() },
-                enabled = !state.isLateLoadMode,
-            ) {
+    val barActions: @Composable RowScope.() -> Unit = {
+        if (state.susfs.detected) {
+            IconButton(onClick = actions.onSusfs) {
                 Icon(
-                    imageVector = Icons.Filled.AutoFixHigh,
-                    contentDescription = stringResource(R.string.install),
+                    imageVector = androidx.compose.material.icons.Icons.Rounded.VisibilityOff,
+                    contentDescription = stringResource(R.string.susfs_title),
                 )
             }
-            RebootListPopup()
-        },
-        colors = expressiveTopAppBarColors(),
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-    )
+        }
+        IconButton(
+            onClick = {
+                if (installBounds != Rect.Zero) {
+                    originState.recordOrigin(
+                        captureNavOrigin(
+                            view = view,
+                            rect = installBounds,
+                            cornerRadius = with(density) { 24.dp.toPx() },
+                            color = originColor,
+                            themeSignature = originThemeSignature,
+                        ),
+                    )
+                }
+                actions.onInstallClick()
+            },
+            modifier = Modifier.onGloballyPositioned { installBounds = it.boundsInRoot() },
+            enabled = !state.isLateLoadMode,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AutoFixHigh,
+                contentDescription = stringResource(R.string.install),
+            )
+        }
+        RebootListPopup()
+    }
+    if (customTitleImage) {
+        MaterialTopAppBar(
+            title = { me.weishu.kernelsu.ui.component.HomeTitleImage() },
+            actions = barActions,
+            colors = expressiveTopAppBarColors(),
+            windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+        )
+    } else {
+        MiuixTopAppBar(
+            title = me.weishu.kernelsu.ui.component.homeTitleText(),
+            color = if (LocalFolkWallpaperTokens.current != null) {
+                Color.Transparent
+            } else {
+                MiuixTheme.colorScheme.surface
+            },
+            scrollBehavior = scrollBehavior,
+            actions = barActions,
+        )
+    }
 }
