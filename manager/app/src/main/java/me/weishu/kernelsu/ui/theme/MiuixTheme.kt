@@ -59,16 +59,32 @@ fun MiuixKernelSUTheme(
             colorSpec = colorSpec,
         )
     }
-    MiuixTheme(controller = controller) {
+    // The Material side paints an AMOLED background pitch black; miuix would keep its own near-black
+    // surface, so the home scaffold and every miuix top bar would show as a lighter band. The same
+    // roles are blacked out here so both toolkits agree in that mode.
+    val colors = controller.currentColors().let { base ->
+        if (!colorMode.isAmoled) {
+            base
+        } else {
+            base.copy(
+                background = Color.Black,
+                surface = Color.Black,
+                surfaceContainer = Color.Black,
+                surfaceContainerHigh = Color.Black,
+                surfaceContainerHighest = Color.Black,
+            )
+        }
+    }
+    MiuixTheme(colors = colors) {
         CompositionLocalProvider(
             // miuix draws text with LocalContentColor, Material draws it with contentColorFor();
             // seeding it from the miuix surface keeps text readable on miuix backgrounds.
-            LocalContentColor provides MiuixTheme.colorScheme.onBackground,
+            LocalContentColor provides colors.onBackground,
             // Material's LocalContentColor is a different local with a black default. Nothing above a
             // Material Scaffold/Surface seeds it - and miuix's scaffold, top bar and cards are not
             // Material surfaces - so text and icons placed in them would fall back to black. Seed it
             // here; any Material Surface inside still overrides it with its own content colour.
-            MaterialLocalContentColor provides MiuixTheme.colorScheme.onBackground,
+            MaterialLocalContentColor provides colors.onBackground,
             content = content,
         )
     }
