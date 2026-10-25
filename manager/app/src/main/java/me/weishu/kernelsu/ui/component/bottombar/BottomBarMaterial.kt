@@ -1,28 +1,28 @@
 package me.weishu.kernelsu.ui.component.bottombar
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShortNavigationBar
-import androidx.compose.material3.ShortNavigationBarItem
-import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.ui.component.material.ChromeEdge
 import me.weishu.kernelsu.ui.component.material.WallpaperChromeZone
+import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
 
+/**
+ * The docked bar, drawn with miuix's navigation components.
+ *
+ * miuix owns the indicator, the selected-icon swap and the ripple, so the destinations only have to
+ * say which of their two vectors applies. Wallpaper chrome still supplies the container colour, so a
+ * theme that paints the bar keeps doing so.
+ */
 @Composable
 fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
     val fullFeatured = useFullFeaturedLayout()
@@ -31,41 +31,22 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
     val mainPagerState = LocalMainPagerState.current
     val visibilityRevision = NavBarVisibilityConfig.revision.collectAsStateWithLifecycle().value
     val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
-
     val barStyle = BottomBarControl.style(BottomBarLayout.Docked)
+
     WallpaperChromeZone(edge = ChromeEdge.Bottom, material = barStyle.scrim) {
-        ShortNavigationBar(
-            containerColor = barStyle.containerColor,
-            windowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout).only(
-                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-            )
-        ) {
+        NavigationBar(color = barStyle.containerColor) {
             destinations.forEach { destination ->
                 val selected = mainPagerState.selectedDestination == destination
-                ShortNavigationBarItem(
+                NavigationBarItem(
+                    modifier = Modifier.weight(1f),
+                    icon = if (selected) destination.iconSelected else destination.iconNotSelected,
+                    label = stringResource(destination.label),
                     selected = selected,
                     onClick = {
                         if (!selected) {
                             mainPagerState.animateToDestination(destination)
                         }
                     },
-                    icon = {
-                        NavigationIconWithBadge(
-                            destination = destination,
-                            selected = selected,
-                            badge = badgeFor(destination, navigationBadge),
-                        )
-                    },
-                    label = {
-                        Text(
-                            stringResource(destination.label),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    colors = barStyle.indicatorColor?.let {
-                        ShortNavigationBarItemDefaults.colors(selectedIndicatorColor = it)
-                    } ?: ShortNavigationBarItemDefaults.colors(),
                 )
             }
         }
