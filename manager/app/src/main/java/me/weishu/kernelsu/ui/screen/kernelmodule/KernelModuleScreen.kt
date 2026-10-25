@@ -44,7 +44,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHostState
@@ -91,6 +90,7 @@ import me.weishu.kernelsu.ui.component.card.FolkCardFrame
 import me.weishu.kernelsu.ui.component.card.cardSurfaceOpacity
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.ExpressiveSwitch
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.ui.component.material.FolkFilledTonalButton
 import me.weishu.kernelsu.ui.component.material.FolkSmallExtendedFloatingActionButton
 import me.weishu.kernelsu.ui.component.material.FolkTextButton
@@ -778,7 +778,7 @@ private fun KernelModuleDetailsSheet(
     module: KernelModule,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,
@@ -899,7 +899,7 @@ private fun KernelModuleParamsSheet(
     onSave: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,
@@ -966,7 +966,7 @@ private fun KernelModuleLogSheet(
     result: me.weishu.kernelsu.data.model.KernelModuleLastResult?,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,

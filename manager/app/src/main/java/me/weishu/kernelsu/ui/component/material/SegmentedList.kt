@@ -258,8 +258,8 @@ fun SegmentedColumn(
         if (LocalFolkWallpaperTokens.current == null) {
             // Every row in the column is either a miuix preference (transparent by design) or one of
             // ours, which stops painting itself inside this card. Without the card the page reads as
-            // bare text on the canvas.
-            MiuixCard(content = { rows() })
+            // bare text on the canvas. 20dp is the radius the settings pages are calibrated against.
+            MiuixCard(cornerRadius = 20.dp, content = { rows() })
         } else {
             WallpaperGroupBackground { rows() }
         }

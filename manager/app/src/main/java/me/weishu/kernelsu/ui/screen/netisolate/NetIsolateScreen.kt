@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHostState
@@ -63,6 +62,7 @@ import me.weishu.kernelsu.data.uts.UtsTarget
 import me.weishu.kernelsu.data.uts.UtsTargetApp
 import me.weishu.kernelsu.ui.component.AppIconImage
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
@@ -548,7 +548,7 @@ private fun NetIsolateEventsSheet(
     onClear: () -> Unit,
 ) {
     val appByUid = remember(apps) { apps.associateBy(UtsTargetApp::uid) }
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,
@@ -714,7 +714,7 @@ private fun NetIsolatePolicySheet(
     val loopbackLabel = stringResource(R.string.netisolate_policy_loopback)
     val strictLabel = stringResource(R.string.netisolate_policy_strict)
 
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,

@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
@@ -42,6 +41,7 @@ import me.weishu.kernelsu.data.model.Module
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.ModuleSortPriorityGroups
 import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.ui.component.material.FolkTextButton
 import me.weishu.kernelsu.ui.component.material.SegmentedCheckboxItem
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -75,7 +75,7 @@ internal fun ModuleSortSheet(
     var orderSnapshot by remember { mutableStateOf<List<Module>>(emptyList()) }
     var showOrderDialog by remember { mutableStateOf(false) }
 
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,

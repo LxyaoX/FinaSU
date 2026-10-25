@@ -43,6 +43,12 @@ fun TonalCard(
     containerColor: Color = MaterialTheme.colorScheme.surfaceBright,
     contentColor: Color = contentColorFor(containerColor),
     shape: Shape = MaterialTheme.shapes.large,
+    /**
+     * Corner radius for the miuix card. miuix takes a radius rather than a [Shape], so this has to be
+     * passed alongside [shape]; it should be the radius that shape was built with (24dp for
+     * `MaterialTheme.shapes.large`, 20dp for [me.weishu.kernelsu.ui.theme.FolkShape.Corner20]).
+     */
+    cornerRadius: Dp = 24.dp,
     wallpaperRole: WallpaperSurfaceRole? =
         if (containerColor == MaterialTheme.colorScheme.surfaceBright) WallpaperSurfaceRole.Group else null,
     enabled: Boolean = true,
@@ -118,7 +124,10 @@ fun TonalCard(
         // The neutral card is the one miuix should draw: it is what the home and settings surfaces
         // are made of. A card that carries a semantic colour (errorContainer, secondaryContainer…)
         // keeps Material's tinted card, because miuix would paint it as a plain surface.
-        MiuixCard(modifier = modifier.then(originModifier).then(clickModifier)) {
+        MiuixCard(
+            modifier = modifier.then(originModifier).then(clickModifier),
+            cornerRadius = cornerRadius,
+        ) {
             // miuix's card publishes miuix's own content colour; Material's `Text`/`Icon` read
             // Material's local, so the card's colour is published again for them.
             CompositionLocalProvider(LocalContentColor provides contentColor) {

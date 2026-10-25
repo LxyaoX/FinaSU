@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -96,9 +95,9 @@ fun SendLogBottomSheet(
             snackbarHostState.showSnackbar(logSaved)
         }
     }
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = { dismiss() },
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        sheetState = sheetState,
         content = {
             Row(
                 modifier = Modifier

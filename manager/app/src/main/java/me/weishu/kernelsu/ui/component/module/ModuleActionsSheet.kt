@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
@@ -19,6 +18,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 
@@ -43,7 +43,7 @@ fun ModuleActionsSheet(
 ) {
     if (!show) return
 
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,

@@ -60,7 +60,6 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
@@ -123,6 +122,7 @@ import me.weishu.kernelsu.ui.component.card.CardSubject
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.component.dialog.rememberLoadingDialog
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.ui.component.material.FolkButton
 import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.FolkOutlinedButton
@@ -702,7 +702,7 @@ private fun ModuleShortcutSheet(
         Toast.makeText(context, resources.getString(R.string.module_shortcut_scheme_copied), Toast.LENGTH_SHORT).show()
     }
 
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,

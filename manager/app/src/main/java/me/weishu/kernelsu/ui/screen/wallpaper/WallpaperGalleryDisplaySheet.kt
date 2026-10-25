@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
@@ -29,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperDevice
 
 /** Bottom sheet holding the gallery's display scheme: device pool + layout style. */
@@ -52,7 +52,7 @@ internal fun WallpaperGalleryDisplaySheet(
         stringResource(R.string.wallpaper_gallery_layout_stack),
     )
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    FolkBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

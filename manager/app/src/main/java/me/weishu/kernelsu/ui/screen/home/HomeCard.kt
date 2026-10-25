@@ -54,6 +54,7 @@ internal fun HomeCard(
         contentColor = contentColor,
         wallpaperRole = wallpaperRole,
         shape = FolkShape.Corner20,
+        cornerRadius = 20.dp,
         onClick = onClick,
         onLongClick = onLongClick,
         navOriginRadius = 20.dp,

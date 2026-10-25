@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
@@ -35,6 +34,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.uts.UtsTarget
 import me.weishu.kernelsu.data.uts.UtsTargetApp
 import me.weishu.kernelsu.ui.component.AppIconImage
+import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
 import me.weishu.kernelsu.ui.component.material.FolkFilledTonalButton
 import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -84,7 +84,7 @@ fun TargetAppSheet(
         }
     }
 
-    ModalBottomSheet(
+    FolkBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberBottomSheetState(
             initialValue = SheetValue.Hidden,

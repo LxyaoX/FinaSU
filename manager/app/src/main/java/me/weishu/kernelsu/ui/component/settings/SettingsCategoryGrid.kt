@@ -57,6 +57,7 @@ fun SettingsCategoryGrid(
     TonalCard(
         modifier = modifier.fillMaxWidth(),
         shape = FolkShape.Corner20,
+        cornerRadius = 20.dp,
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
