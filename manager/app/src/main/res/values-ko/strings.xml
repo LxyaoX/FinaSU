@@ -763,4 +763,5 @@
     <string name="module_preinit_error">프리이닛 동기화 실패, 이전 구성이 유지됩니다</string>
     <string name="module_preinit_bootloop">부팅 시도가 반복되어 프리이닛이 일시 중지되었습니다</string>
     <string name="module_preinit_unsupported">이 커널 또는 로드 모드에서는 프리이닛을 사용할 수 없습니다</string>
+    <string name="zygisk_required">먼저 Zygisk를 활성화하세요</string>
 </resources>

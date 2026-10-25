@@ -11,9 +11,9 @@
 ## Project Overview
 
 FinaSU is a KernelSU-based root solution for Android with a kernel module, Rust userspace daemons, a
-Kotlin Manager app, and docs/web assets. Unlike upstream KernelSU, three engines that upstream
-expects users to install as modules are vendored into this repository and driven by ksud: FolkZygisk
-(Zygisk), Sui (Shizuku API backend) and NoMount (VFS path redirection).
+Kotlin Manager app, and docs/web assets. Unlike upstream KernelSU, engines that upstream expects
+users to install as modules are vendored into this repository and driven by ksud: FolkZygisk
+(Zygisk) and NoMount (VFS path redirection).
 
 ## Repository Structure
 
@@ -23,7 +23,6 @@ expects users to install as modules are vendored into this repository and driven
 /userspace/ksuinit/           # Statically linked init helper that ksud embeds (boot-patch)
 /userspace/folkzygisk/        # Vendored Zygisk engine (ReZygisk-derived, C/C++ + make)
 /userspace/nomount/           # Vendored NoMount kernel module sources (C, built per KMI)
-/userspace/sui/               # Vendored Sui payload - Shizuku API backend (Gradle)
 /manager/                     # Android manager app - Kotlin/Jetpack Compose UI
 /website/                     # Documentation website - VitePress
 /js/                          # JavaScript library for module WebUI
@@ -58,7 +57,6 @@ expects users to install as modules are vendored into this repository and driven
 - **allowlist**: Kernel-managed list of UIDs permitted for root, persisted at `/data/adb/ksu/.allowlist` with default root/non-root profiles. Core logic is in `kernel/policy/allowlist.c` (bitmap storage, persistence, default profile caching) and is initialized from `kernel/core/init.c`; the supercall handlers under `kernel/supercall/` expose getters, deny-list checks, and “should umount modules” decisions. Manager reads and edits it through the JNI calls in `manager/app/src/main/cpp/ksu.cc` and Kotlin `Natives` façade.
 - **built-in engines**: Code that upstream KernelSU expects users to install as modules, vendored here and driven by ksud. Their user-visible contracts are part of this repository's own API surface, and vendored sources must stay byte-identical to upstream unless the change is recorded in the matching `UPSTREAM.md`:
   - **FolkZygisk** (`userspace/folkzygisk/`, ReZygisk-derived) - controlled from `userspace/ksud/src/zygisk.rs` with assets staged by `userspace/ksud/src/zygisk_assets.rs`; it stands down when an external Zygisk provider is installed.
-  - **Sui** (`userspace/sui/`, Shizuku API backend) - payload embedded by ksud, lifecycle owned by `userspace/ksud/src/sui.rs` under the module id `finasu-sui`.
   - **NoMount** (`userspace/nomount/kernel/src/`) - compiled per KMI into `<kmi>_nomount.ko` and embedded; the userspace rule path lives in `userspace/ksud/src/nomount.rs` and `nomount_plan.rs`.
   - **SUSFS** - `userspace/ksud/src/susfs/` configures an existing kernel-side SUSFS installation only; this repository neither patches nor implements SUSFS.
   - **Folk Mount** - mode selection, the per-boot runtime record and the guards in `userspace/ksud/src/magic_mount.rs`. Only `nomount` and `off` exist, and there is no second engine: the magic-mount executor, its planner (`mount_plan.rs`) and the UI-readiness observer (`mount_ui.rs`) were deleted, so a driver that cannot be loaded means nothing is injected for that boot.
@@ -71,14 +69,13 @@ expects users to install as modules are vendored into this repository and driven
 
 ```bash
 cp manager/sign.example.properties manager/keystore.properties  # fill in first
-./build.sh all   # lkm -> nomount -> sui -> ksuinit -> ksud -> apk -> repack
+./build.sh all   # lkm -> nomount -> ksuinit -> ksud -> apk -> repack
 ```
 
 Steps (usable individually, but keep the order above):
 
 - `lkm` - build `kernelsu.ko` for each `KMIS` in the DDK Docker image, then stage it into `userspace/ksud/bin/aarch64/` for ksud to embed.
 - `nomount` - build the vendored NoMount module the same way, staged as `<kmi>_nomount.ko`.
-- `sui` - build the vendored Sui payload and stage it under `userspace/ksud/bin/<bindir>/sui/`.
 - `ksuinit` - cross-compile the statically linked `ksuinit` helper ksud embeds (boot-patch fails without it).
 - `ksud` - cross-compile the daemon with cargo-ndk.
 - `apk` - `./gradlew :app:assembleRelease`, signed from `manager/keystore.properties`.
@@ -88,7 +85,7 @@ This is the proper packaging path: `repack` produces the real release APK with t
 
 Key constraints:
 
-- `lkm`/`nomount` need Docker (DDK images `ghcr.io/ylarod/ddk-min:<kmi>-<DDK_RELEASE>`); `ksud`/`ksuinit` need cargo + the Android NDK; `sui`/`apk` need a JDK.
+- `lkm`/`nomount` need Docker (DDK images `ghcr.io/ylarod/ddk-min:<kmi>-<DDK_RELEASE>`); `ksud`/`ksuinit` need cargo + the Android NDK; `apk` needs a JDK.
 - Keep the NDK at r29 (`NDK_VERSION=29.0.14206865`); newer NDKs break the static ksuinit link.
 - A local `lkm` run builds only the `KMIS` you list - late-load/boot-patch fail on other KMIs. Use a CI release package for the full KMI matrix.
 - Signing comes from `manager/keystore.properties`; `build.sh` also derives the second trusted manager cert size/sha256 and bakes it into the kernel build.
@@ -112,14 +109,13 @@ of them, ALWAYS run these commands in sequence after making code changes:
 3. `cargo fmt` (format)
 4. Fix any errors or warnings before considering the task complete.
 
-### Vendored engines (`userspace/folkzygisk`, `userspace/nomount`, `userspace/sui`)
+### Vendored engines (`userspace/folkzygisk`, `userspace/nomount`)
 
 These are not cargo crates. Build them through their own entry points so the vendored sources stay
 byte-identical to upstream:
 
 - `userspace/folkzygisk` - C/C++ Zygisk engine built from `common.mk` / `Makefile` and packaged by `package.py`.
 - `userspace/nomount` - kernel-module sources compiled per KMI inside the DDK image by `userspace/nomount/build-lkm.sh` (invoked by `./build.sh nomount`).
-- `userspace/sui` - Gradle project; `./gradlew zipRelease` produces the payload that `./build.sh sui` stages for ksud to embed.
 
 ### Android Manager App (`manager/`)
 
@@ -166,7 +162,7 @@ yarn docs:build  # Production build
 
 ## Git Commit
 
-- Mirror existing history style: `<scope>: <summary>` with a short lowercase scope tied to the touched area (e.g., `kernel`, `ksud`, `manager`, `sui`, `nomount`, `folkzygisk`, `docs`, `scripts`). Keep the summary concise, sentence case, and avoid trailing period.
+- Mirror existing history style: `<scope>: <summary>` with a short lowercase scope tied to the touched area (e.g., `kernel`, `ksud`, `manager`, `nomount`, `folkzygisk`, `docs`, `scripts`). Keep the summary concise, sentence case, and avoid trailing period.
 - Prefer one scope; if multiple areas change, pick the primary one rather than chaining scopes. For doc-only changes use `docs:`; for multi-lang string updates use `translations:` if that matches log history.
 - Keep subject lines brief (target ≤72 chars), no body unless necessary. If referencing a PR/issue, append `(#1234)` at the end as seen in history.
 - Before committing, glance at recent `git log --oneline` to stay consistent with current prefixes and capitalization used in this repo.

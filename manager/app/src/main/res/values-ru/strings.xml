@@ -765,4 +765,5 @@
     <string name="module_preinit_error">Не удалось синхронизировать предынициализацию; прежняя конфигурация сохранена</string>
     <string name="module_preinit_bootloop">Предынициализация приостановлена после нескольких попыток загрузки</string>
     <string name="module_preinit_unsupported">Предынициализация недоступна в этом ядре или режиме загрузки</string>
+    <string name="zygisk_required">Сначала включите Zygisk</string>
 </resources>

@@ -187,7 +187,7 @@ private fun ModuleCardContent(
                         }
                         if (zygiskBlocked) {
                             ModuleLabel(
-                                text = stringResource(R.string.sui_reason_zygisk_disabled),
+                                text = stringResource(R.string.zygisk_required),
                                 containerColor = MaterialTheme.colorScheme.errorContainer,
                                 contentColor = MaterialTheme.colorScheme.onErrorContainer,
                             )

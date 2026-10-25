@@ -7,8 +7,6 @@ import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.TeesimStatus
-import me.weishu.kernelsu.data.model.SuiStatus
-import me.weishu.kernelsu.data.model.SuiApp
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 
@@ -25,7 +23,6 @@ data class FeatureSnapshot(
     val persists: Map<String, Long?>,
     val folkMount: Result<FolkMountStatus>,
     val folkZygisk: Result<FolkZygiskStatus>,
-    val sui: Result<SuiStatus>,
     val nomount: Result<NomountStatus>,
 )
 
@@ -114,18 +111,6 @@ interface SettingsRepository {
     suspend fun getFolkZygiskStatus(): Result<FolkZygiskStatus>
     suspend fun setFolkZygiskEnabled(enabled: Boolean): Result<Unit>
     suspend fun recoverFolkZygisk(): Result<Unit>
-    suspend fun getSuiStatus(): Result<SuiStatus>
-    suspend fun setSuiEnabled(enabled: Boolean): Result<Unit>
-    suspend fun repairSui(): Result<Unit>
-    suspend fun suiProbeManagement(): Result<String>
-    suspend fun suiAppPermissions(): Result<List<SuiApp>>
-    suspend fun suiLaunchableAppCount(): Result<Int>
-    suspend fun suiDefaultMode(): Result<Int>
-    suspend fun setSuiDefaultMode(mode: Int): Result<Unit>
-    suspend fun suiSettingsFlags(): Result<Int>
-    suspend fun setSuiSettingsFlags(flags: Int): Result<Unit>
-    suspend fun suiHiddenUids(): Result<List<Int>>
-    suspend fun setSuiAppMode(uid: Int, mode: Int): Result<Unit>
     suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit>
     suspend fun getRekernelXStatus(): Result<RekernelXStatus>
     suspend fun setRekernelXEnabled(enabled: Boolean): Result<Unit>
@@ -163,8 +148,8 @@ interface SettingsRepository {
     fun isLkmMode(): Boolean
 
     /**
-     * Reads every feature status/value, the persisted feature config and the mount, Zygisk,
-     * Sui and NoMount statuses in a single batched shell round trip. A cold post-reboot
+     * Reads every feature status/value, the persisted feature config and the mount, Zygisk
+     * and NoMount statuses in a single batched shell round trip. A cold post-reboot
      * settings open pays one command burst instead of one exec round trip per probe.
      */
     suspend fun loadFeatureSnapshot(): FeatureSnapshot

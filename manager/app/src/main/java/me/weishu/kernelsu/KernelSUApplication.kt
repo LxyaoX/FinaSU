@@ -44,7 +44,6 @@ class KernelSUApplication : Application(), ViewModelStoreOwner {
     override fun onCreate() {
         super.onCreate()
         ksuApp = this
-        me.weishu.kernelsu.data.sui.SuiPermissionHost.attach(this)
 
         if (!isUserUnlocked()) {
             return

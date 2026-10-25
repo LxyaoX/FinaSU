@@ -60,7 +60,7 @@ fun ExecuteModuleActionEffect(
         if (moduleInfo.zygiskRequired &&
             SettingsRepositoryImpl().getFolkZygiskStatus().getOrNull()?.providesImplementation() == false
         ) {
-            Toast.makeText(context, R.string.sui_reason_zygisk_disabled, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.zygisk_required, Toast.LENGTH_SHORT).show()
             onExit()
             return@LaunchedEffect
         }

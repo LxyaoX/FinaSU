@@ -136,11 +136,8 @@ jobs:
   build-ksuinit:
     uses: ./.github/workflows/ksuinit.yml
 
-  build-sui:
-    uses: ./.github/workflows/sui.yml
-
   build-ksud:
-    needs: [build-lkm, build-ksuinit, build-sui]
+    needs: [build-lkm, build-ksuinit]
     strategy:
       matrix:
         include:

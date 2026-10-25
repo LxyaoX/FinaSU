@@ -28,11 +28,6 @@ enum Commands {
         #[command(subcommand)]
         command: crate::zygisk::Command,
     },
-    /// Manage the built-in Sui extension
-    Sui {
-        #[command(subcommand)]
-        command: crate::sui::Command,
-    },
     /// Flash an AnyKernel3 ZIP to the current slot (requires root)
     Anykernel3 { zip: PathBuf },
     /// Manage existing SUSFS implementations (does not load modules)
@@ -776,7 +771,6 @@ pub fn run() -> Result<()> {
         Commands::UtsView { command } => crate::uts_view::run(&command),
         Commands::Netisolate { command } => crate::netisolate::run(&command),
         Commands::Zygisk { command } => crate::zygisk::run(&command),
-        Commands::Sui { command } => crate::sui::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();

@@ -28,6 +28,6 @@ jobs:
         uses: ludeeus/action-shellcheck@2.0.0
         with:
           ignore_names: gradlew
-          # installer.sh and the vendored Sui tree keep upstream content byte for
-          # byte; their scripts run on the device, not in CI.
-          ignore_paths: ./userspace/ksud/src/installer.sh ./.github/scripts/setup-rust-build.sh userspace/sui
+          # installer.sh keeps upstream content byte for byte; its scripts run
+          # on the device, not in CI.
+          ignore_paths: ./userspace/ksud/src/installer.sh ./.github/scripts/setup-rust-build.sh

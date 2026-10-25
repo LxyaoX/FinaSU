@@ -68,7 +68,7 @@ internal suspend fun prepareWebView(
             SettingsRepositoryImpl().getFolkZygiskStatus().getOrNull()?.providesImplementation() == false
         ) {
             withContext(Dispatchers.Main) {
-                webUIState.uiEvent = WebUIEvent.Error(activity.getString(R.string.sui_reason_zygisk_disabled))
+                webUIState.uiEvent = WebUIEvent.Error(activity.getString(R.string.zygisk_required))
             }
             return@withContext
         }

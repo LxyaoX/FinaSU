@@ -89,9 +89,6 @@ mod soft_reboot;
 mod startup_epoch;
 #[cfg(target_os = "android")]
 mod su;
-#[cfg(any(target_os = "android", test))]
-#[cfg_attr(not(target_os = "android"), allow(dead_code))]
-mod sui;
 #[cfg(target_os = "android")]
 mod sulog;
 #[cfg(any(target_os = "android", test))]

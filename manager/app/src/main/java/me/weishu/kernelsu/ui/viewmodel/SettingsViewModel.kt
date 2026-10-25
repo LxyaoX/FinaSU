@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
-import me.weishu.kernelsu.data.model.SuiStatus
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
@@ -120,8 +119,6 @@ class SettingsViewModel(
             val folkZygiskResult = snapshot.folkZygisk
             val rekernelXResult = repo.getRekernelXStatus()
             val bootPropsResult = repo.getBootPropsStatus()
-            val suiResult = snapshot.sui
-
             // The home card's SUSFS row switch only makes sense when the kernel reports SUSFS.
             val susfsDetected = try {
                 SusfsRepository().status().detected
@@ -132,11 +129,6 @@ class SettingsViewModel(
             }
 
             if (generation != refreshGeneration) return@launch
-            val suiManagement = if (suiResult.getOrNull()?.state == SuiStatus.STATE_ENABLED) {
-                refreshSuiManagement()
-            } else {
-                null
-            }
             _uiState.update {
                 it.copy(
                     checkUpdate = checkUpdate,
@@ -197,10 +189,6 @@ class SettingsViewModel(
                     bootPropsStatus = bootPropsResult.getOrNull(),
                     bootPropsReadError = bootPropsResult.isFailure,
                     isBootPropsLoading = false,
-                    suiStatus = suiResult.getOrNull(),
-                    suiReadError = suiResult.isFailure,
-                    isSuiLoading = false,
-                    suiManagementAvailable = suiManagement,
                 )
             }
         }
@@ -344,65 +332,6 @@ class SettingsViewModel(
                 else -> R.string.boot_props_enabled_pending_toast
             }
             Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun setSuiEnabled(enabled: Boolean) {
-        if (_uiState.value.isSuiWriting || _uiState.value.isSuiLoading) return
-        ++refreshGeneration
-        _uiState.update { it.copy(isSuiWriting = true) }
-        viewModelScope.launch {
-            val result = repo.setSuiEnabled(enabled)
-            val status = repo.getSuiStatus()
-            _uiState.update {
-                it.copy(
-                    isSuiWriting = false,
-                    suiStatus = status.getOrNull(),
-                    suiReadError = status.isFailure,
-                )
-            }
-            val message = when {
-                result.isFailure -> R.string.sui_write_failed
-                enabled -> R.string.sui_reboot_required
-                else -> R.string.sui_disable_done
-            }
-            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun probeSuiManagement() {
-        viewModelScope.launch {
-            val message = repo.suiProbeManagement().getOrElse { it.message ?: "probe failed" }
-            Log.i("SuiManagement", message)
-            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private suspend fun refreshSuiManagement(): Boolean {
-        val result = repo.suiProbeManagement()
-        Log.i("SuiManagement", result.getOrElse { "unavailable: ${it.message}" })
-        return result.isSuccess
-    }
-
-    fun repairSui() {
-        if (_uiState.value.isSuiWriting) return
-        ++refreshGeneration
-        _uiState.update { it.copy(isSuiWriting = true) }
-        viewModelScope.launch {
-            val result = repo.repairSui()
-            val status = repo.getSuiStatus()
-            _uiState.update {
-                it.copy(
-                    isSuiWriting = false,
-                    suiStatus = status.getOrNull(),
-                    suiReadError = status.isFailure,
-                )
-            }
-            Toast.makeText(
-                ksuApp,
-                if (result.isSuccess) R.string.sui_repair_done else R.string.sui_repair_failed,
-                Toast.LENGTH_LONG,
-            ).show()
         }
     }
 

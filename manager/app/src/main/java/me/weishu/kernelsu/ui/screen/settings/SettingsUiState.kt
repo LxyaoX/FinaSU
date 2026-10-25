@@ -9,8 +9,6 @@ import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
-import me.weishu.kernelsu.data.model.SuiStatus
-
 @Immutable
 data class SettingsUiState(
     val checkUpdate: Boolean = true,
@@ -76,12 +74,6 @@ data class SettingsUiState(
     val folkZygiskRebootPending: Boolean = false,
     /** Whether the kernel reports a usable SUSFS: gates the home card's SUSFS row switch. */
     val susfsDetected: Boolean = false,
-    // Sui extension
-    val suiStatus: SuiStatus? = null,
-    val isSuiLoading: Boolean = true,
-    val suiReadError: Boolean = false,
-    val isSuiWriting: Boolean = false,
-    val suiManagementAvailable: Boolean? = null,
 
     // ReKernel-X tombstone kernel support (external LKM, only its module state is managed here)
     val rekernelXStatus: RekernelXStatus? = null,
@@ -143,9 +135,6 @@ data class SettingsScreenActions(
     val onSetBootPropsEnabled: (Boolean) -> Unit,
     val onSetFolkZygiskEnabled: (Boolean) -> Unit,
     val onRecoverFolkZygisk: () -> Unit,
-    val onSetSuiEnabled: (Boolean) -> Unit,
-    val onRepairSui: () -> Unit,
-    val onManageSuiPermissions: () -> Unit,
     val onSetAdbRootEnabled: (Boolean) -> Unit,
     val onSetShellSuAdbOnlyEnabled: (Boolean) -> Unit,
     val onOpenUtsView: () -> Unit,

@@ -843,4 +843,5 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="boot_props_enabled_pending_toast">Enabled, but some properties could not be written; see the status line</string>
     <string name="boot_props_disabled_toast">Disabled; the rewritten values revert at the next reboot</string>
     <string name="boot_props_write_failed">Failed to change the property state</string>
+    <string name="zygisk_required">Enable Zygisk first</string>
 </resources>

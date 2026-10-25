@@ -7,7 +7,7 @@ experience. Keep it in sync with `.github/workflows/release.yml`,
 ## 1. How a release reaches a user
 
 1. Pushing a `v*` tag runs the `Release` workflow: the DDK matrix builds `kernelsu.ko` and
-   `nomount.ko` per KMI, `sui.yml` builds the Sui payload, `ksuinit` and `ksud` follow, the manager
+   `nomount.ko` per KMI, `ksuinit` and `ksud` follow, the manager
    APK is built and repacked with that `ksud`, and `softprops/action-gh-release` publishes the APK
    plus a zip containing the standalone `kernelsu.ko` and `ksud` builds.
 2. The manager calls `GET https://api.github.com/repos/LyraVoid/FinaSU/releases/latest` every time
@@ -50,7 +50,7 @@ release) takes over the update prompt for everyone.
    `git push`; the tag itself is what CI builds, so any remote branch carrying that commit is enough.
    `master` only moves when `dev` is merged into it.
 2. Tag and push: `git tag -a v0.1.0 -m "FinaSU v0.1.0" && git push origin v0.1.0`.
-3. Wait for the `Release` workflow (LKM and NoMount via DDK, the Sui payload, ksuinit, ksud for three
+3. Wait for the `Release` workflow (LKM and NoMount via DDK, ksuinit, ksud for three
    Android ABIs plus the desktop targets, manager APK, repack and resign, then the GitHub release).
 4. Write the release notes. The body is the changelog shown in the manager's update dialog; an empty
    body silently skips that dialog. It can be edited after the workflow finishes, or generated with
@@ -91,13 +91,11 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 | `kernelsu.ko` (4 KMIs) | yes |
 | `nomount.ko` (4 KMIs) | yes |
 | FolkZygisk, 32 and 64 bit | yes |
-| Sui (`sui/payload.json` and its files) | yes |
 | `ksuinit`, `waitsys`, `bootctl`, `busybox`, `mkbootfs` | yes |
 
-- The modules, the FolkZygisk tree and the Sui tree live under `userspace/ksud/bin/<abi>/`, are
+- The modules and the FolkZygisk tree live under `userspace/ksud/bin/<abi>/`, are
   gitignored, and are staged by CI before `ksud` is compiled: modules in `ddk-lkm.yml`, FolkZygisk in
-  `ksud.yml`, Sui in `sui.yml` plus `userspace/sui/package.py`. Whatever is not staged is silently
-  absent from the APK.
+  `ksud.yml`. Whatever is not staged is silently absent from the APK.
 - The manager ships `arm64-v8a` only (`abiFilters` in `manager/app/build.gradle.kts`) and the LKM
   matrix in `build-lkm.yml` covers `android14-6.1`, `android15-6.6`, `android16-6.12` and
   `android17-6.18`. There is no x86_64 or riscv64 artifact to miss, and no second mount engine to fall
@@ -116,12 +114,12 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 ```bash
 unzip -p KernelSU_vX.Y.Z_<code>-release.apk lib/arm64-v8a/libksud.so > /tmp/libksud.so
 for p in 'android1[2-7]-[0-9]+\.[0-9]+_kernelsu\.ko' 'android1[2-7]-[0-9]+\.[0-9]+_nomount\.ko' \
-         'folkzygisk/AGPL-3\.0\.txt' 'sui/payload\.json'; do
+         'folkzygisk/AGPL-3\.0\.txt'; do
   printf '%-46s %s\n' "$p" "$(grep -a -o -E -- "$p" /tmp/libksud.so | wc -l)"
 done
 ```
 
-Expect `4`, `4`, `1`, `1` on arm64. A zero where the table above says yes means a staging step was
+Expect `4`, `4`, `1` on arm64. A zero where the table above says yes means a staging step was
 skipped and the APK shipped without that payload.
 
 ```bash
@@ -143,7 +141,5 @@ The bundle must contain 16 `kernelsu.ko` files and eight `ksud` binaries.
 - Every test build published before this convention existed (`v0.1.0-pre4` through `v0.1.0-dev1`) is
   a full release. They stay eligible for `releases/latest` until a newer full release supersedes them.
 - A payload that a local `build.sh all` stages but CI does not ships as an APK that looks complete and
-  silently lacks it. `v1.0.0` shipped without the Sui payload exactly that way; run the check in
+  silently lacks it. `v1.0.0` shipped without a payload exactly that way; run the check in
   section 7 on every release build.
-- The vendored Sui tree is excluded from ShellCheck (`ignore_paths` in `shellcheck.yml`) because its
-  upstream scripts are device-side content that has to stay byte for byte identical.

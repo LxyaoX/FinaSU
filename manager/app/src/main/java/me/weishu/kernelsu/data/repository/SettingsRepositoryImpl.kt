@@ -23,9 +23,6 @@ import me.weishu.kernelsu.data.teesim.TeesimInstaller
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
 import me.weishu.kernelsu.data.model.ModuleSortGroup
-import me.weishu.kernelsu.data.model.SuiStatus
-import me.weishu.kernelsu.data.model.SuiApp
-import me.weishu.kernelsu.data.sui.SuiBridge
 import me.weishu.kernelsu.data.model.ModuleSortPriorityStore
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
 import me.weishu.kernelsu.ksuApp
@@ -391,122 +388,6 @@ class SettingsRepositoryImpl : SettingsRepository {
         }
     }
 
-    override suspend fun getSuiStatus(): Result<SuiStatus> = withContext(Dispatchers.IO) {
-        runCatching {
-            val result = execKsudResult("sui status --json")
-            check(result.isSuccess) { "ksud sui status failed (exit ${result.code})" }
-            val payload = result.out.filter { it.isNotBlank() }
-            check(payload.size == 1) { "Invalid ksud sui status output" }
-            SuiStatus.fromJson(JSONObject(payload.single()))
-        }
-    }
-
-    override suspend fun setSuiEnabled(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            val command = if (enabled) "sui enable" else "sui disable"
-            check(execKsudResult(command).isSuccess) { "ksud $command failed" }
-        }
-    }
-
-    override suspend fun repairSui(): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching { check(execKsudResult("sui repair").isSuccess) { "ksud sui repair failed" } }
-    }
-
-    override suspend fun suiProbeManagement(): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            val service = SuiBridge.service() ?: error("Sui bridge returned no binder")
-            val uid = android.os.Process.myUid()
-            val flags = service.getFlagsForUid(uid, SuiBridge.MASK_PERMISSION)
-            // Idempotent write: it throws unless Sui accepts this app as its manager.
-            service.updateFlagsForUid(uid, SuiBridge.MASK_PERMISSION, flags)
-            "binder=ok uid=$uid flags=$flags"
-        }
-    }
-
-    override suspend fun suiAppPermissions(): Result<List<SuiApp>> = withContext(Dispatchers.IO) {
-        runCatching {
-            val service = SuiBridge.service() ?: error("Sui bridge returned no binder")
-            val pm = ksuApp.packageManager
-            val entries = LinkedHashMap<Int, SuiApp>()
-            val launcher = android.content.Intent(android.content.Intent.ACTION_MAIN)
-                .addCategory(android.content.Intent.CATEGORY_LAUNCHER)
-            for (resolved in pm.queryIntentActivities(launcher, 0)) {
-                val info = resolved.activityInfo?.applicationInfo ?: continue
-                val uid = info.uid
-                // Root, shell and system uids are not app permission targets.
-                if (uid < 10000 || entries.containsKey(uid)) {
-                    continue
-                }
-                entries[uid] = SuiApp(
-                    uid = uid,
-                    packageName = info.packageName,
-                    label = pm.getApplicationLabel(info).toString(),
-                    mode = service.getFlagsForUid(uid, SuiApp.MODE_MASK),
-                    applicationInfo = info,
-                    requestsShizuku = requestsShizuku(pm, info.packageName),
-                )
-            }
-            entries.values.sortedBy { it.label.lowercase() }
-        }
-    }
-
-    override suspend fun setSuiAppMode(uid: Int, mode: Int): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            val service = SuiBridge.service() ?: error("Sui bridge returned no binder")
-            service.updateFlagsForUid(uid, SuiApp.MODE_MASK, mode)
-        }
-    }
-
-    override suspend fun suiLaunchableAppCount(): Result<Int> = withContext(Dispatchers.IO) {
-        runCatching {
-            val launcher = android.content.Intent(android.content.Intent.ACTION_MAIN)
-                .addCategory(android.content.Intent.CATEGORY_LAUNCHER)
-            ksuApp.packageManager.queryIntentActivities(launcher, 0)
-                .mapNotNull { it.activityInfo?.applicationInfo?.uid }
-                .filter { it >= 10000 }
-                .distinct()
-                .size
-        }
-    }
-
-    override suspend fun suiDefaultMode(): Result<Int> = withContext(Dispatchers.IO) {
-        runCatching {
-            SuiBridge.defaultMode() ?: error("Sui did not report the default permission")
-        }
-    }
-
-    override suspend fun setSuiDefaultMode(mode: Int): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            check(SuiBridge.setDefaultMode(mode and SuiApp.MODE_MASK)) {
-                "Sui rejected the default permission"
-            }
-        }
-    }
-
-    override suspend fun suiSettingsFlags(): Result<Int> = withContext(Dispatchers.IO) {
-        runCatching {
-            SuiBridge.globalSettings() ?: error("Sui did not report global settings")
-        }
-    }
-
-    override suspend fun setSuiSettingsFlags(flags: Int): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            check(SuiBridge.setGlobalSettings(flags)) { "Sui rejected the setting" }
-        }
-    }
-
-    override suspend fun suiHiddenUids(): Result<List<Int>> = withContext(Dispatchers.IO) {
-        runCatching {
-            SuiBridge.hiddenUids()?.toList() ?: error("Sui did not report hidden apps")
-        }
-    }
-
-    private fun requestsShizuku(pm: PackageManager, packageName: String): Boolean = runCatching {
-        pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
-            .requestedPermissions
-            ?.contains(SuiApp.PERMISSION_API_V23) == true
-    }.getOrDefault(false)
-
     override suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             // `mode.token` is a fixed enum value; never interpolate arbitrary input.
@@ -626,7 +507,6 @@ class SettingsRepositoryImpl : SettingsRepository {
                 "feature get --config shell_su_adb_only",
                 "mount status --json",
                 "zygisk status --json",
-                "sui status --json",
                 "nomount status --json",
             )
         )
@@ -685,8 +565,7 @@ class SettingsRepositoryImpl : SettingsRepository {
                 FolkMountStatus.fromJson(json)
             },
             folkZygisk = jsonBody(6, "zygisk status").mapCatching { FolkZygiskStatus.fromJson(it) },
-            sui = jsonBody(7, "sui status").mapCatching { SuiStatus.fromJson(it) },
-            nomount = jsonBody(8, "nomount status").mapCatching { NomountStatus.fromJson(it) },
+            nomount = jsonBody(7, "nomount status").mapCatching { NomountStatus.fromJson(it) },
         )
     }
 

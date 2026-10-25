@@ -21,7 +21,6 @@ FinaSU 提供：
 - 基于 overlayfs 与 metamodule 的类 Magisk 模块系统
 - App Profile，将 Root 权限限制在单个应用策略内
 - 内置 FolkZygisk 引擎，并提供管理器控制
-- 内置 Sui 扩展，为支持的应用提供 Shizuku API
 - SUSFS 支持，按内核能力开关
 - 内核级隐藏：挂载隐藏、SELinux 隐藏、AVC 日志伪装与卸载策略
 - `.fpt` 主题，与 FolkPatch 互通
@@ -50,12 +49,6 @@ FinaSU 提供：
 ### FolkZygisk
 
 FolkZygisk 是内置的 Zygisk 引擎。管理器提供安装与激活控制；已有外置 Zygisk provider 时 `ksud` 会让内置引擎自动让位，因此 provider 模块可正常安装。
-
-### Sui
-
-Sui 是内置的 Shizuku API 后端：使用 Shizuku 的应用直接走该扩展，无需另装 Shizuku。载荷由本仓库构建并内置于 ksud，因此安装、启停与修复都由 FinaSU 负责，不走 Sui 自带安装器；注入的 root 与 shell 服务由 `ksud` 监管。
-
-界面完全由管理器提供：逐应用的 Shizuku 权限列表、默认权限、对 Sui 隐藏的应用、诊断信息，以及真实请求的授权弹窗——请求经管理通道回传。上游 Sui 自带的界面不再随包提供。
 
 ### SUSFS
 
@@ -112,8 +105,6 @@ TEESimulator 为选定的应用回应密钥认证请求：它把 AOSP 的参考 
 - [BakaSU](https://github.com/Baka-SU/BakaSU)：AnyKernel3 刷写及部分小功能参考
 - [Magisk](https://github.com/topjohnwu/Magisk)：`magiskpolicy` 与模块概念
 - [SUSFS](https://gitlab.com/simonpunk/susfs4ksu)：内核级隐藏
-- [Sui](https://github.com/XiaoTong6666/Sui)：内置 Shizuku API 后端实现
-- [Shizuku-API](https://github.com/RikkaApps/Shizuku-API)：扩展实现的 Shizuku 客户端 API 库
 - [FolkPatch](https://github.com/LyraVoid/FolkPatch)：主题格式与设计参考
 - [MMRL](https://github.com/MMRLApp/MMRL)：模块仓库格式参考
 - [小赖字体](https://github.com/lxgw/kose-font)：内置应用字体（Copyright 2020-2024 LXGW）。以子集形式分发：GB2312 + ASCII + 常用标点，因为完整字体要占管理器 APK 的 8.2MB；集合外的字会回落到系统字体。

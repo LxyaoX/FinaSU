@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
 import androidx.compose.material.icons.filled.AdminPanelSettings
@@ -41,7 +40,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.rounded.Apps
@@ -730,26 +728,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             titleRes = R.string.settings_folk_zygisk,
             icon = Icons.Filled.Code,
             aliases = listOf("folkzygisk", "zygisk", "injection"),
-        )
-    )
-    add(
-        SettingsCategory.FUNCTION.row(
-            id = "function.sui",
-            titleRes = R.string.sui_title,
-            icon = Icons.Filled.WaterDrop,
-            aliases = listOf("sui", "shizuku", "adbd"),
-        )
-    )
-    add(
-        SettingsCategory.FUNCTION.page(
-            id = "function.sui_manage",
-            titleRes = R.string.sui_manage,
-            summaryRes = R.string.sui_manage_summary,
-            icon = Icons.AutoMirrored.Filled.OpenInNew,
-            route = Route.SuiPermissions,
-            aliases = listOf("sui", "permission", "authorize"),
-            // The row only exists once Sui is actually installed.
-            available = { it.suiStatus?.installed == true },
         )
     )
     add(

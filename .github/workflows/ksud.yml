@@ -43,32 +43,6 @@ jobs:
       run: |
         mv ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
 
-    # Sui ships as a payload embedded in ksud, so the package has to carry it for
-    # every ABI upstream still publishes one for. riscv64 has no Sui payload, and
-    # the manager reports "payload missing" there instead of failing.
-    - name: Stage the Sui payload
-      if: ${{ inputs.target != 'riscv64-linux-android' }}
-      run: |
-        case "${{ inputs.target }}" in
-          aarch64-linux-android) bindir=aarch64 ;;
-          x86_64-linux-android) bindir=x86_64 ;;
-          *) echo "unexpected target: ${{ inputs.target }}" >&2; exit 1 ;;
-        esac
-
-        zip=$(ls -t sui-payload/*.zip | head -1)
-        version=$(sed -n 's/^version=//p' userspace/sui/payload-version.txt)
-        version_code=$(sed -n 's/^version_code=//p' userspace/sui/payload-version.txt)
-
-        python3 userspace/sui/package.py \
-          --zip "$zip" \
-          --target "$bindir" \
-          --assets "userspace/ksud/bin/$bindir" \
-          --version "$version" \
-          --version-code "$version_code" \
-          --force
-
-        test -f "userspace/ksud/bin/$bindir/sui/payload.json"
-
     - name: Setup rustup
       run: |
         if [ "${{ inputs.target }}" = riscv64-linux-android ]; then

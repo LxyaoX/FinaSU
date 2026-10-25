@@ -22,9 +22,9 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v8
 
-      # The APK already carries ksud, the kernel modules, ksuinit and the Sui
-      # payload for every supported ABI. The separate zip exposes the standalone
-      # kernelsu.ko and ksud builds; other outputs stay on the run page.
+      # The APK already carries ksud, the kernel modules and ksuinit for every
+      # supported ABI. The separate zip exposes the standalone kernelsu.ko and
+      # ksud builds; other outputs stay on the run page.
       - name: Check the release APK
         run: |
           apk=$(ls manager/*.apk)

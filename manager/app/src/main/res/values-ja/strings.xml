@@ -763,4 +763,5 @@
     <string name="module_preinit_error">プリイニットの同期に失敗しました。前回の設定を保持します</string>
     <string name="module_preinit_bootloop">起動の再試行が続いたためプリイニットを一時停止しました</string>
     <string name="module_preinit_unsupported">このカーネルまたは読み込みモードではプリイニットを利用できません</string>
+    <string name="zygisk_required">先に Zygisk を有効にしてください</string>
 </resources>

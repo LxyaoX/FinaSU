@@ -170,10 +170,6 @@ pub fn on_post_fs_data() -> Result<()> {
         warn!("FolkZygisk startup skipped/failed: {e:#}");
     }
 
-    if let Err(e) = crate::sui::post_fs_data(safe_mode) {
-        warn!("Sui startup skipped/failed: {e:#}");
-    }
-
     std::env::set_current_dir("/").with_context(|| "failed to chdir to /")?;
 
     Ok(())
@@ -238,9 +234,6 @@ pub fn on_services() {
     info!("on_services triggered!");
     if let Err(e) = crate::zygisk::services() {
         warn!("FolkZygisk health check failed: {e:#}");
-    }
-    if let Err(e) = crate::sui::services() {
-        warn!("Sui health check failed: {e:#}");
     }
     run_stage("service", ScriptWait::NoWait);
 }
