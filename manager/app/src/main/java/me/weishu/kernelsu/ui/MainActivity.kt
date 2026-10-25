@@ -1,6 +1,7 @@
 package me.weishu.kernelsu.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -111,6 +112,7 @@ import me.weishu.kernelsu.ui.component.bottombar.rememberFloatingBarVisibilitySt
 import me.weishu.kernelsu.ui.component.bottombar.rememberMainPagerState
 import me.weishu.kernelsu.ui.component.bottombar.rememberNavBarGlassLiquidState
 import me.weishu.kernelsu.ui.component.bottombar.useNavigationRail
+import me.weishu.kernelsu.ui.component.onboarding.FirstRunGuide
 import me.weishu.kernelsu.ui.navigation3.EXTRA_INCOMING_URIS
 import me.weishu.kernelsu.ui.navigation3.IntentDispatcher
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
@@ -440,6 +442,23 @@ open class MainActivity : FragmentActivity() {
                                 MaterialTheme.colorScheme.surfaceContainer
                             }
                         ) { navDisplay() }
+                    }
+                    val prefs = remember {
+                        ksuApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                    }
+                    var showFirstRunGuide by rememberSaveable {
+                        mutableStateOf(
+                            savedInstanceState == null &&
+                                !prefs.getBoolean("first_run_guide_done", false),
+                        )
+                    }
+                    if (showFirstRunGuide) {
+                        FirstRunGuide(
+                            onDismiss = {
+                                prefs.edit().putBoolean("first_run_guide_done", true).apply()
+                                showFirstRunGuide = false
+                            },
+                        )
                     }
                     SideEffect { contentReady = true }
                 }

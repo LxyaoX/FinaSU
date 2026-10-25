@@ -129,6 +129,13 @@ unzip -Z1 FinaSU_<tag>_kernel-bundle.zip |
 
 The bundle must contain 16 `kernelsu.ko` files and eight `ksud` binaries.
 
+```bash
+unzip -Z1 FinaSU_<tag>_kernel-bundle.zip |
+  awk '/_kernelsu\.ko$/ { ko++ } /^ksud\// { ksud++ } END { print ko, ksud, (ko == 16 && ksud == 8 ? "ok" : "bad") }'
+```
+
+The bundle must contain 16 `kernelsu.ko` files and eight `ksud` binaries.
+
 ## 8. Pitfalls
 
 - Do not set `draft: true` on the release step: `action-gh-release` then uploads the assets and never

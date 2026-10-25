@@ -14,4 +14,5 @@ data class AboutUiState(
 data class AboutScreenActions(
     val onBack: () -> Unit,
     val onOpenLink: (String) -> Unit,
+    val onShowGuide: () -> Unit,
 )
