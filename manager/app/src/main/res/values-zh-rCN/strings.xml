@@ -278,8 +278,6 @@
     <string name="settings_theme_mode_dark">深色</string>
     <string name="settings_amoled_theme">AMOLED 纯黑主题</string>
     <string name="settings_amoled_theme_desc">为深色模式使用纯黑背景</string>
-    <string name="settings_switch_icon">启用按钮指示器</string>
-    <string name="settings_switch_icon_desc">为开关按钮添加状态指示图标</string>
     <string name="settings_discrete_slider">离散滑块</string>
     <string name="settings_discrete_slider_desc">在滑块轨道上显示刻度标记</string>
     <string name="settings_key_color_default">随光</string>

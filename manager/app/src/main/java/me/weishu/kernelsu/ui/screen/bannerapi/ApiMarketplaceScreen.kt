@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,6 +48,7 @@ import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.ui.viewmodel.ApiMarketplaceViewModel
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun ApiMarketplaceScreen() {
@@ -150,7 +150,7 @@ fun ApiMarketplaceScreen() {
     }
 
     previewItem?.let { item ->
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { previewItem = null },
             title = { Text(item.name.ifBlank { item.url }) },
             text = {

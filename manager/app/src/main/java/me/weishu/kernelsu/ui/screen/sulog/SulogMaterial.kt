@@ -29,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CheckableDropdownMenuItem
 import androidx.compose.material3.DropdownMenuGroup
@@ -78,6 +77,7 @@ import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.util.SulogEntry
 import me.weishu.kernelsu.ui.util.SulogEventFilter
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun SulogScreenMaterial(
@@ -428,7 +428,7 @@ private fun SulogDetailDialog(
     entry: SulogEntry,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(sulogEntryTitle(entry)) },
         text = {

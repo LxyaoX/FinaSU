@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -64,6 +63,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 private val primaryFields = listOf(2, 3)
 private val advancedFields = listOf(0, 1, 4, 5)
@@ -152,7 +152,7 @@ fun UtsViewScreen() {
 
     if (confirmDelete) {
         val susfsProvider = provider == "susfs"
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmDelete = false },
             title = {
                 Text(stringResource(
@@ -185,7 +185,7 @@ fun UtsViewScreen() {
     }
 
     if (confirmTakeOver) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmTakeOver = false },
             title = { Text(stringResource(R.string.uts_view_take_over_title)) },
             text = { Text(stringResource(R.string.uts_view_take_over_message)) },
@@ -208,7 +208,7 @@ fun UtsViewScreen() {
     }
 
     if (confirmGlobal) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmGlobal = false },
             title = { Text(stringResource(R.string.uts_view_global_confirm_title)) },
             text = { Text(stringResource(R.string.uts_view_global_confirm_message)) },

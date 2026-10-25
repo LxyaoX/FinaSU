@@ -38,7 +38,6 @@ import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -111,6 +110,7 @@ import me.weishu.kernelsu.ui.screen.module.ModuleButtonStyle
 import me.weishu.kernelsu.ui.screen.module.rememberModuleCardVisual
 import me.weishu.kernelsu.ui.theme.LocalModuleDescriptionMaxLines
 import me.weishu.kernelsu.ui.viewmodel.KernelModuleViewModel
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun KernelModuleScreen() {
@@ -288,7 +288,7 @@ fun KernelModuleScreen() {
         )
     }
     state.confirmRemove?.let { module ->
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = actions.onDismissRemove,
             title = { Text(stringResource(R.string.kernel_modules_remove_title, module.name)) },
             text = { Text(stringResource(R.string.kernel_modules_remove_body)) },

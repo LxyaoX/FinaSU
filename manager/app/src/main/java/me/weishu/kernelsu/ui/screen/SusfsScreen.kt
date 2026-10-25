@@ -56,6 +56,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun susfsManagementLabel(status: String): String = stringResource(when (status) {
@@ -162,7 +163,7 @@ fun SusfsScreen() {
     }
     draft?.let { text ->
         val preview = remember(text) { SusfsInputs.preview(text) }
-        AlertDialog(onDismissRequest = { draft = null }, title = { Text(stringResource(R.string.susfs_import_preview)) },
+        ExpressiveDialog(onDismissRequest = { draft = null }, title = { Text(stringResource(R.string.susfs_import_preview)) },
             text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.susfs_import_counts, preview.getJSONArray("rules").length(),
                     preview.getJSONObject("lkm").getJSONArray("hidden_modules").length(),
@@ -180,7 +181,7 @@ fun SusfsScreen() {
             ) })
     }
     if (state.pendingUnameApply) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = vm::dismissPendingUnameApply,
             title = { Text(stringResource(R.string.susfs_uts_apply_confirm_title)) },
             text = { Text(stringResource(R.string.susfs_uts_apply_confirm_message)) },
@@ -201,7 +202,7 @@ fun SusfsScreen() {
         )
     }
     if (confirmApplyAfterSave) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmApplyAfterSave = false },
             title = { Text(stringResource(R.string.susfs_apply_saved_title)) },
             text = { Text(stringResource(R.string.susfs_apply_saved_message)) },

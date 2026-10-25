@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import me.weishu.kernelsu.ui.component.profile.dialogs.MultiSelectDialog
 import me.weishu.kernelsu.ui.component.profile.dialogs.SingleSelectDialog
 import me.weishu.kernelsu.ui.util.isSepolicyValid
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun RootProfileConfigMaterial(
@@ -421,7 +421,7 @@ private fun SELinuxDialog(
     }
     val isRulesValid = remember(currentRules) { isSepolicyValid(currentRules) }
 
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.profile_selinux_context)) },
         text = {

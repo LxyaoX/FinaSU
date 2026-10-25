@@ -3,7 +3,6 @@ package me.weishu.kernelsu.ui.component
 import android.widget.Toast
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,6 +27,7 @@ import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 /**
  * The long-press editor for any registered surface: the same controls as the settings panel,
@@ -91,7 +91,7 @@ fun SurfaceOptionsDialog(
     )
     val rows = surfaceRows(descriptor, SurfaceStore.config(surfaceId), callbacks)
 
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = { if (!isSaving) onDismiss() },
         title = { Text(stringResource(descriptor.titleRes)) },
         text = {

@@ -2,7 +2,6 @@ package me.weishu.kernelsu.ui.component.profile.dialogs
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,6 +14,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.FolkTextButton
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedRadioItem
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun <T> SingleSelectDialog(
@@ -27,7 +27,7 @@ fun <T> SingleSelectDialog(
 ) {
     var selected by remember { mutableStateOf(selectedItem) }
 
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

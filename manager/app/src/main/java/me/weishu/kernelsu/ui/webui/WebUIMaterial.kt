@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.FolkTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun HandleWebUIEventMaterial(
@@ -25,7 +25,7 @@ fun HandleWebUIEventMaterial(
         is WebUIEvent.ShowAlert -> {
             val showDialog = remember(event) { mutableStateOf(true) }
             if (showDialog.value) {
-                AlertDialog(
+                ExpressiveDialog(
                     onDismissRequest = {
                         webUIState.onAlertResult()
                         showDialog.value = false
@@ -50,7 +50,7 @@ fun HandleWebUIEventMaterial(
         is WebUIEvent.ShowConfirm -> {
             val showDialog = remember(event) { mutableStateOf(true) }
             if (showDialog.value) {
-                AlertDialog(
+                ExpressiveDialog(
                     onDismissRequest = {
                         webUIState.onConfirmResult(false)
                         showDialog.value = false
@@ -86,7 +86,7 @@ fun HandleWebUIEventMaterial(
             val showDialog = remember(event) { mutableStateOf(true) }
             val state = remember(event) { mutableStateOf(event.defaultValue) }
             if (showDialog.value) {
-                AlertDialog(
+                ExpressiveDialog(
                     onDismissRequest = {
                         webUIState.onPromptResult(null)
                         showDialog.value = false

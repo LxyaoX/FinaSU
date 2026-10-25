@@ -76,7 +76,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedItemContainer
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
-import me.weishu.kernelsu.ui.component.material.SwitchIconConfig
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.theme.ColorMode
@@ -218,15 +217,6 @@ fun ColorPaletteScreenMaterial(
                                 },
                             )
                         }
-                    }
-                    item {
-                        SwitchPreference(
-                            title = stringResource(R.string.settings_switch_icon),
-                            summary = stringResource(R.string.settings_switch_icon_desc),
-                            startAction = { Icon(Icons.Outlined.ToggleOn, contentDescription = null) },
-                            checked = SwitchIconConfig.showIcon,
-                            onCheckedChange = { SwitchIconConfig.setIconVisible(it) },
-                        )
                     }
                     item {
                         SwitchPreference(

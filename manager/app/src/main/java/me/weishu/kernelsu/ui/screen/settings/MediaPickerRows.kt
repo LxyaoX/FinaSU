@@ -1,6 +1,5 @@
 package me.weishu.kernelsu.ui.screen.settings
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -18,6 +17,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.snapToPercent
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 internal fun MediaFileRow(filename: String?, icon: ImageVector? = null, onClick: () -> Unit) {
@@ -36,7 +36,7 @@ internal fun ClearMediaRow(onClick: () -> Unit) {
         title = stringResource(R.string.media_clear),
         onClick = { confirm = true },
     )
-    if (confirm) AlertDialog(
+    if (confirm) ExpressiveDialog(
         onDismissRequest = { confirm = false },
         title = { Text(stringResource(R.string.media_clear)) },
         text = { Text(stringResource(R.string.media_clear_confirm)) },

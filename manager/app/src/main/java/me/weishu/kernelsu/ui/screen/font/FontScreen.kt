@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FontDownload
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -44,6 +43,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 /**
  * The font setting: the three [FontMode]s, plus the import and restore rows that only make sense
@@ -72,7 +72,7 @@ fun FontScreen() {
     }
 
     if (showRestoreDialog) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { showRestoreDialog = false },
             title = { Text(stringResource(R.string.font_restore_default)) },
             text = { Text(stringResource(R.string.font_restore_default_confirm)) },

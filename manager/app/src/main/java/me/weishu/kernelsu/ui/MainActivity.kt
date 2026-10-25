@@ -219,7 +219,6 @@ open class MainActivity : FragmentActivity() {
         // Activity recreation must not overwrite a slider edit still waiting for its debounce.
         me.weishu.kernelsu.modulebanner.ModuleBannerConfig.loadOnce()
         me.weishu.kernelsu.modulebanner.ModuleCardConfig.load()
-        me.weishu.kernelsu.ui.component.material.SwitchIconConfig.load(this)
         me.weishu.kernelsu.ui.component.material.SliderTrackConfig.load(this)
         me.weishu.kernelsu.media.VisualMediaConfig.load(this)
 

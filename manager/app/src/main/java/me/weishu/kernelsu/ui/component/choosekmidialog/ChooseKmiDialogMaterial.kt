@@ -2,7 +2,6 @@ package me.weishu.kernelsu.ui.component.choosekmidialog
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,6 +18,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedRadioItem
 import me.weishu.kernelsu.ui.util.getCurrentKmi
 import me.weishu.kernelsu.ui.util.getSupportedKmis
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun ChooseKmiDialogMaterial(
@@ -38,7 +38,7 @@ fun ChooseKmiDialogMaterial(
 
     val selectedKmi = remember(currentKmi) { mutableStateOf(currentKmi) }
 
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = {
             onDismissRequest()
             selectedKmi.value = currentKmi

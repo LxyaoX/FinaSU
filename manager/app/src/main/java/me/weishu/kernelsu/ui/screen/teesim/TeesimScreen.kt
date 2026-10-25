@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -48,6 +47,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 /**
  * TEESimulator settings.
@@ -213,7 +213,7 @@ fun TeesimScreen() {
     }
 
     if (confirmUninstall) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmUninstall = false },
             title = { Text(stringResource(R.string.teesim_uninstall_confirm_title)) },
             text = { Text(stringResource(R.string.teesim_uninstall_confirm)) },

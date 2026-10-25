@@ -30,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,6 +54,7 @@ import me.weishu.kernelsu.wallpaper.PreparedTheme
 import me.weishu.kernelsu.wallpaper.ThemeImportService
 import me.weishu.kernelsu.wallpaper.ThemeMetadata
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 /** Shared picker/store entry point; prepared resources belong to this UI lifetime. */
 @Composable
@@ -112,7 +112,7 @@ fun rememberThemeImportRequest(onResult: (Result<Unit>) -> Unit): (Uri) -> Unit 
 
 @Composable
 private fun ThemeImportDialog(theme: PreparedTheme, busy: Boolean, onDismiss: () -> Unit, onApply: () -> Unit) {
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.fpt_import_title)) },
         text = {
@@ -192,7 +192,7 @@ private fun ThemeMetadataRow(label: String, value: String) {
 @Composable
 fun ThemeMetadataEditor(initial: ThemeMetadata, onDismiss: () -> Unit, onExport: (ThemeMetadata) -> Unit) {
     var metadata by remember(initial) { mutableStateOf(initial) }
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.wallpaper_export)) },
         text = {

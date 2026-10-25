@@ -21,6 +21,7 @@ import org.json.JSONObject
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 internal fun SusfsBasicPage(config: JSONObject?, status: SusfsStatus, writable: Boolean, vm: SusfsViewModel) {
@@ -324,7 +325,7 @@ private fun SusfsExtensionSection(key: String, title: Int, node: String, config:
 @Composable
 private fun SusfsChoiceDialog(title: String, choices: List<Int>, selected: Int, enabled: Boolean,
     dismiss: () -> Unit, choose: (Int) -> Unit) {
-    AlertDialog(onDismissRequest = dismiss, title = { Text(title) }, text = {
+    ExpressiveDialog(onDismissRequest = dismiss, title = { Text(title) }, text = {
         SegmentedColumn { choices.forEachIndexed { index, label -> item {
             SegmentedListItem(selected = selected == index, enabled = enabled, onClick = { choose(index) },
                 headlineContent = { Text(stringResource(label)) }, trailingContent = { RadioButton(selected == index, null, enabled = enabled) })
@@ -337,7 +338,7 @@ private fun SusfsChoiceDialog(title: String, choices: List<Int>, selected: Int, 
 
 @Composable
 private fun SusfsDeleteDialog(value: String, enabled: Boolean, dismiss: () -> Unit, delete: () -> Unit) {
-    AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.susfs_remove)) },
+    ExpressiveDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.susfs_remove)) },
         text = { Text("$value\n\n${stringResource(R.string.susfs_removal_hint)}") },
         confirmButton = { MiuixTextButton(
             text = stringResource(R.string.susfs_remove),
@@ -352,7 +353,7 @@ private fun SusfsDeleteDialog(value: String, enabled: Boolean, dismiss: () -> Un
 
 @Composable
 private fun SusfsForm(title: String, dismiss: () -> Unit, valid: Boolean, save: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    AlertDialog(onDismissRequest = dismiss, title = { Text(title) }, text = {
+    ExpressiveDialog(onDismissRequest = dismiss, title = { Text(title) }, text = {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
     }, confirmButton = { MiuixTextButton(
         text = stringResource(R.string.susfs_save),

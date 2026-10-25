@@ -10,7 +10,6 @@ import androidx.compose.material.icons.rounded.Adb
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.RemoveModerator
 import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +48,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 enum class FlashingStatus {
     FLASHING,
@@ -312,7 +312,7 @@ fun JailbreakFlashWarningDialog(
         }
     }
 
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(android.R.string.dialog_alert_title)) },
         text = {

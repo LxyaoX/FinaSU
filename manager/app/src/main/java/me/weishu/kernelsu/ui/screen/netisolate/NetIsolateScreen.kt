@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -86,6 +85,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 private val NETISOLATE_EVENT_TIME: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm:ss", Locale.ROOT)
@@ -137,7 +137,7 @@ fun NetIsolateScreen() {
     }
 
     if (confirmClear) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text(stringResource(R.string.netisolate_clear)) },
             text = { Text(stringResource(R.string.netisolate_clear_summary)) },
@@ -160,7 +160,7 @@ fun NetIsolateScreen() {
     }
 
     if (confirmClearEvents) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { confirmClearEvents = false },
             title = { Text(stringResource(R.string.netisolate_events_clear)) },
             text = { Text(stringResource(R.string.netisolate_events_clear_confirm)) },

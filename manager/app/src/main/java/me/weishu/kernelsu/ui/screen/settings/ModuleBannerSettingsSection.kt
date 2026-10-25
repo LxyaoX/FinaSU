@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,6 +40,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
 
@@ -201,7 +201,7 @@ fun ModuleBannerSettingsSection() {
 private fun BannerApiSourceDialog(onDismiss: () -> Unit) {
     var value by remember { mutableStateOf(ModuleBannerConfig.apiSource) }
 
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.module_banner_api_source_dialog_title)) },
         text = {

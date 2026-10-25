@@ -1,6 +1,5 @@
 package me.weishu.kernelsu.ui.component.uninstalldialog
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import me.weishu.kernelsu.ui.screen.flash.UninstallType
 import me.weishu.kernelsu.ui.screen.flash.UninstallType.PERMANENT
 import me.weishu.kernelsu.ui.screen.flash.UninstallType.RESTORE_STOCK_IMAGE
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 @Composable
 fun UninstallDialogMaterial(
@@ -44,7 +44,7 @@ fun UninstallDialogMaterial(
     }
 
     if (show) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = onDismissRequest,
             title = { Text(stringResource(R.string.settings_uninstall)) },
             text = {

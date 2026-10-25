@@ -21,7 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Checkbox
+import top.yukonga.miuix.kmp.basic.Checkbox
 import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemColors
@@ -33,14 +33,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.RadioButton
+import top.yukonga.miuix.kmp.basic.RadioButton
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
+import top.yukonga.miuix.kmp.basic.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -95,6 +93,7 @@ import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
+import androidx.compose.ui.state.ToggleableState
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
 private val SegmentedOuterRadius = 16.dp
@@ -706,7 +705,6 @@ fun SegmentedSwitchItem(
                 checked = checked,
                 enabled = enabled,
                 onCheckedChange = null,
-                interactionSource = interactionSource,
             )
         },
         supportingContent = summary?.let { { Text(it) } }
@@ -769,51 +767,47 @@ fun SegmentedSliderItem(
 ) {
     val hoisted = onValueChange != null
     val steps = if (SliderTrackConfig.isDiscrete) discreteSteps else 0
-    val sliderState = rememberSliderState(value = value, steps = steps, trackRange = valueRange)
+    // miuix's slider holds no state of its own, so the row does: the caller's value when it owns
+    // one, otherwise the thumb the user is dragging.
+    var dragged by remember(value, valueRange) { mutableFloatStateOf(value) }
+    val shown = if (hoisted) value else dragged
 
     SegmentedListItem(
         enabled = enabled,
         colors = colors,
         headlineContent = { Text(title) },
         leadingContent = icon?.let { { Icon(it, title) } },
-        trailingContent = { Text(valueText(if (hoisted) value else sliderState.value)) },
+        trailingContent = { Text(valueText(shown)) },
         supportingContent = {
             Column {
                 summary?.let { Text(it) }
-                if (hoisted) {
-                    // The caller owns both the thumb and label; no saved slider value may override it.
-                    val state = remember(valueRange, steps) { SliderState(value = value, steps = steps, trackRange = valueRange) }
-                    if (state.value != value) state.value = value
-                    // A release normally reports itself; this covers the gesture the scroll container took over.
-                    SliderCommitEffect(value) { onValueChangeFinished(state.value) }
-                    Slider(
-                        state = state,
-                        onValueChange = onValueChange,
-                        onValueChangeFinished = { onValueChangeFinished(state.value) },
-                        enabled = enabled,
-                        // Only a drag may move the value: a stationary press is cancelled here, before the
-                        // slider's own tap handling can jump the thumb to an accidental touch.
-                        modifier = Modifier.fillMaxWidth().pointerInput(title) {
-                            awaitEachGesture {
-                                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                                var dragged = false
-                                do {
-                                    val event = awaitPointerEvent(PointerEventPass.Initial)
-                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                    if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) dragged = true
-                                    if (!change.pressed && !dragged) change.consume()
-                                } while (event.changes.any { it.pressed })
-                            }
-                        },
-                    )
-                } else {
-                    Slider(
-                        state = sliderState,
-                        onValueChangeFinished = { onValueChangeFinished(sliderState.value) },
-                        enabled = enabled,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                // A release normally reports itself; this covers the gesture the scroll container took over.
+                SliderCommitEffect(shown) { onValueChangeFinished(shown) }
+                Slider(
+                    value = shown,
+                    onValueChange = {
+                        dragged = it
+                        onValueChange?.invoke(it)
+                    },
+                    onValueChangeFinished = { onValueChangeFinished(if (hoisted) value else dragged) },
+                    valueRange = valueRange,
+                    steps = steps,
+                    enabled = enabled,
+                    // Only a drag may move the value: a stationary press is cancelled here, before the
+                    // slider's own tap handling can jump the thumb to an accidental touch.
+                    modifier = Modifier.fillMaxWidth().pointerInput(title) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                            var moved = false
+                            do {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) moved = true
+                                if (!change.pressed && !moved) change.consume()
+                            } while (event.changes.any { it.pressed })
+                        }
+                    },
+                )
             }
         },
     )
@@ -920,7 +914,7 @@ fun SegmentedRadioItem(
             RadioButton(
                 selected = selected,
                 onClick = null,
-                enabled = enabled
+                enabled = enabled,
             )
         },
         supportingContent = summary?.let { { Text(it) } }
@@ -952,11 +946,10 @@ fun SegmentedCheckboxItem(
         headlineContent = { Text(title) },
         leadingContent = {
             Checkbox(
-                checked = checked,
+                state = if (checked) ToggleableState.On else ToggleableState.Off,
+                onClick = null,
                 enabled = enabled,
-                onCheckedChange = null,
-                interactionSource = interactionSource,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         },
         supportingContent = summary?.let { { Text(it) } }

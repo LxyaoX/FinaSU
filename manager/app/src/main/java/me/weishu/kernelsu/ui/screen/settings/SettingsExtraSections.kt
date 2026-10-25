@@ -34,9 +34,8 @@ import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
+import top.yukonga.miuix.kmp.basic.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -425,11 +424,9 @@ private fun NavIconItemRow(
 @Composable
 fun DisplayDensitySection(uiState: SettingsUiState, actions: SettingsScreenActions) {
     TonalCard(modifier = SectionModifier) {
-        val sliderState = rememberSliderState(
-            value = uiState.pageScale,
-            steps = if (SliderTrackConfig.isDiscrete) 19 else 0,
-            trackRange = 0.8f..1.1f
-        )
+        // miuix's slider keeps no state of its own; the row drags this and only writes on release.
+        var pageScale by remember(uiState.pageScale) { mutableFloatStateOf(uiState.pageScale) }
+        val pageScaleSteps = if (SliderTrackConfig.isDiscrete) 19 else 0
 
         Column(
             modifier = Modifier.padding(16.dp),
@@ -458,26 +455,27 @@ fun DisplayDensitySection(uiState: SettingsUiState, actions: SettingsScreenActio
                     )
                 }
                 Text(
-                    text = "${(sliderState.value * 100).toInt()}%",
+                    text = "${(pageScale * 100).toInt()}%",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Slider(
-                state = sliderState,
-                onValueChangeFinished = { actions.onSetPageScale(sliderState.value) },
-                modifier = Modifier.fillMaxWidth()
+                value = pageScale,
+                onValueChange = { pageScale = it },
+                onValueChangeFinished = { actions.onSetPageScale(pageScale) },
+                valueRange = 0.8f..1.1f,
+                steps = pageScaleSteps,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
 
     TonalCard(modifier = SectionModifier) {
-        val sliderState = rememberSliderState(
-            value = uiState.moduleDescriptionMaxLines.toFloat(),
-            steps = 3,
-            trackRange = 1f..5f
-        )
+        var descriptionLines by remember(uiState.moduleDescriptionMaxLines) {
+            mutableFloatStateOf(uiState.moduleDescriptionMaxLines.toFloat())
+        }
 
         Column(
             modifier = Modifier.padding(16.dp),
@@ -506,18 +504,21 @@ fun DisplayDensitySection(uiState: SettingsUiState, actions: SettingsScreenActio
                     )
                 }
                 Text(
-                    text = "${sliderState.value.roundToInt()} " + stringResource(R.string.unit_lines),
+                    text = "${descriptionLines.roundToInt()} " + stringResource(R.string.unit_lines),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Slider(
-                state = sliderState,
+                value = descriptionLines,
+                onValueChange = { descriptionLines = it },
                 onValueChangeFinished = {
-                    actions.onSetModuleDescriptionMaxLines(sliderState.value.roundToInt())
+                    actions.onSetModuleDescriptionMaxLines(descriptionLines.roundToInt())
                 },
-                modifier = Modifier.fillMaxWidth()
+                valueRange = 1f..5f,
+                steps = 3,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

@@ -38,11 +38,9 @@ import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
+import top.yukonga.miuix.kmp.basic.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -101,6 +99,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 /** Sentinel for "no per-page background is being picked". */
 private const val NO_PAGE = -1
@@ -336,7 +335,7 @@ fun WallpaperScreen() {
     )
 
     if (showResetDialog) {
-        AlertDialog(
+        ExpressiveDialog(
             onDismissRequest = { showResetDialog = false },
             title = { Text(stringResource(R.string.wallpaper_reset_theme)) },
             text = { Text(stringResource(R.string.wallpaper_reset_theme_confirm)) },
@@ -773,8 +772,6 @@ private fun SliderSetting(
     format: (Float) -> String = { "${(it * 100).roundToInt()}%" },
 ) {
     val steps = SliderTrackConfig.steps
-    val sliderState = remember(range, steps) { SliderState(value = value, steps = steps, trackRange = range) }
-    if (sliderState.value != value) sliderState.value = value
     SliderCommitEffect(value, onCommit)
     Column {
         Row(
@@ -809,9 +806,11 @@ private fun SliderSetting(
             )
         }
         Slider(
-            state = sliderState,
+            value = value,
             onValueChange = onValueChange,
             onValueChangeFinished = { onCommit() },
+            valueRange = range,
+            steps = steps,
             modifier = Modifier.fillMaxWidth(),
         )
     }

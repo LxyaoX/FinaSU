@@ -393,8 +393,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_theme_mode_dark">Dark</string>
     <string name="settings_amoled_theme">AMOLED Black Theme</string>
     <string name="settings_amoled_theme_desc">Pure black background for dark mode</string>
-    <string name="settings_switch_icon">Enable Button Indicator</string>
-    <string name="settings_switch_icon_desc">Show status icons on toggle switches</string>
     <string name="settings_discrete_slider">Discrete Slider</string>
     <string name="settings_discrete_slider_desc">Show tick marks on slider tracks</string>
     <string name="settings_key_color_default">Ambient</string>

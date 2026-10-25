@@ -3,7 +3,6 @@ package me.weishu.kernelsu.ui.component
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
 /**
  * The single image-upload flow every caller shares: pick a picture, then crop it to [aspect] or use
@@ -62,7 +62,7 @@ fun ImageCropPickerHost(
         )
         return
     }
-    AlertDialog(
+    ExpressiveDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(stringResource(R.string.wallpaper_crop_title)) },
         text = { Text(stringResource(R.string.wallpaper_crop_message)) },
