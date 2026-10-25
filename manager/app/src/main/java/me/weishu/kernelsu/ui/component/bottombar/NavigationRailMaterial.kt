@@ -8,29 +8,27 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.NavigationRailItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.ui.component.material.ChromeEdge
 import me.weishu.kernelsu.ui.component.material.WallpaperChromeZone
+import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
 
 /**
- * Side navigation rail matching the FolkPatch rail: an icon-only [NavigationRail] whose items are
- * vertically centered. It is fixed — there is no collapse control and no label-bearing wide
- * variant — so the side bar looks the same on phones and tablets.
+ * Side navigation rail matching the FolkPatch rail: an icon-only column whose items are vertically
+ * centered. It is fixed - there is no collapse control and no label-bearing wide variant - so the
+ * side bar looks the same on phones and tablets.
  *
  * In wallpaper mode it shares the docked bottom bar's rule ([BottomBarControl]): the rail turns
  * transparent so the wallpaper reads through, and a [ChromeEdge.Start] scrim softly fades it into
- * the content instead of ending in a hard color band.
+ * the content instead of ending in a hard colour band.
  */
 @Composable
 fun NavigationRailMaterial(
@@ -49,14 +47,23 @@ fun NavigationRailMaterial(
         material = railStyle.scrim,
     ) {
         NavigationRail(
-            modifier = Modifier.fillMaxHeight(),
-            containerColor = railStyle.containerColor,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            windowInsets = railWindowInsets(),
+            modifier = Modifier
+                .fillMaxHeight()
+                .windowInsetsPadding(railWindowInsets()),
+            color = railStyle.containerColor,
+            // The insets above are this app's own (bars plus cutout); miuix adds the whole system
+            // bar, which would double the padding on one side.
+            defaultWindowInsetsPadding = false,
         ) {
             Spacer(Modifier.weight(1f))
             destinations.forEach { destination ->
                 val selected = mainPagerState.selectedDestination == destination
+                val badge = badgeFor(destination, navigationBadge)
+                val badgeSlot: (@Composable () -> Unit)? = if (badge != null) {
+                    { NavBadgeDot(badge) }
+                } else {
+                    null
+                }
                 NavigationRailItem(
                     selected = selected,
                     onClick = {
@@ -64,18 +71,9 @@ fun NavigationRailMaterial(
                             mainPagerState.animateToDestination(destination)
                         }
                     },
-                    icon = {
-                        NavigationIconWithBadge(
-                            destination = destination,
-                            selected = selected,
-                            badge = badgeFor(destination, navigationBadge),
-                        )
-                    },
-                    label = { Text(stringResource(destination.label)) },
-                    alwaysShowLabel = false,
-                    colors = railStyle.indicatorColor?.let {
-                        NavigationRailItemDefaults.colors(indicatorColor = it)
-                    } ?: NavigationRailItemDefaults.colors(),
+                    icon = if (selected) destination.iconSelected else destination.iconNotSelected,
+                    label = stringResource(destination.label),
+                    badge = badgeSlot,
                 )
             }
             Spacer(Modifier.weight(1f))

@@ -1,7 +1,5 @@
 package me.weishu.kernelsu.ui.component.bottombar
 
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,15 +11,16 @@ import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.ui.component.material.ChromeEdge
 import me.weishu.kernelsu.ui.component.material.WallpaperChromeZone
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
+import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 
 /**
  * The docked bar, drawn with miuix's navigation components.
  *
- * miuix owns the indicator, the selected-icon swap and the ripple, so the destinations only have to
- * say which of their two vectors applies. Wallpaper chrome still supplies the container colour, so a
- * theme that paints the bar keeps doing so.
+ * miuix owns the indicator, the selected-icon swap, the ripple and the badge placement, so a
+ * destination only has to say which of its two vectors applies. Wallpaper chrome still supplies the
+ * container colour, so a theme that paints the bar keeps doing so.
  */
 @Composable
 fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
@@ -37,6 +36,12 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
         NavigationBar(color = barStyle.containerColor) {
             destinations.forEach { destination ->
                 val selected = mainPagerState.selectedDestination == destination
+                val badge = badgeFor(destination, navigationBadge)
+                val badgeSlot: (@Composable () -> Unit)? = if (badge != null) {
+                    { NavBadgeDot(badge) }
+                } else {
+                    null
+                }
                 NavigationBarItem(
                     modifier = Modifier.weight(1f),
                     icon = if (selected) destination.iconSelected else destination.iconNotSelected,
@@ -47,38 +52,31 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
                             mainPagerState.animateToDestination(destination)
                         }
                     },
+                    badge = badgeSlot,
                 )
             }
         }
     }
 }
 
+/**
+ * The count miuix draws on an icon.
+ *
+ * The text colour is passed in rather than inherited: miuix badges publish their content colour
+ * through miuix's own `LocalContentColor`, which is not the one Material's `Text` reads, and an
+ * inherited colour here would paint dark digits on the accent fill.
+ */
 @Composable
-internal fun NavigationIconWithBadge(
-    destination: BottomBarDestination,
-    selected: Boolean,
-    badge: NavBadge?,
-) {
-    if (badge != null) {
-        BadgedBox(
-            badge = {
-                when (badge.tone) {
-                    BadgeTone.Alert -> Badge {
-                        Text(badge.count.toString())
-                    }
-
-                    BadgeTone.Accent -> Badge(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    ) {
-                        Text(badge.count.toString())
-                    }
-                }
-            }
-        ) {
-            NavBarIcon(destination, selected)
-        }
-    } else {
-        NavBarIcon(destination, selected)
+internal fun NavBadgeDot(badge: NavBadge) {
+    val container = when (badge.tone) {
+        BadgeTone.Alert -> MaterialTheme.colorScheme.error
+        BadgeTone.Accent -> MaterialTheme.colorScheme.primary
+    }
+    val content = when (badge.tone) {
+        BadgeTone.Alert -> MaterialTheme.colorScheme.onError
+        BadgeTone.Accent -> MaterialTheme.colorScheme.onPrimary
+    }
+    Badge(containerColor = container, contentColor = content) {
+        Text(text = badge.count.toString(), color = content)
     }
 }
