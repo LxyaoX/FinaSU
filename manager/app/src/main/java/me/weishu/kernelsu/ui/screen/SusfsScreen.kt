@@ -55,6 +55,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 @Composable
 fun susfsManagementLabel(status: String): String = stringResource(when (status) {
@@ -124,7 +125,11 @@ fun SusfsScreen() {
         MiuixTopAppBar(
             title = stringResource(R.string.susfs_title),
             navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
-            actions = { TextButton(enabled = !state.busy, onClick = vm::refresh) { Text(stringResource(R.string.susfs_refresh)) } },
+            actions = { MiuixTextButton(
+                text = stringResource(R.string.susfs_refresh),
+                onClick = vm::refresh,
+                enabled = !state.busy,
+            ) },
             scrollBehavior = scrollBehavior,
         )
     }) { padding ->
@@ -164,9 +169,15 @@ fun SusfsScreen() {
                     preview.getJSONObject("lkm").getJSONArray("mount_prefixes").length()))
                 Text(stringResource(if (preview.getBoolean("automatic")) R.string.susfs_import_auto_on else R.string.susfs_import_auto_off))
                 Text(stringResource(R.string.susfs_import_warning))
-            } }, confirmButton = { TextButton(enabled = state.status.protocol == "compatible" && !state.busy,
-                onClick = { vm.save(text); draft = null }) { Text(stringResource(R.string.susfs_save)) } },
-            dismissButton = { TextButton(onClick = { draft = null }) { Text(stringResource(R.string.susfs_cancel)) } })
+            } }, confirmButton = { MiuixTextButton(
+                text = stringResource(R.string.susfs_save),
+                onClick = { vm.save(text); draft = null },
+                enabled = state.status.protocol == "compatible" && !state.busy,
+            ) },
+            dismissButton = { MiuixTextButton(
+                text = stringResource(R.string.susfs_cancel),
+                onClick = { draft = null },
+            ) })
     }
     if (state.pendingUnameApply) {
         AlertDialog(
@@ -174,14 +185,18 @@ fun SusfsScreen() {
             title = { Text(stringResource(R.string.susfs_uts_apply_confirm_title)) },
             text = { Text(stringResource(R.string.susfs_uts_apply_confirm_message)) },
             confirmButton = {
-                TextButton(enabled = !state.busy, onClick = vm::confirmPendingUnameApply) {
-                    Text(stringResource(R.string.susfs_uts_apply_confirm_action))
-                }
+                MiuixTextButton(
+                    text = stringResource(R.string.susfs_uts_apply_confirm_action),
+                    onClick = vm::confirmPendingUnameApply,
+                    enabled = !state.busy,
+                )
             },
             dismissButton = {
-                TextButton(enabled = !state.busy, onClick = vm::dismissPendingUnameApply) {
-                    Text(stringResource(R.string.susfs_cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(R.string.susfs_cancel),
+                    onClick = vm::dismissPendingUnameApply,
+                    enabled = !state.busy,
+                )
             },
         )
     }
@@ -191,18 +206,20 @@ fun SusfsScreen() {
             title = { Text(stringResource(R.string.susfs_apply_saved_title)) },
             text = { Text(stringResource(R.string.susfs_apply_saved_message)) },
             confirmButton = {
-                TextButton(
-                    enabled = state.status.writable && !state.busy,
+                MiuixTextButton(
+                    text = stringResource(R.string.susfs_apply_saved_action),
                     onClick = {
                         confirmApplyAfterSave = false
                         vm.apply()
                     },
-                ) { Text(stringResource(R.string.susfs_apply_saved_action)) }
+                    enabled = state.status.writable && !state.busy,
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmApplyAfterSave = false }) {
-                    Text(stringResource(R.string.susfs_cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(R.string.susfs_cancel),
+                    onClick = { confirmApplyAfterSave = false },
+                )
             },
         )
     }

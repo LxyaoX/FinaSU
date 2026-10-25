@@ -50,6 +50,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * Pick the apps that must see the stock filesystem.
@@ -88,15 +89,14 @@ fun NomountExclusionsScreen() {
                 title = stringResource(R.string.nomount_exclusions_title),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
                 actions = {
-                    TextButton(
-                        enabled = !state.isWriting,
+                    MiuixTextButton(
+                        text = stringResource(R.string.nomount_save),
                         onClick = {
                             viewModel.saveExclusions(selected.toList())
                             navigator.pop()
                         },
-                    ) {
-                        Text(stringResource(R.string.nomount_save))
-                    }
+                        enabled = !state.isWriting,
+                    )
                 },
                 scrollBehavior = scrollBehavior,
             )

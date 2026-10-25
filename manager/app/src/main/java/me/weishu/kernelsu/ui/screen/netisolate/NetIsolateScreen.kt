@@ -85,6 +85,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 private val NETISOLATE_EVENT_TIME: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm:ss", Locale.ROOT)
@@ -141,19 +142,19 @@ fun NetIsolateScreen() {
             title = { Text(stringResource(R.string.netisolate_clear)) },
             text = { Text(stringResource(R.string.netisolate_clear_summary)) },
             confirmButton = {
-                TextButton(
+                MiuixTextButton(
+                    text = stringResource(R.string.netisolate_clear),
                     onClick = {
                         confirmClear = false
                         viewModel.clear()
                     },
-                ) {
-                    Text(stringResource(R.string.netisolate_clear))
-                }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmClear = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { confirmClear = false },
+                )
             },
         )
     }
@@ -164,19 +165,19 @@ fun NetIsolateScreen() {
             title = { Text(stringResource(R.string.netisolate_events_clear)) },
             text = { Text(stringResource(R.string.netisolate_events_clear_confirm)) },
             confirmButton = {
-                TextButton(
+                MiuixTextButton(
+                    text = stringResource(R.string.netisolate_events_clear),
                     onClick = {
                         confirmClearEvents = false
                         viewModel.clearEvents()
                     },
-                ) {
-                    Text(stringResource(R.string.netisolate_events_clear))
-                }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmClearEvents = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { confirmClearEvents = false },
+                )
             },
         )
     }
@@ -581,12 +582,11 @@ private fun NetIsolateEventsSheet(
                         )
                     }
                 }
-                TextButton(
+                MiuixTextButton(
+                    text = stringResource(R.string.netisolate_events_clear),
                     onClick = onClear,
                     enabled = events.supported && !loading && events.events.isNotEmpty(),
-                ) {
-                    Text(stringResource(R.string.netisolate_events_clear))
-                }
+                )
             }
 
             when {

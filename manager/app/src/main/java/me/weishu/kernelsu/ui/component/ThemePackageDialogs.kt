@@ -54,6 +54,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.wallpaper.PreparedTheme
 import me.weishu.kernelsu.wallpaper.ThemeImportService
 import me.weishu.kernelsu.wallpaper.ThemeMetadata
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /** Shared picker/store entry point; prepared resources belong to this UI lifetime. */
 @Composable
@@ -127,8 +128,16 @@ private fun ThemeImportDialog(theme: PreparedTheme, busy: Boolean, onDismiss: ()
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         },
-        confirmButton = { TextButton(onClick = onApply, enabled = !busy) { Text(stringResource(R.string.theme_store_apply)) } },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !busy) { Text(stringResource(R.string.theme_store_cancel)) } },
+        confirmButton = { MiuixTextButton(
+            text = stringResource(R.string.theme_store_apply),
+            onClick = onApply,
+            enabled = !busy,
+        ) },
+        dismissButton = { MiuixTextButton(
+            text = stringResource(R.string.theme_store_cancel),
+            onClick = onDismiss,
+            enabled = !busy,
+        ) },
     )
 }
 
@@ -199,10 +208,15 @@ fun ThemeMetadataEditor(initial: ThemeMetadata, onDismiss: () -> Unit, onExport:
                     label = { Text(stringResource(R.string.fpt_description)) })
             }
         },
-        confirmButton = { TextButton(onClick = { onExport(metadata) }, enabled = metadata.name.isNotBlank()) {
-            Text(stringResource(R.string.wallpaper_export))
-        } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.theme_store_cancel)) } },
+        confirmButton = { MiuixTextButton(
+            text = stringResource(R.string.wallpaper_export),
+            onClick = { onExport(metadata) },
+            enabled = metadata.name.isNotBlank(),
+        ) },
+        dismissButton = { MiuixTextButton(
+            text = stringResource(R.string.theme_store_cancel),
+            onClick = onDismiss,
+        ) },
     )
 }
 

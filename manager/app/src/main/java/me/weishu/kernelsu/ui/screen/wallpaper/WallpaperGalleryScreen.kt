@@ -59,6 +59,7 @@ import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.viewmodel.WallpaperGalleryViewModel
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperDownloader
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperItem
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,9 +222,10 @@ private fun WallpaperPreviewDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.wallpaper_gallery_cancel))
-                    }
+                    MiuixTextButton(
+                        text = stringResource(R.string.wallpaper_gallery_cancel),
+                        onClick = onDismiss,
+                    )
                     Spacer(Modifier.width(8.dp))
                     Button(onClick = onDownload) {
                         Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(18.dp))

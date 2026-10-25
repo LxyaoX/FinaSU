@@ -47,6 +47,7 @@ import me.weishu.kernelsu.ui.viewmodel.TeesimViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * Picks the apps whose attestation the simulator answers.
@@ -90,15 +91,14 @@ fun TeesimTargetsScreen() {
                 title = stringResource(R.string.teesim_targets_title),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
                 actions = {
-                    TextButton(
-                        enabled = canEdit,
+                    MiuixTextButton(
+                        text = stringResource(R.string.teesim_save),
                         onClick = {
                             viewModel.setTargets(selected.toList())
                             navigator.pop()
                         },
-                    ) {
-                        Text(stringResource(R.string.teesim_save))
-                    }
+                        enabled = canEdit,
+                    )
                 },
                 scrollBehavior = scrollBehavior,
             )

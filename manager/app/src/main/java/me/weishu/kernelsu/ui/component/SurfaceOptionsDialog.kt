@@ -27,6 +27,7 @@ import me.weishu.kernelsu.wallpaper.WallpaperManager
 import me.weishu.kernelsu.wallpaper.surface.SurfaceId
 import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * The long-press editor for any registered surface: the same controls as the settings panel,
@@ -104,9 +105,11 @@ fun SurfaceOptionsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss, enabled = !isSaving) {
-                Text(stringResource(android.R.string.ok))
-            }
+            MiuixTextButton(
+                text = stringResource(android.R.string.ok),
+                onClick = onDismiss,
+                enabled = !isSaving,
+            )
         },
     )
 }

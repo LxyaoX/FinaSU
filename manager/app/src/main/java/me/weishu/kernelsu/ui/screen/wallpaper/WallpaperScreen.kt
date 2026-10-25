@@ -100,6 +100,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /** Sentinel for "no per-page background is being picked". */
 private const val NO_PAGE = -1
@@ -340,17 +341,19 @@ fun WallpaperScreen() {
             title = { Text(stringResource(R.string.wallpaper_reset_theme)) },
             text = { Text(stringResource(R.string.wallpaper_reset_theme_confirm)) },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(R.string.wallpaper_reset_theme),
+                    onClick = {
                     showResetDialog = false
                     resetTheme()
-                }) {
-                    Text(stringResource(R.string.wallpaper_reset_theme))
-                }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { showResetDialog = false },
+                )
             },
         )
     }

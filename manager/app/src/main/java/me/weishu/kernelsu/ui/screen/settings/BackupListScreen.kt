@@ -48,6 +48,7 @@ import me.weishu.kernelsu.ui.viewmodel.BackupTarget
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 private val ListGroupModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
 
@@ -158,13 +159,19 @@ fun BackupListScreen() {
             title = { Text(stringResource(R.string.backup_delete)) },
             text = { Text(stringResource(R.string.backup_delete_confirm, item.entry.displayName)) },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(R.string.confirm),
+                    onClick = {
                     pendingDelete = null
                     viewModel.delete(item)
-                }) { Text(stringResource(R.string.confirm)) }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.close)) }
+                MiuixTextButton(
+                    text = stringResource(R.string.close),
+                    onClick = { pendingDelete = null },
+                )
             },
         )
     }

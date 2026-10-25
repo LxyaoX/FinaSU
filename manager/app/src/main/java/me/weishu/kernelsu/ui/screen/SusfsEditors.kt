@@ -20,6 +20,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 @Composable
 internal fun SusfsBasicPage(config: JSONObject?, status: SusfsStatus, writable: Boolean, vm: SusfsViewModel) {
@@ -86,10 +87,16 @@ internal fun SusfsUnameSection(config: JSONObject?, status: SusfsStatus, writabl
             Text(stringResource(R.string.susfs_uname_hint))
             OutlinedTextField(release, { release = it }, label = { Text(stringResource(R.string.susfs_release)) },
                 modifier = Modifier.fillMaxWidth(), singleLine = true, isError = !SusfsInputs.validText(release, 65))
-            TextButton(onClick = { release = "default" }) { Text(stringResource(R.string.susfs_use_real_field)) }
+            MiuixTextButton(
+                text = stringResource(R.string.susfs_use_real_field),
+                onClick = { release = "default" },
+            )
             OutlinedTextField(version, { version = it }, label = { Text(stringResource(R.string.susfs_version)) },
                 modifier = Modifier.fillMaxWidth(), singleLine = true, isError = !SusfsInputs.validText(version, 65))
-            TextButton(onClick = { version = "default" }) { Text(stringResource(R.string.susfs_use_real_field)) }
+            MiuixTextButton(
+                text = stringResource(R.string.susfs_use_real_field),
+                onClick = { version = "default" },
+            )
             if (!valid) Text(stringResource(R.string.susfs_uname_invalid), color = MaterialTheme.colorScheme.error)
         }
     }
@@ -159,7 +166,11 @@ internal fun SusfsRuleSection(kind: String, config: JSONObject?, status: SusfsSt
                     else -> "→ ${rule.getString("destination")}\n${susfsUidLabel(rule.optInt("uid_scheme"))}"
                 }) }, leadingContent = { Icon(when (kind) { "path" -> Icons.Rounded.FolderOff
                     "map" -> Icons.Rounded.Memory; "kstat" -> Icons.Rounded.DataObject; else -> Icons.AutoMirrored.Rounded.AltRoute }, null) },
-                trailingContent = { TextButton(enabled = writable, onClick = { deleting = rule.toString() }) { Text(stringResource(R.string.susfs_remove)) } })
+                trailingContent = { MiuixTextButton(
+                    text = stringResource(R.string.susfs_remove),
+                    onClick = { deleting = rule.toString() },
+                    enabled = writable,
+                ) })
         } }
         if (entries.isEmpty()) item { ArrowPreference(
             title = stringResource(R.string.susfs_empty),
@@ -272,7 +283,11 @@ private fun SusfsExtensionSection(key: String, title: Int, node: String, config:
         for (index in 0 until array.length()) item(key = array.getString(index)) {
             val value = array.getString(index)
             SegmentedListItem(headlineContent = { Text(value) }, trailingContent = {
-                TextButton(enabled = writable, onClick = { deleting = value }) { Text(stringResource(R.string.susfs_remove)) }
+                MiuixTextButton(
+                    text = stringResource(R.string.susfs_remove),
+                    onClick = { deleting = value },
+                    enabled = writable,
+                )
             })
         }
         if (array.length() == 0) item { ArrowPreference(
@@ -314,21 +329,38 @@ private fun SusfsChoiceDialog(title: String, choices: List<Int>, selected: Int, 
             SegmentedListItem(selected = selected == index, enabled = enabled, onClick = { choose(index) },
                 headlineContent = { Text(stringResource(label)) }, trailingContent = { RadioButton(selected == index, null, enabled = enabled) })
         } } }
-    }, confirmButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.susfs_cancel)) } })
+    }, confirmButton = { MiuixTextButton(
+        text = stringResource(R.string.susfs_cancel),
+        onClick = dismiss,
+    ) })
 }
 
 @Composable
 private fun SusfsDeleteDialog(value: String, enabled: Boolean, dismiss: () -> Unit, delete: () -> Unit) {
     AlertDialog(onDismissRequest = dismiss, title = { Text(stringResource(R.string.susfs_remove)) },
         text = { Text("$value\n\n${stringResource(R.string.susfs_removal_hint)}") },
-        confirmButton = { TextButton(enabled = enabled, onClick = delete) { Text(stringResource(R.string.susfs_remove)) } },
-        dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.susfs_cancel)) } })
+        confirmButton = { MiuixTextButton(
+            text = stringResource(R.string.susfs_remove),
+            onClick = delete,
+            enabled = enabled,
+        ) },
+        dismissButton = { MiuixTextButton(
+            text = stringResource(R.string.susfs_cancel),
+            onClick = dismiss,
+        ) })
 }
 
 @Composable
 private fun SusfsForm(title: String, dismiss: () -> Unit, valid: Boolean, save: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     AlertDialog(onDismissRequest = dismiss, title = { Text(title) }, text = {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
-    }, confirmButton = { TextButton(enabled = valid, onClick = save) { Text(stringResource(R.string.susfs_save)) } },
-        dismissButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.susfs_cancel)) } })
+    }, confirmButton = { MiuixTextButton(
+        text = stringResource(R.string.susfs_save),
+        onClick = save,
+        enabled = valid,
+    ) },
+        dismissButton = { MiuixTextButton(
+            text = stringResource(R.string.susfs_cancel),
+            onClick = dismiss,
+        ) })
 }

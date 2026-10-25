@@ -63,6 +63,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 private val primaryFields = listOf(2, 3)
 private val advancedFields = listOf(0, 1, 4, 5)
@@ -164,19 +165,21 @@ fun UtsViewScreen() {
                 ))
             },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(
+                        if (susfsProvider) R.string.uts_view_delete_uts_settings else R.string.uts_view_delete,
+                    ),
+                    onClick = {
                     confirmDelete = false
                     viewModel.clear()
-                }) {
-                    Text(stringResource(
-                        if (susfsProvider) R.string.uts_view_delete_uts_settings else R.string.uts_view_delete,
-                    ))
-                }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { confirmDelete = false },
+                )
             },
         )
     }
@@ -187,15 +190,19 @@ fun UtsViewScreen() {
             title = { Text(stringResource(R.string.uts_view_take_over_title)) },
             text = { Text(stringResource(R.string.uts_view_take_over_message)) },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(R.string.uts_view_take_over),
+                    onClick = {
                     confirmTakeOver = false
                     viewModel.takeOver()
-                }) { Text(stringResource(R.string.uts_view_take_over)) }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmTakeOver = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { confirmTakeOver = false },
+                )
             },
         )
     }
@@ -206,15 +213,19 @@ fun UtsViewScreen() {
             title = { Text(stringResource(R.string.uts_view_global_confirm_title)) },
             text = { Text(stringResource(R.string.uts_view_global_confirm_message)) },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(R.string.uts_view_global_enable),
+                    onClick = {
                     confirmGlobal = false
                     viewModel.setGlobalMode(true)
-                }) { Text(stringResource(R.string.uts_view_global_enable)) }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmGlobal = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { confirmGlobal = false },
+                )
             },
         )
     }

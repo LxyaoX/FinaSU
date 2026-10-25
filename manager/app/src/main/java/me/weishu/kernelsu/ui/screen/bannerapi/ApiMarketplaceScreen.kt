@@ -48,6 +48,7 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.ui.viewmodel.ApiMarketplaceViewModel
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 @Composable
 fun ApiMarketplaceScreen() {
@@ -180,20 +181,20 @@ fun ApiMarketplaceScreen() {
                 }
             },
             confirmButton = {
-                TextButton(
-                    enabled = viewModel.applyingUrl == null,
+                MiuixTextButton(
+                    text = stringResource(R.string.api_marketplace_apply),
                     onClick = {
                         viewModel.apply(item)
                         previewItem = null
                     },
-                ) {
-                    Text(stringResource(R.string.api_marketplace_apply))
-                }
+                    enabled = viewModel.applyingUrl == null,
+                )
             },
             dismissButton = {
-                TextButton(onClick = { previewItem = null }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(android.R.string.cancel),
+                    onClick = { previewItem = null },
+                )
             },
         )
     }

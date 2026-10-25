@@ -43,6 +43,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * NoMount driver, injection and visibility state.
@@ -70,9 +71,10 @@ fun NomountScreen() {
                 title = stringResource(R.string.settings_nomount),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
                 actions = {
-                    TextButton(onClick = viewModel::refresh) {
-                        Text(stringResource(R.string.nomount_refresh))
-                    }
+                    MiuixTextButton(
+                        text = stringResource(R.string.nomount_refresh),
+                        onClick = viewModel::refresh,
+                    )
                 },
                 scrollBehavior = scrollBehavior,
             )
@@ -310,12 +312,11 @@ private fun ModulesSection(state: NomountUiState, viewModel: NomountViewModel) {
                     enabled = ready,
                     onClick = { viewModel.hotLoad(module.id) },
                     trailingContent = {
-                        TextButton(
-                            enabled = ready,
+                        MiuixTextButton(
+                            text = stringResource(R.string.nomount_hot_unload),
                             onClick = { viewModel.hotUnload(module.id) },
-                        ) {
-                            Text(stringResource(R.string.nomount_hot_unload))
-                        }
+                            enabled = ready,
+                        )
                     },
                 )
             }

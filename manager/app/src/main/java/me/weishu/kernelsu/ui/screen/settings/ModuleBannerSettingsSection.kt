@@ -40,6 +40,7 @@ import me.weishu.kernelsu.ui.navigation3.Route
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
 
@@ -213,15 +214,19 @@ private fun BannerApiSourceDialog(onDismiss: () -> Unit) {
             )
         },
         confirmButton = {
-            TextButton(
+            MiuixTextButton(
+                text = stringResource(android.R.string.ok),
                 onClick = {
                     ModuleBannerConfig.updateApiSource(value.trim())
                     onDismiss()
-                }
-            ) { Text(stringResource(android.R.string.ok)) }
+                },
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) }
+            MiuixTextButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = onDismiss,
+            )
         },
     )
 }

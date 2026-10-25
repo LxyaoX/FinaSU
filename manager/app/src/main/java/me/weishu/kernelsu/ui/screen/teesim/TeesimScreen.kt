@@ -47,6 +47,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * TEESimulator settings.
@@ -217,19 +218,19 @@ fun TeesimScreen() {
             title = { Text(stringResource(R.string.teesim_uninstall_confirm_title)) },
             text = { Text(stringResource(R.string.teesim_uninstall_confirm)) },
             confirmButton = {
-                TextButton(
+                MiuixTextButton(
+                    text = stringResource(R.string.teesim_uninstall),
                     onClick = {
                         confirmUninstall = false
                         viewModel.uninstall()
                     },
-                ) {
-                    Text(stringResource(R.string.teesim_uninstall))
-                }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmUninstall = false }) {
-                    Text(stringResource(R.string.teesim_cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(R.string.teesim_cancel),
+                    onClick = { confirmUninstall = false },
+                )
             },
         )
     }

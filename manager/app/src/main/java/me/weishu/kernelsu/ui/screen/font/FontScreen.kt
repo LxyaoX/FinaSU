@@ -43,6 +43,7 @@ import me.weishu.kernelsu.ui.theme.FontMode
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * The font setting: the three [FontMode]s, plus the import and restore rows that only make sense
@@ -76,20 +77,22 @@ fun FontScreen() {
             title = { Text(stringResource(R.string.font_restore_default)) },
             text = { Text(stringResource(R.string.font_restore_default_confirm)) },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(R.string.font_confirm),
+                    onClick = {
                     showRestoreDialog = false
                     FontConfig.clearFont(context)
                     scope.launch {
                         snackbarHost.showSnackbar(resources.getString(R.string.font_restored))
                     }
-                }) {
-                    Text(stringResource(R.string.font_confirm))
-                }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showRestoreDialog = false }) {
-                    Text(stringResource(R.string.font_cancel))
-                }
+                MiuixTextButton(
+                    text = stringResource(R.string.font_cancel),
+                    onClick = { showRestoreDialog = false },
+                )
             },
         )
     }

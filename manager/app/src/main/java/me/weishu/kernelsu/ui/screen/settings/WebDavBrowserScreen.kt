@@ -62,6 +62,7 @@ import okhttp3.Credentials
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /** How a remote file can be previewed. */
 private enum class WebDavPreviewKind { TEXT, IMAGE, BINARY }
@@ -211,15 +212,21 @@ fun WebDavBrowserScreen(path: String) {
             title = { Text(stringResource(R.string.backup_delete)) },
             text = { Text(stringResource(R.string.backup_delete_confirm, entry.name)) },
             confirmButton = {
-                TextButton(onClick = {
+                MiuixTextButton(
+                    text = stringResource(R.string.confirm),
+                    onClick = {
                     pendingDelete = null
                     scope.launch {
                         browser.delete(entry.relativePath).onSuccess { refresh++ }
                     }
-                }) { Text(stringResource(R.string.confirm)) }
+                },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.close)) }
+                MiuixTextButton(
+                    text = stringResource(R.string.close),
+                    onClick = { pendingDelete = null },
+                )
             },
         )
     }
@@ -281,8 +288,14 @@ private fun WebDavPreviewDialog(
                 else -> Text(stringResource(R.string.backup_preview_unavailable, describe(entry)))
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
-        dismissButton = { TextButton(onClick = onDelete) { Text(stringResource(R.string.backup_delete)) } },
+        confirmButton = { MiuixTextButton(
+            text = stringResource(R.string.close),
+            onClick = onDismiss,
+        ) },
+        dismissButton = { MiuixTextButton(
+            text = stringResource(R.string.backup_delete),
+            onClick = onDelete,
+        ) },
     )
 }
 

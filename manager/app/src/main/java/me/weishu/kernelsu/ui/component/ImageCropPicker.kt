@@ -14,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 /**
  * The single image-upload flow every caller shares: pick a picture, then crop it to [aspect] or use
@@ -66,14 +67,16 @@ fun ImageCropPickerHost(
         title = { Text(stringResource(R.string.wallpaper_crop_title)) },
         text = { Text(stringResource(R.string.wallpaper_crop_message)) },
         dismissButton = {
-            TextButton(onClick = { onPicked(target) }) {
-                Text(stringResource(R.string.wallpaper_crop_direct))
-            }
+            MiuixTextButton(
+                text = stringResource(R.string.wallpaper_crop_direct),
+                onClick = { onPicked(target) },
+            )
         },
         confirmButton = {
-            TextButton(onClick = { cropping = true }) {
-                Text(stringResource(R.string.wallpaper_crop_confirm))
-            }
+            MiuixTextButton(
+                text = stringResource(R.string.wallpaper_crop_confirm),
+                onClick = { cropping = true },
+            )
         },
     )
 }

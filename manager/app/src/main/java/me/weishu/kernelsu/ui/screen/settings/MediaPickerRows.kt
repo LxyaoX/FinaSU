@@ -17,6 +17,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.snapToPercent
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 
 @Composable
 internal fun MediaFileRow(filename: String?, icon: ImageVector? = null, onClick: () -> Unit) {
@@ -40,14 +41,16 @@ internal fun ClearMediaRow(onClick: () -> Unit) {
         title = { Text(stringResource(R.string.media_clear)) },
         text = { Text(stringResource(R.string.media_clear_confirm)) },
         confirmButton = {
-            TextButton(onClick = { confirm = false; onClick() }) {
-                Text(stringResource(R.string.media_clear))
-            }
+            MiuixTextButton(
+                text = stringResource(R.string.media_clear),
+                onClick = { confirm = false; onClick() },
+            )
         },
         dismissButton = {
-            TextButton(onClick = { confirm = false }) {
-                Text(stringResource(android.R.string.cancel))
-            }
+            MiuixTextButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = { confirm = false },
+            )
         },
     )
 }
