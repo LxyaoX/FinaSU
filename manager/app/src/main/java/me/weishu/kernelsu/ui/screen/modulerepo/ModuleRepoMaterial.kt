@@ -57,7 +57,7 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -116,7 +116,8 @@ import me.weishu.kernelsu.ui.util.download
 import me.weishu.kernelsu.ui.util.isDownloadAvailable
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 
 @Composable
 fun ModuleRepoScreenMaterial(
@@ -129,7 +130,10 @@ fun ModuleRepoScreenMaterial(
     val listState = rememberLazyGridState()
     val searchListState = rememberLazyGridState()
     val pullToRefreshState = rememberPullToRefreshState()
-    val scrollBehavior = MiuixScrollBehavior()
+    // The search bar is still the Material one, so this screen keeps a Material behaviour for it;
+    // the detail sheet below has its own miuix one.
+    val scrollBehavior = TopAppBarDefaults
+        .exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingDownload by remember { mutableStateOf<(() -> Unit)?>(null) }

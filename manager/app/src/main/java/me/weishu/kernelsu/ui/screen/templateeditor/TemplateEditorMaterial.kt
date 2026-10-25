@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ScrollBehavior
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -35,7 +35,6 @@ import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.profile.RootProfileConfig
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 
 @Composable
 fun TemplateEditorScreenMaterial(
