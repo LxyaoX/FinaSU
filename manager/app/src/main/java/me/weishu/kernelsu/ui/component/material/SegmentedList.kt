@@ -94,6 +94,7 @@ import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
+import top.yukonga.miuix.kmp.basic.Card as MiuixCard
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
 private val SegmentedOuterRadius = 16.dp
@@ -141,6 +142,15 @@ private fun WallpaperGroupBackground(
 annotation class SegmentedColumnDsl
 
 @Composable
+/**
+ * Set while a [SegmentedColumn] draws its own card behind the rows.
+ *
+ * miuix's preference rows are transparent by design and expect a card underneath; the rows this app
+ * still draws itself paint their own fill. Inside the card they must not, or a settings page shows
+ * raised blocks on a card that is already there.
+ */
+internal val LocalSegmentedCardGroup = compositionLocalOf { false }
+
 private fun defaultSegmentedColors(): ListItemColors {
     // In wallpaper mode each row carries the group material itself, so the list reads as one
     // translucent group instead of sitting on a solid surface.
@@ -152,6 +162,14 @@ private fun defaultSegmentedColors(): ListItemColors {
             contentColor = material.contentColor,
             disabledContainerColor = if (inGroup) Color.Transparent else material.fill,
             supportingContentColor = material.supportingColor,
+        )
+    }
+    if (LocalSegmentedCardGroup.current) {
+        return ListItemDefaults.segmentedColors(
+            containerColor = Color.Transparent,
+            contentColor = colorScheme.onSurface,
+            disabledContainerColor = Color.Transparent,
+            supportingContentColor = colorScheme.onSurfaceVariant,
         )
     }
     return ListItemDefaults.segmentedColors(
@@ -221,19 +239,29 @@ fun SegmentedColumn(
                 modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
             )
         }
-        WallpaperGroupBackground {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                content.forEachIndexed { index, itemContent ->
-                    CompositionLocalProvider(
-                        LocalListItemShapes provides defaultSingleSegmentedShape(
-                            index = index,
-                            count = if (visibleLen > 0) visibleLen else content.size
-                        ),
-                    ) {
-                        itemContent()
+        val rows: @Composable () -> Unit = {
+            CompositionLocalProvider(LocalSegmentedCardGroup provides true) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    content.forEachIndexed { index, itemContent ->
+                        CompositionLocalProvider(
+                            LocalListItemShapes provides defaultSingleSegmentedShape(
+                                index = index,
+                                count = if (visibleLen > 0) visibleLen else content.size
+                            ),
+                        ) {
+                            itemContent()
+                        }
                     }
                 }
             }
+        }
+        if (LocalFolkWallpaperTokens.current == null) {
+            // Every row in the column is either a miuix preference (transparent by design) or one of
+            // ours, which stops painting itself inside this card. Without the card the page reads as
+            // bare text on the canvas.
+            MiuixCard(content = { rows() })
+        } else {
+            WallpaperGroupBackground { rows() }
         }
     }
 }
