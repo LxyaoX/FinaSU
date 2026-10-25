@@ -16,11 +16,8 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -38,13 +35,14 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.NomountUiState
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 /**
  * NoMount driver, injection and visibility state.
@@ -59,8 +57,7 @@ fun NomountScreen() {
     val viewModel = viewModel<NomountViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = LocalNavigator.current
-    val scrollBehavior = TopAppBarDefaults
-        .exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -69,15 +66,14 @@ fun NomountScreen() {
 
     ExpressiveScaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.settings_nomount)) },
+            MiuixTopAppBar(
+                title = stringResource(R.string.settings_nomount),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
                 actions = {
                     TextButton(onClick = viewModel::refresh) {
                         Text(stringResource(R.string.nomount_refresh))
                     }
                 },
-                colors = expressiveTopAppBarColors(),
                 scrollBehavior = scrollBehavior,
             )
         }

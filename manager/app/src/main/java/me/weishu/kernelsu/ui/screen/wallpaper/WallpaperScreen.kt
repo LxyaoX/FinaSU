@@ -40,15 +40,12 @@ import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -83,7 +80,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SliderCommitEffect
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.material.snapToPercent
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.settings.ClearMediaRow
@@ -102,6 +98,8 @@ import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
 import kotlin.math.roundToInt
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 /** Sentinel for "no per-page background is being picked". */
 private const val NO_PAGE = -1
@@ -488,14 +486,13 @@ fun WallpaperScreenMaterial(
     actions: WallpaperScreenActions,
     snackbarHostState: SnackbarHostState,
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     ExpressiveScaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
+            MiuixTopAppBar(
+                title = stringResource(R.string.wallpaper_title),
                 navigationIcon = { TopBarBackButton(onClick = actions.onBack) },
-                title = { Text(stringResource(R.string.wallpaper_title)) },
-                colors = expressiveTopAppBarColors(),
                 scrollBehavior = scrollBehavior,
             )
         },

@@ -20,9 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,11 +44,12 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 /**
  * Pick the apps that must see the stock filesystem.
@@ -65,8 +63,7 @@ fun NomountExclusionsScreen() {
     val viewModel = viewModel<NomountViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigator = LocalNavigator.current
-    val scrollBehavior = TopAppBarDefaults
-        .exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     LaunchedEffect(Unit) { viewModel.loadApps() }
 
@@ -87,8 +84,8 @@ fun NomountExclusionsScreen() {
 
     ExpressiveScaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.nomount_exclusions_title)) },
+            MiuixTopAppBar(
+                title = stringResource(R.string.nomount_exclusions_title),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
                 actions = {
                     TextButton(
@@ -101,7 +98,6 @@ fun NomountExclusionsScreen() {
                         Text(stringResource(R.string.nomount_save))
                     }
                 },
-                colors = expressiveTopAppBarColors(),
                 scrollBehavior = scrollBehavior,
             )
         }

@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,10 +30,11 @@ import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedRadioItem
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.wallpaper.ThemeLanguage
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 /**
  * In-app language picker, mirroring FolkPatch's list. Selection flows through [ThemeLanguage],
@@ -55,14 +53,13 @@ fun LanguagePickerScreen() {
     // Instant feedback: setApplicationLocales()/recreate() apply asynchronously.
     var lastSelected by remember { mutableStateOf(-1) }
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     ExpressiveScaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.settings_app_language)) },
+            MiuixTopAppBar(
+                title = stringResource(R.string.settings_app_language),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
-                colors = expressiveTopAppBarColors(),
                 scrollBehavior = scrollBehavior,
             )
         },

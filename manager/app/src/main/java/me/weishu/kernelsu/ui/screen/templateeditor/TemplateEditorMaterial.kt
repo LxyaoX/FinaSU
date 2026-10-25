@@ -17,12 +17,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.ScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -36,13 +33,15 @@ import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.profile.RootProfileConfig
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 
 @Composable
 fun TemplateEditorScreenMaterial(
     state: TemplateEditorUiState,
     actions: TemplateEditorActions,
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     ExpressiveScaffold(
         topBar = {
@@ -172,25 +171,16 @@ private fun TopBar(
     onBack: () -> Unit,
     onDelete: () -> Unit = {},
     onSave: () -> Unit = {},
-    scrollBehavior: TopAppBarScrollBehavior? = null
+    scrollBehavior: ScrollBehavior? = null
 ) {
-    LargeFlexibleTopAppBar(
-        title = {
-            Column {
-                Text(title)
-                if (summary.isNotBlank()) {
-                    Text(
-                        text = summary,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
-        },
+    MiuixTopAppBar(
+        title = title,
+        subtitle = summary,
         navigationIcon = {
             TopBarBackButton(onClick = onBack)
         },
         actions = {
-            if (readOnly) return@LargeFlexibleTopAppBar
+            if (readOnly) return@MiuixTopAppBar
             FolkIconButton(onClick = onDelete) {
                 Icon(
                     Icons.Filled.DeleteForever,

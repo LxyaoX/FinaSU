@@ -42,13 +42,10 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.outlined.ToggleOn
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.ripple
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
@@ -81,13 +78,14 @@ import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.SwitchIconConfig
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.theme.ColorMode
 import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.theme.keyColorOptions
 import me.weishu.kernelsu.ui.theme.rememberKernelSUColorScheme
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 private class ThemeModeChoice(
     val mode: ColorMode,
@@ -110,7 +108,7 @@ fun ColorPaletteScreenMaterial(
     state: ColorPaletteUiState,
     actions: ColorPaletteScreenActions,
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
     val currentColorMode = state.currentColorMode
     val currentKeyColor = state.uiState.keyColor
     val colorStyle = state.currentPaletteStyle
@@ -127,14 +125,12 @@ fun ColorPaletteScreenMaterial(
 
     ExpressiveScaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
+            MiuixTopAppBar(
+                title = stringResource(R.string.settings_theme),
                 navigationIcon = {
                     TopBarBackButton(onClick = actions.onBack)
                 },
-                title = { Text(stringResource(R.string.settings_theme)) },
-                colors = expressiveTopAppBarColors(),
-                windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackBarHost(hostState = snackbarHostState) },

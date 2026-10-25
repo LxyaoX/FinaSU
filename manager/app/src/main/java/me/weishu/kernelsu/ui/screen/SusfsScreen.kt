@@ -53,6 +53,8 @@ import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 @Composable
 fun susfsManagementLabel(status: String): String = stringResource(when (status) {
@@ -74,7 +76,7 @@ fun SusfsScreen() {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
     val pager = rememberPagerState { susfsPages.size }
     // Keep all six positions outside pager composition: distant pages may be disposed.
     val scrolls = susfsPages.map { rememberScrollState() }
@@ -119,11 +121,11 @@ fun SusfsScreen() {
     }
     LifecycleResumeEffect(Unit) { vm.refresh(); onPauseOrDispose { } }
     ExpressiveScaffold(topBar = {
-        LargeFlexibleTopAppBar(
-            title = { Text(stringResource(R.string.susfs_title)) },
+        MiuixTopAppBar(
+            title = stringResource(R.string.susfs_title),
             navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
             actions = { TextButton(enabled = !state.busy, onClick = vm::refresh) { Text(stringResource(R.string.susfs_refresh)) } },
-            colors = expressiveTopAppBarColors(), scrollBehavior = scrollBehavior,
+            scrollBehavior = scrollBehavior,
         )
     }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).nestedScroll(scrollBehavior.nestedScrollConnection)) {

@@ -32,14 +32,11 @@ import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.ScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +65,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.profile.AppProfileConfig
 import me.weishu.kernelsu.ui.component.profile.RootProfileConfig
 import me.weishu.kernelsu.ui.component.profile.TemplateConfig
@@ -78,6 +74,8 @@ import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 /**
  * @author weishu
@@ -89,7 +87,7 @@ fun AppProfileScreenMaterial(
     actions: AppProfileActions,
     snackBarHost: SnackbarHostState,
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     ExpressiveScaffold(
         topBar = {
@@ -357,7 +355,7 @@ private fun AppProfileInner(
 @Composable
 private fun TopBar(
     onBack: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
+    scrollBehavior: ScrollBehavior? = null,
     isUidGroup: Boolean = false,
     showActions: Boolean = true,
     packageName: String = "",
@@ -367,8 +365,8 @@ private fun TopBar(
     onRestartApp: (String, Int) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
-    LargeFlexibleTopAppBar(
-        title = { Text(stringResource(R.string.profile)) },
+    MiuixTopAppBar(
+        title = stringResource(R.string.profile),
         navigationIcon = {
             TopBarBackButton(onClick = onBack)
         },
@@ -410,9 +408,7 @@ private fun TopBar(
                 }
             }
         },
-        colors = expressiveTopAppBarColors(),
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
     )
 }
 

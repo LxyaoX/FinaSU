@@ -51,19 +51,16 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.ScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -111,13 +108,15 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.ui.util.PagerNavigationSpringSpec
 import me.weishu.kernelsu.ui.util.download
 import me.weishu.kernelsu.ui.util.isDownloadAvailable
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 
 @Composable
 fun ModuleRepoScreenMaterial(
@@ -130,7 +129,7 @@ fun ModuleRepoScreenMaterial(
     val listState = rememberLazyGridState()
     val searchListState = rememberLazyGridState()
     val pullToRefreshState = rememberPullToRefreshState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingDownload by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -717,16 +716,15 @@ fun ModuleRepoDetailScreenMaterial(
     val scope = rememberCoroutineScope()
     var pendingDownload by remember { mutableStateOf<(() -> Unit)?>(null) }
     val confirmDialog = rememberConfirmDialog(onConfirm = { pendingDownload?.invoke() })
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = MiuixScrollBehavior()
 
     ExpressiveScaffold(
         topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(text = module.name) },
+            MiuixTopAppBar(
+                title = module.name,
                 navigationIcon = {
                     TopBarBackButton(onClick = actions.onBack)
                 },
-                colors = expressiveTopAppBarColors(),
                 scrollBehavior = scrollBehavior,
             )
         },
@@ -797,7 +795,7 @@ fun ModuleRepoDetailScreenMaterial(
 private fun ReadmeTab(
     description: String,
     innerPadding: PaddingValues,
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: ScrollBehavior,
 ) {
     val layoutDirection = LocalLayoutDirection.current
     LazyColumn(
@@ -837,7 +835,7 @@ private fun ReadmeTab(
 private fun ReleasesTab(
     module: StoreModuleArg,
     innerPadding: PaddingValues,
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: ScrollBehavior,
     confirmDialog: ConfirmDialogHandle,
     scope: CoroutineScope,
     context: Context,
@@ -927,7 +925,7 @@ private data class InfoRowData(
 private fun InfoTab(
     module: StoreModuleArg,
     innerPadding: PaddingValues,
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: ScrollBehavior,
     onOpenUrl: (String) -> Unit,
 ) {
     val layoutDirection = LocalLayoutDirection.current
