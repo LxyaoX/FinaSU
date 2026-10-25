@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">授予 Shell 後的額外檢查：僅限由 adbd 或 KernelSU Root 行程（例如 ADB 模組）啟動的行程可使用，避免取得 shell 權限的應用程式進一步提升至 Root</string>
     <string name="feature_status_forced_summary">已由開機設定強制指定，無法在此變更</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">以目前槽位執行受信任的核心安裝程式，需要 Root 權限。</string>
+    <string name="install_anykernel_summary">在目前或未使用的 A/B 槽位執行受信任的核心安裝程式，需要 Root 權限。</string>
     <string name="install_anykernel_warning">此 ZIP 將以 root 執行，可能修改多個分割區。實際寫入的分割區與槽位由安裝程式決定；FinaSU 不會覆寫槽位，也不會重新整理 ksud。安裝成功不保證能開機，失敗也可能留下部分變更。現有的啟動映像備份未必涵蓋這些變更。請先確認裝置相容性並準備復原映像，再繼續。</string>
     <string name="install_anykernel_root_required">刷入 AnyKernel3 需要 Root 權限。</string>
     <string name="install_anykernel_read_failed">無法讀取 AnyKernel3 ZIP。</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 頁，共 %2$d 頁</string>
     <string name="guide_about_entry_title">重新查看新手導引</string>
     <string name="guide_about_entry_summary">重新播放首次啟動介紹</string>
+    <string name="install_anykernel_target_slot">目標槽位</string>
+    <string name="install_anykernel_current_slot">目前槽位（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">目前槽位</string>
+    <string name="install_anykernel_inactive_slot">未使用槽位（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知檔案</string>
+    <string name="install_anykernel_size_unknown">未知大小</string>
+    <string name="install_anykernel_confirm_details">檔案：%1$s\n大小：%2$s\n目標槽位：%3$s</string>
+    <string name="install_anykernel_confirm_note">實際寫入的分區與槽位仍由安裝器決定。安裝至未使用槽需要 SLOT_SELECT 支援，ksud 會在執行前檢查。使用中的槽位不會自動切換；重新啟動後仍可能進入目前槽位。</string>
+    <string name="flash_log_saved">日誌已儲存至 %1$s</string>
 </resources>

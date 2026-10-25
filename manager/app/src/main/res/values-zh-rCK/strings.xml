@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">给 Shell 发大厨权限时多把一道关：只有 adbd 拉起来的活儿，或者 KernelSU 的 Root 活儿（比方 ADB 招牌菜）使得上，省得应用蹭到 shell 权限就往大厨位子上爬</string>
     <string name="feature_status_forced_summary">饭庄开张时就定死了，这儿改不了</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">拿当前灶台跑可信的秘酱料安装器，得有大厨权限。</string>
+    <string name="install_anykernel_summary">拿当前灶台或未使用的 A/B 灶台跑可信的秘酱料安装器，得有大厨权限。</string>
     <string name="install_anykernel_warning">这 ZIP 会以大厨身份下锅，可能动好几个分区。真写哪块、哪个灶台，全看安装脚本，FinaSU 不插手灶台，也不更新 ksud。装成了也不保准能开机，翻车了也可能已经写了半截。现有的启动镜像备份未必罩得住这些改动。先确认灶具合不合得来、备好回滚镜像，再动手。</string>
     <string name="install_anykernel_root_required">刷 AnyKernel3 得有大厨权限。</string>
     <string name="install_anykernel_read_failed">这 AnyKernel3 ZIP 读不出来。</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 道，共 %2$d 道</string>
     <string name="guide_about_entry_title">再看看新手指引</string>
     <string name="guide_about_entry_summary">重播开张介绍</string>
+    <string name="install_anykernel_target_slot">目标槽位</string>
+    <string name="install_anykernel_current_slot">当前槽（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">当前槽</string>
+    <string name="install_anykernel_inactive_slot">未使用槽（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知文件</string>
+    <string name="install_anykernel_size_unknown">未知大小</string>
+    <string name="install_anykernel_confirm_details">文件：%1$s\n大小：%2$s\n目标槽：%3$s</string>
+    <string name="install_anykernel_confirm_note">实际往哪些分区和槽上菜仍由安装器决定。装到未使用槽需要 SLOT_SELECT 支持，ksud 会在开火前检查。活动槽不会自动切换；重启后也可能仍进当前槽。</string>
+    <string name="flash_log_saved">日志已收进 %1$s</string>
 </resources>

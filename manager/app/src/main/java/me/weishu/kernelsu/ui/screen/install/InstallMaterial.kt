@@ -212,10 +212,29 @@ internal fun InstallScreenMaterial(
                         SegmentedListItem(
                             headlineContent = { Text(stringResource(R.string.install_anykernel)) },
                             supportingContent = {
-                                Text(uiState.installMethod.uri?.lastPathSegment ?: "")
+                                Text(
+                                    stringResource(
+                                        R.string.install_anykernel_file_summary,
+                                        uiState.anyKernelFileName
+                                            ?: stringResource(R.string.install_anykernel_file_unknown),
+                                        uiState.anyKernelSizeLabel
+                                            ?: stringResource(R.string.install_anykernel_size_unknown),
+                                    )
+                                )
                             },
                             onClick = actions.onSelectAnyKernel
                         )
+                    }
+                    if (uiState.showAnyKernelSlotSelector) {
+                        item {
+                            SegmentedDropdownItem(
+                                title = stringResource(R.string.install_anykernel_target_slot),
+                                items = uiState.anyKernelSlotOptions,
+                                selectedIndex = uiState.anyKernelSlotIndex,
+                                onItemSelected = actions.onSelectAnyKernelSlot,
+                                icon = Icons.Filled.Edit,
+                            )
+                        }
                     }
                 }
             }

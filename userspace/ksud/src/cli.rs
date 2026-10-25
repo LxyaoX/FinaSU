@@ -33,8 +33,12 @@ enum Commands {
         #[command(subcommand)]
         command: crate::sui::Command,
     },
-    /// Flash an AnyKernel3 ZIP to the current slot (requires root)
-    Anykernel3 { zip: PathBuf },
+    /// Flash an AnyKernel3 ZIP (requires root)
+    Anykernel3 {
+        zip: PathBuf,
+        #[arg(long)]
+        inactive_slot: bool,
+    },
     /// Manage existing SUSFS implementations (does not load modules)
     Susfs {
         #[command(subcommand)]
@@ -771,7 +775,9 @@ pub fn run() -> Result<()> {
     log::info!("command: {:?}", cli.command);
 
     let result = match cli.command {
-        Commands::Anykernel3 { zip } => crate::anykernel3::flash(&zip),
+        Commands::Anykernel3 { zip, inactive_slot } => {
+            crate::anykernel3::flash(&zip, inactive_slot)
+        }
         Commands::Susfs { command } => crate::susfs::run(command),
         Commands::UtsView { command } => crate::uts_view::run(&command),
         Commands::Netisolate { command } => crate::netisolate::run(&command),

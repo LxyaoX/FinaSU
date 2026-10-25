@@ -55,6 +55,7 @@ class PartitionBackupSource(
     private val access: PartitionAccess,
     private val partitions: List<String>,
     private val tempDir: File,
+    private val slotSuffix: String? = null,
     private val trigger: BackupTrigger = BackupTrigger.MANUAL,
     private val knownStockSha1: Set<String> = emptySet(),
     private val clock: () -> Long = System::currentTimeMillis,
@@ -64,10 +65,11 @@ class PartitionBackupSource(
 
     override suspend fun list(): Result<List<BackupEntry>> = access.availablePartitions().map { available ->
         available.filter { it in partitions }.map { partition ->
+            val target = targetName(partition)
             BackupEntry(
-                id = partition,
+                id = target,
                 kind = kind,
-                displayName = partition,
+                displayName = target,
                 source = BackupOrigin.EXPORTED,
             )
         }
@@ -80,16 +82,17 @@ class PartitionBackupSource(
         val created = mutableListOf<File>()
         try {
             available.filter { it in partitions }.map { partition ->
-                val target = File(tempDir, "partition-${sanitizeSegment(partition)}.img")
-                created += target
-                access.readPartition(partition, target).getOrThrow()
-                val digests = target.digests()
+                val target = targetName(partition)
+                val file = File(tempDir, "partition-${sanitizeSegment(target)}.img")
+                created += file
+                access.readPartition(target, file).getOrThrow()
+                val digests = file.digests()
                 val marker = resolveMarker(digests.sha1, trigger, knownStockSha1)
-                val fileName = bootBackupName(partition, digests.sha1, marker)
+                val fileName = bootBackupName(target, digests.sha1, marker)
                 val meta = BootBackupMeta(
-                    partition = partition,
+                    partition = target,
                     sha1 = digests.sha1,
-                    sizeBytes = target.length(),
+                    sizeBytes = file.length(),
                     device = device.device,
                     fingerprint = device.fingerprint,
                     createdAt = createdAt,
@@ -102,7 +105,7 @@ class PartitionBackupSource(
                     metaFileName = bootMetaFileName(fileName),
                     sha256 = digests.sha256,
                     metaJson = meta.toJson(),
-                    file = target,
+                    file = file,
                 )
             }
         } catch (e: Throwable) {
@@ -124,6 +127,16 @@ class PartitionBackupSource(
     }
 
     override suspend fun delete(entry: BackupEntry): Result<Unit> = Result.success(Unit)
+
+    private fun targetName(partition: String): String =
+        if (slotSuffix.isNullOrEmpty() ||
+            partition.endsWith("_a") ||
+            partition.endsWith("_b")
+        ) {
+            partition
+        } else {
+            partition + slotSuffix
+        }
 
     companion object {
         /** Pre-flash captures retain the stock marker; manual captures compare saved references. */

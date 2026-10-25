@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">فحص إضافي عند منح Shell صلاحية الجذر: لا يمكن استخدامها إلا للعمليات التي ينشئها adbd أو عملية جذر لـ KernelSU (مثل وحدة ADB)، مما يمنع التطبيقات التي تحصل على صلاحيات shell من التصعيد إلى الجذر</string>
     <string name="feature_status_forced_summary">مفروض بواسطة إعدادات الإقلاع؛ لا يمكن تغييره من هنا</string>
     <string name="install_anykernel">تثبيت ملف AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">تشغيل مُثبِّت نواة موثوق باستخدام الفتحة الحالية. يتطلب صلاحية الجذر.</string>
+    <string name="install_anykernel_summary">شغّل مثبّت نواة موثوقًا على الفتحة الحالية أو فتحة A/B غير المستخدمة. يتطلب صلاحية Root.</string>
     <string name="install_anykernel_warning">يعمل ملف ZIP هذا بصلاحية الجذر وقد يعدّل عدة أقسام. يتحكم المُثبِّت في الأقسام والفتحات التي تُكتب؛ ولا يقوم FinaSU بتجاوز الفتحة أو تحديث ksud. لا يضمن نجاح التثبيت قابلية الإقلاع، وقد يترك الفشل تغييرات جزئية. قد لا تغطي النسخ الاحتياطية الحالية لصورة الإقلاع هذه التغييرات. تأكد من توافق الجهاز وجهّز صورة استرداد قبل المتابعة.</string>
     <string name="install_anykernel_root_required">صلاحية الجذر مطلوبة لتثبيت AnyKernel3.</string>
     <string name="install_anykernel_read_failed">تعذّر قراءة ملف AnyKernel3 ZIP.</string>
@@ -1031,4 +1031,14 @@
     <string name="guide_page_indicator">الصفحة %1$d من %2$d</string>
     <string name="guide_about_entry_title">عرض دليل الترحيب مرة أخرى</string>
     <string name="guide_about_entry_summary">إعادة عرض مقدمة التشغيل الأولى</string>
+    <string name="install_anykernel_target_slot">الفتحة المستهدفة</string>
+    <string name="install_anykernel_current_slot">الفتحة الحالية (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">الفتحة الحالية</string>
+    <string name="install_anykernel_inactive_slot">فتحة غير مستخدمة (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">ملف غير معروف</string>
+    <string name="install_anykernel_size_unknown">حجم غير معروف</string>
+    <string name="install_anykernel_confirm_details">الملف: %1$s\nالحجم: %2$s\nالفتحة المستهدفة: %3$s</string>
+    <string name="install_anykernel_confirm_note">لا يزال المثبّت هو من يحدد الأقسام والفتحات التي ستُكتب. يتطلب التثبيت على فتحة غير مستخدمة دعم SLOT_SELECT، ويتحقق منه ksud قبل التشغيل. لا يتم تبديل الفتحة النشطة تلقائيًا؛ وقد يبدأ الجهاز من الفتحة الحالية بعد إعادة التشغيل.</string>
+    <string name="flash_log_saved">تم حفظ السجل في %1$s</string>
 </resources>

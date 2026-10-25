@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">赐 Shell 以 Root 之权时，复加一重勘验：唯 adbd 所生之圣使，或 KernelSU 之 Root 行者（如 ADB 圣光阵）所出之魂，方得施用；以禁凡器因得 shell 之权而私升为 Root</string>
     <string name="feature_status_forced_summary">天意已由圣启配置钦定，不可于此处更改</string>
     <string name="install_anykernel">铭刻 AnyKernel3 圣匣</string>
-    <string name="install_anykernel_summary">以当前星辰槽运转可信灵魂安装器，需 root 之权。</string>
+    <string name="install_anykernel_summary">以当前星辰槽或未使用的 A/B 星辰槽运转可信灵魂安装器，需 root 之权。</string>
     <string name="install_anykernel_warning">此圣匣将以 root 施展，或改动多方圣域分区。实际铭刻之分区与星辰槽由安装符咒决定，FinaSU 不抢占星辰槽，亦不更新 ksud。铭刻功成未必可启，败陨亦可能留下残迹。现有圣启镜像拓印未必涵盖此番改动。请先确认圣器相容，备好归元镜像，再续行。</string>
     <string name="install_anykernel_root_required">铭刻 AnyKernel3 需 root 之权。</string>
     <string name="install_anykernel_read_failed">无法读取 AnyKernel3 圣匣。</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页</string>
     <string name="guide_about_entry_title">重观迎接指引</string>
     <string name="guide_about_entry_summary">重演初临圣域之引</string>
+    <string name="install_anykernel_target_slot">目标圣槽</string>
+    <string name="install_anykernel_current_slot">当前圣槽（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">当前圣槽</string>
+    <string name="install_anykernel_inactive_slot">未使用圣槽（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知典籍</string>
+    <string name="install_anykernel_size_unknown">大小不明</string>
+    <string name="install_anykernel_confirm_details">典籍：%1$s\n大小：%2$s\n目标圣槽：%3$s</string>
+    <string name="install_anykernel_confirm_note">实际写入之分区与槽位仍由安装器决定。于未使用槽安装需 SLOT_SELECT 圣契，ksud 将在施行前勘验。活动槽不会自行切换；重启后仍可能归于当前槽。</string>
+    <string name="flash_log_saved">日志已封存至 %1$s</string>
 </resources>

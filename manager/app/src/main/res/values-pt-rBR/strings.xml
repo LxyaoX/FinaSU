@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">Verificação extra quando o Shell recebe root: apenas processos gerados pelo adbd ou por um processo root do KernelSU (por exemplo, um módulo ADB) podem usá-lo, impedindo que apps que obtêm privilégios de shell escalem para root</string>
     <string name="feature_status_forced_summary">Forçado pela configuração de inicialização; não pode ser alterado aqui</string>
     <string name="install_anykernel">Instalar ZIP AnyKernel3</string>
-    <string name="install_anykernel_summary">Executa um instalador de kernel confiável usando o slot atual. Requer root.</string>
+    <string name="install_anykernel_summary">Executa um instalador de kernel confiável no slot atual ou em um slot A/B não utilizado. Requer Root.</string>
     <string name="install_anykernel_warning">Este ZIP é executado com root e pode modificar várias partições. O instalador controla quais partições e slots são gravados; o FinaSU não substitui o slot nem atualiza o ksud. Uma instalação bem-sucedida não garante a inicialização e uma falha pode deixar alterações parciais. Os backups existentes da imagem de boot podem não cobrir essas alterações. Confirme a compatibilidade do dispositivo e prepare uma imagem de recuperação antes de continuar.</string>
     <string name="install_anykernel_root_required">É necessário root para instalar o AnyKernel3.</string>
     <string name="install_anykernel_read_failed">Não foi possível ler o ZIP do AnyKernel3.</string>
@@ -1031,4 +1031,14 @@
     <string name="guide_page_indicator">Página %1$d de %2$d</string>
     <string name="guide_about_entry_title">Mostrar novamente o guia de boas-vindas</string>
     <string name="guide_about_entry_summary">Reproduzir novamente a introdução de primeira inicialização</string>
+    <string name="install_anykernel_target_slot">Slot de destino</string>
+    <string name="install_anykernel_current_slot">Slot atual (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">Slot atual</string>
+    <string name="install_anykernel_inactive_slot">Slot não utilizado (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">Arquivo desconhecido</string>
+    <string name="install_anykernel_size_unknown">Tamanho desconhecido</string>
+    <string name="install_anykernel_confirm_details">Arquivo: %1$s\nTamanho: %2$s\nSlot de destino: %3$s</string>
+    <string name="install_anykernel_confirm_note">O instalador ainda determina quais partições e slots serão gravados. A instalação em um slot não utilizado requer suporte a SLOT_SELECT, que o ksud valida antes de executar. O slot ativo não é alternado automaticamente; após reiniciar, o dispositivo ainda pode inicializar pelo slot atual.</string>
+    <string name="flash_log_saved">Log salvo em %1$s</string>
 </resources>

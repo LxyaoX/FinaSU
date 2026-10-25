@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">为 shell 授予 OP 权限时的额外检查：仅由 adbd 或 KernelSU OP 进程（例如 ADB 模组）所启动的进程才能使用，以防取得 shell 权限的应用提权到 OP</string>
     <string name="feature_status_forced_summary">已由启动配置强制指定，无法在此修改</string>
     <string name="install_anykernel">锻造 AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">以当前槽运行可信基岩核心合成器，需要 OP 权限。</string>
+    <string name="install_anykernel_summary">以当前或未使用的 A/B 槽运行可信基岩核心合成器，需要 OP 权限。</string>
     <string name="install_anykernel_warning">这个 ZIP 会以 OP 权限执行，可能改动多个分区。实际写入哪些分区和槽位由合成脚本决定，FinaSU 不会覆盖槽位，也不更新 ksud。合成成功不保证能启动，失败也可能已写入一部分。现有的启动镜像末影箱备份未必兜得住这些改动。合成与锻造有风险，请确保已备份存档到末影箱！</string>
     <string name="install_anykernel_root_required">锻造 AnyKernel3 需要 OP 权限。</string>
     <string name="install_anykernel_read_failed">无法读取 AnyKernel3 ZIP。</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页</string>
     <string name="guide_about_entry_title">重新查看新手引导</string>
     <string name="guide_about_entry_summary">再次播放首次启动介绍</string>
+    <string name="install_anykernel_target_slot">目标槽位</string>
+    <string name="install_anykernel_current_slot">当前槽（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">当前槽</string>
+    <string name="install_anykernel_inactive_slot">未使用槽（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知文件</string>
+    <string name="install_anykernel_size_unknown">未知大小</string>
+    <string name="install_anykernel_confirm_details">文件：%1$s\n大小：%2$s\n目标槽：%3$s</string>
+    <string name="install_anykernel_confirm_note">实际写入的分区和槽位仍由安装器决定。安装到未使用槽需要 SLOT_SELECT 支持，ksud 会在执行前检查。活动槽不会自动切换；重启后仍可能进入当前槽。</string>
+    <string name="flash_log_saved">日志已存档到 %1$s</string>
 </resources>

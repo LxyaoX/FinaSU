@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">Pemeriksaan tambahan saat Shell diberi akses Root: hanya proses yang dijalankan oleh adbd atau proses Root KernelSU (misalnya modul ADB) yang dapat menggunakannya, sehingga mencegah aplikasi yang memperoleh hak istimewa shell menaikkan hak akses ke Root</string>
     <string name="feature_status_forced_summary">Dipaksa oleh konfigurasi boot; tidak dapat diubah di sini</string>
     <string name="install_anykernel">Flash AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">Jalankan pemasang kernel tepercaya menggunakan slot saat ini. Memerlukan Root.</string>
+    <string name="install_anykernel_summary">Jalankan pemasang kernel tepercaya pada slot saat ini atau slot A/B yang tidak digunakan. Memerlukan Root.</string>
     <string name="install_anykernel_warning">ZIP ini berjalan dengan Root dan dapat mengubah beberapa partisi. Program pemasang mengontrol partisi dan slot mana yang ditulis; FinaSU tidak menimpa slot atau menyegarkan ksud. Pemasangan yang berhasil tidak menjamin perangkat dapat boot, dan kegagalan dapat meninggalkan perubahan sebagian. Cadangan image boot yang ada mungkin tidak mencakup perubahan ini. Pastikan kompatibilitas perangkat dan siapkan image pemulihan sebelum melanjutkan.</string>
     <string name="install_anykernel_root_required">Root diperlukan untuk mem-flash AnyKernel3.</string>
     <string name="install_anykernel_read_failed">Tidak dapat membaca ZIP AnyKernel3.</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">Halaman %1$d dari %2$d</string>
     <string name="guide_about_entry_title">Tampilkan panduan selamat datang lagi</string>
     <string name="guide_about_entry_summary">Putar ulang pengenalan saat pertama kali dibuka</string>
+    <string name="install_anykernel_target_slot">Slot tujuan</string>
+    <string name="install_anykernel_current_slot">Slot saat ini (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">Slot saat ini</string>
+    <string name="install_anykernel_inactive_slot">Slot tidak digunakan (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">File tidak diketahui</string>
+    <string name="install_anykernel_size_unknown">Ukuran tidak diketahui</string>
+    <string name="install_anykernel_confirm_details">File: %1$s\nUkuran: %2$s\nSlot tujuan: %3$s</string>
+    <string name="install_anykernel_confirm_note">Pemasang tetap menentukan partisi dan slot yang ditulis. Pemasangan ke slot tidak digunakan memerlukan dukungan SLOT_SELECT, yang divalidasi ksud sebelum dijalankan. Slot aktif tidak beralih otomatis; setelah restart, perangkat mungkin masih melakukan boot dari slot saat ini.</string>
+    <string name="flash_log_saved">Log disimpan ke %1$s</string>
 </resources>

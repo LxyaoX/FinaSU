@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">给 Shell 授予 Root 权限时多查一道喵：只有 adbd 拉起来的进程，或者 KernelSU 的 Root 进程（比如 ADB 模块）才用得上它，免得应用拿到 shell 权限就偷偷爬到 Root 哦</string>
     <string name="feature_status_forced_summary">启动配置已经强制定好啦喵，在这里改不了哦</string>
     <string name="install_anykernel">刷入 AnyKernel3 ZIP 喵</string>
-    <string name="install_anykernel_summary">用当前槽位跑受信任的内核安装器喵，需要 root 权限哦</string>
+    <string name="install_anykernel_summary">用当前或未使用的 A/B 槽位跑受信任的内核安装器喵，需要 root 权限哦</string>
     <string name="install_anykernel_warning">这个 ZIP 会以 root 权限执行喵，可能会改动好几个分区。具体写哪些分区和槽位由安装脚本说了算，FinaSU 不会覆盖槽位，也不会更新 ksud。装成功不保证开得了机，装失败了也可能已经写进去一部分了。现有的启动镜像备份未必兜得住这些改动。先确认设备兼容、准备好回滚镜像，再继续哦喵！</string>
     <string name="install_anykernel_root_required">刷 AnyKernel3 得先有 root 权限喵！</string>
     <string name="install_anykernel_read_failed">读不了这个 AnyKernel3 ZIP 喵…</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页喵</string>
     <string name="guide_about_entry_title">再看看新手引导喵</string>
     <string name="guide_about_entry_summary">重播首次启动介绍喵</string>
+    <string name="install_anykernel_target_slot">目标槽喵</string>
+    <string name="install_anykernel_current_slot">当前槽（%1$s）喵</string>
+    <string name="install_anykernel_current_slot_no_suffix">当前槽喵</string>
+    <string name="install_anykernel_inactive_slot">未使用槽（%1$s）喵</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知文件喵</string>
+    <string name="install_anykernel_size_unknown">未知大小喵</string>
+    <string name="install_anykernel_confirm_details">文件：%1$s\n大小：%2$s\n目标槽：%3$s喵</string>
+    <string name="install_anykernel_confirm_note">实际写哪些分区和槽还由安装器决定喵。装到未使用槽要有 SLOT_SELECT 支持，ksud 会在执行前检查喵。活动槽不会自动切换，重启后也可能还是当前槽喵。</string>
+    <string name="flash_log_saved">日志保存到 %1$s 啦喵</string>
 </resources>

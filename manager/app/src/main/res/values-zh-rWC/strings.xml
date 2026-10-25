@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">凡 shell 获 Root 之权时另加查验：唯由 adbd 或 KernelSU Root 之进程（如 ADB 仙符）所生之进程可用，以防得 shell 之权的凡器提为 Root</string>
     <string name="feature_status_forced_summary">已由启道之序强制钦定，此处不可更易</string>
     <string name="install_anykernel">炼化 AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">以当前仙槽运转可信之道核炼器，需 root 之权。</string>
+    <string name="install_anykernel_summary">以当前仙槽或未使用的 A/B 仙槽运转可信之道核炼器，需 root 之权。</string>
     <string name="install_anykernel_warning">此 ZIP 将以 root 运转，或改多方分区。所书分区与仙槽皆由炼器之符决定，FinaSU 不夺仙槽，亦不更新 ksud。炼化功成不保可启，败陨亦可能已留残迹。现有仙躯镜像之拓印未必涵盖此番改动。请先验仙器之相容，备下回滚之镜像，再行继续。</string>
     <string name="install_anykernel_root_required">炼化 AnyKernel3 需 root 之权。</string>
     <string name="install_anykernel_read_failed">无法读取 AnyKernel3 ZIP。</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 页，共 %2$d 页</string>
     <string name="guide_about_entry_title">重观引路篇</string>
     <string name="guide_about_entry_summary">重温初入仙门之引</string>
+    <string name="install_anykernel_target_slot">目标槽位</string>
+    <string name="install_anykernel_current_slot">当前槽位（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">当前槽位</string>
+    <string name="install_anykernel_inactive_slot">未使用槽位（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知卷宗</string>
+    <string name="install_anykernel_size_unknown">大小不明</string>
+    <string name="install_anykernel_confirm_details">卷宗：%1$s\n大小：%2$s\n目标槽位：%3$s</string>
+    <string name="install_anykernel_confirm_note">所写分区与槽位仍由安装器定夺。于未使用槽安装须有 SLOT_SELECT 之术，ksud 会于起法前勘验。活动槽不会自行转换；重启后仍可能归入当前槽。</string>
+    <string name="flash_log_saved">日志已收录于 %1$s</string>
 </resources>

@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">授予 shell Root 权限后的额外咒印检定：仅由 adbd 或 KernelSU Root 进程（如 ADB 魔法阵）启动的进程可获取，防止获得 shell 权限的应用进一步提权至 Root</string>
     <string name="feature_status_forced_summary">已由星界启动仪式强制指定，无法在此修改</string>
     <string name="install_anykernel">注入 AnyKernel3 ZIP</string>
-    <string name="install_anykernel_summary">以当前星槽运行可信的心之契约安装器，需要 root 权限。</string>
+    <string name="install_anykernel_summary">以当前星槽或未使用的 A/B 星槽运行可信的心之契约安装器，需要 root 权限。</string>
     <string name="install_anykernel_warning">此 ZIP 将以 root 施法，可能改写多个星域分区。实际写入的分区与星槽由安装咒式决定，FinaSU 不会覆盖星槽，也不更新 ksud。变身成功不保证能够苏醒，变身失败也可能留下部分改写。已有的启动镜像备份未必覆盖这些改动。请先确认法器相容性并备好回滚镜像，再继续。</string>
     <string name="install_anykernel_root_required">注入 AnyKernel3 需要 root 权限。</string>
     <string name="install_anykernel_read_failed">无法读取 AnyKernel3 ZIP。</string>
@@ -1029,4 +1029,14 @@
     <string name="guide_page_indicator">第 %1$d 章，共 %2$d 章</string>
     <string name="guide_about_entry_title">重观新手引路</string>
     <string name="guide_about_entry_summary">重温初临此地的指引</string>
+    <string name="install_anykernel_target_slot">目标槽位</string>
+    <string name="install_anykernel_current_slot">当前槽位（%1$s）</string>
+    <string name="install_anykernel_current_slot_no_suffix">当前槽位</string>
+    <string name="install_anykernel_inactive_slot">未使用槽位（%1$s）</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">未知文件</string>
+    <string name="install_anykernel_size_unknown">未知大小</string>
+    <string name="install_anykernel_confirm_details">文件：%1$s\n大小：%2$s\n目标槽位：%3$s</string>
+    <string name="install_anykernel_confirm_note">所写分区与槽位仍由安装器决定。安装至未使用槽需 SLOT_SELECT 术式，ksud 会在施术前校验。活动槽不会自动切换；重启后仍可能踏入当前槽。</string>
+    <string name="flash_log_saved">日志已封存至 %1$s</string>
 </resources>

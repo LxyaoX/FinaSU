@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">Dodatkowe sprawdzenie przy przyznawaniu roota powłoce: mogą go używać tylko procesy uruchomione przez adbd lub proces root KernelSU (np. moduł ADB), co zapobiega eskalacji do roota przez aplikacje, które uzyskały uprawnienia powłoki</string>
     <string name="feature_status_forced_summary">Wymuszone przez konfigurację rozruchu; nie można tego tutaj zmienić</string>
     <string name="install_anykernel">Wgraj plik ZIP AnyKernel3</string>
-    <string name="install_anykernel_summary">Uruchom zaufany instalator jądra w bieżącym slocie. Wymagane uprawnienia root.</string>
+    <string name="install_anykernel_summary">Uruchamia zaufany instalator jądra na bieżącym lub nieużywanym slocie A/B. Wymaga uprawnień Root.</string>
     <string name="install_anykernel_warning">Ten plik ZIP działa z uprawnieniami root i może modyfikować wiele partycji. To instalator decyduje, które partycje i sloty zostaną zapisane; FinaSU nie nadpisuje slotu ani nie odświeża ksud. Pomyślna instalacja nie gwarantuje możliwości uruchomienia, a niepowodzenie może pozostawić częściowe zmiany. Istniejące kopie zapasowe obrazu boot mogą nie obejmować tych zmian. Przed kontynuowaniem potwierdź zgodność urządzenia i przygotuj obraz do odzyskiwania.</string>
     <string name="install_anykernel_root_required">Do wgrania AnyKernel3 wymagane są uprawnienia root.</string>
     <string name="install_anykernel_read_failed">Nie można odczytać pliku ZIP AnyKernel3.</string>
@@ -1033,4 +1033,14 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="guide_page_indicator">Strona %1$d z %2$d</string>
     <string name="guide_about_entry_title">Pokaż przewodnik powitalny ponownie</string>
     <string name="guide_about_entry_summary">Odtwórz ponownie wprowadzenie przy pierwszym uruchomieniu</string>
+    <string name="install_anykernel_target_slot">Slot docelowy</string>
+    <string name="install_anykernel_current_slot">Bieżący slot (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">Bieżący slot</string>
+    <string name="install_anykernel_inactive_slot">Nieużywany slot (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">Nieznany plik</string>
+    <string name="install_anykernel_size_unknown">Nieznany rozmiar</string>
+    <string name="install_anykernel_confirm_details">Plik: %1$s\nRozmiar: %2$s\nSlot docelowy: %3$s</string>
+    <string name="install_anykernel_confirm_note">Instalator nadal decyduje, które partycje i sloty zostaną zapisane. Instalacja na nieużywanym slocie wymaga obsługi SLOT_SELECT, którą ksud sprawdza przed uruchomieniem. Aktywny slot nie przełącza się automatycznie; po ponownym uruchomieniu urządzenie nadal może startować z bieżącego slotu.</string>
+    <string name="flash_log_saved">Dziennik zapisano w %1$s</string>
 </resources>

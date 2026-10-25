@@ -36,6 +36,7 @@ class PreFlashBackup(
         extraPartitions: Set<String> = emptySet(),
         moduleInstallers: List<ModuleInstaller> = emptyList(),
         onLog: (String) -> Unit = {},
+        slotSuffix: String? = null,
     ): Boolean {
         if (kinds.isEmpty() || !settings.backupBeforeFlash) return false
 
@@ -59,6 +60,7 @@ class PreFlashBackup(
                 workspace,
                 knownStockSha1,
                 moduleInstallers,
+                slotSuffix,
             )
             if (sources.kinds.isEmpty()) return false
 
@@ -93,6 +95,7 @@ class PreFlashBackup(
         tempDir: File,
         knownStockSha1: Set<String>,
         moduleInstallers: List<ModuleInstaller>,
+        slotSuffix: String?,
     ): BackupSourceRegistry {
         val sources = mutableListOf<BackupSource>()
         if (BackupKind.MODULE in kinds && moduleInstallers.isNotEmpty()) {
@@ -109,6 +112,7 @@ class PreFlashBackup(
                     tempDir = tempDir,
                     trigger = BackupTrigger.PRE_FLASH,
                     knownStockSha1 = knownStockSha1,
+                    slotSuffix = slotSuffix,
                 )
             }
         }

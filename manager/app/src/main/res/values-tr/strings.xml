@@ -4,7 +4,7 @@
     <string name="settings_shell_su_adb_only_summary">Shell\'e root verildiğinde ek denetim: yalnızca adbd veya bir KernelSU root süreci (ör. bir ADB modülü) tarafından oluşturulan süreçler bunu kullanabilir; böylece shell ayrıcalıkları elde eden uygulamaların root\'a yükselmesi engellenir</string>
     <string name="feature_status_forced_summary">Önyükleme yapılandırması tarafından zorlandı; buradan değiştirilemez</string>
     <string name="install_anykernel">AnyKernel3 ZIP flaşla</string>
-    <string name="install_anykernel_summary">Geçerli yuvayı kullanarak güvenilir bir çekirdek yükleyicisi çalıştırır. Root gerekir.</string>
+    <string name="install_anykernel_summary">Güvenilir çekirdek yükleyicisini geçerli veya kullanılmayan A/B yuvasında çalıştırır. Root yetkisi gerekir.</string>
     <string name="install_anykernel_warning">Bu ZIP root ile çalışır ve birden fazla bölümü değiştirebilir. Hangi bölümlerin ve yuvaların yazılacağını yükleyici belirler; FinaSU yuvayı geçersiz kılmaz veya ksud\'u yenilemez. Başarılı bir kurulum açılabilirliği garanti etmez ve başarısızlık kısmi değişiklikler bırakabilir. Mevcut boot imajı yedekleri bu değişiklikleri kapsamayabilir. Devam etmeden önce cihaz uyumluluğunu doğrulayın ve bir kurtarma imajı hazırlayın.</string>
     <string name="install_anykernel_root_required">AnyKernel3 flaşlamak için root gerekir.</string>
     <string name="install_anykernel_read_failed">AnyKernel3 ZIP okunamadı.</string>
@@ -1031,4 +1031,14 @@
     <string name="guide_page_indicator">Sayfa %1$d / %2$d</string>
     <string name="guide_about_entry_title">Karşılama kılavuzunu tekrar göster</string>
     <string name="guide_about_entry_summary">İlk açılış tanıtımını yeniden oynat</string>
+    <string name="install_anykernel_target_slot">Hedef yuva</string>
+    <string name="install_anykernel_current_slot">Geçerli yuva (%1$s)</string>
+    <string name="install_anykernel_current_slot_no_suffix">Geçerli yuva</string>
+    <string name="install_anykernel_inactive_slot">Kullanılmayan yuva (%1$s)</string>
+    <string name="install_anykernel_file_summary">%1$s · %2$s</string>
+    <string name="install_anykernel_file_unknown">Bilinmeyen dosya</string>
+    <string name="install_anykernel_size_unknown">Bilinmeyen boyut</string>
+    <string name="install_anykernel_confirm_details">Dosya: %1$s\nBoyut: %2$s\nHedef yuva: %3$s</string>
+    <string name="install_anykernel_confirm_note">Hangi bölümlerin ve yuvaların yazılacağını yine yükleyici belirler. Kullanılmayan yuvaya kurulum, ksud tarafından çalıştırmadan önce doğrulanan SLOT_SELECT desteği gerektirir. Etkin yuva otomatik olarak değiştirilmez; yeniden başlatmadan sonra cihaz yine geçerli yuvadan açılabilir.</string>
+    <string name="flash_log_saved">Günlük %1$s konumuna kaydedildi</string>
 </resources>

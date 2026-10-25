@@ -2,6 +2,7 @@ package me.weishu.kernelsu.ui.screen.install
 
 import android.app.Activity
 import android.content.Intent
+import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
@@ -63,6 +64,7 @@ fun InstallScreen() {
     var allowShell by rememberSaveable { mutableStateOf(false) }
     var enableAdb by rememberSaveable { mutableStateOf(false) }
     var forceBackup by rememberSaveable { mutableStateOf(false) }
+    var anyKernelSlotIndex by rememberSaveable { mutableIntStateOf(0) }
     val settings = remember { SettingsRepositoryImpl() }
     var backupBeforeFlash by rememberSaveable { mutableStateOf(settings.backupBeforeFlash) }
 
@@ -122,7 +124,12 @@ fun InstallScreen() {
             navigator.push(
                 Route.Flash(
                     when (method) {
-                        is InstallMethod.AnyKernel -> FlashIt.FlashAnyKernel(method.uri ?: return@let)
+                        is InstallMethod.AnyKernel -> FlashIt.FlashAnyKernel(
+                            uri = method.uri ?: return@let,
+                            displayName = method.displayName,
+                            sizeBytes = method.sizeBytes,
+                            inactiveSlot = method.inactiveSlot,
+                        )
                         is InstallMethod.DownloadFile -> FlashIt.DownloadBoot(
                             url = method.url ?: return@let,
                             partition = method.partition ?: return@let,
@@ -148,9 +155,19 @@ fun InstallScreen() {
 
     val anyKernelConfirm = rememberConfirmDialog(onConfirm = onInstall, onDismiss = null)
     val anyKernelTitle = stringResource(R.string.install_anykernel)
-    val anyKernelWarning = stringResource(R.string.install_anykernel_warning)
     val selectAnyKernelLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { installMethod = InstallMethod.AnyKernel(it, summary = anyKernelSummary) }
+        uri?.let {
+            scope.launch {
+                val file = readAnyKernelFileInfo(context, it)
+                anyKernelSlotIndex = 0
+                installMethod = InstallMethod.AnyKernel(
+                    uri = it,
+                    summary = anyKernelSummary,
+                    displayName = file.displayName,
+                    sizeBytes = file.sizeBytes,
+                )
+            }
+        }
     }
 
     ChooseKmiDialog(
@@ -242,6 +259,30 @@ fun InstallScreen() {
         forceBackup = forceBackup,
         canForceBackup = installMethod is InstallMethod.SelectFile,
         backupBeforeFlash = backupBeforeFlash,
+        anyKernelFileName = (installMethod as? InstallMethod.AnyKernel)?.displayName,
+        anyKernelSizeLabel = (installMethod as? InstallMethod.AnyKernel)?.sizeBytes?.let {
+            Formatter.formatShortFileSize(context, it)
+        } ?: resources.getString(R.string.install_anykernel_size_unknown),
+        anyKernelSlotOptions = if (isAbDevice) {
+            listOf(
+                if (slotSuffix.isBlank()) {
+                    resources.getString(R.string.install_anykernel_current_slot_no_suffix)
+                } else {
+                    resources.getString(R.string.install_anykernel_current_slot, slotSuffix)
+                },
+                resources.getString(
+                    R.string.install_anykernel_inactive_slot,
+                    when (slotSuffix) {
+                        "_a" -> "_b"
+                        else -> "_a"
+                    },
+                ),
+            )
+        } else {
+            emptyList()
+        },
+        anyKernelSlotIndex = anyKernelSlotIndex,
+        showAnyKernelSlotSelector = isAbDevice && installMethod is InstallMethod.AnyKernel,
     )
     val actions = InstallScreenActions(
         onBack = dropUnlessResumed { navigator.pop() },
@@ -251,6 +292,13 @@ fun InstallScreen() {
             selectImageLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/octet-stream" })
         },
         onSelectAnyKernel = { selectAnyKernelLauncher.launch("application/zip") },
+        onSelectAnyKernelSlot = { index ->
+            anyKernelSlotIndex = index.coerceIn(0, 1)
+            val method = installMethod
+            if (method is InstallMethod.AnyKernel) {
+                installMethod = method.copy(inactiveSlot = anyKernelSlotIndex == 1)
+            }
+        },
         onUploadLkm = {
             selectLkmLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/octet-stream" })
         },
@@ -266,8 +314,31 @@ fun InstallScreen() {
             }
         },
         onNext = {
-            if (installMethod is InstallMethod.AnyKernel) {
-                anyKernelConfirm.showConfirm(anyKernelTitle, anyKernelWarning)
+            val anyKernelMethod = installMethod as? InstallMethod.AnyKernel
+            if (anyKernelMethod != null) {
+                val method = anyKernelMethod
+                val fileName = method.displayName
+                    ?: resources.getString(R.string.install_anykernel_file_unknown)
+                val size = method.sizeBytes?.let { Formatter.formatShortFileSize(context, it) }
+                    ?: resources.getString(R.string.install_anykernel_size_unknown)
+                val targetSlot = when {
+                    !method.inactiveSlot && slotSuffix.isBlank() ->
+                        resources.getString(R.string.install_anykernel_current_slot_no_suffix)
+                    !method.inactiveSlot ->
+                        resources.getString(R.string.install_anykernel_current_slot, slotSuffix)
+                    else -> resources.getString(
+                        R.string.install_anykernel_inactive_slot,
+                        if (slotSuffix == "_a") "_b" else "_a",
+                    )
+                }
+                val details = resources.getString(
+                    R.string.install_anykernel_confirm_details,
+                    fileName,
+                    size,
+                    targetSlot,
+                )
+                val note = resources.getString(R.string.install_anykernel_confirm_note)
+                anyKernelConfirm.showConfirm(anyKernelTitle, "$details\n\n$note")
             } else {
                 val isLkmSelected = lkmSelection != LkmSelection.KmiNone
                 val isKmiUnknown = currentKmi.isBlank()
