@@ -194,8 +194,6 @@ private fun TopBar(
                 )
             }
         },
-        colors = expressiveTopAppBarColors(),
-        windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
     )
 }
