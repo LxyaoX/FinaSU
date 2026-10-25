@@ -670,9 +670,6 @@
     <string name="sulog_filter_ioctl_grant_root">授予 Root</string>
     <string name="sulog_filter_daemon_restart">守护进程重启</string>
     <string name="profile" translatable="false">App Profile</string>
-    <string name="settings_finasu_hide_summary">一定程度上隐藏 Bootloader 解锁状态</string>
-    <string name="settings_finasu_hide_reboot_hint">重启后恢复真实值</string>
-    <string name="settings_finasu_hide_failed">修改 FinaSU Hide 失败</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_wallpaper_gallery">壁纸图鉴</string>
     <string name="wallpaper_gallery_device_phone">手机</string>

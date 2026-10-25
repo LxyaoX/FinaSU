@@ -102,7 +102,6 @@ fun rememberSettingsActions(
         onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
         onRecoverFolkZygisk = viewModel::recoverFolkZygisk,
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
-        onSetBootHideEnabled = viewModel::setBootHideEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,
         onOpenUtsView = { navigator.push(Route.UtsView) },
         onOpenNetIsolate = { navigator.push(Route.NetIsolate) },

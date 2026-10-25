@@ -99,8 +99,6 @@ class SettingsViewModel(
                 snapshot.persists["adb_root"] == 1L
             }
             val isDefaultUmountModules = repo.isDefaultUmountModules()
-            // FinaSU Hide has no value in the snapshot; it is a ksud property, not a feature.
-            val isBootHideEnabled = repo.getBootHideStatus() == "enabled"
             val shellSuAdbOnlyStatus = snapshot.statuses["shell_su_adb_only"].orEmpty()
             val isShellSuAdbOnlyEnabled = if (shellSuAdbOnlyStatus == "forced") {
                 snapshot.values["shell_su_adb_only"]?.let { it != 0L } == true
@@ -151,7 +149,6 @@ class SettingsViewModel(
                     isSuEnabled = isSuEnabled,
                     adbRootStatus = adbRootStatus,
                     isAdbRootEnabled = isAdbRootEnabled,
-                    isBootHideEnabled = isBootHideEnabled,
                     shellSuAdbOnlyStatus = shellSuAdbOnlyStatus,
                     isShellSuAdbOnlyEnabled = isShellSuAdbOnlyEnabled,
                     kernelUmountStatus = kernelUmountStatus,
@@ -604,31 +601,6 @@ class SettingsViewModel(
             if (repo.setAdbRootEnabled(enabled)) {
                 repo.execKsudFeatureSave()
                 _uiState.update { it.copy(isAdbRootEnabled = enabled) }
-            }
-        }
-    }
-
-    fun setBootHideEnabled(enabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (repo.setBootHideEnabled(enabled)) {
-                _uiState.update { it.copy(isBootHideEnabled = enabled) }
-                if (!enabled) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            ksuApp,
-                            R.string.settings_finasu_hide_reboot_hint,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            } else {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        ksuApp,
-                        R.string.settings_finasu_hide_failed,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
             }
         }
     }

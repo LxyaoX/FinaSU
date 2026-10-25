@@ -15,8 +15,6 @@
 mod anykernel3;
 mod apk_sign;
 mod assets;
-#[cfg(any(target_os = "android", test))]
-mod boot_hide;
 mod boot_patch;
 #[cfg(target_os = "android")]
 mod cli;

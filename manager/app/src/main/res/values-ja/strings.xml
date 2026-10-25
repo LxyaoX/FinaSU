@@ -446,9 +446,6 @@
     <string name="download">ダウンロード</string>
     <string name="download_cancel">キャンセル</string>
     <string name="download_install">インストール</string>
-    <string name="settings_finasu_hide_summary">Bootloader のロック解除状態をある程度隠します</string>
-    <string name="settings_finasu_hide_reboot_hint">再起動後に実際の値に戻ります</string>
-    <string name="settings_finasu_hide_failed">FinaSU Hide を変更できませんでした</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">adbd デーモンを Root 権限で実行します</string>
     <string name="menu_sort">並べ替え</string>

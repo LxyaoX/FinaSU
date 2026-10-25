@@ -109,20 +109,6 @@ Once on, anyone who can connect over ADB gets stronger capabilities. Do not leav
 
 If the computer still shows an ordinary Shell, replug the USB cable, restart the ADB service, or disconnect and reconnect. Vendors differ in their restrictions on `adbd` and debug authorization.
 
-## FinaSU Hide
-
-FinaSU Hide changes selected bootloader-state properties to locked values during `post-fs-data`, so checks that read system properties directly see a locked state. Turning it on applies the change immediately and keeps it across later boots.
-
-Only properties that already exist are covered: `ro.boot.vbmeta.device_state`, `ro.boot.verifiedbootstate`, `ro.boot.flash.locked`, `ro.boot.veritymode`, `vendor.boot.vbmeta.device_state`, `vendor.boot.verifiedbootstate`, `ro.boot.warranty_bit`, `ro.warranty_bit`, `ro.vendor.boot.warranty_bit`, `ro.vendor.warranty_bit`, `ro.secureboot.lockstate`, `ro.boot.realmebootstate`, `ro.boot.realme.lockstate`, `ro.debuggable`, `ro.adb.secure` and `ro.secure`. `service.adb.root` is deleted only when present; missing properties are never created.
-
-Turning the switch off only stops future overrides; properties changed during the current boot remain changed. Reboot before checking the real values.
-
-::: warning Capability boundaries
-
-FinaSU Hide does not solve Play Integrity, keybox or hardware integrity attestation. It does not modify `/proc/bootconfig` or `/proc/cmdline`; use SUSFS cmdline/bootconfig spoofing when those detection surfaces also need to be consistent. It also does not hide USB debugging, wireless debugging or the root identity of `adbd` while ADB Root is active.
-
-:::
-
 ## Restrict Shell Root to ADB Only
 
 This feature adds a source check for an already authorized Shell: only a Shell started by `adbd` or by a KernelSU-family Root process can escalate to Root.

@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PhonelinkLock
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SystemUpdate
@@ -315,15 +314,6 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         startAction = { Icon(Icons.AutoMirrored.Filled.Rule, contentDescription = null) },
                         checked = uiState.isDefaultUmountModules,
                         onCheckedChange = actions.onSetDefaultUmountModules,
-                    )
-                },
-                {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.PhonelinkLock,
-                        title = stringResource(id = R.string.settings_finasu_hide),
-                        summary = stringResource(id = R.string.settings_finasu_hide_summary),
-                        checked = uiState.isBootHideEnabled,
-                        onCheckedChange = actions.onSetBootHideEnabled
                     )
                 },
                 {

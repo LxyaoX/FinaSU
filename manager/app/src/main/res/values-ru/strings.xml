@@ -448,9 +448,6 @@
     <string name="download">Скачать</string>
     <string name="download_cancel">Отмена</string>
     <string name="download_install">Установить</string>
-    <string name="settings_finasu_hide_summary">Частично скрывает состояние разблокировки Bootloader</string>
-    <string name="settings_finasu_hide_reboot_hint">После перезагрузки вернётся реальное значение</string>
-    <string name="settings_finasu_hide_failed">Не удалось изменить FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Запускать демон adbd с правами Root</string>
     <string name="menu_sort">Сортировка</string>

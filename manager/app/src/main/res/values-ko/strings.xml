@@ -446,9 +446,6 @@
     <string name="download">다운로드</string>
     <string name="download_cancel">취소</string>
     <string name="download_install">설치</string>
-    <string name="settings_finasu_hide_summary">Bootloader 잠금 해제 상태를 일부 숨깁니다</string>
-    <string name="settings_finasu_hide_reboot_hint">재부팅 후 실제 값이 복원됩니다</string>
-    <string name="settings_finasu_hide_failed">FinaSU Hide를 변경하지 못했습니다</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">루트 권한으로 adbd 데몬 실행</string>
     <string name="menu_sort">정렬</string>

@@ -109,20 +109,6 @@ ADB Root 以 Root 权限运行 `adbd`，让通过 ADB 连接的 Shell 直接具�
 
 如果电脑仍显示普通 Shell，可以重新插拔 USB、重启 ADB 服务或断开重连。不同厂商对 `adbd` 和调试授权的限制不同。
 
-## FinaSU Hide
-
-FinaSU Hide 在 `post-fs-data` 阶段把部分 bootloader 状态属性改写为“已锁定”的值，让直接读取系统属性的检测看到锁定状态。打开开关会立即应用，并在后续启动中继续生效。
-
-只覆盖已经存在的属性：`ro.boot.vbmeta.device_state`、`ro.boot.verifiedbootstate`、`ro.boot.flash.locked`、`ro.boot.veritymode`、`vendor.boot.vbmeta.device_state`、`vendor.boot.verifiedbootstate`、`ro.boot.warranty_bit`、`ro.warranty_bit`、`ro.vendor.boot.warranty_bit`、`ro.vendor.warranty_bit`、`ro.secureboot.lockstate`、`ro.boot.realmebootstate`、`ro.boot.realme.lockstate`、`ro.debuggable`、`ro.adb.secure` 和 `ro.secure`。`service.adb.root` 只在存在时删除；缺失的属性不会被凭空创建。
-
-关闭开关只停止后续覆盖，本次启动中的属性不会恢复。需要读取真实值时必须重启。
-
-::: warning 能力边界
-
-FinaSU Hide 不解决 Play Integrity、keybox 或硬件完整性认证。它不修改 `/proc/bootconfig` 或 `/proc/cmdline`；需要这些检测面保持一致时，应配合 SUSFS 的 cmdline/bootconfig spoof。它也不隐藏 USB 调试、无线调试状态或 ADB Root 期间 `adbd` 的 root 身份。
-
-:::
-
 ## 限制 Shell 仅可通过 ADB 获取 Root
 
 该功能为已经授权的 Shell 增加来源检查：只有由 `adbd` 或 KernelSU 系 Root 进程启动的 Shell，才能进一步取得 Root。
