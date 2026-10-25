@@ -62,6 +62,8 @@ import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.ui.viewmodel.UtsViewViewModel
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 private val primaryFields = listOf(2, 3)
 private val advancedFields = listOf(0, 1, 4, 5)
@@ -260,47 +262,42 @@ fun UtsViewScreen() {
             Spacer(Modifier.height(8.dp))
             SegmentedColumn {
                 item {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.TextFields,
-                        title = stringResource(R.string.uts_view_enable_switch),
-                        summary = stringResource(
+                    SwitchPreference(
+            title = stringResource(R.string.uts_view_enable_switch),
+            summary = stringResource(
                             R.string.uts_view_state_value,
                             phaseLabel(status),
                             phaseSummary(status),
                         ),
-                        checked = status.enabled,
-                        enabled = canEdit && provider != "susfs",
-                        onCheckedChange = { checked ->
+            startAction = { Icon(Icons.Filled.TextFields, contentDescription = null) },
+            checked = status.enabled,
+            onCheckedChange = { checked ->
                             if (checked && dirty) {
                                 viewModel.saveAndEnable()
                             } else {
                                 viewModel.setEnabled(checked)
                             }
                         },
-                    )
+        )
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.uts_view_current_kernel)) },
-                        supportingContent = {
-                            Text(
-                                if (provider == "susfs") {
+                    ArrowPreference(
+            title = stringResource(R.string.uts_view_current_kernel),
+            summary = if (provider == "susfs") {
                                     stringResource(R.string.uts_view_truth_unavailable)
                                 } else {
                                     state.currentUname?.release ?: "-"
-                                }
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Info, null) },
-                    )
+                                },
+            startAction = { Icon(Icons.Filled.Info, null) },
+        )
                 }
                 if (provider == "susfs") {
                     item {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.uts_view_provider)) },
-                            supportingContent = { Text(stringResource(R.string.uts_view_provider_susfs)) },
-                            leadingContent = { Icon(Icons.Filled.Info, null) },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.uts_view_provider),
+            summary = stringResource(R.string.uts_view_provider_susfs),
+            startAction = { Icon(Icons.Filled.Info, null) },
+        )
                     }
                     item {
                         SegmentedListItem(
@@ -405,22 +402,18 @@ fun UtsViewScreen() {
                     }
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.uts_view_advanced_fields)) },
-                        supportingContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+            title = stringResource(R.string.uts_view_advanced_fields),
+            summary = stringResource(
                                     if (showAdvanced) {
                                         R.string.uts_view_advanced_hide
                                     } else {
                                         R.string.uts_view_advanced_show
                                     },
-                                )
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Tune, null) },
-                        onClick = { showAdvanced = !showAdvanced },
-                    )
+                                ),
+            startAction = { Icon(Icons.Filled.Tune, null) },
+            onClick = { showAdvanced = !showAdvanced },
+        )
                 }
                 if (showAdvanced) {
                     advancedFields.forEach { index ->
@@ -497,11 +490,9 @@ fun UtsViewScreen() {
                         )
                     }
                     item(key = "diagnostics_recent", visible = showDiagnostics) {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.uts_view_diagnostics_recent)) },
-                            supportingContent = {
-                                Text(
-                                    if (observation.matched > 0) {
+                        ArrowPreference(
+            title = stringResource(R.string.uts_view_diagnostics_recent),
+            summary = if (observation.matched > 0) {
                                         stringResource(
                                             R.string.uts_view_diagnostics_latest,
                                             observation.lastUid,
@@ -509,57 +500,39 @@ fun UtsViewScreen() {
                                         )
                                     } else {
                                         stringResource(R.string.uts_view_diagnostics_no_match)
-                                    },
-                                )
-                            },
-                        )
+                                    },,
+        )
                     }
                     item(key = "diagnostics_skips", visible = showDiagnostics) {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.uts_view_diagnostics_skips)) },
-                            supportingContent = {
-                                Text(
-                                    skipReasons.takeIf(List<String>::isNotEmpty)?.joinToString("\n")
-                                        ?: stringResource(R.string.uts_view_diagnostics_no_skips),
-                                )
-                            },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.uts_view_diagnostics_skips),
+            summary = skipReasons.takeIf(List<String>::isNotEmpty)?.joinToString("\n")
+                                        ?: stringResource(R.string.uts_view_diagnostics_no_skips),,
+        )
                     }
                     item(
                         key = "diagnostics_failure",
                         visible = showDiagnostics && observation.unshareFailed > 0,
                     ) {
-                        SegmentedListItem(
-                            headlineContent = {
-                                Text(
-                                    text = stringResource(R.string.uts_view_diagnostics_failure),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            supportingContent = {
-                                Text(
-                                    text = stringResource(
+                        ArrowPreference(
+            title = text = stringResource(R.string.uts_view_diagnostics_failure),
+                                    color = MaterialTheme.colorScheme.error,,
+            summary = text = stringResource(
                                         R.string.uts_view_diagnostics_unshare_failed,
                                         observation.unshareFailed,
                                     ),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                        )
+                                    color = MaterialTheme.colorScheme.error,,
+        )
                     }
                     item(key = "diagnostics_technical", visible = showDiagnostics) {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.uts_view_diagnostics_technical)) },
-                            supportingContent = {
-                                Text(
-                                    stringResource(
+                        ArrowPreference(
+            title = stringResource(R.string.uts_view_diagnostics_technical),
+            summary = stringResource(
                                         R.string.uts_view_diagnostics_technical_value,
                                         observation.generation,
                                         observation.discarded,
-                                    ),
-                                )
-                            },
-                        )
+                                    ),,
+        )
                     }
                 }
             }

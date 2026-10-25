@@ -41,6 +41,7 @@ import me.weishu.kernelsu.ui.component.material.FolkTextButton
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * The text a card shows, independent of the family it comes from.
@@ -114,15 +115,24 @@ fun CardBannerDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 SegmentedColumn {
                     item(visible = showBannerSection) {
-                        SegmentedListItem(
-                            onClick = { picker.launch("image/*") },
-                            leadingContent = { Icon(Icons.Default.Image, contentDescription = null) },
-                            headlineContent = { Text(stringResource(R.string.module_banner_select)) },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.module_banner_select),
+            startAction = { Icon(Icons.Default.Image, contentDescription = null) },
+            onClick = { picker.launch("image/*") },
+        )
                     }
                     item(visible = showBannerSection && hasBanner) {
-                        SegmentedListItem(
-                            onClick = {
+                        ArrowPreference(
+            title = text = stringResource(R.string.module_banner_clear),
+                                    color = MaterialTheme.colorScheme.error,,
+            startAction = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            },
+            onClick = {
                                 scope.launch {
                                     withContext(Dispatchers.IO) {
                                         bannerStorage.clear(subject.id)
@@ -133,20 +143,7 @@ fun CardBannerDialog(
                                     ModuleBannerConfig.requestReload()
                                 }
                             },
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                            headlineContent = {
-                                Text(
-                                    text = stringResource(R.string.module_banner_clear),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            },
-                        )
+        )
                     }
                     item {
                         SegmentedTextField(

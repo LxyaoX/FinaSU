@@ -19,6 +19,7 @@ import me.weishu.kernelsu.ui.screen.flash.FlashIt
 import me.weishu.kernelsu.ui.screen.flash.UninstallType
 import me.weishu.kernelsu.ui.screen.flash.UninstallType.PERMANENT
 import me.weishu.kernelsu.ui.screen.flash.UninstallType.RESTORE_STOCK_IMAGE
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun UninstallDialogMaterial(
@@ -51,20 +52,20 @@ fun UninstallDialogMaterial(
                     modifier = Modifier,
                     content = options.map { type ->
                         {
-                            SegmentedListItem(
-                                onClick = {
-                                    showConfirmDialog.value = true
-                                    runType.value = type
-                                },
-                                headlineContent = { Text(stringResource(type.title)) },
-                                supportingContent = { Text(stringResource(type.message)) },
-                                leadingContent = {
+                            ArrowPreference(
+            title = stringResource(type.title),
+            summary = stringResource(type.message),
+            startAction = {
                                     Icon(
                                         imageVector = type.icon,
                                         contentDescription = null
                                     )
-                                }
-                            )
+                                },
+            onClick = {
+                                    showConfirmDialog.value = true
+                                    runType.value = type
+                                },
+        )
                         }
                     }
                 )

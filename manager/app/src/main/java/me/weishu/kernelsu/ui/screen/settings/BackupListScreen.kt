@@ -49,6 +49,7 @@ import me.weishu.kernelsu.ui.viewmodel.BackupListItem
 import me.weishu.kernelsu.ui.viewmodel.BackupListViewModel
 import me.weishu.kernelsu.ui.viewmodel.BackupNotice
 import me.weishu.kernelsu.ui.viewmodel.BackupTarget
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 private val ListGroupModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
 
@@ -102,13 +103,17 @@ fun BackupListScreen() {
             when {
                 state.loading -> SegmentedColumn(modifier = ListGroupModifier) {
                     item {
-                        SegmentedListItem(headlineContent = { Text(stringResource(R.string.backup_loading)) })
+                        ArrowPreference(
+            title = stringResource(R.string.backup_loading),
+        )
                     }
                 }
 
                 state.items.isEmpty() -> SegmentedColumn(modifier = ListGroupModifier) {
                     item {
-                        SegmentedListItem(headlineContent = { Text(stringResource(R.string.backup_empty_list)) })
+                        ArrowPreference(
+            title = stringResource(R.string.backup_empty_list),
+        )
                     }
                 }
 

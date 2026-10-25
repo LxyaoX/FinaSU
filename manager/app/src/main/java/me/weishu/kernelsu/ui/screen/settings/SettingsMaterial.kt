@@ -55,6 +55,7 @@ import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchShortcuts
 import me.weishu.kernelsu.ui.screen.settings.search.SettingsSearchTarget
 import me.weishu.kernelsu.ui.screen.settings.search.rememberSettingsSearchEntries
 import me.weishu.kernelsu.ui.screen.settings.search.settingsSearchGroups
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 private const val BUG_FEEDBACK_URL = "https://github.com/LyraVoid/FinaSU/issues/new/choose"
 
@@ -165,64 +166,64 @@ fun SettingPagerMaterial(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
                 content = listOf(
                     {
-                        SegmentedListItem(
-                            onClick = actions.onOpenGallery,
-                            headlineContent = { Text(stringResource(id = R.string.settings_wallpaper_gallery)) },
-                            leadingContent = {
+                        ArrowPreference(
+            title = stringResource(id = R.string.settings_wallpaper_gallery),
+            startAction = {
                                 Icon(
                                     Icons.Filled.Collections,
                                     stringResource(id = R.string.settings_wallpaper_gallery)
                                 )
                             },
-                        )
+            onClick = actions.onOpenGallery,
+        )
                     },
                     {
-                        SegmentedListItem(
-                            onClick = { uriHandler.openUri(BUG_FEEDBACK_URL) },
-                            headlineContent = { Text(stringResource(id = R.string.settings_bug_feedback)) },
-                            leadingContent = {
+                        ArrowPreference(
+            title = stringResource(id = R.string.settings_bug_feedback),
+            startAction = {
                                 Icon(
                                     Icons.Filled.BugReport,
                                     stringResource(id = R.string.settings_bug_feedback)
                                 )
                             },
-                        )
+            onClick = { uriHandler.openUri(BUG_FEEDBACK_URL) },
+        )
                     },
                     {
-                        SegmentedListItem(
-                            onClick = { showDisclaimerDialog.value = true },
-                            headlineContent = { Text(stringResource(id = R.string.settings_disclaimer)) },
-                            leadingContent = {
+                        ArrowPreference(
+            title = stringResource(id = R.string.settings_disclaimer),
+            startAction = {
                                 Icon(
                                     Icons.Filled.Policy,
                                     stringResource(id = R.string.settings_disclaimer)
                                 )
                             },
-                        )
+            onClick = { showDisclaimerDialog.value = true },
+        )
                     },
                     {
-                        SegmentedListItem(
-                            onClick = { showBottomSheet = true },
-                            headlineContent = { Text(stringResource(id = R.string.send_log)) },
-                            leadingContent = {
+                        ArrowPreference(
+            title = stringResource(id = R.string.send_log),
+            startAction = {
                                 Icon(
                                     Icons.Filled.Description,
                                     stringResource(id = R.string.send_log)
                                 )
                             },
-                        )
+            onClick = { showBottomSheet = true },
+        )
                     },
                     {
-                        SegmentedListItem(
-                            onClick = actions.onOpenAbout,
-                            headlineContent = { Text(stringResource(id = R.string.about)) },
-                            leadingContent = {
+                        ArrowPreference(
+            title = stringResource(id = R.string.about),
+            startAction = {
                                 Icon(
                                     Icons.Filled.Info,
                                     stringResource(id = R.string.about)
                                 )
                             },
-                        )
+            onClick = actions.onOpenAbout,
+        )
                     }
                 )
             )

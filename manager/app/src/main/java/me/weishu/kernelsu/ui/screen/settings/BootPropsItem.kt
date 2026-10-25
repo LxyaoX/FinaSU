@@ -7,6 +7,8 @@ import androidx.compose.ui.res.stringResource
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import androidx.compose.material3.Icon
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 /**
  * The switch that corrects what the bootloader told init.
@@ -25,18 +27,13 @@ internal fun BootPropsItem(state: SettingsUiState, actions: SettingsScreenAction
         else -> bootPropsSummary(status)
     }
 
-    SegmentedSwitchItem(
-        icon = Icons.Rounded.Lock,
-        title = stringResource(R.string.settings_boot_props),
-        summary = summary,
-        checked = status?.enabled == true,
-        enabled = status != null &&
-            status.ksudAvailable &&
-            !state.bootPropsReadError &&
-            !state.isBootPropsLoading &&
-            !state.isBootPropsWriting,
-        onCheckedChange = actions.onSetBootPropsEnabled,
-    )
+    SwitchPreference(
+            title = stringResource(R.string.settings_boot_props),
+            summary = summary,
+            startAction = { Icon(Icons.Rounded.Lock, contentDescription = null) },
+            checked = status?.enabled == true,
+            onCheckedChange = actions.onSetBootPropsEnabled,
+        )
 }
 
 /** One line that says what the switch is doing and, when it is not enough, what is left. */

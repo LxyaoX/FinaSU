@@ -48,6 +48,8 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.R as AppR
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * The list's sort controls: which kinds of module are lifted above the alphabet, whether switched-on
@@ -107,44 +109,32 @@ internal fun ModuleSortSheet(
 
             SegmentedColumn {
                 item {
-                    SegmentedSwitchItem(
-                        title = stringResource(AppR.string.module_sort_enabled_first),
-                        checked = enabledFirst,
-                        onCheckedChange = onEnabledFirstChange,
-                    )
+                    SwitchPreference(
+            title = stringResource(AppR.string.module_sort_enabled_first),
+            checked = enabledFirst,
+            onCheckedChange = onEnabledFirstChange,
+        )
                 }
             }
 
             SegmentedColumn {
                 item {
-                    SegmentedListItem(
-                        onClick = {
+                    ArrowPreference(
+            title = stringResource(AppR.string.module_sort_custom_order),
+            summary = stringResource(AppR.string.module_sort_custom_order_summary),
+            onClick = {
                             orderSnapshot = displayModules
                             showOrderDialog = true
                         },
-                        headlineContent = { Text(stringResource(AppR.string.module_sort_custom_order)) },
-                        supportingContent = {
-                            Text(stringResource(AppR.string.module_sort_custom_order_summary))
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                            )
-                        },
-                    )
+        )
                 }
                 if (customOrder.isNotEmpty()) {
                     item {
-                        SegmentedListItem(
-                            onClick = onResetCustomOrder,
-                            headlineContent = {
-                                Text(stringResource(AppR.string.module_sort_reset_custom_order))
-                            },
-                            supportingContent = {
-                                Text(stringResource(AppR.string.module_sort_reset_custom_order_summary))
-                            },
-                        )
+                        ArrowPreference(
+            title = stringResource(AppR.string.module_sort_reset_custom_order),
+            summary = stringResource(AppR.string.module_sort_reset_custom_order_summary),
+            onClick = onResetCustomOrder,
+        )
                     }
                 }
             }

@@ -70,6 +70,8 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.TonalCard
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
 
@@ -87,13 +89,13 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
         modifier = SectionModifier,
         content = listOf(
             {
-                SegmentedSwitchItem(
-                    icon = Icons.Rounded.Pin,
-                    title = stringResource(id = R.string.settings_navigation_badge),
-                    summary = stringResource(id = R.string.settings_navigation_badge_summary),
-                    checked = uiState.enableNavigationBadge,
-                    onCheckedChange = actions.onSetEnableNavigationBadge
-                )
+                SwitchPreference(
+            title = stringResource(id = R.string.settings_navigation_badge),
+            summary = stringResource(id = R.string.settings_navigation_badge_summary),
+            startAction = { Icon(Icons.Rounded.Pin, contentDescription = null) },
+            checked = uiState.enableNavigationBadge,
+            onCheckedChange = actions.onSetEnableNavigationBadge,
+        )
             }
         )
     )
@@ -103,13 +105,13 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
             modifier = SectionModifier,
             content = listOf(
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.AutoMirrored.Rounded.MenuOpen,
-                        title = stringResource(id = R.string.settings_enable_predictive_back),
-                        summary = stringResource(id = R.string.settings_enable_predictive_back_summary),
-                        checked = uiState.enablePredictiveBack,
-                        onCheckedChange = actions.onSetEnablePredictiveBack
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_enable_predictive_back),
+            summary = stringResource(id = R.string.settings_enable_predictive_back_summary),
+            startAction = { Icon(Icons.AutoMirrored.Rounded.MenuOpen, contentDescription = null) },
+            checked = uiState.enablePredictiveBack,
+            onCheckedChange = actions.onSetEnablePredictiveBack,
+        )
                 }
             )
         )
@@ -144,13 +146,13 @@ private fun NavCustomIconsSection() {
         modifier = SectionModifier,
         content = buildList<@Composable () -> Unit> {
             add {
-                SegmentedSwitchItem(
-                    icon = Icons.Rounded.Apps,
-                    title = stringResource(R.string.settings_nav_custom_icons),
-                    summary = stringResource(R.string.settings_nav_custom_icons_summary),
-                    checked = customEnabled,
-                    onCheckedChange = { BottomBarIconConfig.isEnabled = it },
-                )
+                SwitchPreference(
+            title = stringResource(R.string.settings_nav_custom_icons),
+            summary = stringResource(R.string.settings_nav_custom_icons_summary),
+            startAction = { Icon(Icons.Rounded.Apps, contentDescription = null) },
+            checked = customEnabled,
+            onCheckedChange = { BottomBarIconConfig.isEnabled = it },
+        )
             }
             if (customEnabled) {
                 BottomBarDestination.entries.forEach { destination ->
@@ -186,17 +188,17 @@ private fun NavLayoutSection() {
         content = buildList<@Composable () -> Unit> {
             NavBarVisibilityConfig.hideable.forEach { destination ->
                 add {
-                    SegmentedSwitchItem(
-                        icon = destination.iconNotSelected,
-                        title = stringResource(
+                    SwitchPreference(
+            title = stringResource(
                             when (destination) {
                                 BottomBarDestination.SuperUser -> R.string.settings_show_superuser
                                 else -> R.string.settings_show_module
                             }
                         ),
-                        checked = visibility[destination] == true,
-                        onCheckedChange = { NavBarVisibilityConfig.setVisible(destination, it) },
-                    )
+            startAction = { Icon(destination.iconNotSelected, contentDescription = null) },
+            checked = visibility[destination] == true,
+            onCheckedChange = { NavBarVisibilityConfig.setVisible(destination, it) },
+        )
                 }
             }
         }
@@ -237,33 +239,33 @@ private fun NavModeSection() {
         modifier = SectionModifier,
         content = buildList<@Composable () -> Unit> {
             add {
-                SegmentedDropdownItem(
-                    icon = Icons.Rounded.SpaceDashboard,
-                    title = stringResource(R.string.settings_nav_mode),
-                    summary = stringResource(R.string.settings_nav_mode_summary),
-                    items = navModeLabels,
-                    selectedIndex = navModes.indexOf(navMode).coerceAtLeast(0),
-                    onItemSelected = { NavModeConfig.mode = navModes[it] },
-                )
+                OverlayDropdownPreference(
+            title = stringResource(R.string.settings_nav_mode),
+            summary = stringResource(R.string.settings_nav_mode_summary),
+            items = navModeLabels,
+            startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
+            selectedIndex = navModes.indexOf(navMode).coerceAtLeast(0),
+            onSelectedIndexChange = { NavModeConfig.mode = navModes[it] },
+        )
             }
             if (navMode == NavMode.Floating) {
                 add {
-                    SegmentedDropdownItem(
-                        icon = Icons.Rounded.Style,
-                        title = stringResource(R.string.settings_floating_bar_style),
-                        items = styleLabels,
-                        selectedIndex = styles.indexOf(floatingStyle).coerceAtLeast(0),
-                        onItemSelected = { FloatingBarConfig.style = styles[it] },
-                    )
+                    OverlayDropdownPreference(
+            title = stringResource(R.string.settings_floating_bar_style),
+            items = styleLabels,
+            startAction = { Icon(Icons.Rounded.Style, contentDescription = null) },
+            selectedIndex = styles.indexOf(floatingStyle).coerceAtLeast(0),
+            onSelectedIndexChange = { FloatingBarConfig.style = styles[it] },
+        )
                 }
                 add {
-                    SegmentedSwitchItem(
-                        icon = Icons.Rounded.BlurOn,
-                        title = stringResource(R.string.settings_floating_bar_glass),
-                        summary = stringResource(R.string.settings_floating_bar_glass_summary),
-                        checked = floatingGlass,
-                        onCheckedChange = { FloatingBarConfig.glass = it },
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.settings_floating_bar_glass),
+            summary = stringResource(R.string.settings_floating_bar_glass_summary),
+            startAction = { Icon(Icons.Rounded.BlurOn, contentDescription = null) },
+            checked = floatingGlass,
+            onCheckedChange = { FloatingBarConfig.glass = it },
+        )
                 }
                 if (floatingGlass) {
                     add {
@@ -297,59 +299,59 @@ private fun NavModeSection() {
                         )
                     }
                     add {
-                        SegmentedSwitchItem(
-                            icon = Icons.Rounded.FlashOn,
-                            title = stringResource(R.string.settings_navbar_glass_specular),
-                            summary = stringResource(R.string.settings_navbar_glass_specular_summary),
-                            checked = glassSpecular,
-                            onCheckedChange = { FloatingBarConfig.glassSpecular = it },
-                        )
+                        SwitchPreference(
+            title = stringResource(R.string.settings_navbar_glass_specular),
+            summary = stringResource(R.string.settings_navbar_glass_specular_summary),
+            startAction = { Icon(Icons.Rounded.FlashOn, contentDescription = null) },
+            checked = glassSpecular,
+            onCheckedChange = { FloatingBarConfig.glassSpecular = it },
+        )
                     }
                     add {
-                        SegmentedSwitchItem(
-                            icon = Icons.Rounded.WbTwilight,
-                            title = stringResource(R.string.settings_navbar_glass_inner_glow),
-                            summary = stringResource(R.string.settings_navbar_glass_inner_glow_summary),
-                            checked = glassInnerGlow,
-                            onCheckedChange = { FloatingBarConfig.glassInnerGlow = it },
-                        )
+                        SwitchPreference(
+            title = stringResource(R.string.settings_navbar_glass_inner_glow),
+            summary = stringResource(R.string.settings_navbar_glass_inner_glow_summary),
+            startAction = { Icon(Icons.Rounded.WbTwilight, contentDescription = null) },
+            checked = glassInnerGlow,
+            onCheckedChange = { FloatingBarConfig.glassInnerGlow = it },
+        )
                     }
                     add {
-                        SegmentedSwitchItem(
-                            icon = Icons.Rounded.BorderOuter,
-                            title = stringResource(R.string.settings_navbar_glass_border),
-                            summary = stringResource(R.string.settings_navbar_glass_border_summary),
-                            checked = glassBorder,
-                            onCheckedChange = { FloatingBarConfig.glassBorder = it },
-                        )
+                        SwitchPreference(
+            title = stringResource(R.string.settings_navbar_glass_border),
+            summary = stringResource(R.string.settings_navbar_glass_border_summary),
+            startAction = { Icon(Icons.Rounded.BorderOuter, contentDescription = null) },
+            checked = glassBorder,
+            onCheckedChange = { FloatingBarConfig.glassBorder = it },
+        )
                     }
                 } else {
                     add {
-                        SegmentedSwitchItem(
-                            icon = Icons.Rounded.RoundedCorner,
-                            title = stringResource(R.string.settings_floating_bar_compact),
-                            checked = floatingCompact,
-                            onCheckedChange = { FloatingBarConfig.compact = it },
-                        )
+                        SwitchPreference(
+            title = stringResource(R.string.settings_floating_bar_compact),
+            startAction = { Icon(Icons.Rounded.RoundedCorner, contentDescription = null) },
+            checked = floatingCompact,
+            onCheckedChange = { FloatingBarConfig.compact = it },
+        )
                     }
                 }
                 add {
-                    SegmentedSwitchItem(
-                        icon = Icons.Rounded.VisibilityOff,
-                        title = stringResource(R.string.settings_floating_auto_hide),
-                        summary = stringResource(R.string.settings_floating_auto_hide_summary),
-                        checked = floatingAutoHide,
-                        onCheckedChange = { FloatingBarConfig.autoHide = it },
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.settings_floating_auto_hide),
+            summary = stringResource(R.string.settings_floating_auto_hide_summary),
+            startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+            checked = floatingAutoHide,
+            onCheckedChange = { FloatingBarConfig.autoHide = it },
+        )
                 }
                 add {
-                    SegmentedSwitchItem(
-                        icon = Icons.Rounded.SwipeUp,
-                        title = stringResource(R.string.settings_floating_swipe_hide),
-                        summary = stringResource(R.string.settings_floating_swipe_hide_summary),
-                        checked = floatingSwipeHide,
-                        onCheckedChange = { FloatingBarConfig.swipeHide = it },
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.settings_floating_swipe_hide),
+            summary = stringResource(R.string.settings_floating_swipe_hide_summary),
+            startAction = { Icon(Icons.Rounded.SwipeUp, contentDescription = null) },
+            checked = floatingSwipeHide,
+            onCheckedChange = { FloatingBarConfig.swipeHide = it },
+        )
                 }
             }
         }

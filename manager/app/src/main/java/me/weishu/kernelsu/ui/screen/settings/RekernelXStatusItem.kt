@@ -8,6 +8,8 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import androidx.compose.material3.Icon
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 /**
  * ReKernel-X is the kernel half of tombstone tooling: it reports binder, signal and network
@@ -23,19 +25,13 @@ internal fun RekernelXStatusItem(state: SettingsUiState, actions: SettingsScreen
         else -> stringResource(R.string.rekernel_x_read_error)
     }
 
-    SegmentedSwitchItem(
-        icon = Icons.Rounded.Bedtime,
-        title = stringResource(R.string.settings_rekernel_x),
-        summary = summary,
-        checked = status?.enabled == true,
-        enabled = status != null &&
-            status.kmiSupported &&
-            !status.externalModule &&
-            !state.rekernelXReadError &&
-            !state.isRekernelXLoading &&
-            !state.isRekernelXWriting,
-        onCheckedChange = actions.onSetRekernelXEnabled,
-    )
+    SwitchPreference(
+            title = stringResource(R.string.settings_rekernel_x),
+            summary = summary,
+            startAction = { Icon(Icons.Rounded.Bedtime, contentDescription = null) },
+            checked = status?.enabled == true,
+            onCheckedChange = actions.onSetRekernelXEnabled,
+        )
 }
 
 /** One line per fact that changes what the switch would do, most actionable first. */

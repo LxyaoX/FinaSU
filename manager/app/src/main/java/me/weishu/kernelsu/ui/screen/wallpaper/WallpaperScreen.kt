@@ -100,6 +100,8 @@ import me.weishu.kernelsu.wallpaper.surface.SurfaceId
 import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
 import kotlin.math.roundToInt
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /** Sentinel for "no per-page background is being picked". */
 private const val NO_PAGE = -1
@@ -510,25 +512,25 @@ fun WallpaperScreenMaterial(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
                 content = buildList {
                     add {
-                        SegmentedSwitchItem(
-                            icon = Icons.Filled.Wallpaper,
-                            title = stringResource(R.string.wallpaper_enable),
-                            summary = stringResource(R.string.wallpaper_enable_summary),
-                            checked = state.enabled,
-                            onCheckedChange = actions.onToggleEnabled,
-                        )
+                        SwitchPreference(
+            title = stringResource(R.string.wallpaper_enable),
+            summary = stringResource(R.string.wallpaper_enable_summary),
+            startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
+            checked = state.enabled,
+            onCheckedChange = actions.onToggleEnabled,
+        )
                     }
                     // The master switch gates every mode, so the video/image choice and its pickers
                     // stay hidden until the background is on. Video takes the slot over entirely —
                     // it replaces the image, matching the render priority (video > image).
                     if (state.enabled) {
                         add {
-                            SegmentedSwitchItem(
-                                icon = Icons.Filled.Movie,
-                                title = stringResource(R.string.media_video),
-                                checked = state.videoEnabled,
-                                onCheckedChange = actions.onToggleVideo,
-                            )
+                            SwitchPreference(
+            title = stringResource(R.string.media_video),
+            startAction = { Icon(Icons.Filled.Movie, contentDescription = null) },
+            checked = state.videoEnabled,
+            onCheckedChange = actions.onToggleVideo,
+        )
                         }
                         if (state.videoEnabled) {
                             add { MediaFileRow(state.videoFilename) { actions.onPickVideo() } }
@@ -547,13 +549,13 @@ fun WallpaperScreenMaterial(
                     }
                     if (state.enabled && !state.videoEnabled) {
                         add {
-                            SegmentedSwitchItem(
-                                icon = Icons.Filled.GridView,
-                                title = stringResource(R.string.wallpaper_multi_background_mode),
-                                summary = stringResource(R.string.wallpaper_multi_background_mode_summary),
-                                checked = state.multiBackgroundEnabled,
-                                onCheckedChange = actions.onToggleMultiBackground,
-                            )
+                            SwitchPreference(
+            title = stringResource(R.string.wallpaper_multi_background_mode),
+            summary = stringResource(R.string.wallpaper_multi_background_mode_summary),
+            startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
+            checked = state.multiBackgroundEnabled,
+            onCheckedChange = actions.onToggleMultiBackground,
+        )
                         }
                         if (state.multiBackgroundEnabled) {
                             add {
@@ -604,11 +606,11 @@ fun WallpaperScreenMaterial(
                             }
                             if (state.hasImage) {
                                 add {
-                                    SegmentedListItem(
-                                        onClick = actions.onClear,
-                                        headlineContent = { Text(stringResource(R.string.wallpaper_clear)) },
-                                        leadingContent = { Icon(Icons.Filled.Delete, null) },
-                                    )
+                                    ArrowPreference(
+            title = stringResource(R.string.wallpaper_clear),
+            startAction = { Icon(Icons.Filled.Delete, null) },
+            onClick = actions.onClear,
+        )
                                 }
                             }
                         }
@@ -697,23 +699,23 @@ fun WallpaperScreenMaterial(
                         // owns the background.
                         if (!state.videoEnabled) {
                             add {
-                                SegmentedSwitchItem(
-                                    icon = Icons.Filled.Palette,
-                                    title = stringResource(R.string.wallpaper_use_color),
-                                    summary = stringResource(R.string.wallpaper_use_color_summary),
-                                    checked = state.useWallpaperColor,
-                                    onCheckedChange = actions.onToggleUseWallpaperColor,
-                                )
+                                SwitchPreference(
+            title = stringResource(R.string.wallpaper_use_color),
+            summary = stringResource(R.string.wallpaper_use_color_summary),
+            startAction = { Icon(Icons.Filled.Palette, contentDescription = null) },
+            checked = state.useWallpaperColor,
+            onCheckedChange = actions.onToggleUseWallpaperColor,
+        )
                             }
                         }
                         add {
-                            SegmentedSwitchItem(
-                                icon = Icons.Filled.Contrast,
-                                title = stringResource(R.string.wallpaper_dual_dim),
-                                summary = stringResource(R.string.wallpaper_dual_dim_summary),
-                                checked = state.dualDimEnabled,
-                                onCheckedChange = actions.onToggleDualDim,
-                            )
+                            SwitchPreference(
+            title = stringResource(R.string.wallpaper_dual_dim),
+            summary = stringResource(R.string.wallpaper_dual_dim_summary),
+            startAction = { Icon(Icons.Filled.Contrast, contentDescription = null) },
+            checked = state.dualDimEnabled,
+            onCheckedChange = actions.onToggleDualDim,
+        )
                         }
                     },
                 )
@@ -726,28 +728,28 @@ fun WallpaperScreenMaterial(
                 title = stringResource(R.string.wallpaper_section_interop),
                 content = buildList {
                     add {
-                        SegmentedListItem(
-                            onClick = actions.onExport,
-                            headlineContent = { Text(stringResource(R.string.wallpaper_export)) },
-                            supportingContent = { Text(stringResource(R.string.wallpaper_export_summary)) },
-                            leadingContent = { Icon(Icons.Filled.FileDownload, null) },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.wallpaper_export),
+            summary = stringResource(R.string.wallpaper_export_summary),
+            startAction = { Icon(Icons.Filled.FileDownload, null) },
+            onClick = actions.onExport,
+        )
                     }
                     add {
-                        SegmentedListItem(
-                            onClick = actions.onImport,
-                            headlineContent = { Text(stringResource(R.string.wallpaper_import)) },
-                            supportingContent = { Text(stringResource(R.string.wallpaper_import_summary)) },
-                            leadingContent = { Icon(Icons.Filled.FileUpload, null) },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.wallpaper_import),
+            summary = stringResource(R.string.wallpaper_import_summary),
+            startAction = { Icon(Icons.Filled.FileUpload, null) },
+            onClick = actions.onImport,
+        )
                     }
                     add {
-                        SegmentedListItem(
-                            onClick = actions.onResetTheme,
-                            headlineContent = { Text(stringResource(R.string.wallpaper_reset_theme)) },
-                            supportingContent = { Text(stringResource(R.string.wallpaper_reset_theme_summary)) },
-                            leadingContent = { Icon(Icons.Filled.RestartAlt, null) },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.wallpaper_reset_theme),
+            summary = stringResource(R.string.wallpaper_reset_theme_summary),
+            startAction = { Icon(Icons.Filled.RestartAlt, null) },
+            onClick = actions.onResetTheme,
+        )
                     }
                 },
             )

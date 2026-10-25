@@ -48,6 +48,7 @@ import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.viewmodel.TeesimViewModel
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 /**
  * Picks the apps whose attestation the simulator answers.
@@ -123,11 +124,11 @@ fun TeesimTargetsScreen() {
                     )
                 }
                 item {
-                    SegmentedSwitchItem(
-                        title = stringResource(R.string.teesim_show_system_apps),
-                        checked = state.showSystemApps,
-                        onCheckedChange = viewModel::setShowSystemApps,
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.teesim_show_system_apps),
+            checked = state.showSystemApps,
+            onCheckedChange = viewModel::setShowSystemApps,
+        )
                 }
             }
 

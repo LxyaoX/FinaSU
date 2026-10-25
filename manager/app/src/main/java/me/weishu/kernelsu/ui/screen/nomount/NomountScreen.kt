@@ -43,6 +43,7 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.NomountUiState
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 /**
  * NoMount driver, injection and visibility state.
@@ -281,14 +282,13 @@ private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel
             )
         }
         item {
-            SegmentedSwitchItem(
-                icon = Icons.Filled.VisibilityOff,
-                title = stringResource(R.string.nomount_block_isolated),
-                summary = stringResource(R.string.nomount_block_isolated_summary),
-                checked = status?.isolatedBlocked == true,
-                enabled = ready,
-                onCheckedChange = viewModel::setIsolated,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.nomount_block_isolated),
+            summary = stringResource(R.string.nomount_block_isolated_summary),
+            startAction = { Icon(Icons.Filled.VisibilityOff, contentDescription = null) },
+            checked = status?.isolatedBlocked == true,
+            onCheckedChange = viewModel::setIsolated,
+        )
         }
     }
 }

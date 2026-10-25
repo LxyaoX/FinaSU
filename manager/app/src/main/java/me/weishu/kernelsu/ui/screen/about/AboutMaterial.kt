@@ -36,6 +36,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun AboutScreenMaterial(
@@ -93,31 +94,27 @@ fun AboutScreenMaterial(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     content = state.links.map { linkInfo ->
                         {
-                            SegmentedListItem(
-                                onClick = { actions.onOpenLink(linkInfo.url) },
-                                headlineContent = { Text(linkInfo.fullText) }
-                            )
+                            ArrowPreference(
+            title = linkInfo.fullText,
+            onClick = { actions.onOpenLink(linkInfo.url) },
+        )
                         }
                     }
                 )
                 SegmentedColumn(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     content = listOf {
-                        SegmentedListItem(
-                            onClick = actions.onShowGuide,
-                            leadingContent = {
+                        ArrowPreference(
+            title = stringResource(R.string.guide_about_entry_title),
+            summary = stringResource(R.string.guide_about_entry_summary),
+            startAction = {
                                 Icon(
                                     imageVector = Icons.Outlined.AutoAwesome,
                                     contentDescription = null,
                                 )
                             },
-                            headlineContent = {
-                                Text(stringResource(R.string.guide_about_entry_title))
-                            },
-                            supportingContent = {
-                                Text(stringResource(R.string.guide_about_entry_summary))
-                            },
-                        )
+            onClick = actions.onShowGuide,
+        )
                     },
                 )
                 Spacer(

@@ -50,6 +50,9 @@ import me.weishu.kernelsu.ui.viewmodel.SusfsUiState
 import me.weishu.kernelsu.ui.viewmodel.SusfsViewModel
 import org.json.JSONObject
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
+import androidx.compose.material3.Icon
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun susfsManagementLabel(status: String): String = stringResource(when (status) {
@@ -258,10 +261,14 @@ private fun SusfsNotice(state: SusfsUiState, onApplyAfterSave: () -> Unit) {
             reason?.let { item { SegmentedListItem(headlineContent = { Text(it) },
                 supportingContent = state.status.error?.let { detail -> ({ Text(detail) }) },
                 leadingContent = { Icon(Icons.Rounded.Info, null) }) } }
-            state.message?.let { item { SegmentedListItem(headlineContent = { Text(it, color = MaterialTheme.colorScheme.error) },
-                supportingContent = { Text(stringResource(R.string.susfs_error_hint)) }) } }
-            if (state.savedNotice) item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_save_success)) },
-                supportingContent = { Text(stringResource(R.string.susfs_save_success_hint)) }) }
+            state.message?.let { item { ArrowPreference(
+            title = it, color = MaterialTheme.colorScheme.error,
+            summary = stringResource(R.string.susfs_error_hint),
+        ) } }
+            if (state.savedNotice) item { ArrowPreference(
+            title = stringResource(R.string.susfs_save_success),
+            summary = stringResource(R.string.susfs_save_success_hint),
+        ) }
             if (state.savedNotice && state.status.writable) item {
                 SegmentedListItem(
                     enabled = !state.busy,
@@ -279,21 +286,32 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
     import: () -> Unit, export: () -> Unit) {
     val status = state.status
     SegmentedColumn(title = stringResource(R.string.susfs_overview)) {
-        item { SegmentedListItem(headlineContent = { Text(stringResource(when (status.protocol) {
+        item { ArrowPreference(
+            title = stringResource(when (status.protocol) {
             "compatible" -> R.string.susfs_compatible
             "not_detected" -> R.string.susfs_absent
             "unknown_protocol" -> R.string.susfs_readonly
             "root_unavailable" -> R.string.susfs_root
             else -> R.string.susfs_probe
-        })) }, supportingContent = { Text(listOf(status.version, status.implementation, status.variant).filter(String::isNotEmpty).joinToString(" · ")) },
-            leadingContent = { Icon(Icons.Rounded.VisibilityOff, null) }) }
-        item { SegmentedListItem(headlineContent = { Text(susfsManagementLabel(status.management)) },
-            supportingContent = { Text(stringResource(susfsManagementHint(status))) }) }
-        item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_saved_counts,
-            config?.optJSONArray("rules")?.length() ?: 0)) }, supportingContent = { Text(stringResource(R.string.susfs_ownership)) }) }
-        item { SegmentedSwitchItem(title = stringResource(R.string.susfs_automatic),
-            summary = stringResource(R.string.susfs_automatic_hint), checked = status.automatic, enabled = writable,
-            onCheckedChange = { value -> vm.change { it.put("automatic", value) } }) }
+        }),
+            summary = listOf(status.version, status.implementation, status.variant).filter(String::isNotEmpty).joinToString(" · "),
+            startAction = { Icon(Icons.Rounded.VisibilityOff, null) },
+        ) }
+        item { ArrowPreference(
+            title = susfsManagementLabel(status.management),
+            summary = stringResource(susfsManagementHint(status)),
+        ) }
+        item { ArrowPreference(
+            title = stringResource(R.string.susfs_saved_counts,
+            config?.optJSONArray("rules")?.length() ?: 0),
+            summary = stringResource(R.string.susfs_ownership),
+        ) }
+        item { SwitchPreference(
+            title = stringResource(R.string.susfs_automatic),
+            summary = stringResource(R.string.susfs_automatic_hint),
+            checked = status.automatic,
+            onCheckedChange = { value -> vm.change { it.put("automatic", value) } },
+        ) }
         item { SegmentedListItem(enabled = writable && !Natives.isSafeMode, onClick = vm::apply,
             headlineContent = { Text(stringResource(R.string.susfs_apply)) },
             supportingContent = { Text(stringResource(if (Natives.isSafeMode) R.string.susfs_safe_mode else R.string.susfs_apply_hint)) },
@@ -301,20 +319,30 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
     }
     state.report?.let { report ->
         SegmentedColumn(title = stringResource(R.string.susfs_last_report)) {
-            item { SegmentedListItem(headlineContent = { Text(susfsManagementLabel(report.status)) },
-                supportingContent = { Text(stringResource(R.string.susfs_report_hint)) }) }
-            report.applied.forEach { key -> item(key = "ok:$key") { SegmentedListItem(
-                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_acknowledged)) },
-                leadingContent = { Icon(Icons.Rounded.CheckCircle, null) }) } }
-            report.failures.forEach { (key, error) -> item(key = "error:$key") { SegmentedListItem(
-                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(error, color = MaterialTheme.colorScheme.error) },
-                leadingContent = { Icon(Icons.Rounded.ErrorOutline, null) }) } }
-            report.deferred.forEach { key -> item(key = "deferred:$key") { SegmentedListItem(
-                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_deferred)) },
-                leadingContent = { Icon(Icons.Rounded.Schedule, null) }) } }
-            report.pendingReboot.forEach { key -> item(key = "pending:$key") { SegmentedListItem(
-                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_pending)) },
-                leadingContent = { Icon(Icons.Rounded.Schedule, null) }) } }
+            item { ArrowPreference(
+            title = susfsManagementLabel(report.status),
+            summary = stringResource(R.string.susfs_report_hint),
+        ) }
+            report.applied.forEach { key -> item(key = "ok:$key") { ArrowPreference(
+            title = susfsOperationName(key),
+            summary = stringResource(R.string.susfs_acknowledged),
+            startAction = { Icon(Icons.Rounded.CheckCircle, null) },
+        ) } }
+            report.failures.forEach { (key, error) -> item(key = "error:$key") { ArrowPreference(
+            title = susfsOperationName(key),
+            summary = error, color = MaterialTheme.colorScheme.error,
+            startAction = { Icon(Icons.Rounded.ErrorOutline, null) },
+        ) } }
+            report.deferred.forEach { key -> item(key = "deferred:$key") { ArrowPreference(
+            title = susfsOperationName(key),
+            summary = stringResource(R.string.susfs_deferred),
+            startAction = { Icon(Icons.Rounded.Schedule, null) },
+        ) } }
+            report.pendingReboot.forEach { key -> item(key = "pending:$key") { ArrowPreference(
+            title = susfsOperationName(key),
+            summary = stringResource(R.string.susfs_pending),
+            startAction = { Icon(Icons.Rounded.Schedule, null) },
+        ) } }
         }
     }
     SegmentedColumn(title = stringResource(R.string.susfs_config)) {
@@ -324,8 +352,12 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
             headlineContent = { Text(stringResource(R.string.susfs_export)) }, leadingContent = { Icon(Icons.Rounded.SaveAlt, null) }) }
     }
     SegmentedColumn(title = stringResource(R.string.susfs_capabilities)) {
-        status.features.forEach { feature -> item(key = feature) { SegmentedListItem(headlineContent = { Text(feature.removePrefix("CONFIG_KSU_SUSFS_")) }) } }
-        if (status.features.isEmpty()) item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_unsupported)) }) }
+        status.features.forEach { feature -> item(key = feature) { ArrowPreference(
+            title = feature.removePrefix("CONFIG_KSU_SUSFS_"),
+        ) } }
+        if (status.features.isEmpty()) item { ArrowPreference(
+            title = stringResource(R.string.susfs_unsupported),
+        ) }
     }
 }
 

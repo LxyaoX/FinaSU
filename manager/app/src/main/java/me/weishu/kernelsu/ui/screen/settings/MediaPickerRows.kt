@@ -16,24 +16,25 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.snapToPercent
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 internal fun MediaFileRow(filename: String?, icon: ImageVector? = null, onClick: () -> Unit) {
-    SegmentedListItem(
-        onClick = onClick,
-        leadingContent = icon?.let { { Icon(it, null) } },
-        headlineContent = { Text(stringResource(R.string.media_select_file)) },
-        supportingContent = { Text(filename ?: stringResource(R.string.media_no_file)) },
-    )
+    ArrowPreference(
+            title = stringResource(R.string.media_select_file),
+            summary = filename ?: stringResource(R.string.media_no_file),
+            startAction = icon?.let { { Icon(it, null) } },
+            onClick = onClick,
+        )
 }
 
 @Composable
 internal fun ClearMediaRow(onClick: () -> Unit) {
     var confirm by remember { mutableStateOf(false) }
-    SegmentedListItem(
-        onClick = { confirm = true },
-        headlineContent = { Text(stringResource(R.string.media_clear)) },
-    )
+    ArrowPreference(
+            title = stringResource(R.string.media_clear),
+            onClick = { confirm = true },
+        )
     if (confirm) AlertDialog(
         onDismissRequest = { confirm = false },
         title = { Text(stringResource(R.string.media_clear)) },

@@ -51,6 +51,9 @@ import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.screen.nomount.nomountUnavailableReason
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * Contents of each settings category, split out of the old flat hub. Every function emits its own
@@ -68,22 +71,22 @@ fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActi
             modifier = GroupModifier,
             content = listOf(
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.SystemUpdate,
-                        title = stringResource(id = R.string.settings_check_update),
-                        summary = stringResource(id = R.string.settings_check_update_summary),
-                        checked = uiState.checkUpdate,
-                        onCheckedChange = actions.onSetCheckUpdate
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_check_update),
+            summary = stringResource(id = R.string.settings_check_update_summary),
+            startAction = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
+            checked = uiState.checkUpdate,
+            onCheckedChange = actions.onSetCheckUpdate,
+        )
                 },
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.SystemUpdateAlt,
-                        title = stringResource(id = R.string.settings_module_check_update),
-                        summary = stringResource(id = R.string.settings_check_update_summary),
-                        checked = uiState.checkModuleUpdate,
-                        onCheckedChange = actions.onSetCheckModuleUpdate
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_module_check_update),
+            summary = stringResource(id = R.string.settings_check_update_summary),
+            startAction = { Icon(Icons.Filled.SystemUpdateAlt, contentDescription = null) },
+            checked = uiState.checkModuleUpdate,
+            onCheckedChange = actions.onSetCheckModuleUpdate,
+        )
                 }
             )
         )
@@ -94,15 +97,12 @@ fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActi
         SegmentedColumn(
             modifier = GroupModifier,
             content = listOf {
-                SegmentedListItem(
-                    onClick = actions.onOpenProfileTemplate,
-                    headlineContent = { Text(profileTemplate) },
-                    supportingContent = { Text(stringResource(id = R.string.settings_profile_template_summary)) },
-                    leadingContent = { Icon(Icons.Filled.Description, profileTemplate) },
-                    trailingContent = {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                    }
-                )
+                ArrowPreference(
+            title = profileTemplate,
+            summary = stringResource(id = R.string.settings_profile_template_summary),
+            startAction = { Icon(Icons.Filled.Description, profileTemplate) },
+            onClick = actions.onOpenProfileTemplate,
+        )
             }
         )
     }
@@ -111,15 +111,12 @@ fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActi
     SegmentedColumn(
         modifier = GroupModifier,
         content = listOf {
-            SegmentedListItem(
-                onClick = actions.onOpenLanguage,
-                headlineContent = { Text(appLanguage) },
-                supportingContent = { Text(stringResource(id = R.string.settings_app_language_summary)) },
-                leadingContent = { Icon(Icons.Filled.Translate, appLanguage) },
-                trailingContent = {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                }
-            )
+            ArrowPreference(
+            title = appLanguage,
+            summary = stringResource(id = R.string.settings_app_language_summary),
+            startAction = { Icon(Icons.Filled.Translate, appLanguage) },
+            onClick = actions.onOpenLanguage,
+        )
         }
     )
 }
@@ -130,37 +127,28 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
         modifier = GroupModifier,
         content = buildList {
             add {
-                SegmentedListItem(
-                    onClick = actions.onOpenTheme,
-                    headlineContent = { Text(stringResource(id = R.string.settings_theme)) },
-                    supportingContent = { Text(stringResource(id = R.string.settings_theme_summary)) },
-                    leadingContent = { Icon(Icons.Filled.Palette, stringResource(id = R.string.settings_theme)) },
-                    trailingContent = {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                    }
-                )
+                ArrowPreference(
+            title = stringResource(id = R.string.settings_theme),
+            summary = stringResource(id = R.string.settings_theme_summary),
+            startAction = { Icon(Icons.Filled.Palette, stringResource(id = R.string.settings_theme)) },
+            onClick = actions.onOpenTheme,
+        )
             }
             add {
-                SegmentedListItem(
-                    onClick = actions.onOpenWallpaper,
-                    headlineContent = { Text(stringResource(id = R.string.wallpaper_title)) },
-                    supportingContent = { Text(stringResource(id = R.string.settings_wallpaper_summary)) },
-                    leadingContent = { Icon(Icons.Filled.Wallpaper, stringResource(id = R.string.wallpaper_title)) },
-                    trailingContent = {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                    }
-                )
+                ArrowPreference(
+            title = stringResource(id = R.string.wallpaper_title),
+            summary = stringResource(id = R.string.settings_wallpaper_summary),
+            startAction = { Icon(Icons.Filled.Wallpaper, stringResource(id = R.string.wallpaper_title)) },
+            onClick = actions.onOpenWallpaper,
+        )
             }
             add {
-                SegmentedListItem(
-                    onClick = actions.onOpenFont,
-                    headlineContent = { Text(stringResource(id = R.string.font_title)) },
-                    supportingContent = { Text(stringResource(id = R.string.settings_font_summary)) },
-                    leadingContent = { Icon(Icons.Filled.FontDownload, stringResource(id = R.string.font_title)) },
-                    trailingContent = {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                    }
-                )
+                ArrowPreference(
+            title = stringResource(id = R.string.font_title),
+            summary = stringResource(id = R.string.settings_font_summary),
+            startAction = { Icon(Icons.Filled.FontDownload, stringResource(id = R.string.font_title)) },
+            onClick = actions.onOpenFont,
+        )
             }
         }
     )
@@ -185,45 +173,45 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
             }
             val selectedHomeLayout =
                 supportedHomeLayouts.indexOf(uiState.homeLayoutStyle).coerceAtLeast(0)
-            SegmentedDropdownItem(
-                icon = Icons.Filled.GridView,
-                title = stringResource(id = R.string.settings_home_layout),
-                summary = stringResource(id = R.string.settings_home_layout_summary),
-                items = homeLayoutItems,
-                selectedIndex = selectedHomeLayout,
-                onItemSelected = { index ->
+            OverlayDropdownPreference(
+            title = stringResource(id = R.string.settings_home_layout),
+            summary = stringResource(id = R.string.settings_home_layout_summary),
+            items = homeLayoutItems,
+            startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
+            selectedIndex = selectedHomeLayout,
+            onSelectedIndexChange = { index ->
                     actions.onSetHomeLayoutStyle(
                         supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
                     )
-                }
-            )
+                },
+        )
         }
         item(visible = uiState.homeLayoutStyle == HomeLayoutStyle.STATS) {
             val statsTopItems = listOf(
                 stringResource(R.string.settings_stats_top_layout_list),
                 stringResource(R.string.settings_stats_top_layout_grid),
             )
-            SegmentedDropdownItem(
-                icon = Icons.Rounded.SpaceDashboard,
-                title = stringResource(id = R.string.settings_stats_top_layout),
-                items = statsTopItems,
-                selectedIndex = if (uiState.statsTopLayout == "grid") 1 else 0,
-                onItemSelected = { index ->
+            OverlayDropdownPreference(
+            title = stringResource(id = R.string.settings_stats_top_layout),
+            items = statsTopItems,
+            startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
+            selectedIndex = if (uiState.statsTopLayout == "grid") 1 else 0,
+            onSelectedIndexChange = { index ->
                     actions.onSetStatsTopLayout(if (index == 1) "grid" else "list")
-                }
-            )
+                },
+        )
         }
         item(
             visible = uiState.homeLayoutStyle == HomeLayoutStyle.CIRCLE ||
                 (uiState.homeLayoutStyle == HomeLayoutStyle.STATS && uiState.statsTopLayout != "grid")
         ) {
-            SegmentedSwitchItem(
-                icon = Icons.AutoMirrored.Rounded.LabelOff,
-                title = stringResource(id = R.string.settings_home_hide_status_tag),
-                summary = stringResource(id = R.string.settings_home_hide_status_tag_summary),
-                checked = uiState.listWorkingCardModeHidden,
-                onCheckedChange = actions.onSetListWorkingCardModeHidden
-            )
+            SwitchPreference(
+            title = stringResource(id = R.string.settings_home_hide_status_tag),
+            summary = stringResource(id = R.string.settings_home_hide_status_tag_summary),
+            startAction = { Icon(Icons.AutoMirrored.Rounded.LabelOff, contentDescription = null) },
+            checked = uiState.listWorkingCardModeHidden,
+            onCheckedChange = actions.onSetListWorkingCardModeHidden,
+        )
         }
     }
 
@@ -236,40 +224,40 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
         title = stringResource(R.string.settings_home_info),
     ) {
         item {
-            SegmentedSwitchItem(
-                icon = Icons.Filled.Fingerprint,
-                title = stringResource(R.string.settings_hide_home_fingerprint),
-                summary = stringResource(R.string.settings_hide_home_fingerprint_summary),
-                checked = uiState.hideHomeFingerprint,
-                onCheckedChange = actions.onSetHideHomeFingerprint,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.settings_hide_home_fingerprint),
+            summary = stringResource(R.string.settings_hide_home_fingerprint_summary),
+            startAction = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
+            checked = uiState.hideHomeFingerprint,
+            onCheckedChange = actions.onSetHideHomeFingerprint,
+        )
         }
         item(visible = zygiskRowPresent) {
-            SegmentedSwitchItem(
-                icon = Icons.Filled.Vaccines,
-                title = stringResource(R.string.settings_hide_home_zygisk),
-                summary = stringResource(R.string.settings_hide_home_zygisk_summary),
-                checked = uiState.hideHomeZygisk,
-                onCheckedChange = actions.onSetHideHomeZygisk,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.settings_hide_home_zygisk),
+            summary = stringResource(R.string.settings_hide_home_zygisk_summary),
+            startAction = { Icon(Icons.Filled.Vaccines, contentDescription = null) },
+            checked = uiState.hideHomeZygisk,
+            onCheckedChange = actions.onSetHideHomeZygisk,
+        )
         }
         item(visible = uiState.susfsDetected) {
-            SegmentedSwitchItem(
-                icon = Icons.Rounded.VisibilityOff,
-                title = stringResource(R.string.settings_hide_home_susfs),
-                summary = stringResource(R.string.settings_hide_home_susfs_summary),
-                checked = uiState.hideHomeSusfs,
-                onCheckedChange = actions.onSetHideHomeSusfs,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.settings_hide_home_susfs),
+            summary = stringResource(R.string.settings_hide_home_susfs_summary),
+            startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+            checked = uiState.hideHomeSusfs,
+            onCheckedChange = actions.onSetHideHomeSusfs,
+        )
         }
         item(visible = uiState.folkMountStatus != null && !uiState.folkMountReadError) {
-            SegmentedSwitchItem(
-                icon = Icons.Filled.Layers,
-                title = stringResource(R.string.settings_hide_home_mount),
-                summary = stringResource(R.string.settings_hide_home_mount_summary),
-                checked = uiState.hideHomeMount,
-                onCheckedChange = actions.onSetHideHomeMount,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.settings_hide_home_mount),
+            summary = stringResource(R.string.settings_hide_home_mount_summary),
+            startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
+            checked = uiState.hideHomeMount,
+            onCheckedChange = actions.onSetHideHomeMount,
+        )
         }
     }
 
@@ -297,44 +285,41 @@ fun BehaviorCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                         else -> stringResource(id = R.string.settings_sucompat_summary)
                     }
-                    SegmentedDropdownItem(
-                        icon = Icons.Filled.AdminPanelSettings,
-                        title = stringResource(id = R.string.settings_sucompat),
-                        summary = suSummary,
-                        items = suCompatModeItems,
-                        enabled = uiState.suCompatStatus == "supported",
-                        selectedIndex = uiState.suCompatMode,
-                        onItemSelected = actions.onSetSuCompatMode
-                    )
+                    OverlayDropdownPreference(
+            title = stringResource(id = R.string.settings_sucompat),
+            summary = suSummary,
+            items = suCompatModeItems,
+            startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
+            selectedIndex = uiState.suCompatMode,
+            onSelectedIndexChange = actions.onSetSuCompatMode,
+        )
                 },
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.RestartAlt,
-                        title = stringResource(id = R.string.settings_soft_reboot),
-                        summary = stringResource(id = R.string.settings_soft_reboot_summary),
-                        enabled = !uiState.isLateLoadMode,
-                        checked = uiState.isLateLoadMode || uiState.useSoftReboot,
-                        onCheckedChange = actions.onSetUseSoftReboot
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_soft_reboot),
+            summary = stringResource(id = R.string.settings_soft_reboot_summary),
+            startAction = { Icon(Icons.Filled.RestartAlt, contentDescription = null) },
+            checked = uiState.isLateLoadMode || uiState.useSoftReboot,
+            onCheckedChange = actions.onSetUseSoftReboot,
+        )
                 },
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.DeveloperMode,
-                        title = stringResource(id = R.string.enable_web_debugging),
-                        summary = stringResource(id = R.string.enable_web_debugging_summary),
-                        checked = uiState.enableWebDebugging,
-                        onCheckedChange = actions.onSetEnableWebDebugging
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.enable_web_debugging),
+            summary = stringResource(id = R.string.enable_web_debugging_summary),
+            startAction = { Icon(Icons.Filled.DeveloperMode, contentDescription = null) },
+            checked = uiState.enableWebDebugging,
+            onCheckedChange = actions.onSetEnableWebDebugging,
+        )
                 },
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.FlashOn,
-                        title = stringResource(id = R.string.settings_auto_jailbreak),
-                        summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
-                        enabled = uiState.isLateLoadMode,
-                        checked = uiState.autoJailbreak,
-                        onCheckedChange = actions.onSetAutoJailbreak
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_auto_jailbreak),
+            summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
+            startAction = { Icon(Icons.Filled.FlashOn, contentDescription = null) },
+            checked = uiState.autoJailbreak,
+            onCheckedChange = actions.onSetAutoJailbreak,
+        )
                 }
             )
         )
@@ -357,23 +342,22 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                         else -> stringResource(id = R.string.settings_kernel_umount_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.LayersClear,
-                        title = stringResource(id = R.string.settings_kernel_umount),
-                        summary = umountSummary,
-                        enabled = uiState.kernelUmountStatus == "supported",
-                        checked = uiState.isKernelUmountEnabled,
-                        onCheckedChange = actions.onSetKernelUmountEnabled
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_kernel_umount),
+            summary = umountSummary,
+            startAction = { Icon(Icons.Filled.LayersClear, contentDescription = null) },
+            checked = uiState.isKernelUmountEnabled,
+            onCheckedChange = actions.onSetKernelUmountEnabled,
+        )
                 },
                 {
-                    SegmentedSwitchItem(
-                        icon = Icons.AutoMirrored.Filled.Rule,
-                        title = stringResource(id = R.string.settings_umount_modules_default),
-                        summary = stringResource(id = R.string.settings_umount_modules_default_summary),
-                        checked = uiState.isDefaultUmountModules,
-                        onCheckedChange = actions.onSetDefaultUmountModules
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_umount_modules_default),
+            summary = stringResource(id = R.string.settings_umount_modules_default_summary),
+            startAction = { Icon(Icons.AutoMirrored.Filled.Rule, contentDescription = null) },
+            checked = uiState.isDefaultUmountModules,
+            onCheckedChange = actions.onSetDefaultUmountModules,
+        )
                 },
                 {
                     val mountViewFilterSummary = when (uiState.mountViewFilterStatus) {
@@ -383,15 +367,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "unavailable" -> stringResource(R.string.settings_mount_view_filter_unavailable)
                         else -> stringResource(R.string.settings_mount_view_filter_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.Rounded.VisibilityOff,
-                        title = stringResource(R.string.settings_mount_view_filter),
-                        summary = mountViewFilterSummary,
-                        enabled = uiState.mountViewFilterStatus == "supported" &&
-                            !uiState.isMountViewFilterWriting,
-                        checked = uiState.isMountViewFilterEnabled,
-                        onCheckedChange = actions.onSetMountViewFilterEnabled,
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.settings_mount_view_filter),
+            summary = mountViewFilterSummary,
+            startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+            checked = uiState.isMountViewFilterEnabled,
+            onCheckedChange = actions.onSetMountViewFilterEnabled,
+        )
                 },
                 {
                     val avcSpoofSummary = when (uiState.avcSpoofStatus) {
@@ -400,14 +382,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                         else -> stringResource(id = R.string.settings_avc_spoof_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Security,
-                        title = stringResource(id = R.string.settings_avc_spoof),
-                        summary = avcSpoofSummary,
-                        enabled = uiState.avcSpoofStatus == "supported" && !uiState.isAvcSpoofWriting,
-                        checked = uiState.isAvcSpoofEnabled,
-                        onCheckedChange = actions.onSetAvcSpoofEnabled
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_avc_spoof),
+            summary = avcSpoofSummary,
+            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+            checked = uiState.isAvcSpoofEnabled,
+            onCheckedChange = actions.onSetAvcSpoofEnabled,
+        )
                 },
                 {
                     val sulogSummary = when (uiState.sulogStatus) {
@@ -416,14 +397,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                         else -> stringResource(id = R.string.settings_sulog_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.AutoMirrored.Filled.Article,
-                        title = stringResource(id = R.string.settings_sulog),
-                        summary = sulogSummary,
-                        enabled = uiState.sulogStatus == "supported",
-                        checked = uiState.isSulogEnabled,
-                        onCheckedChange = actions.onSetSulogEnabled
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_sulog),
+            summary = sulogSummary,
+            startAction = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null) },
+            checked = uiState.isSulogEnabled,
+            onCheckedChange = actions.onSetSulogEnabled,
+        )
                 }
             )
         )
@@ -434,13 +414,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
             SegmentedColumn(
                 modifier = GroupModifier,
                 content = listOf {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.AdminPanelSettings,
-                        title = stringResource(id = R.string.allow_any_dynamic_manager),
-                        summary = stringResource(id = R.string.allow_any_dynamic_manager_summary),
-                        checked = uiState.allowAnyDynamicManager,
-                        onCheckedChange = actions.onSetAllowAnyDynamicManager
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.allow_any_dynamic_manager),
+            summary = stringResource(id = R.string.allow_any_dynamic_manager_summary),
+            startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
+            checked = uiState.allowAnyDynamicManager,
+            onCheckedChange = actions.onSetAllowAnyDynamicManager,
+        )
                 }
             )
         }
@@ -512,17 +492,16 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                             ).joinToString("\n")
                         }
                     }
-                    SegmentedDropdownItem(
-                        icon = Icons.Filled.Layers,
-                        title = stringResource(id = R.string.settings_folk_mount),
-                        summary = summary,
-                        items = if (available) modeItems else emptyList(),
-                        enabled = available && !uiState.isFolkMountLoading && !uiState.isFolkMountWriting,
-                        selectedIndex = mode?.ordinal ?: 0,
-                        onItemSelected = { index ->
+                    OverlayDropdownPreference(
+            title = stringResource(id = R.string.settings_folk_mount),
+            summary = summary,
+            items = if (available) modeItems else emptyList(),
+            startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
+            selectedIndex = mode?.ordinal ?: 0,
+            onSelectedIndexChange = { index ->
                             FolkMountMode.entries.getOrNull(index)?.let(actions.onSetFolkMountMode)
-                        }
-                    )
+                        },
+        )
                 },
                 {
                     // NoMount is its own page: the row only reports the driver
@@ -549,15 +528,12 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                             nomount.rulesExpected,
                         )
                     }
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(id = R.string.settings_nomount)) },
-                        supportingContent = { Text(nomountSummary) },
-                        leadingContent = { Icon(Icons.Filled.Layers, null) },
-                        onClick = actions.onOpenNomount,
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
-                    )
+                    ArrowPreference(
+            title = stringResource(id = R.string.settings_nomount),
+            summary = nomountSummary,
+            startAction = { Icon(Icons.Filled.Layers, null) },
+            onClick = actions.onOpenNomount,
+        )
                 },
                 {
                     // ReKernel-X is an external LKM: the row owns its module markers only, so
@@ -572,41 +548,30 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                 {
                     // TEESimulator keeps its state on disk, not in the settings snapshot: this row
                     // is a door, and the page reads the module itself when it opens.
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(id = R.string.settings_teesim)) },
-                        supportingContent = { Text(stringResource(id = R.string.teesim_search_summary)) },
-                        leadingContent = { Icon(Icons.Filled.VerifiedUser, null) },
-                        onClick = actions.onOpenTeesim,
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
-                    )
+                    ArrowPreference(
+            title = stringResource(id = R.string.settings_teesim),
+            summary = stringResource(id = R.string.teesim_search_summary),
+            startAction = { Icon(Icons.Filled.VerifiedUser, null) },
+            onClick = actions.onOpenTeesim,
+        )
                 },
                 {
                     // UTS View has enough configuration that a switch in the
                     // settings list would misrepresent it as a single toggle.
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(id = R.string.settings_uts_view)) },
-                        supportingContent = { Text(stringResource(id = R.string.settings_uts_view_summary)) },
-                        leadingContent = { Icon(Icons.Rounded.TextFields, null) },
-                        onClick = actions.onOpenUtsView,
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
-                    )
+                    ArrowPreference(
+            title = stringResource(id = R.string.settings_uts_view),
+            summary = stringResource(id = R.string.settings_uts_view_summary),
+            startAction = { Icon(Icons.Rounded.TextFields, null) },
+            onClick = actions.onOpenUtsView,
+        )
                 },
                 {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(id = R.string.settings_netisolate)) },
-                        supportingContent = {
-                            Text(stringResource(id = R.string.settings_netisolate_summary))
-                        },
-                        leadingContent = { Icon(Icons.Filled.WifiOff, null) },
-                        onClick = actions.onOpenNetIsolate,
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
-                    )
+                    ArrowPreference(
+            title = stringResource(id = R.string.settings_netisolate),
+            summary = stringResource(id = R.string.settings_netisolate_summary),
+            startAction = { Icon(Icons.Filled.WifiOff, null) },
+            onClick = actions.onOpenNetIsolate,
+        )
                 }
             )
         )
@@ -627,14 +592,13 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                         else -> stringResource(id = R.string.settings_selinux_hide_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Security,
-                        title = stringResource(id = R.string.settings_selinux_hide),
-                        summary = selinuxHideSummary,
-                        enabled = uiState.selinuxHideStatus == "supported",
-                        checked = uiState.isSelinuxHideEnabled,
-                        onCheckedChange = actions.onSetSelinuxHideEnabled
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_selinux_hide),
+            summary = selinuxHideSummary,
+            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+            checked = uiState.isSelinuxHideEnabled,
+            onCheckedChange = actions.onSetSelinuxHideEnabled,
+        )
                 },
                 {
                     val modeDisplay = when (uiState.selinuxMode) {
@@ -664,14 +628,13 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "managed" -> stringResource(id = R.string.feature_status_managed_summary)
                         else -> stringResource(id = R.string.settings_adb_root_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Adb,
-                        title = stringResource(id = R.string.settings_adb_root),
-                        summary = adbRootSummary,
-                        enabled = uiState.adbRootStatus == "supported",
-                        checked = uiState.isAdbRootEnabled,
-                        onCheckedChange = actions.onSetAdbRootEnabled
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.settings_adb_root),
+            summary = adbRootSummary,
+            startAction = { Icon(Icons.Filled.Adb, contentDescription = null) },
+            checked = uiState.isAdbRootEnabled,
+            onCheckedChange = actions.onSetAdbRootEnabled,
+        )
                 },
                 {
                     val summary = when (uiState.shellSuAdbOnlyStatus) {
@@ -680,14 +643,13 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         "forced" -> stringResource(R.string.feature_status_forced_summary)
                         else -> stringResource(R.string.settings_shell_su_adb_only_summary)
                     }
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.VerifiedUser,
-                        title = stringResource(R.string.settings_shell_su_adb_only),
-                        summary = summary,
-                        enabled = uiState.shellSuAdbOnlyStatus == "supported",
-                        checked = uiState.isShellSuAdbOnlyEnabled,
-                        onCheckedChange = actions.onSetShellSuAdbOnlyEnabled
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.settings_shell_su_adb_only),
+            summary = summary,
+            startAction = { Icon(Icons.Filled.VerifiedUser, contentDescription = null) },
+            checked = uiState.isShellSuAdbOnlyEnabled,
+            onCheckedChange = actions.onSetShellSuAdbOnlyEnabled,
+        )
                 }
             )
         )

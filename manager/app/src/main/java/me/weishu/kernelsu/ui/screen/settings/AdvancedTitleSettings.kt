@@ -19,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
-import top.yukonga.miuix.kmp.basic.Icon
+import androidx.compose.material3.Icon
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn

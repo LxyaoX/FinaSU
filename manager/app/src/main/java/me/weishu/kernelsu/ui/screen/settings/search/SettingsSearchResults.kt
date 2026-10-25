@@ -39,6 +39,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
 import me.weishu.kernelsu.ui.screen.settings.SettingsUiState
 import me.weishu.kernelsu.ui.theme.FolkType
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /** FDK §5.2: emphasis is a weight, never a different colour. */
 private val MatchEmphasis = SpanStyle(fontWeight = FontWeight.SemiBold)
@@ -146,14 +147,11 @@ fun SettingsSearchShortcuts(
             SettingsCategory.entries.forEach { category ->
                 item(key = category.key) {
                     val label = stringResource(category.titleRes)
-                    SegmentedListItem(
-                        onClick = { onOpenCategory(category.key) },
-                        headlineContent = { Text(label) },
-                        leadingContent = { Icon(category.icon, label) },
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
-                    )
+                    ArrowPreference(
+            title = label,
+            startAction = { Icon(category.icon, label) },
+            onClick = { onOpenCategory(category.key) },
+        )
                 }
             }
         }

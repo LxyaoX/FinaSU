@@ -18,6 +18,9 @@ import me.weishu.kernelsu.ui.component.material.*
 import me.weishu.kernelsu.ui.viewmodel.SusfsViewModel
 import org.json.JSONArray
 import org.json.JSONObject
+import androidx.compose.material3.Icon
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 internal fun SusfsBasicPage(config: JSONObject?, status: SusfsStatus, writable: Boolean, vm: SusfsViewModel) {
@@ -146,7 +149,9 @@ internal fun SusfsRuleSection(kind: String, config: JSONObject?, status: SusfsSt
                     "map" -> Icons.Rounded.Memory; "kstat" -> Icons.Rounded.DataObject; else -> Icons.AutoMirrored.Rounded.AltRoute }, null) },
                 trailingContent = { TextButton(enabled = writable, onClick = { deleting = rule.toString() }) { Text(stringResource(R.string.susfs_remove)) } })
         } }
-        if (entries.isEmpty()) item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_empty)) }) }
+        if (entries.isEmpty()) item { ArrowPreference(
+            title = stringResource(R.string.susfs_empty),
+        ) }
     }
     if (entries.isNotEmpty()) Text(stringResource(R.string.susfs_removal_hint), style = MaterialTheme.typography.bodySmall)
     if (editing) SusfsRuleDialog(kind, original, status, writable && supported, { editing = false }) { replacement ->
@@ -201,14 +206,21 @@ private fun SusfsRuleDialog(kind: String, original: String?, status: SusfsStatus
             Text(stringResource(R.string.susfs_uid_hint), style = MaterialTheme.typography.bodySmall)
         }
         if (kind == "path") {
-            SegmentedColumn { item { SegmentedSwitchItem(title = stringResource(R.string.susfs_loop),
-                summary = stringResource(R.string.susfs_loop_hint), checked = looping, onCheckedChange = { looping = it }) } }
+            SegmentedColumn { item { SwitchPreference(
+            title = stringResource(R.string.susfs_loop),
+            summary = stringResource(R.string.susfs_loop_hint),
+            checked = looping,
+            onCheckedChange = { looping = it },
+        ) } }
         }
         if (kind == "kstat") {
             Text(stringResource(R.string.susfs_kstat_hint))
-            SegmentedColumn { item { SegmentedSwitchItem(title = stringResource(R.string.susfs_clone),
-                summary = stringResource(if (cloneSupported) R.string.susfs_clone_hint else R.string.susfs_proc_hint),
-                checked = clone, enabled = cloneSupported || clone, onCheckedChange = { clone = it && cloneSupported }) } }
+            SegmentedColumn { item { SwitchPreference(
+            title = stringResource(R.string.susfs_clone),
+            summary = stringResource(if (cloneSupported) R.string.susfs_clone_hint else R.string.susfs_proc_hint),
+            checked = clone,
+            onCheckedChange = { clone = it && cloneSupported },
+        ) } }
         }
         if (kind == "map") Text(stringResource(R.string.susfs_map_hint))
         Text(stringResource(R.string.susfs_removal_hint), style = MaterialTheme.typography.bodySmall)
@@ -218,9 +230,10 @@ private fun SusfsRuleDialog(kind: String, original: String?, status: SusfsStatus
 @Composable
 internal fun SusfsExtensionsPage(config: JSONObject?, status: SusfsStatus, writable: Boolean, vm: SusfsViewModel) {
     if (status.implementation != "lkm") {
-        SegmentedColumn(title = stringResource(R.string.susfs_lkm)) { item { SegmentedListItem(
-            headlineContent = { Text(stringResource(R.string.susfs_lkm_only)) },
-            supportingContent = { Text(stringResource(R.string.susfs_lkm_only_hint)) }) } }
+        SegmentedColumn(title = stringResource(R.string.susfs_lkm)) { item { ArrowPreference(
+            title = stringResource(R.string.susfs_lkm_only),
+            summary = stringResource(R.string.susfs_lkm_only_hint),
+        ) } }
         return
     }
     SusfsExtensionSection("hidden_modules", R.string.susfs_modules, "susfs_hide_modules", config, status, writable, vm)
@@ -246,7 +259,9 @@ private fun SusfsExtensionSection(key: String, title: Int, node: String, config:
                 TextButton(enabled = writable, onClick = { deleting = value }) { Text(stringResource(R.string.susfs_remove)) }
             })
         }
-        if (array.length() == 0) item { SegmentedListItem(headlineContent = { Text(stringResource(R.string.susfs_empty)) }) }
+        if (array.length() == 0) item { ArrowPreference(
+            title = stringResource(R.string.susfs_empty),
+        ) }
     }
     if (adding) {
         var value by remember { mutableStateOf("") }

@@ -77,6 +77,7 @@ import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.util.SulogEntry
 import me.weishu.kernelsu.ui.util.SulogEventFilter
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 
 @Composable
 fun SulogScreenMaterial(
@@ -231,17 +232,16 @@ fun SulogScreenMaterial(
                     Box(modifier = Modifier.padding(bottom = 16.dp)) {
                         SegmentedColumn(
                             content = listOf {
-                                SegmentedDropdownItem(
-                                    title = stringResource(R.string.sulog_log_files),
-                                    items = fileSelector.items,
-                                    enabled = fileSelector.items.isNotEmpty(),
-                                    selectedIndex = fileSelector.selectedIndex,
-                                    onItemSelected = { index ->
+                                OverlayDropdownPreference(
+            title = stringResource(R.string.sulog_log_files),
+            items = fileSelector.items,
+            selectedIndex = fileSelector.selectedIndex,
+            onSelectedIndexChange = { index ->
                                         state.files.getOrNull(index)?.let { file ->
                                             actions.onSelectFile(file.path)
                                         }
-                                    }
-                                )
+                                    },
+        )
                             },
                         )
                     }

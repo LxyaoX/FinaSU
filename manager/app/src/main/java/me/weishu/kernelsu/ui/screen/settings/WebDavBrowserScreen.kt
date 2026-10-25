@@ -63,6 +63,7 @@ import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import okhttp3.Credentials
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /** How a remote file can be previewed. */
 private enum class WebDavPreviewKind { TEXT, IMAGE, BINARY }
@@ -132,28 +133,30 @@ fun WebDavBrowserScreen(path: String) {
                 val current = entries
                 when {
                     current == null -> item {
-                        SegmentedListItem(headlineContent = { Text(stringResource(R.string.backup_loading)) })
+                        ArrowPreference(
+            title = stringResource(R.string.backup_loading),
+        )
                     }
 
                     error != null -> {
                         item {
-                            SegmentedListItem(
-                                headlineContent = { Text(stringResource(R.string.backup_webdav_error)) },
-                                supportingContent = { Text(error.orEmpty()) },
-                            )
+                            ArrowPreference(
+            title = stringResource(R.string.backup_webdav_error),
+            summary = error.orEmpty(),
+        )
                         }
                         item {
-                            SegmentedListItem(
-                                onClick = { refresh++ },
-                                headlineContent = { Text(stringResource(R.string.backup_retry)) },
-                            )
+                            ArrowPreference(
+            title = stringResource(R.string.backup_retry),
+            onClick = { refresh++ },
+        )
                         }
                     }
 
                     current.isEmpty() -> item {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.backup_webdav_empty)) },
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.backup_webdav_empty),
+        )
                     }
 
                     else -> current.forEach { entry ->

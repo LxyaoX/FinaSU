@@ -75,6 +75,8 @@ import me.weishu.kernelsu.ui.component.profile.TemplateConfig
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.util.ownerNameForUid
 import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * @author weishu
@@ -238,29 +240,28 @@ private fun AppProfileInner(
                     )
                 }
                 if (!isSpecialApp) add {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Security,
-                        title = stringResource(id = R.string.superuser),
-                        checked = isRootGranted,
-                        onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.superuser),
+            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+            checked = isRootGranted,
+            onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
+        )
                 }
                 if (showDynamicManagerSwitch) add {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.AdminPanelSettings,
-                        title = stringResource(id = R.string.set_as_dynamic_manager),
-                        summary = stringResource(id = R.string.set_as_dynamic_manager_summary),
-                        checked = isDynamicManager,
-                        enabled = dynamicManagerEnabled,
-                        onCheckedChange = onDynamicManagerChange,
-                    )
+                    SwitchPreference(
+            title = stringResource(id = R.string.set_as_dynamic_manager),
+            summary = stringResource(id = R.string.set_as_dynamic_manager_summary),
+            startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
+            checked = isDynamicManager,
+            onCheckedChange = onDynamicManagerChange,
+        )
                 }
                 add {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.profile)) },
-                        supportingContent = { Text(mode.text, color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                        leadingContent = { Icon(Icons.Filled.AccountCircle, null) },
-                    )
+                    ArrowPreference(
+            title = stringResource(R.string.profile),
+            summary = mode.text, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            startAction = { Icon(Icons.Filled.AccountCircle, null) },
+        )
                 }
             }
         )
@@ -326,17 +327,17 @@ private fun AppProfileInner(
                 if (isUidGroup) {
                     val appItems = affectedApps.map<SuperUserViewModel.AppInfo, @Composable () -> Unit> { app ->
                         {
-                            SegmentedListItem(
-                                headlineContent = { Text(app.label) },
-                                supportingContent = { Text(app.displayIdentifier) },
-                                leadingContent = {
+                            ArrowPreference(
+            title = app.label,
+            summary = app.displayIdentifier,
+            startAction = {
                                     AppIconImage(
                                         packageInfo = app.packageInfo,
                                         label = app.label,
                                         modifier = Modifier.size(36.dp)
                                     )
-                                }
-                            )
+                                },
+        )
                         }
                     }
                     SegmentedColumn(

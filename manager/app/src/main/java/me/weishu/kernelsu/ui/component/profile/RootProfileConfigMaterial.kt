@@ -33,6 +33,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 import me.weishu.kernelsu.ui.component.profile.dialogs.MultiSelectDialog
 import me.weishu.kernelsu.ui.component.profile.dialogs.SingleSelectDialog
 import me.weishu.kernelsu.ui.util.isSepolicyValid
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 @Composable
 fun RootProfileConfigMaterial(
@@ -193,13 +194,13 @@ private fun GroupsPanel(
     SegmentedColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.profile_groups)) },
-                supportingContent = { Text(tag) },
-                onClick = if (enabled) {
+            ArrowPreference(
+            title = stringResource(R.string.profile_groups),
+            summary = tag,
+            onClick = if (enabled) {
                     { showDialog.value = true }
-                } else null
-            )
+                } else null,
+        )
         }
     )
 }
@@ -248,13 +249,13 @@ private fun MountNameSpacePanel(
     SegmentedColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.profile_namespace)) },
-                supportingContent = { Text(selectedOption.label) },
-                onClick = if (enabled) {
+            ArrowPreference(
+            title = stringResource(R.string.profile_namespace),
+            summary = selectedOption.label,
+            onClick = if (enabled) {
                     { showDialog.value = true }
-                } else null
-            )
+                } else null,
+        )
         }
     )
 }
@@ -302,13 +303,13 @@ private fun RootProfileFlagPanel(
     SegmentedColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.profile_flags)) },
-                supportingContent = { Text(tag) },
-                onClick = if (enabled) {
+            ArrowPreference(
+            title = stringResource(R.string.profile_flags),
+            summary = tag,
+            onClick = if (enabled) {
                     { showDialog.value = true }
-                } else null
-            )
+                } else null,
+        )
         }
     )
 }
@@ -356,13 +357,13 @@ private fun CapsPanel(
     SegmentedColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.profile_capabilities)) },
-                supportingContent = { Text(tag) },
-                onClick = if (enabled) {
+            ArrowPreference(
+            title = stringResource(R.string.profile_capabilities),
+            summary = tag,
+            onClick = if (enabled) {
                     { showDialog.value = true }
-                } else null
-            )
+                } else null,
+        )
         }
     )
 }
@@ -393,13 +394,13 @@ private fun SELinuxPanel(
     SegmentedColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.profile_selinux_context)) },
-                supportingContent = { Text(context.ifEmpty { "—" }) },
-                onClick = if (enabled) {
+            ArrowPreference(
+            title = stringResource(R.string.profile_selinux_context),
+            summary = context.ifEmpty { "—" },
+            onClick = if (enabled) {
                     { showDialog.value = true }
-                } else null
-            )
+                } else null,
+        )
         }
     )
 }

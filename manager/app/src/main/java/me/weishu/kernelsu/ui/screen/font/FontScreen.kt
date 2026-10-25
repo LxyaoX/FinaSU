@@ -44,6 +44,7 @@ import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.theme.FontConfig
 import me.weishu.kernelsu.ui.theme.FontMode
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * The font setting: the three [FontMode]s, plus the import and restore rows that only make sense
@@ -145,23 +146,23 @@ fun FontScreen() {
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
                     content = buildList {
                         add {
-                            SegmentedListItem(
-                                onClick = { pickFontLauncher.launch("*/*") },
-                                headlineContent = { Text(stringResource(R.string.font_select_file)) },
-                                leadingContent = {
+                            ArrowPreference(
+            title = stringResource(R.string.font_select_file),
+            startAction = {
                                     Icon(Icons.Filled.FontDownload, contentDescription = null)
                                 },
-                            )
+            onClick = { pickFontLauncher.launch("*/*") },
+        )
                         }
                         if (FontConfig.customFontFilename != null) {
                             add {
-                                SegmentedListItem(
-                                    onClick = { showRestoreDialog = true },
-                                    headlineContent = { Text(stringResource(R.string.font_restore_default)) },
-                                    leadingContent = {
+                                ArrowPreference(
+            title = stringResource(R.string.font_restore_default),
+            startAction = {
                                         Icon(Icons.Filled.Delete, contentDescription = null)
                                     },
-                                )
+            onClick = { showRestoreDialog = true },
+        )
                             }
                         }
                     },

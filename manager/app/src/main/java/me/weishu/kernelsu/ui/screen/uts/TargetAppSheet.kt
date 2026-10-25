@@ -42,6 +42,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun TargetAppSheet(
@@ -129,11 +130,11 @@ fun TargetAppSheet(
                     )
                 }
                 item {
-                    SegmentedSwitchItem(
-                        title = stringResource(R.string.uts_view_show_system_apps),
-                        checked = showSystemApps,
-                        onCheckedChange = { showSystemApps = it },
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.uts_view_show_system_apps),
+            checked = showSystemApps,
+            onCheckedChange = { showSystemApps = it },
+        )
                 }
             }
 

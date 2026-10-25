@@ -50,6 +50,7 @@ import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 /**
  * Pick the apps that must see the stock filesystem.
@@ -120,11 +121,11 @@ fun NomountExclusionsScreen() {
                     )
                 }
                 item {
-                    SegmentedSwitchItem(
-                        title = stringResource(R.string.nomount_show_system_apps),
-                        checked = state.showSystemApps,
-                        onCheckedChange = viewModel::setShowSystemApps,
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.nomount_show_system_apps),
+            checked = state.showSystemApps,
+            onCheckedChange = viewModel::setShowSystemApps,
+        )
                 }
                 item {
                     SegmentedListItem(

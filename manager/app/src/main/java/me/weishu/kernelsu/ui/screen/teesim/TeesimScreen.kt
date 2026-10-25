@@ -47,6 +47,8 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.TeesimUiState
 import me.weishu.kernelsu.ui.viewmodel.TeesimViewModel
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * TEESimulator settings.
@@ -107,10 +109,8 @@ fun TeesimScreen() {
                     // runtime the line right below it reported as running.
                     val installedVersion = status?.installedVersion.orEmpty()
                     val bundled = TeesimInstaller.VERSION
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                when {
+                    ArrowPreference(
+            title = when {
                                     status?.installed != true ->
                                         stringResource(R.string.teesim_bundled_version, bundled)
 
@@ -124,22 +124,19 @@ fun TeesimScreen() {
                                     )
 
                                     else -> installedVersion
-                                }
-                            )
-                        },
-                        supportingContent = { Text(teesimSummary(state)) },
-                        leadingContent = { Icon(Icons.Filled.VerifiedUser, null) },
-                    )
+                                },
+            summary = teesimSummary(state),
+            startAction = { Icon(Icons.Filled.VerifiedUser, null) },
+        )
                 }
                 item {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.Security,
-                        title = stringResource(R.string.teesim_enable),
-                        summary = stringResource(R.string.teesim_enable_summary),
-                        checked = state.status?.enabled == true,
-                        enabled = !state.loading && !state.writing,
-                        onCheckedChange = viewModel::setEnabled,
-                    )
+                    SwitchPreference(
+            title = stringResource(R.string.teesim_enable),
+            summary = stringResource(R.string.teesim_enable_summary),
+            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+            checked = state.status?.enabled == true,
+            onCheckedChange = viewModel::setEnabled,
+        )
                 }
                 item {
                     val status = state.status

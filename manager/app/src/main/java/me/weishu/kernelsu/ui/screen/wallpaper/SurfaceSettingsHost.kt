@@ -20,6 +20,8 @@ import me.weishu.kernelsu.wallpaper.surface.SurfaceScalarRow
 import me.weishu.kernelsu.wallpaper.surface.SurfaceSliderRow
 import me.weishu.kernelsu.wallpaper.surface.SurfaceToggleRow
 import kotlin.math.roundToInt
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * The mutation callbacks one rendered surface needs.
@@ -81,16 +83,16 @@ fun surfaceRows(
                 val checked = row.field?.let { config.toggle(it) }
                     ?: row.flag?.let { config.hasFlag(it) }
                     ?: false
-                SegmentedSwitchItem(
-                    icon = row.icon,
-                    title = stringResource(row.titleRes),
-                    summary = row.summaryRes?.let { stringResource(it) },
-                    checked = checked,
-                    onCheckedChange = { value ->
+                SwitchPreference(
+            title = stringResource(row.titleRes),
+            summary = row.summaryRes?.let { stringResource(it) },
+            startAction = { Icon(row.icon, contentDescription = null) },
+            checked = checked,
+            onCheckedChange = { value ->
                         row.field?.let { callbacks.onToggle(it, value) }
                         row.flag?.let { callbacks.onFlagChange(it, value) }
                     },
-                )
+        )
             }
 
             is SurfaceSliderRow -> add {
@@ -146,25 +148,21 @@ fun surfaceRows(
 
             is SurfaceImageRow -> {
                 add {
-                    SegmentedListItem(
-                        onClick = callbacks.onPickImage,
-                        headlineContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+            title = stringResource(
                                     if (config.hasImage) row.changeTitleRes else row.pickTitleRes
-                                )
-                            )
-                        },
-                        leadingContent = { Icon(row.pickIcon, null) },
-                    )
+                                ),
+            startAction = { Icon(row.pickIcon, null) },
+            onClick = callbacks.onPickImage,
+        )
                 }
                 if (config.hasImage) {
                     add {
-                        SegmentedListItem(
-                            onClick = callbacks.onClearImage,
-                            headlineContent = { Text(stringResource(row.clearTitleRes)) },
-                            leadingContent = { Icon(row.clearIcon, null) },
-                        )
+                        ArrowPreference(
+            title = stringResource(row.clearTitleRes),
+            startAction = { Icon(row.clearIcon, null) },
+            onClick = callbacks.onClearImage,
+        )
                     }
                 }
             }

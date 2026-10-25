@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 internal fun showFolkZygiskRecovery(state: SettingsUiState): Boolean =
     state.folkZygiskStatus?.startupBlocked == true
@@ -72,14 +73,13 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
             }.joinToString("\n")
         }
     }
-    SegmentedSwitchItem(
-        icon = Icons.Filled.Code,
-        title = stringResource(R.string.settings_folk_zygisk),
-        summary = summary,
-        checked = status?.enabled == true,
-        enabled = status != null && !state.folkZygiskReadError && !state.isFolkZygiskLoading && !state.isFolkZygiskWriting,
-        onCheckedChange = { actions.onSetFolkZygiskEnabled(it) },
-    )
+    SwitchPreference(
+            title = stringResource(R.string.settings_folk_zygisk),
+            summary = summary,
+            startAction = { Icon(Icons.Filled.Code, contentDescription = null) },
+            checked = status?.enabled == true,
+            onCheckedChange = { actions.onSetFolkZygiskEnabled(it) },
+        )
     if (showFolkZygiskRecovery(state)) {
         SegmentedListItem(
             headlineContent = { Text(stringResource(R.string.folkzygisk_recover)) },

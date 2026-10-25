@@ -84,6 +84,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 private val NETISOLATE_EVENT_TIME: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm:ss", Locale.ROOT)
@@ -243,10 +245,9 @@ fun NetIsolateScreen() {
             Spacer(Modifier.height(8.dp))
             SegmentedColumn {
                 item {
-                    SegmentedSwitchItem(
-                        icon = Icons.Filled.WifiOff,
-                        title = stringResource(R.string.netisolate_enable),
-                        summary = stringResource(
+                    SwitchPreference(
+            title = stringResource(R.string.netisolate_enable),
+            summary = stringResource(
                             when {
                                 !state.hasLoaded || state.loading ->
                                     R.string.netisolate_loading
@@ -255,10 +256,10 @@ fun NetIsolateScreen() {
                                 else -> R.string.netisolate_disabled_summary
                             },
                         ),
-                        checked = status.enabled,
-                        enabled = canEdit,
-                        onCheckedChange = viewModel::setEnabled,
-                    )
+            startAction = { Icon(Icons.Filled.WifiOff, contentDescription = null) },
+            checked = status.enabled,
+            onCheckedChange = viewModel::setEnabled,
+        )
                 }
             }
 
@@ -323,26 +324,24 @@ fun NetIsolateScreen() {
                 Spacer(Modifier.height(12.dp))
                 SegmentedColumn(title = stringResource(R.string.netisolate_advanced)) {
                     item {
-                        SegmentedSwitchItem(
-                            icon = Icons.Filled.Security,
-                            title = stringResource(R.string.netisolate_strict_socket),
-                            summary = stringResource(
+                        SwitchPreference(
+            title = stringResource(R.string.netisolate_strict_socket),
+            summary = stringResource(
                                 if (status.strictSocketSupported) {
                                     R.string.netisolate_strict_socket_summary
                                 } else {
                                     R.string.netisolate_strict_socket_unsupported
                                 },
                             ),
-                            checked = status.strictSocket,
-                            enabled = canEdit && status.strictSocketSupported,
-                            onCheckedChange = viewModel::setStrictSocket,
-                        )
+            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+            checked = status.strictSocket,
+            onCheckedChange = viewModel::setStrictSocket,
+        )
                     }
                     item {
-                        SegmentedSwitchItem(
-                            icon = Icons.Filled.Info,
-                            title = stringResource(R.string.netisolate_allow_loopback),
-                            summary = stringResource(
+                        SwitchPreference(
+            title = stringResource(R.string.netisolate_allow_loopback),
+            summary = stringResource(
                                 when {
                                     !status.allowLoopbackSupported ->
                                         R.string.netisolate_allow_loopback_unsupported
@@ -351,18 +350,15 @@ fun NetIsolateScreen() {
                                     else -> R.string.netisolate_allow_loopback_summary
                                 },
                             ),
-                            checked = status.allowLoopback,
-                            enabled = canEdit &&
-                                status.allowLoopbackSupported &&
-                                !status.strictSocket,
-                            onCheckedChange = viewModel::setAllowLoopback,
-                        )
+            startAction = { Icon(Icons.Filled.Info, contentDescription = null) },
+            checked = status.allowLoopback,
+            onCheckedChange = viewModel::setAllowLoopback,
+        )
                     }
                     item {
-                        SegmentedSwitchItem(
-                            icon = Icons.Filled.Info,
-                            title = stringResource(R.string.netisolate_allow_private_network),
-                            summary = stringResource(
+                        SwitchPreference(
+            title = stringResource(R.string.netisolate_allow_private_network),
+            summary = stringResource(
                                 when {
                                     !status.allowPrivateNetworkSupported ->
                                         R.string.netisolate_allow_private_network_unsupported
@@ -372,18 +368,15 @@ fun NetIsolateScreen() {
                                         R.string.netisolate_allow_private_network_summary
                                 },
                             ),
-                            checked = status.allowPrivateNetwork,
-                            enabled = canEdit &&
-                                status.allowPrivateNetworkSupported &&
-                                !status.strictSocket,
-                            onCheckedChange = viewModel::setAllowPrivateNetwork,
-                        )
+            startAction = { Icon(Icons.Filled.Info, contentDescription = null) },
+            checked = status.allowPrivateNetwork,
+            onCheckedChange = viewModel::setAllowPrivateNetwork,
+        )
                     }
                     item {
-                        SegmentedSwitchItem(
-                            icon = Icons.Filled.Info,
-                            title = stringResource(R.string.netisolate_allow_local_discovery),
-                            summary = stringResource(
+                        SwitchPreference(
+            title = stringResource(R.string.netisolate_allow_local_discovery),
+            summary = stringResource(
                                 when {
                                     !status.allowLocalDiscoverySupported ->
                                         R.string.netisolate_allow_local_discovery_unsupported
@@ -393,12 +386,10 @@ fun NetIsolateScreen() {
                                         R.string.netisolate_allow_local_discovery_summary
                                 },
                             ),
-                            checked = status.allowLocalDiscovery,
-                            enabled = canEdit &&
-                                status.allowLocalDiscoverySupported &&
-                                !status.strictSocket,
-                            onCheckedChange = viewModel::setAllowLocalDiscovery,
-                        )
+            startAction = { Icon(Icons.Filled.Info, contentDescription = null) },
+            checked = status.allowLocalDiscovery,
+            onCheckedChange = viewModel::setAllowLocalDiscovery,
+        )
                     }
                 }
             }
@@ -462,97 +453,75 @@ fun NetIsolateScreen() {
             Spacer(Modifier.height(16.dp))
             SegmentedColumn {
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.netisolate_existing_connections))
-                        },
-                        leadingContent = { Icon(Icons.Filled.Info, null) },
-                    )
+                    ArrowPreference(
+            title = stringResource(R.string.netisolate_existing_connections),
+            startAction = { Icon(Icons.Filled.Info, null) },
+        )
                 }
                 item(visible = status.enabled) {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+            title = stringResource(
                                     if (status.allowLoopback) {
                                         R.string.netisolate_allow_loopback_proxy_warning
                                     } else {
                                         R.string.netisolate_loopback_blocked
                                     },
-                                ),
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Security, null) },
-                    )
+                                ),,
+            startAction = { Icon(Icons.Filled.Security, null) },
+        )
                 }
                 item(visible = status.enabled) {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+            title = stringResource(
                                     if (status.allowPrivateNetwork) {
                                         R.string.netisolate_private_network_allowed
                                     } else {
                                         R.string.netisolate_private_network_blocked
                                     },
-                                ),
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Security, null) },
-                    )
+                                ),,
+            startAction = { Icon(Icons.Filled.Security, null) },
+        )
                 }
                 item(visible = status.enabled) {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+            title = stringResource(
                                     if (status.allowLocalDiscovery) {
                                         R.string.netisolate_local_discovery_allowed
                                     } else {
                                         R.string.netisolate_local_discovery_blocked
                                     },
-                                ),
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Security, null) },
-                    )
+                                ),,
+            startAction = { Icon(Icons.Filled.Security, null) },
+        )
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.netisolate_manager_exempt))
-                        },
-                        leadingContent = { Icon(Icons.Filled.Info, null) },
-                    )
+                    ArrowPreference(
+            title = stringResource(R.string.netisolate_manager_exempt),
+            startAction = { Icon(Icons.Filled.Info, null) },
+        )
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+            title = stringResource(
                                     if (status.compatSupported) {
                                         R.string.netisolate_compat_supported
                                     } else {
                                         R.string.netisolate_compat_unsupported
                                     },
-                                ),
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Info, null) },
-                    )
+                                ),,
+            startAction = { Icon(Icons.Filled.Info, null) },
+        )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
             SegmentedColumn {
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.netisolate_events))
-                        },
-                        leadingContent = { Icon(Icons.Filled.History, null) },
-                        onClick = { showEvents = true },
-                    )
+                    ArrowPreference(
+            title = stringResource(R.string.netisolate_events),
+            startAction = { Icon(Icons.Filled.History, null) },
+            onClick = { showEvents = true },
+        )
                 }
                 item {
                     SegmentedListItem(

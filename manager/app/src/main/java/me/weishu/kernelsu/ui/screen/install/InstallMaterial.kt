@@ -48,6 +48,8 @@ import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.util.LkmSelection
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * @author weishu
@@ -103,18 +105,17 @@ internal fun InstallScreenMaterial(
                         uiState.partitionSelectionIndex
                     }
                     if (partitionItems.isNotEmpty()) add {
-                        SegmentedDropdownItem(
-                            enabled = uiState.canSelectPartition,
-                            items = partitionItems,
-                            selectedIndex = partitionIndex,
-                            title = if (isDownload) {
+                        OverlayDropdownPreference(
+            title = if (isDownload) {
                                 stringResource(R.string.install_select_partition)
                             } else {
                                 "${stringResource(R.string.install_select_partition)} (${uiState.slotSuffix})"
                             },
-                            onItemSelected = actions.onSelectPartition,
-                            icon = Icons.Filled.Edit
-                        )
+            items = partitionItems,
+            startAction = { Icon(Icons.Filled.Edit, contentDescription = null) },
+            selectedIndex = partitionIndex,
+            onSelectedIndexChange = actions.onSelectPartition,
+        )
                     }
                     if (uiState.canForceBackup) add {
                         SegmentedCheckboxItem(
@@ -209,13 +210,11 @@ internal fun InstallScreenMaterial(
             } else {
                 SegmentedColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
                     item {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.install_anykernel)) },
-                            supportingContent = {
-                                Text(uiState.installMethod.uri?.lastPathSegment ?: "")
-                            },
-                            onClick = actions.onSelectAnyKernel
-                        )
+                        ArrowPreference(
+            title = stringResource(R.string.install_anykernel),
+            summary = uiState.installMethod.uri?.lastPathSegment ?: "",
+            onClick = actions.onSelectAnyKernel,
+        )
                     }
                 }
             }

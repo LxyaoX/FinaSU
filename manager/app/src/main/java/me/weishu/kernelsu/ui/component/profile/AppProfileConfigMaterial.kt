@@ -11,6 +11,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 @Composable
 fun AppProfileConfigMaterial(
@@ -39,24 +40,23 @@ fun AppProfileConfigMaterial(
         SegmentedColumn(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             content = listOf {
-                SegmentedSwitchItem(
-                    title = stringResource(R.string.profile_umount_modules),
-                    summary = stringResource(R.string.profile_umount_modules_summary),
-                    checked = if (enabled) {
+                SwitchPreference(
+            title = stringResource(R.string.profile_umount_modules),
+            summary = stringResource(R.string.profile_umount_modules_summary),
+            checked = if (enabled) {
                         profile.umountModules
                     } else {
                         Natives.isDefaultUmountModules()
                     },
-                    enabled = enabled,
-                    onCheckedChange = {
+            onCheckedChange = {
                         onProfileChange(
                             profile.copy(
                                 umountModules = it,
                                 nonRootUseDefault = false
                             )
                         )
-                    }
-                )
+                    },
+        )
             }
         )
     }

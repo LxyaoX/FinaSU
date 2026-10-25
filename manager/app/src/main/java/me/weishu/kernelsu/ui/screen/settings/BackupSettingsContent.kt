@@ -31,6 +31,8 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.BackupViewModel
 import me.weishu.kernelsu.ui.viewmodel.WebDavTestState
+import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 private val BackupGroupModifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
 
@@ -78,51 +80,51 @@ fun BackupSettingsContent() {
 
     SegmentedColumn(modifier = BackupGroupModifier, title = stringResource(R.string.backup_section_targets)) {
         item {
-            SegmentedSwitchItem(
-                title = stringResource(R.string.backup_local_enabled),
-                summary = stringResource(R.string.backup_local_summary),
-                checked = state.localEnabled,
-                onCheckedChange = viewModel::setLocalEnabled,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.backup_local_enabled),
+            summary = stringResource(R.string.backup_local_summary),
+            checked = state.localEnabled,
+            onCheckedChange = viewModel::setLocalEnabled,
+        )
         }
         item {
-            SegmentedSwitchItem(
-                title = stringResource(R.string.backup_webdav_enabled),
-                checked = state.webDavEnabled,
-                onCheckedChange = viewModel::setWebDavEnabled,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.backup_webdav_enabled),
+            checked = state.webDavEnabled,
+            onCheckedChange = viewModel::setWebDavEnabled,
+        )
         }
         item {
-            SegmentedListItem(
-                onClick = { openDownloads(context) },
-                headlineContent = { Text(stringResource(R.string.backup_open_folder)) },
-            )
+            ArrowPreference(
+            title = stringResource(R.string.backup_open_folder),
+            onClick = { openDownloads(context) },
+        )
         }
         item {
-            SegmentedSwitchItem(
-                title = stringResource(R.string.backup_before_flash),
-                summary = stringResource(R.string.backup_before_flash_summary),
-                checked = state.backupBeforeFlash,
-                onCheckedChange = viewModel::setBackupBeforeFlash,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.backup_before_flash),
+            summary = stringResource(R.string.backup_before_flash_summary),
+            checked = state.backupBeforeFlash,
+            onCheckedChange = viewModel::setBackupBeforeFlash,
+        )
         }
     }
 
     SegmentedColumn(modifier = BackupGroupModifier, title = stringResource(R.string.backup_section_content)) {
         item {
-            SegmentedSwitchItem(
-                title = stringResource(R.string.backup_modules),
-                summary = stringResource(R.string.backup_modules_summary),
-                checked = state.modulesEnabled,
-                onCheckedChange = viewModel::setModulesEnabled,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.backup_modules),
+            summary = stringResource(R.string.backup_modules_summary),
+            checked = state.modulesEnabled,
+            onCheckedChange = viewModel::setModulesEnabled,
+        )
         }
         item {
-            SegmentedSwitchItem(
-                title = stringResource(R.string.backup_allowlist),
-                checked = state.allowlistEnabled,
-                onCheckedChange = viewModel::setAllowlistEnabled,
-            )
+            SwitchPreference(
+            title = stringResource(R.string.backup_allowlist),
+            checked = state.allowlistEnabled,
+            onCheckedChange = viewModel::setAllowlistEnabled,
+        )
         }
     }
 
@@ -133,9 +135,9 @@ fun BackupSettingsContent() {
         ) {
             if (state.availablePartitions.isEmpty()) {
                 item {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.backup_no_partitions)) },
-                    )
+                    ArrowPreference(
+            title = stringResource(R.string.backup_no_partitions),
+        )
                 }
             }
             state.availablePartitions.forEach { partition ->
@@ -167,10 +169,10 @@ fun BackupSettingsContent() {
             )
         }
         item {
-            SegmentedListItem(
-                onClick = { navigator.push(Route.BackupList) },
-                headlineContent = { Text(stringResource(R.string.backup_open_list)) },
-            )
+            ArrowPreference(
+            title = stringResource(R.string.backup_open_list),
+            onClick = { navigator.push(Route.BackupList) },
+        )
         }
     }
 
