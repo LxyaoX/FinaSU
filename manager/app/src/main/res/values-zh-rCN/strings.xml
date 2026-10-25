@@ -902,6 +902,9 @@
     <string name="theme_store_go_my_themes">前往我的主题</string>
     <string name="my_themes_refresh">刷新</string>
     <string name="profile" translatable="false">App Profile</string>
+    <string name="settings_finasu_hide_summary">一定程度上隐藏 Bootloader 解锁状态</string>
+    <string name="settings_finasu_hide_reboot_hint">重启后恢复真实值</string>
+    <string name="settings_finasu_hide_failed">修改 FinaSU Hide 失败</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="plugin">插件</string>
     <string name="plugin_empty">未安装插件</string>

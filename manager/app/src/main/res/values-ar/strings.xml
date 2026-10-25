@@ -591,6 +591,9 @@
     <string name="download">تنزيل</string>
     <string name="download_cancel">إلغاء</string>
     <string name="download_install">تثبيت</string>
+    <string name="settings_finasu_hide_summary">إخفاء حالة فتح Bootloader جزئيًا</string>
+    <string name="settings_finasu_hide_reboot_hint">تعود القيمة الحقيقية بعد إعادة التشغيل</string>
+    <string name="settings_finasu_hide_failed">تعذّر تغيير FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">تشغيل خدمة adbd بصلاحيات الجذر</string>
     <string name="menu_sort">فرز</string>

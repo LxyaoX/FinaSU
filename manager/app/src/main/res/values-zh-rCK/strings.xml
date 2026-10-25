@@ -598,6 +598,9 @@
     <string name="download">采购</string>
     <string name="download_cancel">算了</string>
     <string name="download_install">上灶</string>
+    <string name="settings_finasu_hide_summary">多多少少藏着 Bootloader 解锁状态</string>
+    <string name="settings_finasu_hide_reboot_hint">重启后还是真模样</string>
+    <string name="settings_finasu_hide_failed">FinaSU Hide 没改成功</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">让 adbd 看店的拿着大厨权限干活</string>
     <string name="menu_sort">排队</string>

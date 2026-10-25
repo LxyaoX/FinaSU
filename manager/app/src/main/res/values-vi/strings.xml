@@ -589,6 +589,9 @@
     <string name="download">Tải xuống</string>
     <string name="download_cancel">Hủy bỏ</string>
     <string name="download_install">Cài đặt</string>
+    <string name="settings_finasu_hide_summary">Ẩn một phần trạng thái mở khóa Bootloader</string>
+    <string name="settings_finasu_hide_reboot_hint">Giá trị thực sẽ trở lại sau khi khởi động lại</string>
+    <string name="settings_finasu_hide_failed">Không thể thay đổi FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Chạy tiến trình nền adbd với quyền Root.</string>
     <string name="menu_sort">Sắp xếp</string>

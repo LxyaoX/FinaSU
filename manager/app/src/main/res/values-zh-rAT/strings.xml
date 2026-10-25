@@ -598,6 +598,9 @@
     <string name="download">祈召</string>
     <string name="download_cancel">罢手</string>
     <string name="download_install">蒙恩</string>
+    <string name="settings_finasu_hide_summary">于一定程度隐匿 Bootloader 解锁之态</string>
+    <string name="settings_finasu_hide_reboot_hint">重启后真值归位</string>
+    <string name="settings_finasu_hide_failed">更易 FinaSU Hide 神恩未至</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">以 Root 之权运转 adbd 守望圣使</string>
     <string name="menu_sort">排列</string>

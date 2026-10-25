@@ -103,6 +103,7 @@ fun rememberSettingsActions(
         onRepairSui = viewModel::repairSui,
         onManageSuiPermissions = { navigator.push(Route.SuiPermissions) },
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
+        onSetBootHideEnabled = viewModel::setBootHideEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,
         onOpenUtsView = { navigator.push(Route.UtsView) },
         onOpenNetIsolate = { navigator.push(Route.NetIsolate) },

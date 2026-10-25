@@ -593,6 +593,9 @@ Przed kontynuowaniem upewnij się, że bootloader jest odblokowany!</string>
     <string name="download">Pobierz</string>
     <string name="download_cancel">Anuluj</string>
     <string name="download_install">Instaluj</string>
+    <string name="settings_finasu_hide_summary">Częściowo ukrywa stan odblokowania Bootloadera</string>
+    <string name="settings_finasu_hide_reboot_hint">Rzeczywista wartość wróci po ponownym uruchomieniu</string>
+    <string name="settings_finasu_hide_failed">Nie udało się zmienić FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Uruchamiaj demon adbd z uprawnieniami root</string>
     <string name="menu_sort">Sortuj</string>

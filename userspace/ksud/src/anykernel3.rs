@@ -8,6 +8,7 @@ use std::{
 use anyhow::{Result, bail};
 
 const UPDATE_BINARY_ENTRY: &str = "META-INF/com/google/android/update-binary";
+#[cfg(target_os = "android")]
 const AK3_CORE_ENTRY: &str = "tools/ak3-core.sh";
 const PATCH_MARKER: &[u8] = b"chmod -R 755 tools bin;";
 
@@ -185,6 +186,7 @@ mod android {
     };
 
     const MAX_UPDATE_BINARY_SIZE: u64 = 4 * 1024 * 1024;
+    #[cfg(target_os = "android")]
     const MAX_AK3_CORE_SIZE: u64 = 2 * 1024 * 1024;
 
     fn read_zip_entry(zip_path: &Path, entry_name: &str, max_size: u64) -> Result<Vec<u8>> {
@@ -295,6 +297,7 @@ mod android {
         read_zip_entry(zip_path, UPDATE_BINARY_ENTRY, MAX_UPDATE_BINARY_SIZE)
     }
 
+    #[cfg(target_os = "android")]
     fn validate_inactive_slot_support(zip_path: &Path) -> Result<()> {
         read_update_binary(zip_path)?;
         let core = read_zip_entry(zip_path, AK3_CORE_ENTRY, MAX_AK3_CORE_SIZE)

@@ -591,6 +591,9 @@
     <string name="download">Baixar</string>
     <string name="download_cancel">Cancelar</string>
     <string name="download_install">Instalar</string>
+    <string name="settings_finasu_hide_summary">Oculta parcialmente o estado de desbloqueio do Bootloader</string>
+    <string name="settings_finasu_hide_reboot_hint">O valor real retorna após reiniciar</string>
+    <string name="settings_finasu_hide_failed">Falha ao alterar o FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Executar o daemon adbd com privilégios de root</string>
     <string name="menu_sort">Ordenar</string>

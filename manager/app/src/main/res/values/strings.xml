@@ -628,6 +628,10 @@
     <string name="download">Download</string>
     <string name="download_cancel">Cancel</string>
     <string name="download_install">Install</string>
+    <string name="settings_finasu_hide" translatable="false">FinaSU Hide</string>
+    <string name="settings_finasu_hide_summary">Partially hide the Bootloader unlock state</string>
+    <string name="settings_finasu_hide_reboot_hint">The real value returns after reboot</string>
+    <string name="settings_finasu_hide_failed">Failed to change FinaSU Hide</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">Run adbd daemon with Root privileges</string>
     <string name="menu_sort">Sort</string>

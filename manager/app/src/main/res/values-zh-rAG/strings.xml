@@ -598,6 +598,9 @@
     <string name="download">下载喵</string>
     <string name="download_cancel">取消喵</string>
     <string name="download_install">安装喵</string>
+    <string name="settings_finasu_hide_summary">在一定程度上把 Bootloader 解锁状态藏起来喵</string>
+    <string name="settings_finasu_hide_reboot_hint">重启后恢复真实值喵</string>
+    <string name="settings_finasu_hide_failed">改 FinaSU Hide 失败啦喵…</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
     <string name="settings_adb_root_summary">用 Root 权限跑 adbd 守护进程喵</string>
     <string name="menu_sort">排序喵</string>

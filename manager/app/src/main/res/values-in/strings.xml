@@ -589,6 +589,9 @@
     <string name="download">Unduh</string>
     <string name="download_cancel">Batal</string>
     <string name="download_install">Pasang</string>
+    <string name="settings_finasu_hide_summary">Sembunyikan sebagian status bootloader yang terbuka</string>
+    <string name="settings_finasu_hide_reboot_hint">Nilai sebenarnya kembali setelah reboot</string>
+    <string name="settings_finasu_hide_failed">Gagal mengubah FinaSU Hide</string>
     <string name="settings_adb_root">ADB root</string>
     <string name="settings_adb_root_summary">Jalankan daemon adbd dengan hak akses root</string>
     <string name="menu_sort">Urutkan</string>
