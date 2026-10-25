@@ -117,7 +117,14 @@ private fun WallpaperGroupBackground(
 ) {
     val tokens = LocalFolkWallpaperTokens.current
     if (tokens == null) {
-        content()
+        // Off wallpaper the group is a single miuix card. miuix preferences draw no background of
+        // their own, so without it a column of switches floats bare on the page while our own rows,
+        // which do paint themselves, look like one card each. Inside the card they stop painting.
+        MiuixCard(modifier = modifier, cornerRadius = 20.dp) {
+            CompositionLocalProvider(LocalSegmentedCardGroup provides true) {
+                content()
+            }
+        }
         return
     }
     Box(
@@ -255,14 +262,7 @@ fun SegmentedColumn(
                 }
             }
         }
-        if (LocalFolkWallpaperTokens.current == null) {
-            // Every row in the column is either a miuix preference (transparent by design) or one of
-            // ours, which stops painting itself inside this card. Without the card the page reads as
-            // bare text on the canvas. 20dp is the radius the settings pages are calibrated against.
-            MiuixCard(cornerRadius = 20.dp, content = { rows() })
-        } else {
-            WallpaperGroupBackground { rows() }
-        }
+        WallpaperGroupBackground { rows() }
     }
 }
 

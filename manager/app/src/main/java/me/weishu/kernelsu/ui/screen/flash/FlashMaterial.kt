@@ -27,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -44,7 +43,7 @@ import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.FolkSmallExtendedFloatingActionButton
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 
 @Composable
 fun FlashScreenMaterial(
@@ -67,19 +66,14 @@ fun FlashScreenMaterial(
                 modifier = Modifier.let { if (state.showRebootAction) it else it.safeDrawingPadding() })
         },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(
-                            when (state.flashingStatus) {
-                                FlashingStatus.FLASHING -> R.string.flashing
-                                FlashingStatus.SUCCESS -> R.string.flash_success
-                                FlashingStatus.FAILED -> R.string.flash_failed
-                            }
-                        )
-                    )
-                },
-                colors = expressiveTopAppBarColors(),
+            MiuixTopAppBar(
+                title = stringResource(
+                    when (state.flashingStatus) {
+                        FlashingStatus.FLASHING -> R.string.flashing
+                        FlashingStatus.SUCCESS -> R.string.flash_success
+                        FlashingStatus.FAILED -> R.string.flash_failed
+                    }
+                ),
                 navigationIcon = {
                     TopBarBackButton(onClick = actions.onBack)
                 },

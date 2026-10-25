@@ -147,6 +147,7 @@ fun MaterialKernelSUTheme(
                 isDark = darkTheme,
                 paletteStyle = appSettings.paletteStyle,
                 colorMode = appSettings.colorMode,
+                fontFamily = fontFamily,
             ) {
                 CompositionLocalProvider(
                     LocalRippleConfiguration provides rippleConfiguration,

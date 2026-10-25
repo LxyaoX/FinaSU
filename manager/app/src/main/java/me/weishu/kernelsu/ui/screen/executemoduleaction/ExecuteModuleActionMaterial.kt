@@ -28,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -49,7 +48,7 @@ import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.FolkSmallExtendedFloatingActionButton
 import me.weishu.kernelsu.ui.component.material.SnackBarHost
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
-import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
+import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
@@ -92,9 +91,8 @@ fun ExecuteModuleActionScreenMaterial(
                 modifier = Modifier.let { if (state.isComplete) it else it.safeDrawingPadding() })
         },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.action)) },
-                colors = expressiveTopAppBarColors(),
+            MiuixTopAppBar(
+                title = stringResource(R.string.action),
                 navigationIcon = {
                     TopBarBackButton(onClick = actions.onBack)
                 },

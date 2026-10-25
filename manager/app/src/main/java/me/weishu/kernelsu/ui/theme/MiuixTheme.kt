@@ -5,10 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import com.materialkolor.PaletteStyle
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.LocalContentColor
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.TextStyles
 import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
 import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
@@ -28,6 +30,7 @@ fun MiuixKernelSUTheme(
     isDark: Boolean,
     paletteStyle: PaletteStyle,
     colorMode: ColorMode,
+    fontFamily: FontFamily = FontFamily.Default,
     content: @Composable () -> Unit,
 ) {
     val mode = when (colorMode) {
@@ -75,7 +78,18 @@ fun MiuixKernelSUTheme(
             )
         }
     }
-    MiuixTheme(colors = colors) {
+    // miuix carries its own type ramp, separate from Material's typography. Without this the imported
+    // font (the bundled Xiaolai face, or the user's own) only shows in the screens Material still
+    // draws, and every miuix label, preference and button falls back to the platform font.
+    val defaultTextStyles = MiuixTheme.textStyles
+    val textStyles = remember(defaultTextStyles, fontFamily) {
+        if (fontFamily == FontFamily.Default) {
+            defaultTextStyles
+        } else {
+            defaultTextStyles.withFontFamily(fontFamily)
+        }
+    }
+    MiuixTheme(colors = colors, textStyles = textStyles) {
         CompositionLocalProvider(
             // miuix draws text with LocalContentColor, Material draws it with contentColorFor();
             // seeding it from the miuix surface keeps text readable on miuix backgrounds.
@@ -89,3 +103,26 @@ fun MiuixKernelSUTheme(
         )
     }
 }
+
+/**
+ * The miuix type ramp with [family] in place of the platform font.
+ *
+ * Every style has to be rewritten individually: miuix resolves `fontFamily` per style and offers no
+ * theme-wide override, so a single missed style would still render in the default face.
+ */
+private fun TextStyles.withFontFamily(family: FontFamily): TextStyles = copy(
+    main = main.copy(fontFamily = family),
+    paragraph = paragraph.copy(fontFamily = family),
+    body1 = body1.copy(fontFamily = family),
+    body2 = body2.copy(fontFamily = family),
+    button = button.copy(fontFamily = family),
+    footnote1 = footnote1.copy(fontFamily = family),
+    footnote2 = footnote2.copy(fontFamily = family),
+    headline1 = headline1.copy(fontFamily = family),
+    headline2 = headline2.copy(fontFamily = family),
+    subtitle = subtitle.copy(fontFamily = family),
+    title1 = title1.copy(fontFamily = family),
+    title2 = title2.copy(fontFamily = family),
+    title3 = title3.copy(fontFamily = family),
+    title4 = title4.copy(fontFamily = family),
+)
