@@ -3,7 +3,7 @@ package me.weishu.kernelsu.ui.component.material
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.Card
+import androidx.compose.material3.Card as MaterialCard
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
+import top.yukonga.miuix.kmp.basic.Card as MiuixCard
 
 /**
  * A rounded card that participates in the unified transparency layering controller.
@@ -111,8 +112,15 @@ fun TonalCard(
         ) {
             content()
         }
+    } else if (containerColor == MaterialTheme.colorScheme.surfaceBright) {
+        // The neutral card is the one miuix should draw: it is what the home and settings surfaces
+        // are made of. A card that carries a semantic colour (errorContainer, secondaryContainer…)
+        // keeps Material's tinted card, because miuix would paint it as a plain surface.
+        MiuixCard(modifier = modifier.then(originModifier).then(clickModifier)) {
+            content()
+        }
     } else {
-        Card(
+        MaterialCard(
             modifier = modifier.then(originModifier).then(clickModifier),
             colors = CardDefaults.cardColors(
                 containerColor = containerColor,
