@@ -513,12 +513,12 @@ fun WallpaperScreenMaterial(
                 content = buildList {
                     add {
                         SwitchPreference(
-            title = stringResource(R.string.wallpaper_enable),
-            summary = stringResource(R.string.wallpaper_enable_summary),
-            startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
-            checked = state.enabled,
-            onCheckedChange = actions.onToggleEnabled,
-        )
+                            title = stringResource(R.string.wallpaper_enable),
+                            summary = stringResource(R.string.wallpaper_enable_summary),
+                            startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
+                            checked = state.enabled,
+                            onCheckedChange = actions.onToggleEnabled,
+                        )
                     }
                     // The master switch gates every mode, so the video/image choice and its pickers
                     // stay hidden until the background is on. Video takes the slot over entirely —
@@ -526,11 +526,11 @@ fun WallpaperScreenMaterial(
                     if (state.enabled) {
                         add {
                             SwitchPreference(
-            title = stringResource(R.string.media_video),
-            startAction = { Icon(Icons.Filled.Movie, contentDescription = null) },
-            checked = state.videoEnabled,
-            onCheckedChange = actions.onToggleVideo,
-        )
+                                title = stringResource(R.string.media_video),
+                                startAction = { Icon(Icons.Filled.Movie, contentDescription = null) },
+                                checked = state.videoEnabled,
+                                onCheckedChange = actions.onToggleVideo,
+                            )
                         }
                         if (state.videoEnabled) {
                             add { MediaFileRow(state.videoFilename) { actions.onPickVideo() } }
@@ -550,12 +550,12 @@ fun WallpaperScreenMaterial(
                     if (state.enabled && !state.videoEnabled) {
                         add {
                             SwitchPreference(
-            title = stringResource(R.string.wallpaper_multi_background_mode),
-            summary = stringResource(R.string.wallpaper_multi_background_mode_summary),
-            startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
-            checked = state.multiBackgroundEnabled,
-            onCheckedChange = actions.onToggleMultiBackground,
-        )
+                                title = stringResource(R.string.wallpaper_multi_background_mode),
+                                summary = stringResource(R.string.wallpaper_multi_background_mode_summary),
+                                startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
+                                checked = state.multiBackgroundEnabled,
+                                onCheckedChange = actions.onToggleMultiBackground,
+                            )
                         }
                         if (state.multiBackgroundEnabled) {
                             add {
@@ -592,25 +592,20 @@ fun WallpaperScreenMaterial(
                             }
                         } else {
                             add {
-                                SegmentedListItem(
+                                ArrowPreference(
+                                    title = stringResource(if (state.hasImage) R.string.wallpaper_change else R.string.wallpaper_pick),
+                                    startAction = { Icon(Icons.Filled.Image, null) },
                                     onClick = actions.onPickImage,
                                     enabled = !state.isSaving,
-                                    headlineContent = {
-                                        Text(stringResource(if (state.hasImage) R.string.wallpaper_change else R.string.wallpaper_pick))
-                                    },
-                                    leadingContent = { Icon(Icons.Filled.Image, null) },
-                                    trailingContent = {
-                                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                                    },
                                 )
                             }
                             if (state.hasImage) {
                                 add {
                                     ArrowPreference(
-            title = stringResource(R.string.wallpaper_clear),
-            startAction = { Icon(Icons.Filled.Delete, null) },
-            onClick = actions.onClear,
-        )
+                                        title = stringResource(R.string.wallpaper_clear),
+                                        startAction = { Icon(Icons.Filled.Delete, null) },
+                                        onClick = actions.onClear,
+                                    )
                                 }
                             }
                         }
@@ -700,22 +695,22 @@ fun WallpaperScreenMaterial(
                         if (!state.videoEnabled) {
                             add {
                                 SwitchPreference(
-            title = stringResource(R.string.wallpaper_use_color),
-            summary = stringResource(R.string.wallpaper_use_color_summary),
-            startAction = { Icon(Icons.Filled.Palette, contentDescription = null) },
-            checked = state.useWallpaperColor,
-            onCheckedChange = actions.onToggleUseWallpaperColor,
-        )
+                                    title = stringResource(R.string.wallpaper_use_color),
+                                    summary = stringResource(R.string.wallpaper_use_color_summary),
+                                    startAction = { Icon(Icons.Filled.Palette, contentDescription = null) },
+                                    checked = state.useWallpaperColor,
+                                    onCheckedChange = actions.onToggleUseWallpaperColor,
+                                )
                             }
                         }
                         add {
                             SwitchPreference(
-            title = stringResource(R.string.wallpaper_dual_dim),
-            summary = stringResource(R.string.wallpaper_dual_dim_summary),
-            startAction = { Icon(Icons.Filled.Contrast, contentDescription = null) },
-            checked = state.dualDimEnabled,
-            onCheckedChange = actions.onToggleDualDim,
-        )
+                                title = stringResource(R.string.wallpaper_dual_dim),
+                                summary = stringResource(R.string.wallpaper_dual_dim_summary),
+                                startAction = { Icon(Icons.Filled.Contrast, contentDescription = null) },
+                                checked = state.dualDimEnabled,
+                                onCheckedChange = actions.onToggleDualDim,
+                            )
                         }
                     },
                 )
@@ -729,27 +724,27 @@ fun WallpaperScreenMaterial(
                 content = buildList {
                     add {
                         ArrowPreference(
-            title = stringResource(R.string.wallpaper_export),
-            summary = stringResource(R.string.wallpaper_export_summary),
-            startAction = { Icon(Icons.Filled.FileDownload, null) },
-            onClick = actions.onExport,
-        )
+                            title = stringResource(R.string.wallpaper_export),
+                            summary = stringResource(R.string.wallpaper_export_summary),
+                            startAction = { Icon(Icons.Filled.FileDownload, null) },
+                            onClick = actions.onExport,
+                        )
                     }
                     add {
                         ArrowPreference(
-            title = stringResource(R.string.wallpaper_import),
-            summary = stringResource(R.string.wallpaper_import_summary),
-            startAction = { Icon(Icons.Filled.FileUpload, null) },
-            onClick = actions.onImport,
-        )
+                            title = stringResource(R.string.wallpaper_import),
+                            summary = stringResource(R.string.wallpaper_import_summary),
+                            startAction = { Icon(Icons.Filled.FileUpload, null) },
+                            onClick = actions.onImport,
+                        )
                     }
                     add {
                         ArrowPreference(
-            title = stringResource(R.string.wallpaper_reset_theme),
-            summary = stringResource(R.string.wallpaper_reset_theme_summary),
-            startAction = { Icon(Icons.Filled.RestartAlt, null) },
-            onClick = actions.onResetTheme,
-        )
+                            title = stringResource(R.string.wallpaper_reset_theme),
+                            summary = stringResource(R.string.wallpaper_reset_theme_summary),
+                            startAction = { Icon(Icons.Filled.RestartAlt, null) },
+                            onClick = actions.onResetTheme,
+                        )
                     }
                 },
             )

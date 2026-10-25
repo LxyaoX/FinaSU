@@ -212,33 +212,34 @@ fun ColorPaletteScreenMaterial(
                     if (darkTheme) {
                         item {
                             SwitchPreference(
-            title = stringResource(R.string.settings_amoled_theme),
-            summary = stringResource(R.string.settings_amoled_theme_desc),
-            startAction = { Icon(Icons.Filled.DarkMode, contentDescription = null) },
-            checked = currentColorMode.isAmoled,
-            onCheckedChange = { enabled ->
-                                    actions.onSetColorMode(if (enabled) ColorMode.DARK_AMOLED else ColorMode.DARK)
+                                title = stringResource(R.string.settings_amoled_theme),
+                                summary = stringResource(R.string.settings_amoled_theme_desc),
+                                startAction = { Icon(Icons.Filled.DarkMode, contentDescription = null) },
+                                checked = currentColorMode.isAmoled,
+                                onCheckedChange = {
+                                    enabled ->
+                                                                       actions.onSetColorMode(if (enabled) ColorMode.DARK_AMOLED else ColorMode.DARK)
                                 },
-        )
+                            )
                         }
                     }
                     item {
                         SwitchPreference(
-            title = stringResource(R.string.settings_switch_icon),
-            summary = stringResource(R.string.settings_switch_icon_desc),
-            startAction = { Icon(Icons.Outlined.ToggleOn, contentDescription = null) },
-            checked = SwitchIconConfig.showIcon,
-            onCheckedChange = { SwitchIconConfig.setIconVisible(it) },
-        )
+                            title = stringResource(R.string.settings_switch_icon),
+                            summary = stringResource(R.string.settings_switch_icon_desc),
+                            startAction = { Icon(Icons.Outlined.ToggleOn, contentDescription = null) },
+                            checked = SwitchIconConfig.showIcon,
+                            onCheckedChange = { SwitchIconConfig.setIconVisible(it) },
+                        )
                     }
                     item {
                         SwitchPreference(
-            title = stringResource(R.string.settings_discrete_slider),
-            summary = stringResource(R.string.settings_discrete_slider_desc),
-            startAction = { Icon(Icons.AutoMirrored.Outlined.Segment, contentDescription = null) },
-            checked = SliderTrackConfig.isDiscrete,
-            onCheckedChange = { SliderTrackConfig.setDiscreteSteps(it) },
-        )
+                            title = stringResource(R.string.settings_discrete_slider),
+                            summary = stringResource(R.string.settings_discrete_slider_desc),
+                            startAction = { Icon(Icons.AutoMirrored.Outlined.Segment, contentDescription = null) },
+                            checked = SliderTrackConfig.isDiscrete,
+                            onCheckedChange = { SliderTrackConfig.setDiscreteSteps(it) },
+                        )
                     }
                 }
             }

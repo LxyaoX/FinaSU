@@ -77,6 +77,7 @@ import me.weishu.kernelsu.ui.util.ownerNameForUid
 import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 
 /**
  * @author weishu
@@ -241,27 +242,29 @@ private fun AppProfileInner(
                 }
                 if (!isSpecialApp) add {
                     SwitchPreference(
-            title = stringResource(id = R.string.superuser),
-            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
-            checked = isRootGranted,
-            onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
-        )
+                        title = stringResource(id = R.string.superuser),
+                        startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+                        checked = isRootGranted,
+                        onCheckedChange = { onProfileChange(profile.copy(allowSu = it)) },
+                    )
                 }
                 if (showDynamicManagerSwitch) add {
                     SwitchPreference(
-            title = stringResource(id = R.string.set_as_dynamic_manager),
-            summary = stringResource(id = R.string.set_as_dynamic_manager_summary),
-            startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
-            checked = isDynamicManager,
-            onCheckedChange = onDynamicManagerChange,
-        )
+                        title = stringResource(id = R.string.set_as_dynamic_manager),
+                        summary = stringResource(id = R.string.set_as_dynamic_manager_summary),
+                        startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
+                        checked = isDynamicManager,
+                        onCheckedChange = onDynamicManagerChange,
+                        enabled = dynamicManagerEnabled,
+                    )
                 }
                 add {
                     ArrowPreference(
-            title = stringResource(R.string.profile),
-            summary = mode.text, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            startAction = { Icon(Icons.Filled.AccountCircle, null) },
-        )
+                        title = stringResource(R.string.profile),
+                        summary = mode.text,
+                        summaryColor = BasicComponentDefaults.summaryColor(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                        startAction = { Icon(Icons.Filled.AccountCircle, null) },
+                    )
                 }
             }
         )
@@ -328,16 +331,16 @@ private fun AppProfileInner(
                     val appItems = affectedApps.map<SuperUserViewModel.AppInfo, @Composable () -> Unit> { app ->
                         {
                             ArrowPreference(
-            title = app.label,
-            summary = app.displayIdentifier,
-            startAction = {
+                                title = app.label,
+                                summary = app.displayIdentifier,
+                                startAction = {
                                     AppIconImage(
                                         packageInfo = app.packageInfo,
                                         label = app.label,
                                         modifier = Modifier.size(36.dp)
                                     )
                                 },
-        )
+                            )
                         }
                     }
                     SegmentedColumn(

@@ -95,9 +95,9 @@ fun AboutScreenMaterial(
                     content = state.links.map { linkInfo ->
                         {
                             ArrowPreference(
-            title = linkInfo.fullText,
-            onClick = { actions.onOpenLink(linkInfo.url) },
-        )
+                                title = linkInfo.fullText,
+                                onClick = { actions.onOpenLink(linkInfo.url) },
+                            )
                         }
                     }
                 )
@@ -105,16 +105,16 @@ fun AboutScreenMaterial(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     content = listOf {
                         ArrowPreference(
-            title = stringResource(R.string.guide_about_entry_title),
-            summary = stringResource(R.string.guide_about_entry_summary),
-            startAction = {
+                            title = stringResource(R.string.guide_about_entry_title),
+                            summary = stringResource(R.string.guide_about_entry_summary),
+                            startAction = {
                                 Icon(
                                     imageVector = Icons.Outlined.AutoAwesome,
                                     contentDescription = null,
                                 )
                             },
-            onClick = actions.onShowGuide,
-        )
+                            onClick = actions.onShowGuide,
+                        )
                     },
                 )
                 Spacer(

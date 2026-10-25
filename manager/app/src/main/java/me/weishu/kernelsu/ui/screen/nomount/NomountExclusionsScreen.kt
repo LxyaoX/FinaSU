@@ -51,6 +51,7 @@ import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * Pick the apps that must see the stock filesystem.
@@ -122,26 +123,22 @@ fun NomountExclusionsScreen() {
                 }
                 item {
                     SwitchPreference(
-            title = stringResource(R.string.nomount_show_system_apps),
-            checked = state.showSystemApps,
-            onCheckedChange = viewModel::setShowSystemApps,
-        )
+                        title = stringResource(R.string.nomount_show_system_apps),
+                        checked = state.showSystemApps,
+                        onCheckedChange = viewModel::setShowSystemApps,
+                    )
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.nomount_follow_profiles))
-                        },
-                        supportingContent = {
-                            Text(stringResource(R.string.nomount_follow_profiles_summary))
-                        },
-                        enabled = !state.appsLoading && !state.isWriting,
+                    ArrowPreference(
+                        title = stringResource(R.string.nomount_follow_profiles),
+                        summary = stringResource(R.string.nomount_follow_profiles_summary),
                         onClick = {
                             scope.launch {
                                 selected = selected +
                                     viewModel.profileExcludedUids(state.showSystemApps)
                             }
                         },
+                        enabled = !state.appsLoading && !state.isWriting,
                     )
                 }
             }

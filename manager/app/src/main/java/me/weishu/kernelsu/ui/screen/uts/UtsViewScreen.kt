@@ -64,6 +64,7 @@ import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.ui.viewmodel.UtsViewViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 
 private val primaryFields = listOf(2, 3)
 private val advancedFields = listOf(0, 1, 4, 5)
@@ -263,49 +264,51 @@ fun UtsViewScreen() {
             SegmentedColumn {
                 item {
                     SwitchPreference(
-            title = stringResource(R.string.uts_view_enable_switch),
-            summary = stringResource(
-                            R.string.uts_view_state_value,
-                            phaseLabel(status),
-                            phaseSummary(status),
-                        ),
-            startAction = { Icon(Icons.Filled.TextFields, contentDescription = null) },
-            checked = status.enabled,
-            onCheckedChange = { checked ->
-                            if (checked && dirty) {
-                                viewModel.saveAndEnable()
-                            } else {
-                                viewModel.setEnabled(checked)
-                            }
+                        title = stringResource(R.string.uts_view_enable_switch),
+                        summary = stringResource(
+                                      R.string.uts_view_state_value,
+                                      phaseLabel(status),
+                                      phaseSummary(status),
+                                  ),
+                        startAction = { Icon(Icons.Filled.TextFields, contentDescription = null) },
+                        checked = status.enabled,
+                        onCheckedChange = {
+                            checked ->
+                                                       if (checked && dirty) {
+                                                           viewModel.saveAndEnable()
+                                                       } else {
+                                                           viewModel.setEnabled(checked)
+                                                       }
                         },
-        )
+                        enabled = canEdit && provider != "susfs",
+                    )
                 }
                 item {
                     ArrowPreference(
-            title = stringResource(R.string.uts_view_current_kernel),
-            summary = if (provider == "susfs") {
-                                    stringResource(R.string.uts_view_truth_unavailable)
-                                } else {
-                                    state.currentUname?.release ?: "-"
-                                },
-            startAction = { Icon(Icons.Filled.Info, null) },
-        )
+                        title = stringResource(R.string.uts_view_current_kernel),
+                        summary = if (provider == "susfs") {
+                                      stringResource(R.string.uts_view_truth_unavailable)
+                                  } else {
+                                      state.currentUname?.release ?: "-"
+                                  },
+                        startAction = { Icon(Icons.Filled.Info, null) },
+                    )
                 }
                 if (provider == "susfs") {
                     item {
                         ArrowPreference(
-            title = stringResource(R.string.uts_view_provider),
-            summary = stringResource(R.string.uts_view_provider_susfs),
-            startAction = { Icon(Icons.Filled.Info, null) },
-        )
+                            title = stringResource(R.string.uts_view_provider),
+                            summary = stringResource(R.string.uts_view_provider_susfs),
+                            startAction = { Icon(Icons.Filled.Info, null) },
+                        )
                     }
                     item {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.uts_view_take_over)) },
-                            supportingContent = { Text(stringResource(R.string.uts_view_take_over_message)) },
-                            leadingContent = { Icon(Icons.Filled.SwapHoriz, null) },
-                            enabled = canEdit,
+                        ArrowPreference(
+                            title = stringResource(R.string.uts_view_take_over),
+                            summary = stringResource(R.string.uts_view_take_over_message),
+                            startAction = { Icon(Icons.Filled.SwapHoriz, null) },
                             onClick = { confirmTakeOver = true },
+                            enabled = canEdit,
                         )
                     }
                 }
@@ -348,23 +351,19 @@ fun UtsViewScreen() {
                 }
                 if (!globalMode) {
                     item {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.uts_view_target_apps)) },
-                            supportingContent = {
-                                Text(
-                                    when {
-                                        status.targets.isEmpty() ->
-                                            stringResource(R.string.uts_view_no_target_apps)
-                                        else -> stringResource(
-                                            R.string.uts_view_selected_target_count,
-                                            status.targets.size,
-                                        )
-                                    },
-                                )
-                            },
-                            leadingContent = { Icon(Icons.Filled.Apps, null) },
-                            enabled = canEdit,
+                        ArrowPreference(
+                            title = stringResource(R.string.uts_view_target_apps),
+                            summary = when {
+                                          status.targets.isEmpty() ->
+                                              stringResource(R.string.uts_view_no_target_apps)
+                                          else -> stringResource(
+                                              R.string.uts_view_selected_target_count,
+                                              status.targets.size,
+                                          )
+                                      },
+                            startAction = { Icon(Icons.Filled.Apps, null) },
                             onClick = { showTargets = true },
+                            enabled = canEdit,
                         )
                     }
                 }
@@ -380,14 +379,12 @@ fun UtsViewScreen() {
                     } else {
                         state.currentUname?.let { "${it.sysname} ${it.release} ${it.machine}" } ?: "-"
                     }
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.uts_view_fill_current)) },
-                        supportingContent = {
-                            Text("$fillDetail\n${stringResource(R.string.uts_view_required_hint)}")
-                        },
-                        leadingContent = { Icon(Icons.Filled.ContentCopy, null) },
-                        enabled = canEdit && provider != "susfs",
+                    ArrowPreference(
+                        title = stringResource(R.string.uts_view_fill_current),
+                        summary = "$fillDetail\n${stringResource(R.string.uts_view_required_hint)}",
+                        startAction = { Icon(Icons.Filled.ContentCopy, null) },
                         onClick = viewModel::fillCurrentValues,
+                        enabled = canEdit && provider != "susfs",
                     )
                 }
                 primaryFields.forEach { index ->
@@ -403,17 +400,17 @@ fun UtsViewScreen() {
                 }
                 item {
                     ArrowPreference(
-            title = stringResource(R.string.uts_view_advanced_fields),
-            summary = stringResource(
-                                    if (showAdvanced) {
-                                        R.string.uts_view_advanced_hide
-                                    } else {
-                                        R.string.uts_view_advanced_show
-                                    },
-                                ),
-            startAction = { Icon(Icons.Filled.Tune, null) },
-            onClick = { showAdvanced = !showAdvanced },
-        )
+                        title = stringResource(R.string.uts_view_advanced_fields),
+                        summary = stringResource(
+                                      if (showAdvanced) {
+                                          R.string.uts_view_advanced_hide
+                                      } else {
+                                          R.string.uts_view_advanced_show
+                                      },
+                                  ),
+                        startAction = { Icon(Icons.Filled.Tune, null) },
+                        onClick = { showAdvanced = !showAdvanced },
+                    )
                 }
                 if (showAdvanced) {
                     advancedFields.forEach { index ->
@@ -430,32 +427,24 @@ fun UtsViewScreen() {
                 }
                 if (dirty) {
                     item {
-                        SegmentedListItem(
-                            headlineContent = {
-                                Text(
-                                    stringResource(
+                        ArrowPreference(
+                            title = stringResource(
                                         if (status.enabled) {
                                             R.string.uts_view_save_apply_changes
                                         } else {
                                             R.string.uts_view_save_draft
                                         },
                                     ),
-                                )
-                            },
-                            supportingContent = {
-                                Text(
-                                    stringResource(
-                                        if (status.enabled) {
-                                            R.string.uts_view_save_apply_changes_summary
-                                        } else {
-                                            R.string.uts_view_save_draft_summary
-                                        },
-                                    ),
-                                )
-                            },
-                            leadingContent = { Icon(Icons.Filled.Save, null) },
-                            enabled = canEdit,
+                            summary = stringResource(
+                                          if (status.enabled) {
+                                              R.string.uts_view_save_apply_changes_summary
+                                          } else {
+                                              R.string.uts_view_save_draft_summary
+                                          },
+                                      ),
+                            startAction = { Icon(Icons.Filled.Save, null) },
                             onClick = viewModel::save,
+                            enabled = canEdit,
                         )
                     }
                 }
@@ -491,48 +480,48 @@ fun UtsViewScreen() {
                     }
                     item(key = "diagnostics_recent", visible = showDiagnostics) {
                         ArrowPreference(
-            title = stringResource(R.string.uts_view_diagnostics_recent),
-            summary = if (observation.matched > 0) {
-                                        stringResource(
-                                            R.string.uts_view_diagnostics_latest,
-                                            observation.lastUid,
-                                            observation.lastPid,
-                                        )
-                                    } else {
-                                        stringResource(R.string.uts_view_diagnostics_no_match)
-                                    },,
-        )
+                            title = stringResource(R.string.uts_view_diagnostics_recent),
+                            summary = if (observation.matched > 0) {
+                                          stringResource(
+                                              R.string.uts_view_diagnostics_latest,
+                                              observation.lastUid,
+                                              observation.lastPid,
+                                          )
+                                      } else {
+                                          stringResource(R.string.uts_view_diagnostics_no_match)
+                                      },
+                        )
                     }
                     item(key = "diagnostics_skips", visible = showDiagnostics) {
                         ArrowPreference(
-            title = stringResource(R.string.uts_view_diagnostics_skips),
-            summary = skipReasons.takeIf(List<String>::isNotEmpty)?.joinToString("\n")
-                                        ?: stringResource(R.string.uts_view_diagnostics_no_skips),,
-        )
+                            title = stringResource(R.string.uts_view_diagnostics_skips),
+                            summary = skipReasons.takeIf(List<String>::isNotEmpty)?.joinToString("\n")
+                                      ?: stringResource(R.string.uts_view_diagnostics_no_skips),
+                        )
                     }
                     item(
                         key = "diagnostics_failure",
                         visible = showDiagnostics && observation.unshareFailed > 0,
                     ) {
                         ArrowPreference(
-            title = text = stringResource(R.string.uts_view_diagnostics_failure),
-                                    color = MaterialTheme.colorScheme.error,,
-            summary = text = stringResource(
-                                        R.string.uts_view_diagnostics_unshare_failed,
-                                        observation.unshareFailed,
-                                    ),
-                                    color = MaterialTheme.colorScheme.error,,
-        )
+                            title = stringResource(R.string.uts_view_diagnostics_failure),
+                            titleColor = BasicComponentDefaults.titleColor(color = MaterialTheme.colorScheme.error),
+                            summary = stringResource(
+                                          R.string.uts_view_diagnostics_unshare_failed,
+                                          observation.unshareFailed,
+                                      ),
+                            summaryColor = BasicComponentDefaults.summaryColor(color = MaterialTheme.colorScheme.error),
+                        )
                     }
                     item(key = "diagnostics_technical", visible = showDiagnostics) {
                         ArrowPreference(
-            title = stringResource(R.string.uts_view_diagnostics_technical),
-            summary = stringResource(
-                                        R.string.uts_view_diagnostics_technical_value,
-                                        observation.generation,
-                                        observation.discarded,
-                                    ),,
-        )
+                            title = stringResource(R.string.uts_view_diagnostics_technical),
+                            summary = stringResource(
+                                          R.string.uts_view_diagnostics_technical_value,
+                                          observation.generation,
+                                          observation.discarded,
+                                      ),
+                        )
                     }
                 }
             }
@@ -540,25 +529,19 @@ fun UtsViewScreen() {
             Spacer(Modifier.height(24.dp))
             SegmentedColumn(title = stringResource(R.string.uts_view_danger_zone)) {
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                text = stringResource(
+                    ArrowPreference(
+                        title = stringResource(
                                     if (provider == "susfs") R.string.uts_view_delete_uts_settings
                                     else R.string.uts_view_restore_real,
                                 ),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        supportingContent = {
-                            Text(stringResource(
-                                if (provider == "susfs") R.string.uts_view_delete_uts_summary
-                                else R.string.uts_view_delete_summary,
-                            ))
-                        },
-                        leadingContent = { Icon(Icons.Filled.Restore, null) },
-                        enabled = canDelete,
+                        titleColor = BasicComponentDefaults.titleColor(color = MaterialTheme.colorScheme.error),
+                        summary = stringResource(
+                                      if (provider == "susfs") R.string.uts_view_delete_uts_summary
+                                      else R.string.uts_view_delete_summary,
+                                  ),
+                        startAction = { Icon(Icons.Filled.Restore, null) },
                         onClick = { confirmDelete = true },
+                        enabled = canDelete,
                     )
                 }
             }

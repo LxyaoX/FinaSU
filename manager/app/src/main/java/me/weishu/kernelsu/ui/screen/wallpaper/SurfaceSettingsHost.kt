@@ -84,15 +84,16 @@ fun surfaceRows(
                     ?: row.flag?.let { config.hasFlag(it) }
                     ?: false
                 SwitchPreference(
-            title = stringResource(row.titleRes),
-            summary = row.summaryRes?.let { stringResource(it) },
-            startAction = { Icon(row.icon, contentDescription = null) },
-            checked = checked,
-            onCheckedChange = { value ->
-                        row.field?.let { callbacks.onToggle(it, value) }
-                        row.flag?.let { callbacks.onFlagChange(it, value) }
+                    title = stringResource(row.titleRes),
+                    summary = row.summaryRes?.let { stringResource(it) },
+                    startAction = { Icon(row.icon, contentDescription = null) },
+                    checked = checked,
+                    onCheckedChange = {
+                        value ->
+                                               row.field?.let { callbacks.onToggle(it, value) }
+                                               row.flag?.let { callbacks.onFlagChange(it, value) }
                     },
-        )
+                )
             }
 
             is SurfaceSliderRow -> add {
@@ -149,20 +150,20 @@ fun surfaceRows(
             is SurfaceImageRow -> {
                 add {
                     ArrowPreference(
-            title = stringResource(
+                        title = stringResource(
                                     if (config.hasImage) row.changeTitleRes else row.pickTitleRes
                                 ),
-            startAction = { Icon(row.pickIcon, null) },
-            onClick = callbacks.onPickImage,
-        )
+                        startAction = { Icon(row.pickIcon, null) },
+                        onClick = callbacks.onPickImage,
+                    )
                 }
                 if (config.hasImage) {
                     add {
                         ArrowPreference(
-            title = stringResource(row.clearTitleRes),
-            startAction = { Icon(row.clearIcon, null) },
-            onClick = callbacks.onClearImage,
-        )
+                            title = stringResource(row.clearTitleRes),
+                            startAction = { Icon(row.clearIcon, null) },
+                            onClick = callbacks.onClearImage,
+                        )
                     }
                 }
             }

@@ -125,10 +125,10 @@ fun TeesimTargetsScreen() {
                 }
                 item {
                     SwitchPreference(
-            title = stringResource(R.string.teesim_show_system_apps),
-            checked = state.showSystemApps,
-            onCheckedChange = viewModel::setShowSystemApps,
-        )
+                        title = stringResource(R.string.teesim_show_system_apps),
+                        checked = state.showSystemApps,
+                        onCheckedChange = viewModel::setShowSystemApps,
+                    )
                 }
             }
 

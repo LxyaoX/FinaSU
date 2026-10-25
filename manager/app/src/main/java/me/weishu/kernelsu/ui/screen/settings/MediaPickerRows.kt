@@ -21,20 +21,20 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 @Composable
 internal fun MediaFileRow(filename: String?, icon: ImageVector? = null, onClick: () -> Unit) {
     ArrowPreference(
-            title = stringResource(R.string.media_select_file),
-            summary = filename ?: stringResource(R.string.media_no_file),
-            startAction = icon?.let { { Icon(it, null) } },
-            onClick = onClick,
-        )
+        title = stringResource(R.string.media_select_file),
+        summary = filename ?: stringResource(R.string.media_no_file),
+        startAction = icon?.let { { Icon(it, null) } },
+        onClick = onClick,
+    )
 }
 
 @Composable
 internal fun ClearMediaRow(onClick: () -> Unit) {
     var confirm by remember { mutableStateOf(false) }
     ArrowPreference(
-            title = stringResource(R.string.media_clear),
-            onClick = { confirm = true },
-        )
+        title = stringResource(R.string.media_clear),
+        onClick = { confirm = true },
+    )
     if (confirm) AlertDialog(
         onDismissRequest = { confirm = false },
         title = { Text(stringResource(R.string.media_clear)) },

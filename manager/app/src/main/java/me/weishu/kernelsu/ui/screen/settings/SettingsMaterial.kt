@@ -167,63 +167,63 @@ fun SettingPagerMaterial(
                 content = listOf(
                     {
                         ArrowPreference(
-            title = stringResource(id = R.string.settings_wallpaper_gallery),
-            startAction = {
+                            title = stringResource(id = R.string.settings_wallpaper_gallery),
+                            startAction = {
                                 Icon(
                                     Icons.Filled.Collections,
                                     stringResource(id = R.string.settings_wallpaper_gallery)
                                 )
                             },
-            onClick = actions.onOpenGallery,
-        )
+                            onClick = actions.onOpenGallery,
+                        )
                     },
                     {
                         ArrowPreference(
-            title = stringResource(id = R.string.settings_bug_feedback),
-            startAction = {
+                            title = stringResource(id = R.string.settings_bug_feedback),
+                            startAction = {
                                 Icon(
                                     Icons.Filled.BugReport,
                                     stringResource(id = R.string.settings_bug_feedback)
                                 )
                             },
-            onClick = { uriHandler.openUri(BUG_FEEDBACK_URL) },
-        )
+                            onClick = { uriHandler.openUri(BUG_FEEDBACK_URL) },
+                        )
                     },
                     {
                         ArrowPreference(
-            title = stringResource(id = R.string.settings_disclaimer),
-            startAction = {
+                            title = stringResource(id = R.string.settings_disclaimer),
+                            startAction = {
                                 Icon(
                                     Icons.Filled.Policy,
                                     stringResource(id = R.string.settings_disclaimer)
                                 )
                             },
-            onClick = { showDisclaimerDialog.value = true },
-        )
+                            onClick = { showDisclaimerDialog.value = true },
+                        )
                     },
                     {
                         ArrowPreference(
-            title = stringResource(id = R.string.send_log),
-            startAction = {
+                            title = stringResource(id = R.string.send_log),
+                            startAction = {
                                 Icon(
                                     Icons.Filled.Description,
                                     stringResource(id = R.string.send_log)
                                 )
                             },
-            onClick = { showBottomSheet = true },
-        )
+                            onClick = { showBottomSheet = true },
+                        )
                     },
                     {
                         ArrowPreference(
-            title = stringResource(id = R.string.about),
-            startAction = {
+                            title = stringResource(id = R.string.about),
+                            startAction = {
                                 Icon(
                                     Icons.Filled.Info,
                                     stringResource(id = R.string.about)
                                 )
                             },
-            onClick = actions.onOpenAbout,
-        )
+                            onClick = actions.onOpenAbout,
+                        )
                     }
                 )
             )
@@ -234,11 +234,11 @@ fun SettingPagerMaterial(
                     content = listOf(
                         {
                             val uninstall = stringResource(id = R.string.settings_uninstall)
-                            SegmentedListItem(
+                            ArrowPreference(
+                                title = uninstall,
+                                startAction = { Icon(Icons.Filled.Delete, uninstall) },
                                 onClick = { showUninstallDialog.value = true },
                                 enabled = !uiState.isLateLoadMode,
-                                headlineContent = { Text(uninstall) },
-                                leadingContent = { Icon(Icons.Filled.Delete, uninstall) }
                             )
                         }
                     )

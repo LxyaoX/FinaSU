@@ -233,15 +233,17 @@ fun SulogScreenMaterial(
                         SegmentedColumn(
                             content = listOf {
                                 OverlayDropdownPreference(
-            title = stringResource(R.string.sulog_log_files),
-            items = fileSelector.items,
-            selectedIndex = fileSelector.selectedIndex,
-            onSelectedIndexChange = { index ->
-                                        state.files.getOrNull(index)?.let { file ->
-                                            actions.onSelectFile(file.path)
-                                        }
+                                    title = stringResource(R.string.sulog_log_files),
+                                    items = fileSelector.items,
+                                    selectedIndex = fileSelector.selectedIndex,
+                                    onSelectedIndexChange = {
+                                        index ->
+                                                                               state.files.getOrNull(index)?.let { file ->
+                                                                                   actions.onSelectFile(file.path)
+                                                                               }
                                     },
-        )
+                                    enabled = fileSelector.items.isNotEmpty(),
+                                )
                             },
                         )
                     }

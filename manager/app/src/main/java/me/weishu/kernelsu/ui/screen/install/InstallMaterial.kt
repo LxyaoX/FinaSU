@@ -106,16 +106,17 @@ internal fun InstallScreenMaterial(
                     }
                     if (partitionItems.isNotEmpty()) add {
                         OverlayDropdownPreference(
-            title = if (isDownload) {
-                                stringResource(R.string.install_select_partition)
-                            } else {
-                                "${stringResource(R.string.install_select_partition)} (${uiState.slotSuffix})"
-                            },
-            items = partitionItems,
-            startAction = { Icon(Icons.Filled.Edit, contentDescription = null) },
-            selectedIndex = partitionIndex,
-            onSelectedIndexChange = actions.onSelectPartition,
-        )
+                            title = if (isDownload) {
+                                        stringResource(R.string.install_select_partition)
+                                    } else {
+                                        "${stringResource(R.string.install_select_partition)} (${uiState.slotSuffix})"
+                                    },
+                            items = partitionItems,
+                            startAction = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                            selectedIndex = partitionIndex,
+                            onSelectedIndexChange = actions.onSelectPartition,
+                            enabled = uiState.canSelectPartition,
+                        )
                     }
                     if (uiState.canForceBackup) add {
                         SegmentedCheckboxItem(
@@ -211,10 +212,10 @@ internal fun InstallScreenMaterial(
                 SegmentedColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
                     item {
                         ArrowPreference(
-            title = stringResource(R.string.install_anykernel),
-            summary = uiState.installMethod.uri?.lastPathSegment ?: "",
-            onClick = actions.onSelectAnyKernel,
-        )
+                            title = stringResource(R.string.install_anykernel),
+                            summary = uiState.installMethod.uri?.lastPathSegment ?: "",
+                            onClick = actions.onSelectAnyKernel,
+                        )
                     }
                 }
             }

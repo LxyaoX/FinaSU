@@ -90,12 +90,12 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
         content = listOf(
             {
                 SwitchPreference(
-            title = stringResource(id = R.string.settings_navigation_badge),
-            summary = stringResource(id = R.string.settings_navigation_badge_summary),
-            startAction = { Icon(Icons.Rounded.Pin, contentDescription = null) },
-            checked = uiState.enableNavigationBadge,
-            onCheckedChange = actions.onSetEnableNavigationBadge,
-        )
+                    title = stringResource(id = R.string.settings_navigation_badge),
+                    summary = stringResource(id = R.string.settings_navigation_badge_summary),
+                    startAction = { Icon(Icons.Rounded.Pin, contentDescription = null) },
+                    checked = uiState.enableNavigationBadge,
+                    onCheckedChange = actions.onSetEnableNavigationBadge,
+                )
             }
         )
     )
@@ -106,12 +106,12 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
             content = listOf(
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_enable_predictive_back),
-            summary = stringResource(id = R.string.settings_enable_predictive_back_summary),
-            startAction = { Icon(Icons.AutoMirrored.Rounded.MenuOpen, contentDescription = null) },
-            checked = uiState.enablePredictiveBack,
-            onCheckedChange = actions.onSetEnablePredictiveBack,
-        )
+                        title = stringResource(id = R.string.settings_enable_predictive_back),
+                        summary = stringResource(id = R.string.settings_enable_predictive_back_summary),
+                        startAction = { Icon(Icons.AutoMirrored.Rounded.MenuOpen, contentDescription = null) },
+                        checked = uiState.enablePredictiveBack,
+                        onCheckedChange = actions.onSetEnablePredictiveBack,
+                    )
                 }
             )
         )
@@ -147,12 +147,12 @@ private fun NavCustomIconsSection() {
         content = buildList<@Composable () -> Unit> {
             add {
                 SwitchPreference(
-            title = stringResource(R.string.settings_nav_custom_icons),
-            summary = stringResource(R.string.settings_nav_custom_icons_summary),
-            startAction = { Icon(Icons.Rounded.Apps, contentDescription = null) },
-            checked = customEnabled,
-            onCheckedChange = { BottomBarIconConfig.isEnabled = it },
-        )
+                    title = stringResource(R.string.settings_nav_custom_icons),
+                    summary = stringResource(R.string.settings_nav_custom_icons_summary),
+                    startAction = { Icon(Icons.Rounded.Apps, contentDescription = null) },
+                    checked = customEnabled,
+                    onCheckedChange = { BottomBarIconConfig.isEnabled = it },
+                )
             }
             if (customEnabled) {
                 BottomBarDestination.entries.forEach { destination ->
@@ -189,16 +189,16 @@ private fun NavLayoutSection() {
             NavBarVisibilityConfig.hideable.forEach { destination ->
                 add {
                     SwitchPreference(
-            title = stringResource(
-                            when (destination) {
-                                BottomBarDestination.SuperUser -> R.string.settings_show_superuser
-                                else -> R.string.settings_show_module
-                            }
-                        ),
-            startAction = { Icon(destination.iconNotSelected, contentDescription = null) },
-            checked = visibility[destination] == true,
-            onCheckedChange = { NavBarVisibilityConfig.setVisible(destination, it) },
-        )
+                        title = stringResource(
+                                    when (destination) {
+                                        BottomBarDestination.SuperUser -> R.string.settings_show_superuser
+                                        else -> R.string.settings_show_module
+                                    }
+                                ),
+                        startAction = { Icon(destination.iconNotSelected, contentDescription = null) },
+                        checked = visibility[destination] == true,
+                        onCheckedChange = { NavBarVisibilityConfig.setVisible(destination, it) },
+                    )
                 }
             }
         }
@@ -240,32 +240,32 @@ private fun NavModeSection() {
         content = buildList<@Composable () -> Unit> {
             add {
                 OverlayDropdownPreference(
-            title = stringResource(R.string.settings_nav_mode),
-            summary = stringResource(R.string.settings_nav_mode_summary),
-            items = navModeLabels,
-            startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
-            selectedIndex = navModes.indexOf(navMode).coerceAtLeast(0),
-            onSelectedIndexChange = { NavModeConfig.mode = navModes[it] },
-        )
+                    title = stringResource(R.string.settings_nav_mode),
+                    summary = stringResource(R.string.settings_nav_mode_summary),
+                    items = navModeLabels,
+                    startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
+                    selectedIndex = navModes.indexOf(navMode).coerceAtLeast(0),
+                    onSelectedIndexChange = { NavModeConfig.mode = navModes[it] },
+                )
             }
             if (navMode == NavMode.Floating) {
                 add {
                     OverlayDropdownPreference(
-            title = stringResource(R.string.settings_floating_bar_style),
-            items = styleLabels,
-            startAction = { Icon(Icons.Rounded.Style, contentDescription = null) },
-            selectedIndex = styles.indexOf(floatingStyle).coerceAtLeast(0),
-            onSelectedIndexChange = { FloatingBarConfig.style = styles[it] },
-        )
+                        title = stringResource(R.string.settings_floating_bar_style),
+                        items = styleLabels,
+                        startAction = { Icon(Icons.Rounded.Style, contentDescription = null) },
+                        selectedIndex = styles.indexOf(floatingStyle).coerceAtLeast(0),
+                        onSelectedIndexChange = { FloatingBarConfig.style = styles[it] },
+                    )
                 }
                 add {
                     SwitchPreference(
-            title = stringResource(R.string.settings_floating_bar_glass),
-            summary = stringResource(R.string.settings_floating_bar_glass_summary),
-            startAction = { Icon(Icons.Rounded.BlurOn, contentDescription = null) },
-            checked = floatingGlass,
-            onCheckedChange = { FloatingBarConfig.glass = it },
-        )
+                        title = stringResource(R.string.settings_floating_bar_glass),
+                        summary = stringResource(R.string.settings_floating_bar_glass_summary),
+                        startAction = { Icon(Icons.Rounded.BlurOn, contentDescription = null) },
+                        checked = floatingGlass,
+                        onCheckedChange = { FloatingBarConfig.glass = it },
+                    )
                 }
                 if (floatingGlass) {
                     add {
@@ -300,58 +300,58 @@ private fun NavModeSection() {
                     }
                     add {
                         SwitchPreference(
-            title = stringResource(R.string.settings_navbar_glass_specular),
-            summary = stringResource(R.string.settings_navbar_glass_specular_summary),
-            startAction = { Icon(Icons.Rounded.FlashOn, contentDescription = null) },
-            checked = glassSpecular,
-            onCheckedChange = { FloatingBarConfig.glassSpecular = it },
-        )
+                            title = stringResource(R.string.settings_navbar_glass_specular),
+                            summary = stringResource(R.string.settings_navbar_glass_specular_summary),
+                            startAction = { Icon(Icons.Rounded.FlashOn, contentDescription = null) },
+                            checked = glassSpecular,
+                            onCheckedChange = { FloatingBarConfig.glassSpecular = it },
+                        )
                     }
                     add {
                         SwitchPreference(
-            title = stringResource(R.string.settings_navbar_glass_inner_glow),
-            summary = stringResource(R.string.settings_navbar_glass_inner_glow_summary),
-            startAction = { Icon(Icons.Rounded.WbTwilight, contentDescription = null) },
-            checked = glassInnerGlow,
-            onCheckedChange = { FloatingBarConfig.glassInnerGlow = it },
-        )
+                            title = stringResource(R.string.settings_navbar_glass_inner_glow),
+                            summary = stringResource(R.string.settings_navbar_glass_inner_glow_summary),
+                            startAction = { Icon(Icons.Rounded.WbTwilight, contentDescription = null) },
+                            checked = glassInnerGlow,
+                            onCheckedChange = { FloatingBarConfig.glassInnerGlow = it },
+                        )
                     }
                     add {
                         SwitchPreference(
-            title = stringResource(R.string.settings_navbar_glass_border),
-            summary = stringResource(R.string.settings_navbar_glass_border_summary),
-            startAction = { Icon(Icons.Rounded.BorderOuter, contentDescription = null) },
-            checked = glassBorder,
-            onCheckedChange = { FloatingBarConfig.glassBorder = it },
-        )
+                            title = stringResource(R.string.settings_navbar_glass_border),
+                            summary = stringResource(R.string.settings_navbar_glass_border_summary),
+                            startAction = { Icon(Icons.Rounded.BorderOuter, contentDescription = null) },
+                            checked = glassBorder,
+                            onCheckedChange = { FloatingBarConfig.glassBorder = it },
+                        )
                     }
                 } else {
                     add {
                         SwitchPreference(
-            title = stringResource(R.string.settings_floating_bar_compact),
-            startAction = { Icon(Icons.Rounded.RoundedCorner, contentDescription = null) },
-            checked = floatingCompact,
-            onCheckedChange = { FloatingBarConfig.compact = it },
-        )
+                            title = stringResource(R.string.settings_floating_bar_compact),
+                            startAction = { Icon(Icons.Rounded.RoundedCorner, contentDescription = null) },
+                            checked = floatingCompact,
+                            onCheckedChange = { FloatingBarConfig.compact = it },
+                        )
                     }
                 }
                 add {
                     SwitchPreference(
-            title = stringResource(R.string.settings_floating_auto_hide),
-            summary = stringResource(R.string.settings_floating_auto_hide_summary),
-            startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
-            checked = floatingAutoHide,
-            onCheckedChange = { FloatingBarConfig.autoHide = it },
-        )
+                        title = stringResource(R.string.settings_floating_auto_hide),
+                        summary = stringResource(R.string.settings_floating_auto_hide_summary),
+                        startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+                        checked = floatingAutoHide,
+                        onCheckedChange = { FloatingBarConfig.autoHide = it },
+                    )
                 }
                 add {
                     SwitchPreference(
-            title = stringResource(R.string.settings_floating_swipe_hide),
-            summary = stringResource(R.string.settings_floating_swipe_hide_summary),
-            startAction = { Icon(Icons.Rounded.SwipeUp, contentDescription = null) },
-            checked = floatingSwipeHide,
-            onCheckedChange = { FloatingBarConfig.swipeHide = it },
-        )
+                        title = stringResource(R.string.settings_floating_swipe_hide),
+                        summary = stringResource(R.string.settings_floating_swipe_hide_summary),
+                        startAction = { Icon(Icons.Rounded.SwipeUp, contentDescription = null) },
+                        checked = floatingSwipeHide,
+                        onCheckedChange = { FloatingBarConfig.swipeHide = it },
+                    )
                 }
             }
         }

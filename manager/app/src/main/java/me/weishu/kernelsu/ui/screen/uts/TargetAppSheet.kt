@@ -131,10 +131,10 @@ fun TargetAppSheet(
                 }
                 item {
                     SwitchPreference(
-            title = stringResource(R.string.uts_view_show_system_apps),
-            checked = showSystemApps,
-            onCheckedChange = { showSystemApps = it },
-        )
+                        title = stringResource(R.string.uts_view_show_system_apps),
+                        checked = showSystemApps,
+                        onCheckedChange = { showSystemApps = it },
+                    )
                 }
             }
 

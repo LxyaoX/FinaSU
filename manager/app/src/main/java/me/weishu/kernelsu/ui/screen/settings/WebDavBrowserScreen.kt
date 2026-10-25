@@ -134,29 +134,29 @@ fun WebDavBrowserScreen(path: String) {
                 when {
                     current == null -> item {
                         ArrowPreference(
-            title = stringResource(R.string.backup_loading),
-        )
+                            title = stringResource(R.string.backup_loading),
+                        )
                     }
 
                     error != null -> {
                         item {
                             ArrowPreference(
-            title = stringResource(R.string.backup_webdav_error),
-            summary = error.orEmpty(),
-        )
+                                title = stringResource(R.string.backup_webdav_error),
+                                summary = error.orEmpty(),
+                            )
                         }
                         item {
                             ArrowPreference(
-            title = stringResource(R.string.backup_retry),
-            onClick = { refresh++ },
-        )
+                                title = stringResource(R.string.backup_retry),
+                                onClick = { refresh++ },
+                            )
                         }
                     }
 
                     current.isEmpty() -> item {
                         ArrowPreference(
-            title = stringResource(R.string.backup_webdav_empty),
-        )
+                            title = stringResource(R.string.backup_webdav_empty),
+                        )
                     }
 
                     else -> current.forEach { entry ->

@@ -18,7 +18,6 @@ import me.weishu.kernelsu.ui.component.material.*
 import me.weishu.kernelsu.ui.viewmodel.SusfsViewModel
 import org.json.JSONArray
 import org.json.JSONObject
-import androidx.compose.material3.Icon
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 
@@ -58,16 +57,23 @@ internal fun SusfsUnameSection(config: JSONObject?, status: SusfsStatus, writabl
     val uname = config?.optJSONObject("settings")?.optJSONObject("uname")
     val supported = status.supports("SPOOF_UNAME")
     SegmentedColumn(title = stringResource(R.string.susfs_uname)) {
-        item { SegmentedListItem(enabled = writable && supported, onClick = { editing = true },
-            headlineContent = { Text(stringResource(R.string.susfs_uname)) },
-            supportingContent = { Text(susfsDisabledReason(status, supported) ?: if (uname == null)
-                stringResource(R.string.susfs_unmanaged) else
-                "${stringResource(R.string.susfs_release)}: ${uname.optString("release")}\n${stringResource(R.string.susfs_version)}: ${uname.optString("version")}") },
-            leadingContent = { Icon(Icons.Rounded.Tune, null) }) }
-        item { SegmentedListItem(enabled = writable && supported, onClick = {
-            vm.change { it.getJSONObject("settings").put("uname", JSONObject().put("release", "default").put("version", "default")) }
-        }, headlineContent = { Text(stringResource(R.string.susfs_restore_uname)) },
-            supportingContent = { Text(stringResource(R.string.susfs_restore_hint)) }) }
+        item { ArrowPreference(
+            title = stringResource(R.string.susfs_uname),
+            summary = susfsDisabledReason(status, supported) ?: if (uname == null)
+                      stringResource(R.string.susfs_unmanaged) else
+                      "${stringResource(R.string.susfs_release)}: ${uname.optString("release")}\n${stringResource(R.string.susfs_version)}: ${uname.optString("version")}",
+            startAction = { Icon(Icons.Rounded.Tune, null) },
+            onClick = { editing = true },
+            enabled = writable && supported,
+        ) }
+        item { ArrowPreference(
+            title = stringResource(R.string.susfs_restore_uname),
+            summary = stringResource(R.string.susfs_restore_hint),
+            onClick = {
+                vm.change { it.getJSONObject("settings").put("uname", JSONObject().put("release", "default").put("version", "default")) }
+            },
+            enabled = writable && supported,
+        ) }
     }
     if (editing) {
         var release by remember { mutableStateOf(uname?.optString("release") ?: "default") }
@@ -96,9 +102,12 @@ internal fun SusfsCmdlineSection(config: JSONObject?, status: SusfsStatus, writa
     val value = if (settings == null || settings.isNull("cmdline")) "" else settings.optString("cmdline")
     val supported = status.supports("SPOOF_CMDLINE_OR_BOOTCONFIG")
     SegmentedColumn(title = stringResource(R.string.susfs_cmdline)) {
-        item { SegmentedListItem(enabled = writable && supported, onClick = { editing = true },
-            headlineContent = { Text(stringResource(R.string.susfs_cmdline)) },
-            supportingContent = { Text(susfsDisabledReason(status, supported) ?: value.ifEmpty { stringResource(R.string.susfs_unmanaged) }) }) }
+        item { ArrowPreference(
+            title = stringResource(R.string.susfs_cmdline),
+            summary = susfsDisabledReason(status, supported) ?: value.ifEmpty { stringResource(R.string.susfs_unmanaged) },
+            onClick = { editing = true },
+            enabled = writable && supported,
+        ) }
     }
     if (editing) {
         var text by remember { mutableStateOf(value) }
@@ -133,10 +142,13 @@ internal fun SusfsRuleSection(kind: String, config: JSONObject?, status: SusfsSt
     val rules = config?.optJSONArray("rules") ?: JSONArray()
     val entries = (0 until rules.length()).map { rules.getJSONObject(it) }.filter { it.getString("kind") == kind }
     SegmentedColumn(title = stringResource(ruleTitle(kind))) {
-        item { SegmentedListItem(enabled = writable && supported, onClick = { original = null; editing = true },
-            headlineContent = { Text(stringResource(R.string.susfs_add_rule)) },
-            supportingContent = { Text(susfsDisabledReason(status, supported) ?: stringResource(hint)) },
-            leadingContent = { Icon(Icons.Rounded.Add, null) }) }
+        item { ArrowPreference(
+            title = stringResource(R.string.susfs_add_rule),
+            summary = susfsDisabledReason(status, supported) ?: stringResource(hint),
+            startAction = { Icon(Icons.Rounded.Add, null) },
+            onClick = { original = null; editing = true },
+            enabled = writable && supported,
+        ) }
         entries.forEach { rule -> item(key = rule.getString("path")) {
             SegmentedListItem(enabled = writable && supported, onClick = { original = rule.toString(); editing = true },
                 headlineContent = { Text(rule.getString("path")) },
@@ -207,20 +219,21 @@ private fun SusfsRuleDialog(kind: String, original: String?, status: SusfsStatus
         }
         if (kind == "path") {
             SegmentedColumn { item { SwitchPreference(
-            title = stringResource(R.string.susfs_loop),
-            summary = stringResource(R.string.susfs_loop_hint),
-            checked = looping,
-            onCheckedChange = { looping = it },
-        ) } }
+                title = stringResource(R.string.susfs_loop),
+                summary = stringResource(R.string.susfs_loop_hint),
+                checked = looping,
+                onCheckedChange = { looping = it },
+            ) } }
         }
         if (kind == "kstat") {
             Text(stringResource(R.string.susfs_kstat_hint))
             SegmentedColumn { item { SwitchPreference(
-            title = stringResource(R.string.susfs_clone),
-            summary = stringResource(if (cloneSupported) R.string.susfs_clone_hint else R.string.susfs_proc_hint),
-            checked = clone,
-            onCheckedChange = { clone = it && cloneSupported },
-        ) } }
+                title = stringResource(R.string.susfs_clone),
+                summary = stringResource(if (cloneSupported) R.string.susfs_clone_hint else R.string.susfs_proc_hint),
+                checked = clone,
+                onCheckedChange = { clone = it && cloneSupported },
+                enabled = cloneSupported || clone,
+            ) } }
         }
         if (kind == "map") Text(stringResource(R.string.susfs_map_hint))
         Text(stringResource(R.string.susfs_removal_hint), style = MaterialTheme.typography.bodySmall)
@@ -248,11 +261,14 @@ private fun SusfsExtensionSection(key: String, title: Int, node: String, config:
     val enabled = writable && status.proc(node)
     val array = config?.optJSONObject("lkm")?.optJSONArray(key) ?: JSONArray()
     SegmentedColumn(title = stringResource(title)) {
-        item { SegmentedListItem(enabled = enabled, onClick = { adding = true },
-            headlineContent = { Text(stringResource(R.string.susfs_add_entry)) },
-            supportingContent = { Text(susfsDisabledReason(status, true) ?: stringResource(if (!status.proc(node))
-                R.string.susfs_proc_hint else if (key == "hidden_modules") R.string.susfs_module_hint else R.string.susfs_prefix_hint)) },
-            leadingContent = { Icon(Icons.Rounded.Add, null) }) }
+        item { ArrowPreference(
+            title = stringResource(R.string.susfs_add_entry),
+            summary = susfsDisabledReason(status, true) ?: stringResource(if (!status.proc(node))
+                      R.string.susfs_proc_hint else if (key == "hidden_modules") R.string.susfs_module_hint else R.string.susfs_prefix_hint),
+            startAction = { Icon(Icons.Rounded.Add, null) },
+            onClick = { adding = true },
+            enabled = enabled,
+        ) }
         for (index in 0 until array.length()) item(key = array.getString(index)) {
             val value = array.getString(index)
             SegmentedListItem(headlineContent = { Text(value) }, trailingContent = {

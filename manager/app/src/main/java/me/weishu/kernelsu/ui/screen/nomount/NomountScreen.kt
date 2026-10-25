@@ -44,6 +44,7 @@ import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.viewmodel.NomountUiState
 import me.weishu.kernelsu.ui.viewmodel.NomountViewModel
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 /**
  * NoMount driver, injection and visibility state.
@@ -113,19 +114,15 @@ private fun DriverSection(state: NomountUiState, viewModel: NomountViewModel) {
         item(visible = state.status?.deferredTo != null) {
             // Another module drives the same driver: say so instead of showing a
             // healthy backend that is not the one injecting.
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.nomount_deferred)) },
-                supportingContent = {
-                    Text(
-                        stringResource(
-                            R.string.nomount_deferred_summary,
-                            state.status?.deferredTo.orEmpty(),
-                        )
-                    )
-                },
-                leadingContent = { Icon(Icons.Filled.Layers, null) },
-                enabled = false,
+            ArrowPreference(
+                title = stringResource(R.string.nomount_deferred),
+                summary = stringResource(
+                              R.string.nomount_deferred_summary,
+                              state.status?.deferredTo.orEmpty(),
+                          ),
+                startAction = { Icon(Icons.Filled.Layers, null) },
                 onClick = {},
+                enabled = false,
             )
         }
     }
@@ -186,23 +183,21 @@ private fun InjectionSection(state: NomountUiState, viewModel: NomountViewModel)
             )
         }
         item {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.nomount_clear_rules)) },
-                supportingContent = { Text(stringResource(R.string.nomount_clear_rules_summary)) },
-                leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
-                enabled = ready,
+            ArrowPreference(
+                title = stringResource(R.string.nomount_clear_rules),
+                summary = stringResource(R.string.nomount_clear_rules_summary),
+                startAction = { Icon(Icons.Filled.DeleteSweep, null) },
                 onClick = viewModel::clearRules,
+                enabled = ready,
             )
         }
         item(visible = state.actionError) {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.nomount_action_failed)) },
-                supportingContent = {
-                    Text(stringResource(R.string.nomount_action_failed_summary))
-                },
-                leadingContent = { Icon(Icons.Filled.Refresh, null) },
-                enabled = false,
+            ArrowPreference(
+                title = stringResource(R.string.nomount_action_failed),
+                summary = stringResource(R.string.nomount_action_failed_summary),
+                startAction = { Icon(Icons.Filled.Refresh, null) },
                 onClick = {},
+                enabled = false,
             )
         }
     }
@@ -248,47 +243,42 @@ private fun VisibilitySection(state: NomountUiState, viewModel: NomountViewModel
             )
         }
         item {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.nomount_visibility_model)) },
-                supportingContent = {
-                    Text(stringResource(R.string.nomount_visibility_model_hint))
-                },
-                leadingContent = { Icon(Icons.Filled.VisibilityOff, null) },
-                enabled = false,
+            ArrowPreference(
+                title = stringResource(R.string.nomount_visibility_model),
+                summary = stringResource(R.string.nomount_visibility_model_hint),
+                startAction = { Icon(Icons.Filled.VisibilityOff, null) },
                 onClick = {},
+                enabled = false,
             )
         }
         item {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.nomount_clear_exclusions)) },
-                supportingContent = {
-                    Text(stringResource(R.string.nomount_clear_exclusions_summary))
-                },
-                leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
-                enabled = ready && status?.uids?.isNotEmpty() == true,
+            ArrowPreference(
+                title = stringResource(R.string.nomount_clear_exclusions),
+                summary = stringResource(R.string.nomount_clear_exclusions_summary),
+                startAction = { Icon(Icons.Filled.DeleteSweep, null) },
                 onClick = viewModel::clearExclusions,
+                enabled = ready && status?.uids?.isNotEmpty() == true,
             )
         }
         item {
-            SegmentedListItem(
-                headlineContent = { Text(stringResource(R.string.nomount_clear_everything)) },
-                supportingContent = {
-                    Text(stringResource(R.string.nomount_clear_everything_summary))
-                },
-                leadingContent = { Icon(Icons.Filled.DeleteSweep, null) },
-                enabled = ready &&
-                    ((status?.rulesApplied ?: 0) > 0 || status?.uids?.isNotEmpty() == true),
+            ArrowPreference(
+                title = stringResource(R.string.nomount_clear_everything),
+                summary = stringResource(R.string.nomount_clear_everything_summary),
+                startAction = { Icon(Icons.Filled.DeleteSweep, null) },
                 onClick = viewModel::clearEverything,
+                enabled = ready &&
+                          ((status?.rulesApplied ?: 0) > 0 || status?.uids?.isNotEmpty() == true),
             )
         }
         item {
             SwitchPreference(
-            title = stringResource(R.string.nomount_block_isolated),
-            summary = stringResource(R.string.nomount_block_isolated_summary),
-            startAction = { Icon(Icons.Filled.VisibilityOff, contentDescription = null) },
-            checked = status?.isolatedBlocked == true,
-            onCheckedChange = viewModel::setIsolated,
-        )
+                title = stringResource(R.string.nomount_block_isolated),
+                summary = stringResource(R.string.nomount_block_isolated_summary),
+                startAction = { Icon(Icons.Filled.VisibilityOff, contentDescription = null) },
+                checked = status?.isolatedBlocked == true,
+                onCheckedChange = viewModel::setIsolated,
+                enabled = ready,
+            )
         }
     }
 }
@@ -305,14 +295,12 @@ private fun ModulesSection(state: NomountUiState, viewModel: NomountViewModel) {
     val ready = status?.apiOk == true && !state.isWriting
     SegmentedColumn(title = stringResource(R.string.nomount_section_modules)) {
         item {
-            SegmentedListItem(
-                headlineContent = {
-                    Text(stringResource(R.string.nomount_modules_count, modules.size))
-                },
-                supportingContent = { Text(stringResource(R.string.nomount_modules_hint)) },
-                leadingContent = { Icon(Icons.Filled.Layers, null) },
-                enabled = false,
+            ArrowPreference(
+                title = stringResource(R.string.nomount_modules_count, modules.size),
+                summary = stringResource(R.string.nomount_modules_hint),
+                startAction = { Icon(Icons.Filled.Layers, null) },
                 onClick = {},
+                enabled = false,
             )
         }
         modules.forEach { module ->

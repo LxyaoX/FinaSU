@@ -148,10 +148,10 @@ fun SettingsSearchShortcuts(
                 item(key = category.key) {
                     val label = stringResource(category.titleRes)
                     ArrowPreference(
-            title = label,
-            startAction = { Icon(category.icon, label) },
-            onClick = { onOpenCategory(category.key) },
-        )
+                        title = label,
+                        startAction = { Icon(category.icon, label) },
+                        onClick = { onOpenCategory(category.key) },
+                    )
                 }
             }
         }

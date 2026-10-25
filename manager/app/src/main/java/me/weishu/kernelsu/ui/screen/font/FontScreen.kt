@@ -147,22 +147,22 @@ fun FontScreen() {
                     content = buildList {
                         add {
                             ArrowPreference(
-            title = stringResource(R.string.font_select_file),
-            startAction = {
+                                title = stringResource(R.string.font_select_file),
+                                startAction = {
                                     Icon(Icons.Filled.FontDownload, contentDescription = null)
                                 },
-            onClick = { pickFontLauncher.launch("*/*") },
-        )
+                                onClick = { pickFontLauncher.launch("*/*") },
+                            )
                         }
                         if (FontConfig.customFontFilename != null) {
                             add {
                                 ArrowPreference(
-            title = stringResource(R.string.font_restore_default),
-            startAction = {
+                                    title = stringResource(R.string.font_restore_default),
+                                    startAction = {
                                         Icon(Icons.Filled.Delete, contentDescription = null)
                                     },
-            onClick = { showRestoreDialog = true },
-        )
+                                    onClick = { showRestoreDialog = true },
+                                )
                             }
                         }
                     },

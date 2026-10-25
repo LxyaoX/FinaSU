@@ -110,7 +110,7 @@ fun TeesimScreen() {
                     val installedVersion = status?.installedVersion.orEmpty()
                     val bundled = TeesimInstaller.VERSION
                     ArrowPreference(
-            title = when {
+                        title = when {
                                     status?.installed != true ->
                                         stringResource(R.string.teesim_bundled_version, bundled)
 
@@ -125,37 +125,33 @@ fun TeesimScreen() {
 
                                     else -> installedVersion
                                 },
-            summary = teesimSummary(state),
-            startAction = { Icon(Icons.Filled.VerifiedUser, null) },
-        )
+                        summary = teesimSummary(state),
+                        startAction = { Icon(Icons.Filled.VerifiedUser, null) },
+                    )
                 }
                 item {
                     SwitchPreference(
-            title = stringResource(R.string.teesim_enable),
-            summary = stringResource(R.string.teesim_enable_summary),
-            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
-            checked = state.status?.enabled == true,
-            onCheckedChange = viewModel::setEnabled,
-        )
+                        title = stringResource(R.string.teesim_enable),
+                        summary = stringResource(R.string.teesim_enable_summary),
+                        startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+                        checked = state.status?.enabled == true,
+                        onCheckedChange = viewModel::setEnabled,
+                        enabled = !state.loading && !state.writing,
+                    )
                 }
                 item {
                     val status = state.status
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.teesim_keybox)) },
-                        supportingContent = {
-                            Text(
-                                if (status != null && status.keyboxPresent) {
-                                    stringResource(
-                                        R.string.teesim_keybox_present,
-                                        keyboxSize(status.keyboxBytes),
-                                    )
-                                } else {
-                                    stringResource(R.string.teesim_keybox_missing)
-                                }
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Lock, null) },
-                        enabled = status?.installed == true && !state.writing,
+                    ArrowPreference(
+                        title = stringResource(R.string.teesim_keybox),
+                        summary = if (status != null && status.keyboxPresent) {
+                                      stringResource(
+                                          R.string.teesim_keybox_present,
+                                          keyboxSize(status.keyboxBytes),
+                                      )
+                                  } else {
+                                      stringResource(R.string.teesim_keybox_missing)
+                                  },
+                        startAction = { Icon(Icons.Filled.Lock, null) },
                         onClick = {
                             // Some providers report a keybox as octet-stream, so keep the
                             // declared XML types but do not lock the picker to them.
@@ -163,75 +159,56 @@ fun TeesimScreen() {
                                 arrayOf("text/xml", "application/xml", "text/plain", "*/*")
                             )
                         },
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
+                        enabled = status?.installed == true && !state.writing,
                     )
                 }
                 if (state.status?.keyboxPresent == true) {
                     item {
-                        SegmentedListItem(
-                            headlineContent = { Text(stringResource(R.string.teesim_keybox_remove)) },
-                            leadingContent = { Icon(Icons.Filled.Delete, null) },
-                            enabled = !state.writing,
+                        ArrowPreference(
+                            title = stringResource(R.string.teesim_keybox_remove),
+                            startAction = { Icon(Icons.Filled.Delete, null) },
                             onClick = viewModel::removeKeybox,
+                            enabled = !state.writing,
                         )
                     }
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.teesim_targets)) },
-                        supportingContent = {
-                            Text(
-                                stringResource(
-                                    R.string.teesim_targets_summary,
-                                    state.status?.targetApps.orEmpty().size,
-                                )
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Apps, null) },
-                        enabled = state.status?.installed == true && !state.writing,
+                    ArrowPreference(
+                        title = stringResource(R.string.teesim_targets),
+                        summary = stringResource(
+                                      R.string.teesim_targets_summary,
+                                      state.status?.targetApps.orEmpty().size,
+                                  ),
+                        startAction = { Icon(Icons.Filled.Apps, null) },
                         onClick = { navigator.push(Route.TeesimTargets) },
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
+                        enabled = state.status?.installed == true && !state.writing,
                     )
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = {
-                            Text(
-                                stringResource(
+                    ArrowPreference(
+                        title = stringResource(
                                     if (state.status?.installed == true) {
                                         R.string.teesim_reinstall
                                     } else {
                                         R.string.teesim_install
                                     }
-                                )
-                            )
-                        },
-                        supportingContent = {
-                            Text(
-                                stringResource(
-                                    R.string.teesim_install_summary,
-                                    TeesimInstaller.VERSION,
-                                )
-                            )
-                        },
-                        leadingContent = { Icon(Icons.Filled.Download, null) },
-                        enabled = !state.loading && !state.writing,
+                                ),
+                        summary = stringResource(
+                                      R.string.teesim_install_summary,
+                                      TeesimInstaller.VERSION,
+                                  ),
+                        startAction = { Icon(Icons.Filled.Download, null) },
                         onClick = viewModel::install,
+                        enabled = !state.loading && !state.writing,
                     )
                 }
                 item {
-                    SegmentedListItem(
-                        headlineContent = { Text(stringResource(R.string.teesim_uninstall)) },
-                        supportingContent = {
-                            Text(stringResource(R.string.teesim_uninstall_summary))
-                        },
-                        leadingContent = { Icon(Icons.Filled.Delete, null) },
-                        enabled = state.status?.installed == true && !state.writing,
+                    ArrowPreference(
+                        title = stringResource(R.string.teesim_uninstall),
+                        summary = stringResource(R.string.teesim_uninstall_summary),
+                        startAction = { Icon(Icons.Filled.Delete, null) },
                         onClick = { confirmUninstall = true },
+                        enabled = state.status?.installed == true && !state.writing,
                     )
                 }
             }

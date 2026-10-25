@@ -51,30 +51,30 @@ fun ModuleCardSettingsSection() {
     ) {
         item {
             SwitchPreference(
-            title = stringResource(R.string.module_card_show_more_info),
-            summary = stringResource(R.string.module_card_show_more_info_summary),
-            startAction = { Icon(Icons.Filled.Description, contentDescription = null) },
-            checked = ModuleCardConfig.showMoreInfo,
-            onCheckedChange = ModuleCardConfig::updateShowMoreInfo,
-        )
+                title = stringResource(R.string.module_card_show_more_info),
+                summary = stringResource(R.string.module_card_show_more_info_summary),
+                startAction = { Icon(Icons.Filled.Description, contentDescription = null) },
+                checked = ModuleCardConfig.showMoreInfo,
+                onCheckedChange = ModuleCardConfig::updateShowMoreInfo,
+            )
         }
         item {
             SwitchPreference(
-            title = stringResource(R.string.module_card_fold_system),
-            summary = stringResource(R.string.module_card_fold_system_summary),
-            startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
-            checked = ModuleCardConfig.foldSystemModule,
-            onCheckedChange = ModuleCardConfig::updateFoldSystemModule,
-        )
+                title = stringResource(R.string.module_card_fold_system),
+                summary = stringResource(R.string.module_card_fold_system_summary),
+                startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
+                checked = ModuleCardConfig.foldSystemModule,
+                onCheckedChange = ModuleCardConfig::updateFoldSystemModule,
+            )
         }
         item {
             SwitchPreference(
-            title = stringResource(R.string.module_card_spliced),
-            summary = stringResource(R.string.module_card_spliced_summary),
-            startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
-            checked = ModuleCardConfig.splicedCardGroup,
-            onCheckedChange = ModuleCardConfig::updateSplicedCardGroup,
-        )
+                title = stringResource(R.string.module_card_spliced),
+                summary = stringResource(R.string.module_card_spliced_summary),
+                startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
+                checked = ModuleCardConfig.splicedCardGroup,
+                onCheckedChange = ModuleCardConfig::updateSplicedCardGroup,
+            )
         }
         item {
             val styleItems = listOf(
@@ -82,17 +82,18 @@ fun ModuleCardSettingsSection() {
                 stringResource(R.string.module_card_style_icon),
             )
             OverlayDropdownPreference(
-            title = stringResource(R.string.module_card_button_style),
-            summary = stringResource(R.string.module_card_button_style_summary),
-            items = styleItems,
-            startAction = { Icon(Icons.Filled.Palette, contentDescription = null) },
-            selectedIndex = if (ModuleCardConfig.buttonStyle == ModuleCardConfig.STYLE_ICON_ONLY) 1 else 0,
-            onSelectedIndexChange = { index ->
-                    ModuleCardConfig.updateButtonStyle(
-                        if (index == 1) ModuleCardConfig.STYLE_ICON_ONLY else ModuleCardConfig.STYLE_FULL
-                    )
+                title = stringResource(R.string.module_card_button_style),
+                summary = stringResource(R.string.module_card_button_style_summary),
+                items = styleItems,
+                startAction = { Icon(Icons.Filled.Palette, contentDescription = null) },
+                selectedIndex = if (ModuleCardConfig.buttonStyle == ModuleCardConfig.STYLE_ICON_ONLY) 1 else 0,
+                onSelectedIndexChange = {
+                    index ->
+                                       ModuleCardConfig.updateButtonStyle(
+                                           if (index == 1) ModuleCardConfig.STYLE_ICON_ONLY else ModuleCardConfig.STYLE_FULL
+                                       )
                 },
-        )
+            )
         }
     }
 }
@@ -115,67 +116,67 @@ fun ModuleBannerSettingsSection() {
         // not be flipped by a drag aimed at the slider: these rows answer to a real tap only.
         item {
             SwitchPreference(
-            title = stringResource(R.string.module_banner_enabled),
-            summary = stringResource(R.string.module_banner_enabled_summary),
-            startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
-            checked = ModuleBannerConfig.enabled,
-            onCheckedChange = ModuleBannerConfig::updateEnabled,
-        )
+                title = stringResource(R.string.module_banner_enabled),
+                summary = stringResource(R.string.module_banner_enabled_summary),
+                startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
+                checked = ModuleBannerConfig.enabled,
+                onCheckedChange = ModuleBannerConfig::updateEnabled,
+            )
         }
         item(visible = ModuleBannerConfig.enabled) {
             SwitchPreference(
-            title = stringResource(R.string.module_banner_folk),
-            summary = stringResource(R.string.module_banner_folk_summary),
-            startAction = { Icon(Icons.Outlined.Cloud, contentDescription = null) },
-            checked = ModuleBannerConfig.folkEnabled,
-            onCheckedChange = ModuleBannerConfig::updateFolkEnabled,
-        )
+                title = stringResource(R.string.module_banner_folk),
+                summary = stringResource(R.string.module_banner_folk_summary),
+                startAction = { Icon(Icons.Outlined.Cloud, contentDescription = null) },
+                checked = ModuleBannerConfig.folkEnabled,
+                onCheckedChange = ModuleBannerConfig::updateFolkEnabled,
+            )
         }
         item(visible = policy.active) {
             SwitchPreference(
-            title = stringResource(R.string.module_banner_api_mode),
-            summary = stringResource(R.string.module_banner_api_mode_summary),
-            startAction = { Icon(Icons.Outlined.Cloud, contentDescription = null) },
-            checked = ModuleBannerConfig.apiModeEnabled,
-            onCheckedChange = ModuleBannerConfig::updateApiModeEnabled,
-        )
+                title = stringResource(R.string.module_banner_api_mode),
+                summary = stringResource(R.string.module_banner_api_mode_summary),
+                startAction = { Icon(Icons.Outlined.Cloud, contentDescription = null) },
+                checked = ModuleBannerConfig.apiModeEnabled,
+                onCheckedChange = ModuleBannerConfig::updateApiModeEnabled,
+            )
         }
         item(visible = apiRowsVisible) {
             ArrowPreference(
-            title = stringResource(R.string.module_banner_api_source),
-            summary = if (apiConfigured) ModuleBannerConfig.effectiveApiSource
-                        else stringResource(R.string.module_banner_api_source_not_configured),
-            startAction = { Icon(Icons.Outlined.Cloud, null) },
-            onClick = { showSourceDialog = true },
-        )
+                title = stringResource(R.string.module_banner_api_source),
+                summary = if (apiConfigured) ModuleBannerConfig.effectiveApiSource
+                          else stringResource(R.string.module_banner_api_source_not_configured),
+                startAction = { Icon(Icons.Outlined.Cloud, null) },
+                onClick = { showSourceDialog = true },
+            )
         }
         item(visible = apiRowsVisible) {
             ArrowPreference(
-            title = stringResource(R.string.module_banner_marketplace),
-            summary = stringResource(R.string.module_banner_marketplace_summary),
-            startAction = { Icon(Icons.Outlined.Cloud, null) },
-            onClick = { navigator.push(Route.ApiMarketplace) },
-        )
+                title = stringResource(R.string.module_banner_marketplace),
+                summary = stringResource(R.string.module_banner_marketplace_summary),
+                startAction = { Icon(Icons.Outlined.Cloud, null) },
+                onClick = { navigator.push(Route.ApiMarketplace) },
+            )
         }
         item(visible = apiRowsVisible) {
             ArrowPreference(
-            title = stringResource(R.string.module_banner_clear_cache),
-            startAction = { Icon(Icons.Outlined.Cloud, null) },
-            onClick = {
+                title = stringResource(R.string.module_banner_clear_cache),
+                startAction = { Icon(Icons.Outlined.Cloud, null) },
+                onClick = {
                     BannerApiClient.clearAll(context)
                     ModuleBannerConfig.requestReload()
                     Toast.makeText(context, R.string.module_banner_cache_cleared, Toast.LENGTH_SHORT).show()
                 },
-        )
+            )
         }
         item(visible = ModuleBannerConfig.enabled) {
             SwitchPreference(
-            title = stringResource(R.string.module_banner_custom_opacity),
-            summary = stringResource(R.string.module_banner_custom_opacity_summary),
-            startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
-            checked = ModuleBannerConfig.customOpacityEnabled,
-            onCheckedChange = ModuleBannerConfig::updateCustomOpacityEnabled,
-        )
+                title = stringResource(R.string.module_banner_custom_opacity),
+                summary = stringResource(R.string.module_banner_custom_opacity_summary),
+                startAction = { Icon(Icons.Filled.Wallpaper, contentDescription = null) },
+                checked = ModuleBannerConfig.customOpacityEnabled,
+                onCheckedChange = ModuleBannerConfig::updateCustomOpacityEnabled,
+            )
         }
         item(visible = ModuleBannerConfig.enabled && ModuleBannerConfig.customOpacityEnabled) {
             SegmentedSliderItem(

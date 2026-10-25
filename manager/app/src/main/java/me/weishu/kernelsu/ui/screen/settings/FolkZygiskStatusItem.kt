@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import top.yukonga.miuix.kmp.preference.SwitchPreference
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 internal fun showFolkZygiskRecovery(state: SettingsUiState): Boolean =
     state.folkZygiskStatus?.startupBlocked == true
@@ -74,23 +75,22 @@ internal fun FolkZygiskStatusItem(state: SettingsUiState, actions: SettingsScree
         }
     }
     SwitchPreference(
-            title = stringResource(R.string.settings_folk_zygisk),
-            summary = summary,
-            startAction = { Icon(Icons.Filled.Code, contentDescription = null) },
-            checked = status?.enabled == true,
-            onCheckedChange = { actions.onSetFolkZygiskEnabled(it) },
-        )
+        title = stringResource(R.string.settings_folk_zygisk),
+        summary = summary,
+        startAction = { Icon(Icons.Filled.Code, contentDescription = null) },
+        checked = status?.enabled == true,
+        onCheckedChange = { actions.onSetFolkZygiskEnabled(it) },
+        enabled = status != null && !state.folkZygiskReadError && !state.isFolkZygiskLoading && !state.isFolkZygiskWriting,
+    )
     if (showFolkZygiskRecovery(state)) {
-        SegmentedListItem(
-            headlineContent = { Text(stringResource(R.string.folkzygisk_recover)) },
-            supportingContent = {
-                Text(stringResource(R.string.folkzygisk_recover_summary))
-            },
-            leadingContent = { Icon(Icons.Filled.Refresh, null) },
-            enabled = !state.folkZygiskReadError &&
-                !state.isFolkZygiskLoading &&
-                !state.isFolkZygiskWriting,
+        ArrowPreference(
+            title = stringResource(R.string.folkzygisk_recover),
+            summary = stringResource(R.string.folkzygisk_recover_summary),
+            startAction = { Icon(Icons.Filled.Refresh, null) },
             onClick = actions.onRecoverFolkZygisk,
+            enabled = !state.folkZygiskReadError &&
+                      !state.isFolkZygiskLoading &&
+                      !state.isFolkZygiskWriting,
         )
     }
 }

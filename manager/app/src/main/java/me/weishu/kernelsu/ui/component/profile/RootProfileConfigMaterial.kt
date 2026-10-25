@@ -195,12 +195,12 @@ private fun GroupsPanel(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
             ArrowPreference(
-            title = stringResource(R.string.profile_groups),
-            summary = tag,
-            onClick = if (enabled) {
-                    { showDialog.value = true }
-                } else null,
-        )
+                title = stringResource(R.string.profile_groups),
+                summary = tag,
+                onClick = if (enabled) {
+                              { showDialog.value = true }
+                          } else null,
+            )
         }
     )
 }
@@ -250,12 +250,12 @@ private fun MountNameSpacePanel(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
             ArrowPreference(
-            title = stringResource(R.string.profile_namespace),
-            summary = selectedOption.label,
-            onClick = if (enabled) {
-                    { showDialog.value = true }
-                } else null,
-        )
+                title = stringResource(R.string.profile_namespace),
+                summary = selectedOption.label,
+                onClick = if (enabled) {
+                              { showDialog.value = true }
+                          } else null,
+            )
         }
     )
 }
@@ -304,12 +304,12 @@ private fun RootProfileFlagPanel(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
             ArrowPreference(
-            title = stringResource(R.string.profile_flags),
-            summary = tag,
-            onClick = if (enabled) {
-                    { showDialog.value = true }
-                } else null,
-        )
+                title = stringResource(R.string.profile_flags),
+                summary = tag,
+                onClick = if (enabled) {
+                              { showDialog.value = true }
+                          } else null,
+            )
         }
     )
 }
@@ -358,12 +358,12 @@ private fun CapsPanel(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
             ArrowPreference(
-            title = stringResource(R.string.profile_capabilities),
-            summary = tag,
-            onClick = if (enabled) {
-                    { showDialog.value = true }
-                } else null,
-        )
+                title = stringResource(R.string.profile_capabilities),
+                summary = tag,
+                onClick = if (enabled) {
+                              { showDialog.value = true }
+                          } else null,
+            )
         }
     )
 }
@@ -395,12 +395,12 @@ private fun SELinuxPanel(
         modifier = Modifier.padding(horizontal = 16.dp),
         content = listOf {
             ArrowPreference(
-            title = stringResource(R.string.profile_selinux_context),
-            summary = context.ifEmpty { "—" },
-            onClick = if (enabled) {
-                    { showDialog.value = true }
-                } else null,
-        )
+                title = stringResource(R.string.profile_selinux_context),
+                summary = context.ifEmpty { "—" },
+                onClick = if (enabled) {
+                              { showDialog.value = true }
+                          } else null,
+            )
         }
     )
 }

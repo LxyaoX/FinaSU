@@ -104,16 +104,16 @@ fun BackupListScreen() {
                 state.loading -> SegmentedColumn(modifier = ListGroupModifier) {
                     item {
                         ArrowPreference(
-            title = stringResource(R.string.backup_loading),
-        )
+                            title = stringResource(R.string.backup_loading),
+                        )
                     }
                 }
 
                 state.items.isEmpty() -> SegmentedColumn(modifier = ListGroupModifier) {
                     item {
                         ArrowPreference(
-            title = stringResource(R.string.backup_empty_list),
-        )
+                            title = stringResource(R.string.backup_empty_list),
+                        )
                     }
                 }
 

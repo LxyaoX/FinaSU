@@ -72,21 +72,21 @@ fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActi
             content = listOf(
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_check_update),
-            summary = stringResource(id = R.string.settings_check_update_summary),
-            startAction = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
-            checked = uiState.checkUpdate,
-            onCheckedChange = actions.onSetCheckUpdate,
-        )
+                        title = stringResource(id = R.string.settings_check_update),
+                        summary = stringResource(id = R.string.settings_check_update_summary),
+                        startAction = { Icon(Icons.Filled.SystemUpdate, contentDescription = null) },
+                        checked = uiState.checkUpdate,
+                        onCheckedChange = actions.onSetCheckUpdate,
+                    )
                 },
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_module_check_update),
-            summary = stringResource(id = R.string.settings_check_update_summary),
-            startAction = { Icon(Icons.Filled.SystemUpdateAlt, contentDescription = null) },
-            checked = uiState.checkModuleUpdate,
-            onCheckedChange = actions.onSetCheckModuleUpdate,
-        )
+                        title = stringResource(id = R.string.settings_module_check_update),
+                        summary = stringResource(id = R.string.settings_check_update_summary),
+                        startAction = { Icon(Icons.Filled.SystemUpdateAlt, contentDescription = null) },
+                        checked = uiState.checkModuleUpdate,
+                        onCheckedChange = actions.onSetCheckModuleUpdate,
+                    )
                 }
             )
         )
@@ -98,11 +98,11 @@ fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActi
             modifier = GroupModifier,
             content = listOf {
                 ArrowPreference(
-            title = profileTemplate,
-            summary = stringResource(id = R.string.settings_profile_template_summary),
-            startAction = { Icon(Icons.Filled.Description, profileTemplate) },
-            onClick = actions.onOpenProfileTemplate,
-        )
+                    title = profileTemplate,
+                    summary = stringResource(id = R.string.settings_profile_template_summary),
+                    startAction = { Icon(Icons.Filled.Description, profileTemplate) },
+                    onClick = actions.onOpenProfileTemplate,
+                )
             }
         )
     }
@@ -112,11 +112,11 @@ fun GeneralCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActi
         modifier = GroupModifier,
         content = listOf {
             ArrowPreference(
-            title = appLanguage,
-            summary = stringResource(id = R.string.settings_app_language_summary),
-            startAction = { Icon(Icons.Filled.Translate, appLanguage) },
-            onClick = actions.onOpenLanguage,
-        )
+                title = appLanguage,
+                summary = stringResource(id = R.string.settings_app_language_summary),
+                startAction = { Icon(Icons.Filled.Translate, appLanguage) },
+                onClick = actions.onOpenLanguage,
+            )
         }
     )
 }
@@ -128,27 +128,27 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
         content = buildList {
             add {
                 ArrowPreference(
-            title = stringResource(id = R.string.settings_theme),
-            summary = stringResource(id = R.string.settings_theme_summary),
-            startAction = { Icon(Icons.Filled.Palette, stringResource(id = R.string.settings_theme)) },
-            onClick = actions.onOpenTheme,
-        )
+                    title = stringResource(id = R.string.settings_theme),
+                    summary = stringResource(id = R.string.settings_theme_summary),
+                    startAction = { Icon(Icons.Filled.Palette, stringResource(id = R.string.settings_theme)) },
+                    onClick = actions.onOpenTheme,
+                )
             }
             add {
                 ArrowPreference(
-            title = stringResource(id = R.string.wallpaper_title),
-            summary = stringResource(id = R.string.settings_wallpaper_summary),
-            startAction = { Icon(Icons.Filled.Wallpaper, stringResource(id = R.string.wallpaper_title)) },
-            onClick = actions.onOpenWallpaper,
-        )
+                    title = stringResource(id = R.string.wallpaper_title),
+                    summary = stringResource(id = R.string.settings_wallpaper_summary),
+                    startAction = { Icon(Icons.Filled.Wallpaper, stringResource(id = R.string.wallpaper_title)) },
+                    onClick = actions.onOpenWallpaper,
+                )
             }
             add {
                 ArrowPreference(
-            title = stringResource(id = R.string.font_title),
-            summary = stringResource(id = R.string.settings_font_summary),
-            startAction = { Icon(Icons.Filled.FontDownload, stringResource(id = R.string.font_title)) },
-            onClick = actions.onOpenFont,
-        )
+                    title = stringResource(id = R.string.font_title),
+                    summary = stringResource(id = R.string.settings_font_summary),
+                    startAction = { Icon(Icons.Filled.FontDownload, stringResource(id = R.string.font_title)) },
+                    onClick = actions.onOpenFont,
+                )
             }
         }
     )
@@ -174,17 +174,18 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
             val selectedHomeLayout =
                 supportedHomeLayouts.indexOf(uiState.homeLayoutStyle).coerceAtLeast(0)
             OverlayDropdownPreference(
-            title = stringResource(id = R.string.settings_home_layout),
-            summary = stringResource(id = R.string.settings_home_layout_summary),
-            items = homeLayoutItems,
-            startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
-            selectedIndex = selectedHomeLayout,
-            onSelectedIndexChange = { index ->
-                    actions.onSetHomeLayoutStyle(
-                        supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
-                    )
+                title = stringResource(id = R.string.settings_home_layout),
+                summary = stringResource(id = R.string.settings_home_layout_summary),
+                items = homeLayoutItems,
+                startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
+                selectedIndex = selectedHomeLayout,
+                onSelectedIndexChange = {
+                    index ->
+                                       actions.onSetHomeLayoutStyle(
+                                           supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
+                                       )
                 },
-        )
+            )
         }
         item(visible = uiState.homeLayoutStyle == HomeLayoutStyle.STATS) {
             val statsTopItems = listOf(
@@ -192,26 +193,27 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 stringResource(R.string.settings_stats_top_layout_grid),
             )
             OverlayDropdownPreference(
-            title = stringResource(id = R.string.settings_stats_top_layout),
-            items = statsTopItems,
-            startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
-            selectedIndex = if (uiState.statsTopLayout == "grid") 1 else 0,
-            onSelectedIndexChange = { index ->
-                    actions.onSetStatsTopLayout(if (index == 1) "grid" else "list")
+                title = stringResource(id = R.string.settings_stats_top_layout),
+                items = statsTopItems,
+                startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
+                selectedIndex = if (uiState.statsTopLayout == "grid") 1 else 0,
+                onSelectedIndexChange = {
+                    index ->
+                                       actions.onSetStatsTopLayout(if (index == 1) "grid" else "list")
                 },
-        )
+            )
         }
         item(
             visible = uiState.homeLayoutStyle == HomeLayoutStyle.CIRCLE ||
                 (uiState.homeLayoutStyle == HomeLayoutStyle.STATS && uiState.statsTopLayout != "grid")
         ) {
             SwitchPreference(
-            title = stringResource(id = R.string.settings_home_hide_status_tag),
-            summary = stringResource(id = R.string.settings_home_hide_status_tag_summary),
-            startAction = { Icon(Icons.AutoMirrored.Rounded.LabelOff, contentDescription = null) },
-            checked = uiState.listWorkingCardModeHidden,
-            onCheckedChange = actions.onSetListWorkingCardModeHidden,
-        )
+                title = stringResource(id = R.string.settings_home_hide_status_tag),
+                summary = stringResource(id = R.string.settings_home_hide_status_tag_summary),
+                startAction = { Icon(Icons.AutoMirrored.Rounded.LabelOff, contentDescription = null) },
+                checked = uiState.listWorkingCardModeHidden,
+                onCheckedChange = actions.onSetListWorkingCardModeHidden,
+            )
         }
     }
 
@@ -225,39 +227,39 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
     ) {
         item {
             SwitchPreference(
-            title = stringResource(R.string.settings_hide_home_fingerprint),
-            summary = stringResource(R.string.settings_hide_home_fingerprint_summary),
-            startAction = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
-            checked = uiState.hideHomeFingerprint,
-            onCheckedChange = actions.onSetHideHomeFingerprint,
-        )
+                title = stringResource(R.string.settings_hide_home_fingerprint),
+                summary = stringResource(R.string.settings_hide_home_fingerprint_summary),
+                startAction = { Icon(Icons.Filled.Fingerprint, contentDescription = null) },
+                checked = uiState.hideHomeFingerprint,
+                onCheckedChange = actions.onSetHideHomeFingerprint,
+            )
         }
         item(visible = zygiskRowPresent) {
             SwitchPreference(
-            title = stringResource(R.string.settings_hide_home_zygisk),
-            summary = stringResource(R.string.settings_hide_home_zygisk_summary),
-            startAction = { Icon(Icons.Filled.Vaccines, contentDescription = null) },
-            checked = uiState.hideHomeZygisk,
-            onCheckedChange = actions.onSetHideHomeZygisk,
-        )
+                title = stringResource(R.string.settings_hide_home_zygisk),
+                summary = stringResource(R.string.settings_hide_home_zygisk_summary),
+                startAction = { Icon(Icons.Filled.Vaccines, contentDescription = null) },
+                checked = uiState.hideHomeZygisk,
+                onCheckedChange = actions.onSetHideHomeZygisk,
+            )
         }
         item(visible = uiState.susfsDetected) {
             SwitchPreference(
-            title = stringResource(R.string.settings_hide_home_susfs),
-            summary = stringResource(R.string.settings_hide_home_susfs_summary),
-            startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
-            checked = uiState.hideHomeSusfs,
-            onCheckedChange = actions.onSetHideHomeSusfs,
-        )
+                title = stringResource(R.string.settings_hide_home_susfs),
+                summary = stringResource(R.string.settings_hide_home_susfs_summary),
+                startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+                checked = uiState.hideHomeSusfs,
+                onCheckedChange = actions.onSetHideHomeSusfs,
+            )
         }
         item(visible = uiState.folkMountStatus != null && !uiState.folkMountReadError) {
             SwitchPreference(
-            title = stringResource(R.string.settings_hide_home_mount),
-            summary = stringResource(R.string.settings_hide_home_mount_summary),
-            startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
-            checked = uiState.hideHomeMount,
-            onCheckedChange = actions.onSetHideHomeMount,
-        )
+                title = stringResource(R.string.settings_hide_home_mount),
+                summary = stringResource(R.string.settings_hide_home_mount_summary),
+                startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
+                checked = uiState.hideHomeMount,
+                onCheckedChange = actions.onSetHideHomeMount,
+            )
         }
     }
 
@@ -286,40 +288,43 @@ fun BehaviorCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(id = R.string.settings_sucompat_summary)
                     }
                     OverlayDropdownPreference(
-            title = stringResource(id = R.string.settings_sucompat),
-            summary = suSummary,
-            items = suCompatModeItems,
-            startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
-            selectedIndex = uiState.suCompatMode,
-            onSelectedIndexChange = actions.onSetSuCompatMode,
-        )
+                        title = stringResource(id = R.string.settings_sucompat),
+                        summary = suSummary,
+                        items = suCompatModeItems,
+                        startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
+                        selectedIndex = uiState.suCompatMode,
+                        onSelectedIndexChange = actions.onSetSuCompatMode,
+                        enabled = uiState.suCompatStatus == "supported",
+                    )
                 },
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_soft_reboot),
-            summary = stringResource(id = R.string.settings_soft_reboot_summary),
-            startAction = { Icon(Icons.Filled.RestartAlt, contentDescription = null) },
-            checked = uiState.isLateLoadMode || uiState.useSoftReboot,
-            onCheckedChange = actions.onSetUseSoftReboot,
-        )
+                        title = stringResource(id = R.string.settings_soft_reboot),
+                        summary = stringResource(id = R.string.settings_soft_reboot_summary),
+                        startAction = { Icon(Icons.Filled.RestartAlt, contentDescription = null) },
+                        checked = uiState.isLateLoadMode || uiState.useSoftReboot,
+                        onCheckedChange = actions.onSetUseSoftReboot,
+                        enabled = !uiState.isLateLoadMode,
+                    )
                 },
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.enable_web_debugging),
-            summary = stringResource(id = R.string.enable_web_debugging_summary),
-            startAction = { Icon(Icons.Filled.DeveloperMode, contentDescription = null) },
-            checked = uiState.enableWebDebugging,
-            onCheckedChange = actions.onSetEnableWebDebugging,
-        )
+                        title = stringResource(id = R.string.enable_web_debugging),
+                        summary = stringResource(id = R.string.enable_web_debugging_summary),
+                        startAction = { Icon(Icons.Filled.DeveloperMode, contentDescription = null) },
+                        checked = uiState.enableWebDebugging,
+                        onCheckedChange = actions.onSetEnableWebDebugging,
+                    )
                 },
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_auto_jailbreak),
-            summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
-            startAction = { Icon(Icons.Filled.FlashOn, contentDescription = null) },
-            checked = uiState.autoJailbreak,
-            onCheckedChange = actions.onSetAutoJailbreak,
-        )
+                        title = stringResource(id = R.string.settings_auto_jailbreak),
+                        summary = stringResource(id = R.string.settings_auto_jailbreak_summary),
+                        startAction = { Icon(Icons.Filled.FlashOn, contentDescription = null) },
+                        checked = uiState.autoJailbreak,
+                        onCheckedChange = actions.onSetAutoJailbreak,
+                        enabled = uiState.isLateLoadMode,
+                    )
                 }
             )
         )
@@ -343,21 +348,22 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(id = R.string.settings_kernel_umount_summary)
                     }
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_kernel_umount),
-            summary = umountSummary,
-            startAction = { Icon(Icons.Filled.LayersClear, contentDescription = null) },
-            checked = uiState.isKernelUmountEnabled,
-            onCheckedChange = actions.onSetKernelUmountEnabled,
-        )
+                        title = stringResource(id = R.string.settings_kernel_umount),
+                        summary = umountSummary,
+                        startAction = { Icon(Icons.Filled.LayersClear, contentDescription = null) },
+                        checked = uiState.isKernelUmountEnabled,
+                        onCheckedChange = actions.onSetKernelUmountEnabled,
+                        enabled = uiState.kernelUmountStatus == "supported",
+                    )
                 },
                 {
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_umount_modules_default),
-            summary = stringResource(id = R.string.settings_umount_modules_default_summary),
-            startAction = { Icon(Icons.AutoMirrored.Filled.Rule, contentDescription = null) },
-            checked = uiState.isDefaultUmountModules,
-            onCheckedChange = actions.onSetDefaultUmountModules,
-        )
+                        title = stringResource(id = R.string.settings_umount_modules_default),
+                        summary = stringResource(id = R.string.settings_umount_modules_default_summary),
+                        startAction = { Icon(Icons.AutoMirrored.Filled.Rule, contentDescription = null) },
+                        checked = uiState.isDefaultUmountModules,
+                        onCheckedChange = actions.onSetDefaultUmountModules,
+                    )
                 },
                 {
                     val mountViewFilterSummary = when (uiState.mountViewFilterStatus) {
@@ -368,12 +374,14 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(R.string.settings_mount_view_filter_summary)
                     }
                     SwitchPreference(
-            title = stringResource(R.string.settings_mount_view_filter),
-            summary = mountViewFilterSummary,
-            startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
-            checked = uiState.isMountViewFilterEnabled,
-            onCheckedChange = actions.onSetMountViewFilterEnabled,
-        )
+                        title = stringResource(R.string.settings_mount_view_filter),
+                        summary = mountViewFilterSummary,
+                        startAction = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+                        checked = uiState.isMountViewFilterEnabled,
+                        onCheckedChange = actions.onSetMountViewFilterEnabled,
+                        enabled = uiState.mountViewFilterStatus == "supported" &&
+                                  !uiState.isMountViewFilterWriting,
+                    )
                 },
                 {
                     val avcSpoofSummary = when (uiState.avcSpoofStatus) {
@@ -383,12 +391,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(id = R.string.settings_avc_spoof_summary)
                     }
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_avc_spoof),
-            summary = avcSpoofSummary,
-            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
-            checked = uiState.isAvcSpoofEnabled,
-            onCheckedChange = actions.onSetAvcSpoofEnabled,
-        )
+                        title = stringResource(id = R.string.settings_avc_spoof),
+                        summary = avcSpoofSummary,
+                        startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+                        checked = uiState.isAvcSpoofEnabled,
+                        onCheckedChange = actions.onSetAvcSpoofEnabled,
+                        enabled = uiState.avcSpoofStatus == "supported" && !uiState.isAvcSpoofWriting,
+                    )
                 },
                 {
                     val sulogSummary = when (uiState.sulogStatus) {
@@ -398,12 +407,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(id = R.string.settings_sulog_summary)
                     }
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_sulog),
-            summary = sulogSummary,
-            startAction = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null) },
-            checked = uiState.isSulogEnabled,
-            onCheckedChange = actions.onSetSulogEnabled,
-        )
+                        title = stringResource(id = R.string.settings_sulog),
+                        summary = sulogSummary,
+                        startAction = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null) },
+                        checked = uiState.isSulogEnabled,
+                        onCheckedChange = actions.onSetSulogEnabled,
+                        enabled = uiState.sulogStatus == "supported",
+                    )
                 }
             )
         )
@@ -415,12 +425,12 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                 modifier = GroupModifier,
                 content = listOf {
                     SwitchPreference(
-            title = stringResource(id = R.string.allow_any_dynamic_manager),
-            summary = stringResource(id = R.string.allow_any_dynamic_manager_summary),
-            startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
-            checked = uiState.allowAnyDynamicManager,
-            onCheckedChange = actions.onSetAllowAnyDynamicManager,
-        )
+                        title = stringResource(id = R.string.allow_any_dynamic_manager),
+                        summary = stringResource(id = R.string.allow_any_dynamic_manager_summary),
+                        startAction = { Icon(Icons.Filled.AdminPanelSettings, contentDescription = null) },
+                        checked = uiState.allowAnyDynamicManager,
+                        onCheckedChange = actions.onSetAllowAnyDynamicManager,
+                    )
                 }
             )
         }
@@ -493,15 +503,17 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         }
                     }
                     OverlayDropdownPreference(
-            title = stringResource(id = R.string.settings_folk_mount),
-            summary = summary,
-            items = if (available) modeItems else emptyList(),
-            startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
-            selectedIndex = mode?.ordinal ?: 0,
-            onSelectedIndexChange = { index ->
-                            FolkMountMode.entries.getOrNull(index)?.let(actions.onSetFolkMountMode)
+                        title = stringResource(id = R.string.settings_folk_mount),
+                        summary = summary,
+                        items = if (available) modeItems else emptyList(),
+                        startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
+                        selectedIndex = mode?.ordinal ?: 0,
+                        onSelectedIndexChange = {
+                            index ->
+                                                       FolkMountMode.entries.getOrNull(index)?.let(actions.onSetFolkMountMode)
                         },
-        )
+                        enabled = available && !uiState.isFolkMountLoading && !uiState.isFolkMountWriting,
+                    )
                 },
                 {
                     // NoMount is its own page: the row only reports the driver
@@ -529,11 +541,11 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         )
                     }
                     ArrowPreference(
-            title = stringResource(id = R.string.settings_nomount),
-            summary = nomountSummary,
-            startAction = { Icon(Icons.Filled.Layers, null) },
-            onClick = actions.onOpenNomount,
-        )
+                        title = stringResource(id = R.string.settings_nomount),
+                        summary = nomountSummary,
+                        startAction = { Icon(Icons.Filled.Layers, null) },
+                        onClick = actions.onOpenNomount,
+                    )
                 },
                 {
                     // ReKernel-X is an external LKM: the row owns its module markers only, so
@@ -549,29 +561,29 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     // TEESimulator keeps its state on disk, not in the settings snapshot: this row
                     // is a door, and the page reads the module itself when it opens.
                     ArrowPreference(
-            title = stringResource(id = R.string.settings_teesim),
-            summary = stringResource(id = R.string.teesim_search_summary),
-            startAction = { Icon(Icons.Filled.VerifiedUser, null) },
-            onClick = actions.onOpenTeesim,
-        )
+                        title = stringResource(id = R.string.settings_teesim),
+                        summary = stringResource(id = R.string.teesim_search_summary),
+                        startAction = { Icon(Icons.Filled.VerifiedUser, null) },
+                        onClick = actions.onOpenTeesim,
+                    )
                 },
                 {
                     // UTS View has enough configuration that a switch in the
                     // settings list would misrepresent it as a single toggle.
                     ArrowPreference(
-            title = stringResource(id = R.string.settings_uts_view),
-            summary = stringResource(id = R.string.settings_uts_view_summary),
-            startAction = { Icon(Icons.Rounded.TextFields, null) },
-            onClick = actions.onOpenUtsView,
-        )
+                        title = stringResource(id = R.string.settings_uts_view),
+                        summary = stringResource(id = R.string.settings_uts_view_summary),
+                        startAction = { Icon(Icons.Rounded.TextFields, null) },
+                        onClick = actions.onOpenUtsView,
+                    )
                 },
                 {
                     ArrowPreference(
-            title = stringResource(id = R.string.settings_netisolate),
-            summary = stringResource(id = R.string.settings_netisolate_summary),
-            startAction = { Icon(Icons.Filled.WifiOff, null) },
-            onClick = actions.onOpenNetIsolate,
-        )
+                        title = stringResource(id = R.string.settings_netisolate),
+                        summary = stringResource(id = R.string.settings_netisolate_summary),
+                        startAction = { Icon(Icons.Filled.WifiOff, null) },
+                        onClick = actions.onOpenNetIsolate,
+                    )
                 }
             )
         )
@@ -593,12 +605,13 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(id = R.string.settings_selinux_hide_summary)
                     }
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_selinux_hide),
-            summary = selinuxHideSummary,
-            startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
-            checked = uiState.isSelinuxHideEnabled,
-            onCheckedChange = actions.onSetSelinuxHideEnabled,
-        )
+                        title = stringResource(id = R.string.settings_selinux_hide),
+                        summary = selinuxHideSummary,
+                        startAction = { Icon(Icons.Filled.Security, contentDescription = null) },
+                        checked = uiState.isSelinuxHideEnabled,
+                        onCheckedChange = actions.onSetSelinuxHideEnabled,
+                        enabled = uiState.selinuxHideStatus == "supported",
+                    )
                 },
                 {
                     val modeDisplay = when (uiState.selinuxMode) {
@@ -608,17 +621,12 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(R.string.selinux_status_unknown)
                     }
                     val modeTitle = stringResource(R.string.settings_selinux_mode)
-                    SegmentedListItem(
+                    ArrowPreference(
+                        title = modeTitle,
+                        summary = stringResource(R.string.settings_selinux_current_mode, modeDisplay),
+                        startAction = { Icon(Icons.Filled.Lock, modeTitle) },
                         onClick = { showSELinuxModeDialog = true },
                         enabled = !uiState.isSELinuxModeWriting,
-                        headlineContent = { Text(modeTitle) },
-                        supportingContent = {
-                            Text(stringResource(R.string.settings_selinux_current_mode, modeDisplay))
-                        },
-                        leadingContent = { Icon(Icons.Filled.Lock, modeTitle) },
-                        trailingContent = {
-                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                        },
                     )
                 },
                 {
@@ -629,12 +637,13 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(id = R.string.settings_adb_root_summary)
                     }
                     SwitchPreference(
-            title = stringResource(id = R.string.settings_adb_root),
-            summary = adbRootSummary,
-            startAction = { Icon(Icons.Filled.Adb, contentDescription = null) },
-            checked = uiState.isAdbRootEnabled,
-            onCheckedChange = actions.onSetAdbRootEnabled,
-        )
+                        title = stringResource(id = R.string.settings_adb_root),
+                        summary = adbRootSummary,
+                        startAction = { Icon(Icons.Filled.Adb, contentDescription = null) },
+                        checked = uiState.isAdbRootEnabled,
+                        onCheckedChange = actions.onSetAdbRootEnabled,
+                        enabled = uiState.adbRootStatus == "supported",
+                    )
                 },
                 {
                     val summary = when (uiState.shellSuAdbOnlyStatus) {
@@ -644,12 +653,13 @@ fun SecurityCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         else -> stringResource(R.string.settings_shell_su_adb_only_summary)
                     }
                     SwitchPreference(
-            title = stringResource(R.string.settings_shell_su_adb_only),
-            summary = summary,
-            startAction = { Icon(Icons.Filled.VerifiedUser, contentDescription = null) },
-            checked = uiState.isShellSuAdbOnlyEnabled,
-            onCheckedChange = actions.onSetShellSuAdbOnlyEnabled,
-        )
+                        title = stringResource(R.string.settings_shell_su_adb_only),
+                        summary = summary,
+                        startAction = { Icon(Icons.Filled.VerifiedUser, contentDescription = null) },
+                        checked = uiState.isShellSuAdbOnlyEnabled,
+                        onCheckedChange = actions.onSetShellSuAdbOnlyEnabled,
+                        enabled = uiState.shellSuAdbOnlyStatus == "supported",
+                    )
                 }
             )
         )

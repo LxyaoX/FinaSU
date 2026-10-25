@@ -53,19 +53,19 @@ fun UninstallDialogMaterial(
                     content = options.map { type ->
                         {
                             ArrowPreference(
-            title = stringResource(type.title),
-            summary = stringResource(type.message),
-            startAction = {
+                                title = stringResource(type.title),
+                                summary = stringResource(type.message),
+                                startAction = {
                                     Icon(
                                         imageVector = type.icon,
                                         contentDescription = null
                                     )
                                 },
-            onClick = {
+                                onClick = {
                                     showConfirmDialog.value = true
                                     runType.value = type
                                 },
-        )
+                            )
                         }
                     }
                 )

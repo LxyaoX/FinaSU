@@ -110,31 +110,31 @@ internal fun ModuleSortSheet(
             SegmentedColumn {
                 item {
                     SwitchPreference(
-            title = stringResource(AppR.string.module_sort_enabled_first),
-            checked = enabledFirst,
-            onCheckedChange = onEnabledFirstChange,
-        )
+                        title = stringResource(AppR.string.module_sort_enabled_first),
+                        checked = enabledFirst,
+                        onCheckedChange = onEnabledFirstChange,
+                    )
                 }
             }
 
             SegmentedColumn {
                 item {
                     ArrowPreference(
-            title = stringResource(AppR.string.module_sort_custom_order),
-            summary = stringResource(AppR.string.module_sort_custom_order_summary),
-            onClick = {
+                        title = stringResource(AppR.string.module_sort_custom_order),
+                        summary = stringResource(AppR.string.module_sort_custom_order_summary),
+                        onClick = {
                             orderSnapshot = displayModules
                             showOrderDialog = true
                         },
-        )
+                    )
                 }
                 if (customOrder.isNotEmpty()) {
                     item {
                         ArrowPreference(
-            title = stringResource(AppR.string.module_sort_reset_custom_order),
-            summary = stringResource(AppR.string.module_sort_reset_custom_order_summary),
-            onClick = onResetCustomOrder,
-        )
+                            title = stringResource(AppR.string.module_sort_reset_custom_order),
+                            summary = stringResource(AppR.string.module_sort_reset_custom_order_summary),
+                            onClick = onResetCustomOrder,
+                        )
                     }
                 }
             }

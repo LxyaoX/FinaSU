@@ -81,50 +81,50 @@ fun BackupSettingsContent() {
     SegmentedColumn(modifier = BackupGroupModifier, title = stringResource(R.string.backup_section_targets)) {
         item {
             SwitchPreference(
-            title = stringResource(R.string.backup_local_enabled),
-            summary = stringResource(R.string.backup_local_summary),
-            checked = state.localEnabled,
-            onCheckedChange = viewModel::setLocalEnabled,
-        )
+                title = stringResource(R.string.backup_local_enabled),
+                summary = stringResource(R.string.backup_local_summary),
+                checked = state.localEnabled,
+                onCheckedChange = viewModel::setLocalEnabled,
+            )
         }
         item {
             SwitchPreference(
-            title = stringResource(R.string.backup_webdav_enabled),
-            checked = state.webDavEnabled,
-            onCheckedChange = viewModel::setWebDavEnabled,
-        )
+                title = stringResource(R.string.backup_webdav_enabled),
+                checked = state.webDavEnabled,
+                onCheckedChange = viewModel::setWebDavEnabled,
+            )
         }
         item {
             ArrowPreference(
-            title = stringResource(R.string.backup_open_folder),
-            onClick = { openDownloads(context) },
-        )
+                title = stringResource(R.string.backup_open_folder),
+                onClick = { openDownloads(context) },
+            )
         }
         item {
             SwitchPreference(
-            title = stringResource(R.string.backup_before_flash),
-            summary = stringResource(R.string.backup_before_flash_summary),
-            checked = state.backupBeforeFlash,
-            onCheckedChange = viewModel::setBackupBeforeFlash,
-        )
+                title = stringResource(R.string.backup_before_flash),
+                summary = stringResource(R.string.backup_before_flash_summary),
+                checked = state.backupBeforeFlash,
+                onCheckedChange = viewModel::setBackupBeforeFlash,
+            )
         }
     }
 
     SegmentedColumn(modifier = BackupGroupModifier, title = stringResource(R.string.backup_section_content)) {
         item {
             SwitchPreference(
-            title = stringResource(R.string.backup_modules),
-            summary = stringResource(R.string.backup_modules_summary),
-            checked = state.modulesEnabled,
-            onCheckedChange = viewModel::setModulesEnabled,
-        )
+                title = stringResource(R.string.backup_modules),
+                summary = stringResource(R.string.backup_modules_summary),
+                checked = state.modulesEnabled,
+                onCheckedChange = viewModel::setModulesEnabled,
+            )
         }
         item {
             SwitchPreference(
-            title = stringResource(R.string.backup_allowlist),
-            checked = state.allowlistEnabled,
-            onCheckedChange = viewModel::setAllowlistEnabled,
-        )
+                title = stringResource(R.string.backup_allowlist),
+                checked = state.allowlistEnabled,
+                onCheckedChange = viewModel::setAllowlistEnabled,
+            )
         }
     }
 
@@ -136,8 +136,8 @@ fun BackupSettingsContent() {
             if (state.availablePartitions.isEmpty()) {
                 item {
                     ArrowPreference(
-            title = stringResource(R.string.backup_no_partitions),
-        )
+                        title = stringResource(R.string.backup_no_partitions),
+                    )
                 }
             }
             state.availablePartitions.forEach { partition ->
@@ -156,23 +156,19 @@ fun BackupSettingsContent() {
 
     SegmentedColumn(modifier = BackupGroupModifier) {
         item {
-            SegmentedListItem(
+            ArrowPreference(
+                title = stringResource(
+                            if (state.busy) R.string.backup_running else R.string.backup_now
+                        ),
                 onClick = viewModel::backupNow,
                 enabled = state.canBackup && !state.busy,
-                headlineContent = {
-                    Text(
-                        stringResource(
-                            if (state.busy) R.string.backup_running else R.string.backup_now
-                        )
-                    )
-                },
             )
         }
         item {
             ArrowPreference(
-            title = stringResource(R.string.backup_open_list),
-            onClick = { navigator.push(Route.BackupList) },
-        )
+                title = stringResource(R.string.backup_open_list),
+                onClick = { navigator.push(Route.BackupList) },
+            )
         }
     }
 
@@ -233,17 +229,17 @@ private fun WebDavSettingsSection(
             )
         }
         item {
-            SegmentedListItem(
+            ArrowPreference(
+                title = stringResource(R.string.backup_webdav_test),
                 onClick = viewModel::testWebDav,
                 enabled = url.isNotBlank(),
-                headlineContent = { Text(stringResource(R.string.backup_webdav_test)) },
             )
         }
         item {
-            SegmentedListItem(
+            ArrowPreference(
+                title = stringResource(R.string.backup_webdav_browse),
                 onClick = { navigator.push(Route.WebDavBrowser()) },
                 enabled = url.isNotBlank(),
-                headlineContent = { Text(stringResource(R.string.backup_webdav_browse)) },
             )
         }
     }
