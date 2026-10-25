@@ -19,10 +19,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
-import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 
 /**
  * The advanced home title image and its opacity/dim/offset controls.
@@ -49,10 +50,12 @@ fun AdvancedTitleSettings(modifier: Modifier = Modifier) {
     val filename = VisualMediaConfig.titleFilename
     SegmentedColumn(modifier = modifier) {
         item {
-            SegmentedSwitchItem(
-                icon = Icons.Rounded.Image,
+            SwitchPreference(
                 title = title,
                 summary = stringResource(R.string.media_title_image_summary),
+                startAction = {
+                    Icon(Icons.Rounded.Image, contentDescription = title)
+                },
                 checked = enabled,
                 onCheckedChange = {
                     VisualMediaConfig.titleEnabled = it
