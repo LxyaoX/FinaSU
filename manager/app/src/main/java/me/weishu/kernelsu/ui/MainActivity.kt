@@ -92,6 +92,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
+import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.ui.component.bottombar.BottomBar
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarDestination
 import me.weishu.kernelsu.ui.component.bottombar.FloatingBar
