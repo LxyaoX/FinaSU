@@ -110,7 +110,8 @@ fun TonalCard(
         else -> Modifier
     }
 
-    if (wallpaperRole != null) {
+    val tokens = LocalFolkWallpaperTokens.current
+    if (tokens != null && wallpaperRole != null) {
         FolkWallpaperSurface(
             role = wallpaperRole,
             shape = shape,
@@ -122,8 +123,13 @@ fun TonalCard(
         }
     } else if (containerColor == MaterialTheme.colorScheme.surfaceBright) {
         // The neutral card is the one miuix should draw: it is what the home and settings surfaces
-        // are made of. A card that carries a semantic colour (errorContainer, secondaryContainer…)
-        // keeps Material's tinted card, because miuix would paint it as a plain surface.
+        // are made of, and it is the same fill a settings group has, so a grid of category tiles or
+        // a density panel no longer sits on Material's surfaceBright while the group below it sits on
+        // miuix's surfaceContainer. A card that carries a semantic colour (errorContainer,
+        // secondaryContainer…) keeps Material's tinted card, because miuix would paint it plain.
+        //
+        // Off wallpaper this branch must win even when a wallpaperRole was passed: the role only
+        // describes how the fill should join the wallpaper layering, which is not in play here.
         MiuixCard(
             modifier = modifier.then(originModifier).then(clickModifier),
             cornerRadius = cornerRadius,
