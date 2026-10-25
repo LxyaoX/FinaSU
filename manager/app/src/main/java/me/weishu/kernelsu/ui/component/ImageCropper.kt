@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 private const val MAX_CROP_SIDE = 1600
 private const val MAX_SOURCE_SIDE = 2048
@@ -82,7 +82,7 @@ fun SurfaceCropDialog(
         Box(Modifier.fillMaxSize().background(Color.Black)) {
             val image = bitmap
             if (loading) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
+                MiuixCircularProgressIndicator(Modifier.align(Alignment.Center))
             } else if (image != null) {
                 SurfaceCropEditor(
                     bitmap = image,
@@ -182,7 +182,7 @@ private fun SurfaceCropEditor(
             TextButton(onClick = onCancel, enabled = !saving) {
                 Text(stringResource(android.R.string.cancel), color = Color.White)
             }
-            if (saving) CircularProgressIndicator()
+            if (saving) MiuixCircularProgressIndicator()
             if (failed) {
                 Text(stringResource(R.string.wallpaper_save_failed), color = Color.White, modifier = Modifier.weight(1f))
             }

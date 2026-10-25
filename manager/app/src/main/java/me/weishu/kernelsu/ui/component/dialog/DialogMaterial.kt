@@ -2,7 +2,6 @@ package me.weishu.kernelsu.ui.component.dialog
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,6 +16,7 @@ import androidx.compose.ui.window.DialogProperties
 import me.weishu.kernelsu.ui.component.markdown.MarkdownContent
 import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 import me.weishu.kernelsu.ui.component.material.FolkTextButton
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 @Composable
 fun LoadingDialogMaterial(
@@ -37,7 +37,7 @@ fun LoadingDialogMaterial(
                 Box(
                     contentAlignment = Alignment.Center,
                 ) {
-                    LoadingIndicator()
+                    MiuixCircularProgressIndicator()
                 }
             }
         }

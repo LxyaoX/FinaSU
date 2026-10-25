@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,6 +48,7 @@ import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.ui.viewmodel.ApiMarketplaceViewModel
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 @Composable
 fun ApiMarketplaceScreen() {
@@ -93,7 +93,7 @@ fun ApiMarketplaceScreen() {
             val items = viewModel.items
             when {
                 viewModel.isLoading && items.isEmpty() -> {
-                    LoadingIndicator(modifier = Modifier.align(Alignment.Center))
+                    MiuixCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
                 viewModel.errorMessage != null && items.isEmpty() -> {

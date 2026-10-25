@@ -51,7 +51,6 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.SelectableDropdownMenuItem
@@ -118,6 +117,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 @Composable
 fun ModuleRepoScreenMaterial(
@@ -232,7 +232,7 @@ fun ModuleRepoScreenMaterial(
             .padding(innerPadding)
         when {
             state.isLoading -> Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
-                LoadingIndicator()
+                MiuixCircularProgressIndicator()
             }
 
             state.error != null -> RepoMessageState(
@@ -607,7 +607,7 @@ private fun RepositoryPickerDialog(
                         .padding(24.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    LoadingIndicator()
+                    MiuixCircularProgressIndicator()
                 }
 
                 repositories.isEmpty() -> Text(

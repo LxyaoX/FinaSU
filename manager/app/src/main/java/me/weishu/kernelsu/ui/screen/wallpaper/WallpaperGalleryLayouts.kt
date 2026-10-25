@@ -22,7 +22,6 @@ import androidx.compose.material.icons.outlined.BrokenImage
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +57,7 @@ import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperItem
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 private val SectionSpacing = 8.dp
 private val ScreenPadding = 16.dp
@@ -235,7 +235,7 @@ fun WallpaperCard(
                 modifier = Modifier.fillMaxSize(),
             )
             when (state) {
-                is AsyncImagePainter.State.Loading -> LoadingIndicator(modifier = Modifier.size(CardIconSize))
+                is AsyncImagePainter.State.Loading -> MiuixCircularProgressIndicator(modifier = Modifier.size(CardIconSize))
                 is AsyncImagePainter.State.Error -> Icon(
                     Icons.Outlined.BrokenImage,
                     contentDescription = stringResource(R.string.wallpaper_gallery_retry),

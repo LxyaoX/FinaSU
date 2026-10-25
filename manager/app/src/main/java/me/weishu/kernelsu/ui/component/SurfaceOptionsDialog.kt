@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,6 +27,7 @@ import me.weishu.kernelsu.wallpaper.surface.SurfaceId
 import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 /**
  * The long-press editor for any registered surface: the same controls as the settings panel,
@@ -96,7 +96,7 @@ fun SurfaceOptionsDialog(
         title = { Text(stringResource(descriptor.titleRes)) },
         text = {
             if (isSaving) {
-                CircularProgressIndicator()
+                MiuixCircularProgressIndicator()
             } else {
                 SegmentedColumn(
                     modifier = Modifier.verticalScroll(rememberScrollState()),

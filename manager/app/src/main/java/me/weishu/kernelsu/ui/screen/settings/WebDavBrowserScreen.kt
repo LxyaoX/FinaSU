@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Folder
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,6 +62,7 @@ import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 /** How a remote file can be previewed. */
 private enum class WebDavPreviewKind { TEXT, IMAGE, BINARY }
@@ -270,7 +270,7 @@ private fun WebDavPreviewDialog(
         title = { Text(entry.name) },
         text = {
             when {
-                loading -> CircularProgressIndicator()
+                loading -> MiuixCircularProgressIndicator()
                 failure != null -> Text(failure.orEmpty())
                 kind == WebDavPreviewKind.IMAGE -> AsyncImage(
                     model = ImageRequest.Builder(context)

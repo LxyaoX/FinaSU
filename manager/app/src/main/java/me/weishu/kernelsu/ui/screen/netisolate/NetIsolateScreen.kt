@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -86,6 +85,7 @@ import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 private val NETISOLATE_EVENT_TIME: DateTimeFormatter =
     DateTimeFormatter.ofPattern("HH:mm:ss", Locale.ROOT)
@@ -591,7 +591,7 @@ private fun NetIsolateEventsSheet(
 
             when {
                 loading -> {
-                    CircularProgressIndicator(
+                    MiuixCircularProgressIndicator(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(24.dp),

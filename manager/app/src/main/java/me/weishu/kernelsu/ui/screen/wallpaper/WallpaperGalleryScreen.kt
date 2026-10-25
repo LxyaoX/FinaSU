@@ -21,7 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -60,6 +59,7 @@ import me.weishu.kernelsu.ui.viewmodel.WallpaperGalleryViewModel
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperDownloader
 import me.weishu.kernelsu.wallpaper.gallery.WallpaperItem
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -172,7 +172,7 @@ fun WallpaperGalleryScreen() {
 @Composable
 private fun GalleryLoading(text: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        LoadingIndicator()
+        MiuixCircularProgressIndicator()
         Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
