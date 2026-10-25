@@ -141,7 +141,6 @@ private fun WallpaperGroupBackground(
 @DslMarker
 annotation class SegmentedColumnDsl
 
-@Composable
 /**
  * Set while a [SegmentedColumn] draws its own card behind the rows.
  *
@@ -151,6 +150,7 @@ annotation class SegmentedColumnDsl
  */
 internal val LocalSegmentedCardGroup = compositionLocalOf { false }
 
+@Composable
 private fun defaultSegmentedColors(): ListItemColors {
     // In wallpaper mode each row carries the group material itself, so the list reads as one
     // translucent group instead of sitting on a solid surface.
