@@ -5,23 +5,16 @@ import android.system.Os
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.BuildConfig
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.HomeMetrics
-import me.weishu.kernelsu.data.MetricsHistory
-import me.weishu.kernelsu.data.SystemMetricsCollector
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.getKernelVersion
@@ -105,33 +98,6 @@ class HomeViewModel(
             }
         }
     }
-
-    /**
-     * Live device/storage metrics for the home screen. Polled only while a consumer collects the
-     * flow (the focus layout), and stopped a few seconds after it leaves.
-     */
-    val metrics: StateFlow<HomeMetrics> = flow {
-        val cpuTemperature = ArrayDeque<Float>()
-        val memoryUsage = ArrayDeque<Float>()
-        while (true) {
-            val storage = SystemMetricsCollector.collectStorageStatus()
-            val device = SystemMetricsCollector.collectDeviceStatus(ksuApp)
-            device.cpuTemperatureC?.let { cpuTemperature.record(it) }
-            if (storage.ramTotalBytes > 0L) memoryUsage.record(storage.ramUsedFraction * 100f)
-            emit(
-                HomeMetrics(
-                    device = device,
-                    storage = storage,
-                    history = MetricsHistory(
-                        cpuTemperature = cpuTemperature.toList(),
-                        memoryUsage = memoryUsage.toList(),
-                    ),
-                )
-            )
-            delay(METRICS_POLL_INTERVAL_MS)
-        }
-    }.flowOn(Dispatchers.IO)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(METRICS_STOP_TIMEOUT_MS), HomeMetrics())
 
     fun refresh() {
         refreshSusfs()
@@ -279,17 +245,3 @@ class HomeViewModel(
     }
 }
 
-/** How often the home screen refreshes its device/storage metrics. */
-private const val METRICS_POLL_INTERVAL_MS = 5_000L
-
-/** How long the metrics keep polling after the last collector goes away. */
-private const val METRICS_STOP_TIMEOUT_MS = 5_000L
-
-/** How many samples the wave charts of the stats board keep, oldest dropped first. */
-private const val METRICS_HISTORY_SIZE = 30
-
-/** Appends a sample, keeping the buffer at its fixed length. */
-private fun ArrayDeque<Float>.record(value: Float) {
-    addLast(value)
-    while (size > METRICS_HISTORY_SIZE) removeFirst()
-}

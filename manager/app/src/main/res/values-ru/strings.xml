@@ -367,16 +367,6 @@
     <string name="group_contains_apps">Содержит %d приложений</string>
     <string name="settings_theme">Тема</string>
     <string name="settings_theme_summary">Выберите режим темы приложения.</string>
-    <string name="settings_home_layout">Макет главного экрана</string>
-    <string name="settings_home_layout_summary">Выберите способ оформления главного экрана.</string>
-    <string name="settings_home_layout_circle">CircleUI</string>
-    <string name="settings_home_layout_grid">GridUI</string>
-    <string name="settings_home_layout_focus">FocusUI</string>
-    <string name="settings_home_layout_dashboard">DashboardUI</string>
-    <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_stats_top_layout">Макет верхней части</string>
-    <string name="settings_stats_top_layout_list">Список</string>
-    <string name="settings_stats_top_layout_grid">Сетка</string>
     <string name="settings_home_hide_status_tag">Скрыть метку состояния</string>
     <string name="settings_home_hide_status_tag_summary">Скрыть метку режима работы на карточке состояния главного экрана.</string>
     <string name="superuser_search_hint">Поиск приложений</string>

@@ -47,7 +47,6 @@ class MainActivityViewModel(
             pageScale = settingRepo.pageScale,
             enableNavigationBadge = settingRepo.enableNavigationBadge,
             moduleDescriptionMaxLines = settingRepo.moduleDescriptionMaxLines,
-            homeLayoutStyle = settingRepo.homeLayoutStyle,
         )
     }
 

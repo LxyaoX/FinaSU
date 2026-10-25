@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
-import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountDriverState
 import me.weishu.kernelsu.ui.component.KsuIsValid
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -159,54 +158,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
         title = stringResource(R.string.settings_section_layout),
     ) {
         item {
-            val supportedHomeLayouts = HomeLayoutStyle.supported
-            val homeLayoutItems = supportedHomeLayouts.map { style ->
-                stringResource(
-                    when (style) {
-                        HomeLayoutStyle.GRID -> R.string.settings_home_layout_grid
-                        HomeLayoutStyle.FOCUS -> R.string.settings_home_layout_focus
-                        HomeLayoutStyle.DASHBOARD -> R.string.settings_home_layout_dashboard
-                        HomeLayoutStyle.STATS -> R.string.settings_home_layout_stats
-                        else -> R.string.settings_home_layout_circle
-                    }
-                )
-            }
-            val selectedHomeLayout =
-                supportedHomeLayouts.indexOf(uiState.homeLayoutStyle).coerceAtLeast(0)
-            OverlayDropdownPreference(
-                title = stringResource(id = R.string.settings_home_layout),
-                summary = stringResource(id = R.string.settings_home_layout_summary),
-                items = homeLayoutItems,
-                startAction = { Icon(Icons.Filled.GridView, contentDescription = null) },
-                selectedIndex = selectedHomeLayout,
-                onSelectedIndexChange = {
-                    index ->
-                                       actions.onSetHomeLayoutStyle(
-                                           supportedHomeLayouts.getOrElse(index) { HomeLayoutStyle.DEFAULT }
-                                       )
-                },
-            )
-        }
-        item(visible = uiState.homeLayoutStyle == HomeLayoutStyle.STATS) {
-            val statsTopItems = listOf(
-                stringResource(R.string.settings_stats_top_layout_list),
-                stringResource(R.string.settings_stats_top_layout_grid),
-            )
-            OverlayDropdownPreference(
-                title = stringResource(id = R.string.settings_stats_top_layout),
-                items = statsTopItems,
-                startAction = { Icon(Icons.Rounded.SpaceDashboard, contentDescription = null) },
-                selectedIndex = if (uiState.statsTopLayout == "grid") 1 else 0,
-                onSelectedIndexChange = {
-                    index ->
-                                       actions.onSetStatsTopLayout(if (index == 1) "grid" else "list")
-                },
-            )
-        }
-        item(
-            visible = uiState.homeLayoutStyle == HomeLayoutStyle.CIRCLE ||
-                (uiState.homeLayoutStyle == HomeLayoutStyle.STATS && uiState.statsTopLayout != "grid")
-        ) {
             SwitchPreference(
                 title = stringResource(id = R.string.settings_home_hide_status_tag),
                 summary = stringResource(id = R.string.settings_home_hide_status_tag_summary),

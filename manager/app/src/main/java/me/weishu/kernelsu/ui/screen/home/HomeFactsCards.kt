@@ -9,16 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeveloperBoard
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material.icons.filled.Vaccines
-import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,111 +23,12 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.theme.FolkType
-import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
-import me.weishu.kernelsu.wallpaper.surface.SurfaceId
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-
-/** The manager build and the policy it runs under, or the system facts the stats board closes with. */
-@Composable
-internal fun HomeFactsTile(
-    state: HomeUiState,
-    title: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    background: SurfaceConfig? = null,
-    onLongClick: (() -> Unit)? = null,
-    surfaceId: SurfaceId? = null,
-    onSusfs: () -> Unit = {},
-) {
-    val display = rememberHomeDisplaySettings()
-    HomeTileCard(
-        title = title,
-        icon = icon,
-        modifier = modifier.fillMaxWidth(),
-        background = background,
-        onLongClick = onLongClick,
-        surfaceId = surfaceId,
-    ) {
-        HomeFactRow(
-            label = stringResource(R.string.home_manager_version),
-            value = state.systemInfo.managerVersion,
-        )
-        HomeFactRow(
-            label = stringResource(R.string.home_kernel),
-            value = state.systemInfo.kernelVersion,
-        )
-        state.systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
-            HomeFactRow(
-                label = stringResource(R.string.home_kernel_full_version),
-                value = value,
-            )
-        }
-        HomeFactRow(
-            label = stringResource(R.string.home_device_model),
-            value = state.systemInfo.deviceModel,
-        )
-        if (!display.hideFingerprint) {
-            HomeFactRow(
-                label = stringResource(R.string.home_fingerprint),
-                value = state.systemInfo.fingerprint,
-            )
-        }
-        HomeFactRow(
-            label = stringResource(R.string.home_selinux_status),
-            value = selinuxDisplayName(state.systemInfo.selinuxStatus),
-        )
-        HomeFactRow(
-            label = stringResource(R.string.home_seccomp_status),
-            value = seccompDisplayName(state.systemInfo.seccompStatus),
-        )
-        if (!display.hideZygisk) {
-            state.zygiskProvider?.let { provider ->
-                HomeFactRow(
-                    label = stringResource(R.string.home_zygisk_implement),
-                    value = provider,
-                )
-            }
-        }
-        if (!display.hideMount) {
-            homeMountValue(state.mount)?.let { value ->
-                HomeFactRow(
-                    label = stringResource(R.string.home_mount_implementation),
-                    value = value,
-                )
-            }
-        }
-        if (!display.hideSusfs) SusfsHomeRow(state.susfs, onSusfs)
-    }
-}
-
-/** One `label: value` line, the shape every row of the Focus board takes. */
-@Composable
-internal fun HomeFactRow(
-    label: String,
-    value: String,
-) {
-    val overColor = LocalHomeTileCardContentColor.current
-    Row(verticalAlignment = Alignment.Top) {
-        Text(
-            text = "$label: ",
-            style = FolkType.Summary,
-            color = overColor?.copy(alpha = 0.8f)
-                ?: LocalWallpaperSupportingColor.current
-                ?: MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = value,
-            style = FolkType.Summary.copy(fontWeight = FontWeight.Medium),
-            color = overColor ?: MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
 
 @Composable
 internal fun InfoCard(
@@ -264,24 +155,6 @@ private fun SpecSheet(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun SusfsHomeRow(status: me.weishu.kernelsu.data.susfs.SusfsStatus, onClick: () -> Unit) {
-    if (!status.detected) return
-    val overColor = LocalHomeTileCardContentColor.current
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp)) {
-        Column(Modifier.weight(1f)) {
-            Text("SUSFS · ${status.version} · ${status.implementation}", style = FolkType.Summary,
-                color = overColor ?: MaterialTheme.colorScheme.onSurface)
-            Text(me.weishu.kernelsu.ui.screen.susfsManagementLabel(status.management), style = FolkType.Machine,
-                color = overColor?.copy(alpha = 0.8f)
-                    ?: LocalWallpaperSupportingColor.current
-                    ?: MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Text(stringResource(R.string.susfs_manage), style = FolkType.Summary,
-            color = overColor ?: MaterialTheme.colorScheme.primary)
     }
 }
 

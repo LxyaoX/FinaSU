@@ -25,8 +25,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.HomeMetrics
-import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.magica.MagicaService
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarDestination
@@ -50,14 +48,6 @@ fun HomePager(
     val mainPagerState = LocalMainPagerState.current
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
-    // The sampler runs only while this page is the one on screen and only for a layout that draws
-    // live metrics; every other case leaves it idle. The lifecycle also stops it once the app
-    // leaves the foreground.
-    val metrics = if (isCurrentPage && HomeLayoutStyle.usesMetrics(LocalHomeLayoutStyle.current)) {
-        viewModel.metrics.collectAsStateWithLifecycle().value
-    } else {
-        HomeMetrics()
-    }
     val loadingDialog = rememberLoadingDialog()
     val scope = rememberCoroutineScope()
     val latestIsCurrentPage by rememberUpdatedState(isCurrentPage)
@@ -119,6 +109,5 @@ fun HomePager(
         bottomInnerPadding = bottomInnerPadding,
         superuserCount = superuserCount,
         moduleEnabledCount = moduleEnabledCount,
-        metrics = metrics,
     )
 }

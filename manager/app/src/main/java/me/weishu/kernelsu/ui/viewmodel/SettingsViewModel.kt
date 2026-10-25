@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountMode
-import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.repository.SettingsRepositoryImpl
 import me.weishu.kernelsu.data.susfs.SusfsRepository
@@ -56,8 +55,6 @@ class SettingsViewModel(
             val pageScale = repo.pageScale
             val moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines
             val enableWebDebugging = repo.enableWebDebugging
-            val homeLayoutStyle = repo.homeLayoutStyle
-            val statsTopLayout = repo.statsTopLayout
             val listWorkingCardModeHidden = repo.listWorkingCardModeHidden
             val colorStyle = repo.colorStyle
             val isLkmMode = repo.isLkmMode()
@@ -140,8 +137,6 @@ class SettingsViewModel(
                     pageScale = pageScale,
                     moduleDescriptionMaxLines = moduleDescriptionMaxLines,
                     enableWebDebugging = enableWebDebugging,
-                    homeLayoutStyle = homeLayoutStyle,
-                    statsTopLayout = statsTopLayout,
                     listWorkingCardModeHidden = listWorkingCardModeHidden,
                     hideHomeFingerprint = repo.hideHomeFingerprint,
                     hideHomeZygisk = repo.hideHomeZygisk,
@@ -213,8 +208,6 @@ class SettingsViewModel(
                     pageScale = repo.pageScale,
                     moduleDescriptionMaxLines = repo.moduleDescriptionMaxLines,
                     enableWebDebugging = repo.enableWebDebugging,
-                    homeLayoutStyle = repo.homeLayoutStyle,
-                    statsTopLayout = repo.statsTopLayout,
                     listWorkingCardModeHidden = repo.listWorkingCardModeHidden,
                     hideHomeFingerprint = repo.hideHomeFingerprint,
                     hideHomeZygisk = repo.hideHomeZygisk,
@@ -390,18 +383,6 @@ class SettingsViewModel(
     fun setEnableWebDebugging(enabled: Boolean) {
         repo.enableWebDebugging = enabled
         _uiState.update { it.copy(enableWebDebugging = enabled) }
-    }
-
-    fun setHomeLayoutStyle(style: String) {
-        val normalized = HomeLayoutStyle.fromValue(style)
-        repo.homeLayoutStyle = normalized
-        _uiState.update { it.copy(homeLayoutStyle = normalized) }
-    }
-
-    fun setStatsTopLayout(layout: String) {
-        val normalized = if (layout == "grid") "grid" else "list"
-        repo.statsTopLayout = normalized
-        _uiState.update { it.copy(statsTopLayout = normalized) }
     }
 
     fun setListWorkingCardModeHidden(hidden: Boolean) {

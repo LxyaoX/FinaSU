@@ -291,17 +291,13 @@ internal object FontAsset : ThemedAsset {
 }
 
 /**
- * The home layout style (the token persisted under `home_layout_style`).
+ * The home layout token.
  *
- * It is pure configuration with no payload file, so it only round-trips through `theme.json`. The
- * key `homeLayoutStyle` and the tokens (`kernelsu` for the grid UI, `circle` for the single column,
- * `focus`/`dashboard_ui`/`stats` for the tile layouts) are shared with the wider theme ecosystem, so
- * a theme exported elsewhere imports here.
- *
- * The `default` (ListUI) and `sign` (SignUI) tokens of that ecosystem have no counterpart here;
- * they are close enough to the circle layout that they are mapped onto it rather than dropped or
- * reimplemented. Any other token is left untouched instead of forcing a layout the user did not
- * pick.
+ * The home page has one layout now, so this carries nothing but the token: it is written so a theme
+ * package stays valid for a build that still offered the choice, and read only to be ignored. The
+ * key and its tokens (`kernelsu`, `circle`, `focus`, `dashboard_ui`, `stats`, `default`, `sign`)
+ * are shared with the wider theme ecosystem, so dropping the key would make every imported package
+ * warn about a field this manager simply no longer uses.
  */
 internal object HomeLayoutAsset : ThemedAsset {
     private const val KEY = "homeLayoutStyle"
@@ -311,23 +307,13 @@ internal object HomeLayoutAsset : ThemedAsset {
     override fun currentFile(context: Context): File? = null
 
     override fun writeConfig(json: JSONObject) {
-        json.put(KEY, SettingsRepositoryImpl().homeLayoutStyle)
+        json.put(KEY, HomeLayoutStyle.HOME)
     }
 
-    override suspend fun apply(context: Context, json: JSONObject, file: File?) {
-        if (!json.has(KEY)) return
-        val token = when (json.optString(KEY)) {
-            HomeLayoutStyle.GRID -> HomeLayoutStyle.GRID
-            HomeLayoutStyle.FOCUS -> HomeLayoutStyle.FOCUS
-            HomeLayoutStyle.DASHBOARD -> HomeLayoutStyle.DASHBOARD
-            HomeLayoutStyle.STATS -> HomeLayoutStyle.STATS
-            HomeLayoutStyle.CIRCLE, "default", "sign" -> HomeLayoutStyle.CIRCLE
-            else -> return
-        }
-        SettingsRepositoryImpl().homeLayoutStyle = token
-    }
+    /** Nothing to apply: a package may name a layout, and this manager draws the only one it has. */
+    override suspend fun apply(context: Context, json: JSONObject, file: File?) = Unit
 
     override suspend fun reset(context: Context) {
-        SettingsRepositoryImpl().homeLayoutStyle = HomeLayoutStyle.DEFAULT
+        SettingsRepositoryImpl().homeLayoutStyle = HomeLayoutStyle.HOME
     }
 }

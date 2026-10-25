@@ -1,47 +1,19 @@
 package me.weishu.kernelsu.data.model
 
 /**
- * Tokens persisted under the `home_layout_style` preference key.
+ * The home page has one layout, so this is no longer a choice - it is the token the wallpaper
+ * surface registry keys on, and the value a `.fpt` package may still carry.
  *
- * The strings are fixed and intentionally kept identical to the tokens the appearance settings
- * write, so a stored configuration maps onto the same layout. Unknown or legacy tokens fall back
- * to [CIRCLE] instead of failing.
+ * Themes written for the layouts this manager no longer draws keep their `homeLayoutStyle` key; it
+ * is read as [HOME] and has no effect.
  */
 object HomeLayoutStyle {
-    /** The standard single-column home. */
-    const val CIRCLE = "circle"
+    /** The single-column home this manager draws. */
+    const val HOME = "circle"
 
-    /** The two-column card grid home. */
-    const val GRID = "kernelsu"
+    /** Alias kept for stored configurations and theme packages. */
+    const val DEFAULT = HOME
 
-    /** The responsive tile grid that becomes a 2x2 board on a landscape screen. */
-    const val FOCUS = "focus"
-
-    /** The hero-first home with a single wide status banner. */
-    const val DASHBOARD = "dashboard_ui"
-
-    /** The counters-first home built around the superuser and module tallies. */
-    const val STATS = "stats"
-
-    /** Layout used when the preference is missing or holds an unsupported token. */
-    const val DEFAULT = CIRCLE
-
-    /** Normalise a stored value to a supported token. */
-    fun fromValue(value: String?): String = when (value) {
-        GRID -> GRID
-        FOCUS -> FOCUS
-        DASHBOARD -> DASHBOARD
-        STATS -> STATS
-        CIRCLE -> CIRCLE
-        else -> DEFAULT
-    }
-
-    /**
-     * Whether a layout draws live device metrics, and therefore has to keep the collector polled.
-     * The others read a single snapshot of the module state and must leave the sampler idle.
-     */
-    fun usesMetrics(value: String): Boolean = value == FOCUS || value == STATS
-
-    /** Every supported token, in display order. */
-    val supported: List<String> = listOf(CIRCLE, GRID, FOCUS, DASHBOARD, STATS)
+    /** Every stored or imported token resolves to [HOME]. */
+    fun fromValue(value: String?): String = HOME
 }

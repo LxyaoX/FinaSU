@@ -5,7 +5,6 @@ import com.materialkolor.PaletteStyle
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.FolkZygiskStatus
-import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
@@ -21,8 +20,6 @@ data class SettingsUiState(
     val pageScale: Float = 1.0f,
     val moduleDescriptionMaxLines: Int = 4,
     val enableWebDebugging: Boolean = false,
-    val homeLayoutStyle: String = HomeLayoutStyle.DEFAULT,
-    val statsTopLayout: String = "list",
     val listWorkingCardModeHidden: Boolean = false,
     val hideHomeFingerprint: Boolean = false,
     val hideHomeZygisk: Boolean = false,
@@ -141,8 +138,6 @@ data class SettingsScreenActions(
     val onOpenNetIsolate: () -> Unit,
     val onSetDefaultUmountModules: (Boolean) -> Unit,
     val onSetEnableWebDebugging: (Boolean) -> Unit,
-    val onSetHomeLayoutStyle: (String) -> Unit,
-    val onSetStatsTopLayout: (String) -> Unit,
     val onSetListWorkingCardModeHidden: (Boolean) -> Unit,
     val onSetHideHomeFingerprint: (Boolean) -> Unit,
     val onSetHideHomeZygisk: (Boolean) -> Unit,

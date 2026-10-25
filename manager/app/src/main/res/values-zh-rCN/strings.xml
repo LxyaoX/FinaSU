@@ -254,16 +254,6 @@
     <string name="settings_theme">主题设置</string>
     <string name="settings_theme_summary">自定义更多主题选项</string>
     <string name="settings_theme_options">主题选项</string>
-    <string name="settings_home_layout">首页布局</string>
-    <string name="settings_home_layout_summary">选择首页的排布方式。</string>
-    <string name="settings_home_layout_circle">CircleUI</string>
-    <string name="settings_home_layout_grid">GridUI</string>
-    <string name="settings_home_layout_focus">FocusUI</string>
-    <string name="settings_home_layout_dashboard">DashboardUI</string>
-    <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_stats_top_layout">顶部布局</string>
-    <string name="settings_stats_top_layout_list">列表样式</string>
-    <string name="settings_stats_top_layout_grid">网格样式</string>
     <string name="settings_home_hide_status_tag">隐藏状态标签</string>
     <string name="settings_home_hide_status_tag_summary">隐藏首页状态卡上的运行模式标签。</string>
     <string name="settings_section_layout">布局</string>

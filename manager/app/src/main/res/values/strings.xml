@@ -369,16 +369,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_summary">Choose the app theme mode.</string>
     <string name="settings_theme_options">Theme options</string>
-    <string name="settings_home_layout">Home layout</string>
-    <string name="settings_home_layout_summary">Choose how the home screen is arranged.</string>
-    <string name="settings_home_layout_circle">CircleUI</string>
-    <string name="settings_home_layout_grid">GridUI</string>
-    <string name="settings_home_layout_focus">FocusUI</string>
-    <string name="settings_home_layout_dashboard">DashboardUI</string>
-    <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_stats_top_layout">Top layout</string>
-    <string name="settings_stats_top_layout_list">ListUI</string>
-    <string name="settings_stats_top_layout_grid">GridUI</string>
     <string name="settings_home_hide_status_tag">Hide status tag</string>
     <string name="settings_home_hide_status_tag_summary">Hide the running-mode tag on the home status card.</string>
     <string name="settings_section_layout">Layout</string>

@@ -35,8 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.data.HomeMetrics
-import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
 import me.weishu.kernelsu.ui.component.rebootlistpopup.RebootListPopup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
@@ -65,7 +63,6 @@ fun HomePagerMaterial(
     bottomInnerPadding: Dp,
     superuserCount: Int = 0,
     moduleEnabledCount: Int = 0,
-    metrics: HomeMetrics = HomeMetrics(),
 ) {
     val scrollBehavior = MiuixScrollBehavior()
     val wallpaperActive = LocalFolkWallpaperTokens.current != null
@@ -89,51 +86,29 @@ fun HomePagerMaterial(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // The order the home page has always had in the reference build: what state the kernel
+            // is in, then anything the user has to act on, then the two tallies, then the facts.
+            StatusCard(state = state, actions = actions)
             HomeWarnings(state = state, actions = actions)
-            val layout = LocalHomeLayoutStyle.current
-            when (layout) {
-                HomeLayoutStyle.GRID -> GridHomeContent(
-                    state = state,
-                    actions = actions,
+            if (useFullFeaturedLayout()) {
+                CountCardPair(
                     superuserCount = superuserCount,
                     moduleEnabledCount = moduleEnabledCount,
-                )
-
-                HomeLayoutStyle.FOCUS -> FocusHomeContent(
-                    state = state,
-                    actions = actions,
-                    metrics = metrics,
-                )
-
-                HomeLayoutStyle.DASHBOARD -> DashboardHomeContent(
-                    state = state,
-                    actions = actions,
-                    superuserCount = superuserCount,
-                    moduleEnabledCount = moduleEnabledCount,
-                )
-
-                HomeLayoutStyle.STATS -> StatsHomeContent(
-                    state = state,
-                    actions = actions,
-                    superuserCount = superuserCount,
-                    moduleEnabledCount = moduleEnabledCount,
-                    metrics = metrics,
-                )
-
-                else -> CircleHomeContent(
-                    state = state,
-                    actions = actions,
-                    superuserCount = superuserCount,
-                    moduleEnabledCount = moduleEnabledCount,
+                    onOpenSuperUser = actions.onOpenSuperUser,
+                    onOpenModule = actions.onOpenModule,
+                    layout = CountCardLayout.Horizontal,
                 )
             }
-            // The tile layouts place the facts card inside their own board.
-            if (layout == HomeLayoutStyle.CIRCLE || layout == HomeLayoutStyle.GRID) {
-                InfoCard(systemInfo = state.systemInfo, susfs = state.susfs, zygiskProvider = state.zygiskProvider, mount = state.mount, onSusfs = actions.onSusfs)
-            }
+            InfoCard(
+                systemInfo = state.systemInfo,
+                susfs = state.susfs,
+                zygiskProvider = state.zygiskProvider,
+                mount = state.mount,
+                onSusfs = actions.onSusfs,
+            )
             Spacer(
                 Modifier.height(
                     bottomInnerPadding + if (!useFullFeaturedLayout())

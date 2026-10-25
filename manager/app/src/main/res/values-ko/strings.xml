@@ -365,16 +365,6 @@
     <string name="group_contains_apps">%d 앱을 포함</string>
     <string name="settings_theme">테마</string>
     <string name="settings_theme_summary">앱 테마 모드를 선택합니다.</string>
-    <string name="settings_home_layout">홈 레이아웃</string>
-    <string name="settings_home_layout_summary">홈 화면의 배치 방식을 선택합니다.</string>
-    <string name="settings_home_layout_circle">CircleUI</string>
-    <string name="settings_home_layout_grid">GridUI</string>
-    <string name="settings_home_layout_focus">FocusUI</string>
-    <string name="settings_home_layout_dashboard">DashboardUI</string>
-    <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_stats_top_layout">상단 레이아웃</string>
-    <string name="settings_stats_top_layout_list">리스트</string>
-    <string name="settings_stats_top_layout_grid">그리드</string>
     <string name="settings_home_hide_status_tag">상태 태그 숨기기</string>
     <string name="settings_home_hide_status_tag_summary">홈 상태 카드의 실행 모드 태그를 숨깁니다.</string>
     <string name="superuser_search_hint">앱 검색</string>

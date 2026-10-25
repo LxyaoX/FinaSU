@@ -61,7 +61,7 @@ data class SurfaceDescriptor(
     val legacyThemeFields: Map<SurfaceField, String> = emptyMap(),
     val legacyThemeFlags: Map<SurfaceFlag, String> = emptyMap(),
     /**
-     * Whether this surface is available for a home layout token such as [HomeLayoutStyle.GRID],
+     * Whether this surface is available for a home layout token such as [HomeLayoutStyle.HOME],
      * given the Stats layout's header form (`list` or `grid`).
      */
     val available: (String, String) -> Boolean = { _, _ -> true },
@@ -104,7 +104,7 @@ object SurfaceRegistry {
         titleRes = R.string.wallpaper_work_card_section,
         icon = Icons.Filled.Wallpaper,
         scope = SurfaceScope.Slot,
-        layouts = setOf(HomeLayoutStyle.GRID),
+        layouts = setOf(HomeLayoutStyle.HOME),
         fields = setOf(
             SurfaceField.Image,
             SurfaceField.Enabled,
@@ -183,249 +183,14 @@ object SurfaceRegistry {
             SurfaceFlag.HideText to "isGridWorkingCardTextHidden",
             SurfaceFlag.HideMode to "isGridWorkingCardModeHidden",
         ),
-        available = { layout, statsTop ->
-            layout == HomeLayoutStyle.GRID || (layout == HomeLayoutStyle.STATS && statsTop == "grid")
-        },
-    )
-
-    /**
-     * The focus layout shares one set of dim/opacity values across its four cards, so the shared
-     * values live on this parent surface and each card below stores only its own image. This
-     * mirrors the wider ecosystem's keys exactly and keeps the two halves from drifting.
-     */
-    private val focus = SurfaceDescriptor(
-        id = FOCUS,
-        titleRes = R.string.settings_home_layout_focus,
-        icon = Icons.Outlined.AdminPanelSettings,
-        scope = SurfaceScope.Layout,
-        layouts = setOf(HomeLayoutStyle.FOCUS),
-        fields = setOf(
-            SurfaceField.Enabled,
-            SurfaceField.Opacity,
-            SurfaceField.DualOpacity,
-            SurfaceField.DayOpacity,
-            SurfaceField.NightOpacity,
-            SurfaceField.Dim,
-            SurfaceField.DualDim,
-            SurfaceField.DayDim,
-            SurfaceField.NightDim,
-        ),
-        legacyThemeFields = mapOf(
-            SurfaceField.Enabled to "isFocusCardBackgroundEnabled",
-            SurfaceField.Dim to "focusCardBgDim",
-            SurfaceField.DualDim to "isFocusCardDualDimEnabled",
-            SurfaceField.DayDim to "focusCardBgDayDim",
-            SurfaceField.NightDim to "focusCardBgNightDim",
-            SurfaceField.Opacity to "focusCardBgOpacity",
-            SurfaceField.DualOpacity to "isFocusCardDualOpacityEnabled",
-            SurfaceField.DayOpacity to "focusCardBgDayOpacity",
-            SurfaceField.NightOpacity to "focusCardBgNightOpacity",
-        ),
-        rows = listOf(
-            SurfaceToggleRow(
-                titleRes = R.string.wallpaper_focus_enable,
-                icon = Icons.Filled.Wallpaper,
-                field = SurfaceField.Enabled,
-                summaryRes = R.string.wallpaper_focus_enable_summary,
-            ),
-            SurfaceToggleRow(
-                titleRes = R.string.wallpaper_work_card_dual_opacity,
-                icon = Icons.Filled.Contrast,
-                field = SurfaceField.DualOpacity,
-                showWhenEnabled = true,
-            ),
-            SurfaceScalarRow(
-                singleTitleRes = R.string.wallpaper_work_card_opacity,
-                dayTitleRes = R.string.wallpaper_work_card_day_opacity,
-                nightTitleRes = R.string.wallpaper_work_card_night_opacity,
-                singleField = SurfaceField.Opacity,
-                dayField = SurfaceField.DayOpacity,
-                nightField = SurfaceField.NightOpacity,
-                dualField = SurfaceField.DualOpacity,
-                singleIcon = Icons.Filled.Opacity,
-                dayNightIcon = Icons.Filled.Contrast,
-            ),
-            SurfaceToggleRow(
-                titleRes = R.string.wallpaper_dual_dim,
-                icon = Icons.Filled.Brightness6,
-                field = SurfaceField.DualDim,
-                showWhenEnabled = true,
-            ),
-            SurfaceScalarRow(
-                singleTitleRes = R.string.wallpaper_work_card_dim,
-                dayTitleRes = R.string.wallpaper_day_dim,
-                nightTitleRes = R.string.wallpaper_night_dim,
-                singleField = SurfaceField.Dim,
-                dayField = SurfaceField.DayDim,
-                nightField = SurfaceField.NightDim,
-                dualField = SurfaceField.DualDim,
-                singleIcon = Icons.Filled.Brightness6,
-                dayNightIcon = Icons.Filled.Contrast,
-            ),
-        ),
-        available = { layout, _ -> layout == HomeLayoutStyle.FOCUS },
-    )
-
-    private val focusCards = listOf(
-        focusCard(
-            FOCUS_CARD_KERNEL,
-            R.string.home_tile_status,
-            Icons.Outlined.AdminPanelSettings,
-            "focus_card_kernel_bg",
-            "hasFocusCardKernelBg",
-        ),
-        focusCard(
-            FOCUS_CARD_APP,
-            R.string.home_tile_manager,
-            Icons.Outlined.Memory,
-            "focus_card_app_bg",
-            "hasFocusCardAppBg",
-        ),
-        focusCard(
-            FOCUS_CARD_DEVICE,
-            R.string.home_tile_device,
-            Icons.Outlined.Memory,
-            "focus_card_device_bg",
-            "hasFocusCardDeviceBg",
-        ),
-        focusCard(
-            FOCUS_CARD_STORAGE,
-            R.string.home_tile_storage,
-            Icons.Outlined.SdStorage,
-            "focus_card_storage_bg",
-            "hasFocusCardStorageBg",
-        ),
-    )
-
-    /** The dashboard layout's hero card, which owns an image plus its own dim/opacity values. */
-    private val dashboardHero = SurfaceDescriptor(
-        id = DASHBOARD_HERO,
-        titleRes = R.string.settings_home_layout_dashboard,
-        icon = Icons.Outlined.Memory,
-        scope = SurfaceScope.Slot,
-        layouts = setOf(HomeLayoutStyle.DASHBOARD),
-        fields = setOf(
-            SurfaceField.Image,
-            SurfaceField.Enabled,
-            SurfaceField.Opacity,
-            SurfaceField.DualOpacity,
-            SurfaceField.DayOpacity,
-            SurfaceField.NightOpacity,
-            SurfaceField.Dim,
-            SurfaceField.DualDim,
-            SurfaceField.DayDim,
-            SurfaceField.NightDim,
-        ),
-        rows = listOf(
-            SurfaceToggleRow(
-                titleRes = R.string.wallpaper_surface_enable,
-                icon = Icons.Filled.Wallpaper,
-                field = SurfaceField.Enabled,
-                summaryRes = R.string.wallpaper_surface_enable_summary,
-            ),
-            SurfaceToggleRow(
-                titleRes = R.string.wallpaper_work_card_dual_opacity,
-                icon = Icons.Filled.Contrast,
-                field = SurfaceField.DualOpacity,
-                showWhenEnabled = true,
-            ),
-            SurfaceScalarRow(
-                singleTitleRes = R.string.wallpaper_work_card_opacity,
-                dayTitleRes = R.string.wallpaper_work_card_day_opacity,
-                nightTitleRes = R.string.wallpaper_work_card_night_opacity,
-                singleField = SurfaceField.Opacity,
-                dayField = SurfaceField.DayOpacity,
-                nightField = SurfaceField.NightOpacity,
-                dualField = SurfaceField.DualOpacity,
-                singleIcon = Icons.Filled.Opacity,
-                dayNightIcon = Icons.Filled.Contrast,
-            ),
-            SurfaceToggleRow(
-                titleRes = R.string.wallpaper_dual_dim,
-                icon = Icons.Filled.Brightness6,
-                field = SurfaceField.DualDim,
-                showWhenEnabled = true,
-            ),
-            SurfaceScalarRow(
-                singleTitleRes = R.string.wallpaper_work_card_dim,
-                dayTitleRes = R.string.wallpaper_day_dim,
-                nightTitleRes = R.string.wallpaper_night_dim,
-                singleField = SurfaceField.Dim,
-                dayField = SurfaceField.DayDim,
-                nightField = SurfaceField.NightDim,
-                dualField = SurfaceField.DualDim,
-                singleIcon = Icons.Filled.Brightness6,
-                dayNightIcon = Icons.Filled.Contrast,
-            ),
-            SurfaceImageRow(
-                pickTitleRes = R.string.wallpaper_pick,
-                changeTitleRes = R.string.wallpaper_change,
-                clearTitleRes = R.string.wallpaper_clear,
-                pickIcon = Icons.Filled.Image,
-                clearIcon = Icons.Filled.Delete,
-            ),
-        ),
-        storageStem = "dashboard_card_bg",
-        themeBase = "dashboard_card_bg",
-        aspect = 2.0f,
-        legacyThemeFields = mapOf(
-            SurfaceField.Image to "hasDashboardCardBg",
-            SurfaceField.Enabled to "isDashboardCardBackgroundEnabled",
-            SurfaceField.Dim to "dashboardCardBgDim",
-            SurfaceField.DualDim to "isDashboardCardDualDimEnabled",
-            SurfaceField.DayDim to "dashboardCardBgDayDim",
-            SurfaceField.NightDim to "dashboardCardBgNightDim",
-            SurfaceField.Opacity to "dashboardCardBgOpacity",
-            SurfaceField.DualOpacity to "isDashboardCardDualOpacityEnabled",
-            SurfaceField.DayOpacity to "dashboardCardBgDayOpacity",
-            SurfaceField.NightOpacity to "dashboardCardBgNightOpacity",
-        ),
-        available = { layout, _ -> layout == HomeLayoutStyle.DASHBOARD },
-    )
-
-    /**
-     * A focus card that stores its own image; the shared values live on [focus]. The image also
-     * carries the surface's Enabled bit so a card keeps its photo across a restart, and that bit is
-     * the same presence flag the wider ecosystem records as `has<Card>Bg`.
-     */
-    private fun focusCard(
-        id: SurfaceId,
-        titleRes: Int,
-        icon: ImageVector,
-        themeBase: String,
-        legacyKey: String,
-    ): SurfaceDescriptor = SurfaceDescriptor(
-        id = id,
-        titleRes = titleRes,
-        icon = icon,
-        scope = SurfaceScope.Slot,
-        layouts = setOf(HomeLayoutStyle.FOCUS),
-        fields = setOf(SurfaceField.Image, SurfaceField.Enabled),
-        rows = listOf(
-            SurfaceImageRow(
-                pickTitleRes = R.string.wallpaper_pick,
-                changeTitleRes = R.string.wallpaper_change,
-                clearTitleRes = R.string.wallpaper_clear,
-                pickIcon = Icons.Filled.Image,
-                clearIcon = Icons.Filled.Delete,
-                showWhenEnabled = false,
-            ),
-        ),
-        storageStem = themeBase,
-        themeBase = themeBase,
-        aspect = 1.4f,
-        legacyThemeFields = mapOf(SurfaceField.Enabled to legacyKey),
-        available = { layout, _ -> layout == HomeLayoutStyle.FOCUS },
-        parentId = FOCUS,
+        available = { _, _ -> true },
     )
 
     /** Every registered surface. */
-    val all: List<SurfaceDescriptor> =
-        listOf(gridWorkCard, focus) + focusCards + listOf(dashboardHero)
+    val all: List<SurfaceDescriptor> = listOf(gridWorkCard)
 
-    /** The surfaces available for a home layout token, in registration order. */
-    fun forLayout(layout: String, statsTopLayout: String = "list"): List<SurfaceDescriptor> =
-        all.filter { it.available(layout, statsTopLayout) }
+    /** The surfaces this home page offers, in registration order. */
+    fun forLayout(): List<SurfaceDescriptor> = all
 
     /** The descriptor registered under [id], or null when no surface uses it. */
     fun descriptor(id: SurfaceId): SurfaceDescriptor? = all.firstOrNull { it.id == id }

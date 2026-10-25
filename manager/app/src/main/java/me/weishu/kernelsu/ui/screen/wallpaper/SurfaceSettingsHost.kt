@@ -8,7 +8,6 @@ import me.weishu.kernelsu.ui.component.material.SegmentedListItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.snapToPercent
-import me.weishu.kernelsu.ui.screen.home.LocalHomeLayoutStyle
 import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
 import me.weishu.kernelsu.wallpaper.surface.SurfaceDescriptor
 import me.weishu.kernelsu.wallpaper.surface.SurfaceField
@@ -50,8 +49,7 @@ fun SurfaceSettingsHost(
     state: WallpaperUiState,
     actions: WallpaperScreenActions,
 ) {
-    val layout = LocalHomeLayoutStyle.current
-    SurfaceRegistry.forLayout(layout, state.statsTopLayout).forEach { descriptor ->
+    SurfaceRegistry.forLayout().forEach { descriptor ->
         // A grouped child (the focus cards) only appears once its shared master switch is on,
         // mirroring the theme's own nesting so a card can never be configured while its parent is off.
         val parent = descriptor.parentId?.let { SurfaceRegistry.descriptor(it) }

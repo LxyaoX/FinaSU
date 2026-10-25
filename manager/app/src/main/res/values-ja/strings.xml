@@ -365,16 +365,6 @@
     <string name="group_contains_apps">%d 個のアプリが含まれています</string>
     <string name="settings_theme">テーマ</string>
     <string name="settings_theme_summary">アプリのテーマモードを選択します。</string>
-    <string name="settings_home_layout">ホームのレイアウト</string>
-    <string name="settings_home_layout_summary">ホーム画面の配置方法を選択します。</string>
-    <string name="settings_home_layout_circle">CircleUI</string>
-    <string name="settings_home_layout_grid">GridUI</string>
-    <string name="settings_home_layout_focus">FocusUI</string>
-    <string name="settings_home_layout_dashboard">DashboardUI</string>
-    <string name="settings_home_layout_stats">StatsUI</string>
-    <string name="settings_stats_top_layout">上部レイアウト</string>
-    <string name="settings_stats_top_layout_list">リスト</string>
-    <string name="settings_stats_top_layout_grid">グリッド</string>
     <string name="settings_home_hide_status_tag">ステータスタグを隠す</string>
     <string name="settings_home_hide_status_tag_summary">ホームのステータスカードにある実行モードのタグを隠します。</string>
     <string name="superuser_search_hint">アプリを検索</string>
