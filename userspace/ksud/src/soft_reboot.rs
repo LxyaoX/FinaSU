@@ -234,24 +234,7 @@ pub fn soft_reboot() -> Result<()> {
         ));
     }
 
-    if let Err(error) = crate::yukizygisk::prepare_soft_reboot() {
-        return Err(restart_after_failed_soft_reboot(&format!(
-            "FolkZygisk could not prepare for a new userspace cycle: {error:#}"
-        )));
-    }
-
-    info!("stop");
-    let status = match Command::new("stop").status() {
-        Ok(status) => status,
-        Err(error) => {
-            return Err(restart_after_failed_soft_reboot(&format!(
-                "could not execute stop: {error}"
-            )));
-        }
-    };
-    if !status.success() {
-        warn!("stop exited with status: {status}");
-    }
+    crate::yukizygisk::prepare_soft_reboot();
 
     let waited_for_stop = waitsys.as_ref().map(|waitsys| {
         if let Err(error) = waitsys.wait_for_signal(2, defs::WAITSYS_STOP_TIMEOUT) {

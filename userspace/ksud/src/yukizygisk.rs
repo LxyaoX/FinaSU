@@ -66,14 +66,18 @@ pub fn install() -> Result<()> {
     fs::create_dir_all(STATE_DIR).with_context(|| format!("create {STATE_DIR}"))?;
     fs::set_permissions(BIN_DIR, fs::Permissions::from_mode(0o755))?;
     fs::set_permissions(STATE_DIR, fs::Permissions::from_mode(0o700))?;
+    // The directory needs the label as much as the files do: a zygote that cannot search it never
+    // reaches the payload inside.
+    if let Err(error) = crate::restorecon::lsetfilecon(BIN_DIR, crate::restorecon::KSU_CON) {
+        log::warn!("yukizygisk: could not label {BIN_DIR}: {error:#}");
+    }
 
     for name in FILES {
         let asset = crate::assets::embedded(&format!("yukizygisk/{name}"))
             .with_context(|| format!("embedded payload {name} is missing"))?;
         let target = Path::new(BIN_DIR).join(name);
-        let unchanged = fs::read(&target)
-            .map(|on_disk| on_disk.as_slice() == asset.data.as_ref())
-            .unwrap_or(false);
+        let unchanged =
+            fs::read(&target).is_ok_and(|on_disk| on_disk.as_slice() == asset.data.as_ref());
         if unchanged {
             continue;
         }
@@ -217,7 +221,7 @@ pub fn start() -> Result<()> {
         let path = Path::new(BIN_DIR).join(name);
         match spawn_daemon(&path) {
             Ok(child) => {
-                log::info!("yukizygisk: {name} started as pid {}", child);
+                log::info!("yukizygisk: {name} started as pid {child}");
                 started.push(child);
             }
             Err(error) => log::warn!("yukizygisk: {name} failed to start: {error:#}"),
@@ -262,10 +266,10 @@ fn spawn_daemon(path: &Path) -> Result<i32> {
 }
 
 /// Stop every daemon. Used by soft reboot and by an explicit restart.
-pub fn stop() -> Result<()> {
+pub fn stop() {
     let live = running();
     if live.is_empty() {
-        return Ok(());
+        return;
     }
     for (_, pid) in &live {
         // SAFETY: plain signal delivery to a pid we just discovered.
@@ -276,7 +280,7 @@ pub fn stop() -> Result<()> {
     let deadline = Instant::now() + Duration::from_secs(2);
     while Instant::now() < deadline {
         if running().is_empty() {
-            return Ok(());
+            return;
         }
         std::thread::sleep(Duration::from_millis(50));
     }
@@ -286,7 +290,6 @@ pub fn stop() -> Result<()> {
             libc::kill(pid, libc::SIGKILL);
         }
     }
-    Ok(())
 }
 
 /// post-fs-data: install the payload and bring the daemons up.
@@ -315,7 +318,7 @@ pub fn ensure_running() -> Result<()> {
 
 /// Soft reboot tears down userspace while the kernel module stays loaded: the daemons have to go so
 /// the new cycle starts them against the new zygote.
-pub fn prepare_soft_reboot() -> Result<()> {
+pub fn prepare_soft_reboot() {
     stop()
 }
 
@@ -356,10 +359,7 @@ pub enum Command {
 
 pub fn run(command: &Command) -> Result<()> {
     match command {
-        Command::Status => {
-            println!("{}", serde_json::to_string_pretty(&status()?)?);
-            Ok(())
-        }
+        Command::Status => println!("{}", serde_json::to_string_pretty(&status()?)?),
         Command::Set {
             key,
             value,
@@ -367,17 +367,16 @@ pub fn run(command: &Command) -> Result<()> {
         } => {
             set(key, value)?;
             if *restart {
-                stop()?;
+                stop();
                 start()?;
             }
-            Ok(())
         }
         Command::Restart => {
-            stop()?;
+            stop();
             start()?;
-            Ok(())
         }
     }
+    Ok(())
 }
 
 /// `setsid` gives the daemon its own session; this additionally moves it out of the cgroup init put
