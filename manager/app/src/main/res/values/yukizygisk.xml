@@ -4,6 +4,7 @@
     <string name="yukizygisk_summary">Kernel-assisted Zygisk engine</string>
     <string name="yukizygisk_status_running">Running · %1$d daemons</string>
     <string name="yukizygisk_status_stopped">Not running</string>
+    <string name="yukizygisk_status_unsupported">Not supported on this architecture</string>
     <string name="yukizygisk_status_missing">Payload not installed</string>
     <string name="yukizygisk_builtin_active">YukiZygisk (built-in)</string>
     <string name="yukizygisk_status_daemon">ABI %1$d · pid %2$d</string>

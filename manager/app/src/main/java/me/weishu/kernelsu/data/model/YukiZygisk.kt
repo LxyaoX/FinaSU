@@ -24,6 +24,8 @@ data class YukiZygiskConfig(
  */
 data class YukiZygiskStatus(
     val installed: Boolean,
+    /** False when this build carries no payload for the device architecture (YukiZygisk is arm-only). */
+    val supported: Boolean,
     val daemons: List<YukiZygiskDaemon>,
     val config: YukiZygiskConfig,
 ) {
@@ -48,6 +50,7 @@ data class YukiZygiskStatus(
             }
             YukiZygiskStatus(
                 installed = root.optBoolean("installed", false),
+                supported = root.optBoolean("supported", true),
                 daemons = daemons,
                 config = YukiZygiskConfig(
                     yukilinker = config.optBoolean("yukilinker", true),

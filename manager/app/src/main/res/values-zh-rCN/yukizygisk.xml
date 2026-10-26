@@ -3,6 +3,7 @@
     <string name="yukizygisk_summary">内核辅助的 Zygisk 引擎</string>
     <string name="yukizygisk_status_running">运行中 · %1$d 个守护进程</string>
     <string name="yukizygisk_status_stopped">未运行</string>
+    <string name="yukizygisk_status_unsupported">当前架构不支持</string>
     <string name="yukizygisk_status_missing">载荷未安装</string>
     <string name="yukizygisk_builtin_active">YukiZygisk（内置）</string>
     <string name="yukizygisk_status_daemon">ABI %1$d · pid %2$d</string>

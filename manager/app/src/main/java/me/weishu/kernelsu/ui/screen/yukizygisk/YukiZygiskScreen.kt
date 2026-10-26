@@ -73,6 +73,7 @@ fun YukiZygiskScreen() {
                         title = stringResource(R.string.yukizygisk_title),
                         summary = when {
                             state.readFailed -> stringResource(R.string.yukizygisk_read_failed)
+                            status != null && !status.supported -> stringResource(R.string.yukizygisk_status_unsupported)
                             status == null || !status.installed -> stringResource(R.string.yukizygisk_status_missing)
                             status.running -> stringResource(R.string.yukizygisk_status_running, status.daemons.size)
                             else -> stringResource(R.string.yukizygisk_status_stopped)
@@ -86,7 +87,6 @@ fun YukiZygiskScreen() {
                         item {
                             ArrowPreference(
                                 title = stringResource(R.string.yukizygisk_status_daemon, daemon.abi, daemon.pid),
-                                summary = stringResource(R.string.yukizygisk_restart_hint),
                                 startAction = { Icon(Icons.Filled.Code, contentDescription = null) },
                                 onClick = viewModel::refresh,
                             )

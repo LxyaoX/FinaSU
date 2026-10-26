@@ -82,6 +82,11 @@ pub fn install() -> Result<()> {
         let temp = target.with_extension("new");
         fs::write(&temp, &asset.data).with_context(|| format!("write {}", temp.display()))?;
         fs::set_permissions(&temp, fs::Permissions::from_mode(0o755))?;
+        // The zygote reads these files; under `adb_data_file` that is denied. The ksu_file label is
+        // the one the injection and its mount namespace are allowed to reach.
+        if let Err(error) = crate::restorecon::lsetfilecon(&temp, crate::restorecon::KSU_CON) {
+            log::warn!("yukizygisk: could not label {}: {error:#}", temp.display());
+        }
         fs::rename(&temp, &target).with_context(|| format!("install {}", target.display()))?;
         log::info!("yukizygisk: installed {name}");
     }
@@ -140,6 +145,19 @@ pub fn set(key: &str, value: &str) -> Result<()> {
 
 fn write_config(document: &Value) -> Result<()> {
     fs::create_dir_all(STATE_DIR).with_context(|| format!("create {STATE_DIR}"))?;
+    // The daemon also writes this file when it starts; the same lock file keeps a settings change
+    // from racing a startup write.
+    let lock_path = format!("{CONFIG}.lock");
+    let lock = fs::OpenOptions::new()
+        .create(true)
+        .truncate(false)
+        .write(true)
+        .open(&lock_path)
+        .with_context(|| format!("open {lock_path}"))?;
+    // SAFETY: plain flock on a file this function owns.
+    if unsafe { libc::flock(std::os::unix::io::AsRawFd::as_raw_fd(&lock), libc::LOCK_EX) } != 0 {
+        return Err(std::io::Error::last_os_error()).context("lock yzconfig.json");
+    }
     let temp = Path::new(STATE_DIR).join("yzconfig.json.new");
     let mut file = fs::File::create(&temp).context("create yzconfig.json.new")?;
     serde_json::to_writer_pretty(&mut file, document)?;
@@ -188,13 +206,15 @@ pub fn start() -> Result<()> {
     let live = running();
     let mut started = Vec::new();
     for (abi, name) in [(64, "zygiskd64"), (32, "zygiskd32")] {
+        // Only an ABI whose own file exists is expected to run: a 64-bit-only build has no 32-bit
+        // daemon, and a device with 32-bit support needs both.
+        if !Path::new(BIN_DIR).join(name).exists() {
+            continue;
+        }
         if live.iter().any(|(running_abi, _)| *running_abi == abi) {
             continue;
         }
         let path = Path::new(BIN_DIR).join(name);
-        if !path.exists() {
-            continue;
-        }
         match spawn_daemon(&path) {
             Ok(child) => {
                 log::info!("yukizygisk: {name} started as pid {}", child);
@@ -305,6 +325,9 @@ pub fn status() -> Result<Value> {
     let live = running();
     Ok(json!({
         "installed": installed(),
+        // A build without a payload for this architecture (x86_64, riscv64) is not broken -
+        // YukiZygisk is arm-only - and the page says that instead of "not installed".
+        "supported": crate::assets::embedded(&format!("yukizygisk/{}", FILES[0])).is_some(),
         "configPath": CONFIG,
         "daemons": live
             .iter()
