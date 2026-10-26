@@ -373,7 +373,7 @@ pub fn ensure_running() -> Result<()> {
 /// Soft reboot tears down userspace while the kernel module stays loaded: the daemons have to go so
 /// the new cycle starts them against the new zygote.
 pub fn prepare_soft_reboot() {
-    stop()
+    stop();
 }
 
 /// The last line the daemon wrote, for the page to show when nothing is running.
@@ -450,7 +450,7 @@ pub fn run(command: &Command) -> Result<()> {
         }
         Command::Enable => set_enabled(true)?,
         Command::Disable => set_enabled(false)?,
-    };
+    }
     Ok(())
 }
 
