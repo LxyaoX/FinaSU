@@ -45,7 +45,7 @@ If the device currently gets root from Magisk, KernelSU or one of its forks, or 
 
 ### What is FinaSU?
 
-FinaSU is a downstream fork of the KernelSU family in which the core root decision happens in the kernel. It provides a kernel-level `su` with an allowlist, Folk Mount, App Profile, FolkZygisk, Sui, SUSFS capability interfaces, NoMount, `.fpt` themes and a module repository.
+FinaSU is a downstream fork of the KernelSU family in which the core root decision happens in the kernel. It provides a kernel-level `su` with an allowlist, Folk Mount, App Profile, YukiZygisk, Sui, SUSFS capability interfaces, NoMount, `.fpt` themes and a module repository.
 
 ::: important It is not just a Manager
 
@@ -208,13 +208,13 @@ A Metamodule takes over the mount or installation flow for regular modules, and 
 
 Folk Mount is the engine that selects a mount provider and injects modules; NoMount injects files through kernel VFS path redirection without creating a traditional mount. NoMount ships with `ksud` and is matched by KMI.
 
-### What is FolkZygisk and do I need another Zygisk provider?
+### What is YukiZygisk and do I need another Zygisk provider?
 
-FolkZygisk is the built-in Zygisk engine. Enable it and reboot to run Zygisk modules; when an external provider is detected, the built-in engine steps aside. FinaSU keeps only one active Zygisk implementation.
+YukiZygisk is the built-in Zygisk engine. Enable it and reboot to run Zygisk modules; when an external provider is detected, the built-in engine steps aside. FinaSU keeps only one active Zygisk implementation.
 
 ### Does FinaSU support Xposed?
 
-Yes. Install a modern Xposed-derived framework such as LSPosed on an available Zygisk provider. Only one of the built-in FolkZygisk and an external provider can be kept.
+Yes. Install a modern Xposed-derived framework such as LSPosed on an available Zygisk provider. Only one of the built-in YukiZygisk and an external provider can be kept.
 
 ### What is Sui and do I still need Shizuku?
 

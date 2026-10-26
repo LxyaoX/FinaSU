@@ -2,10 +2,8 @@ kernelsu-objs := core/init.o
 
 kernelsu-objs += feature/kernel_umount.o
 kernelsu-objs += feature/module_blacklist.o
-kernelsu-objs += feature/netisolate.o
 kernelsu-objs += feature/sulog.o
 kernelsu-objs += feature/sucompat.o
-kernelsu-objs += feature/uts_view.o
 
 # YukiZygisk ships with the module: it is the only Zygisk provider this tree builds.
 include $(src)/feature/yukizygisk/Kbuild

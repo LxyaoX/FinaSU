@@ -694,7 +694,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_bug_feedback">Bug report</string>
     <string name="settings_search_hint">Search settings</string>
     <string name="settings_search_empty">No settings found</string>
-    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="module_preinit_no_space">Preinit not synchronized: insufficient metadata space</string>
     <string name="module_preinit_error">Preinit synchronization failed; previous configuration retained</string>
     <string name="module_preinit_bootloop">Preinit paused after repeated boot attempts</string>
@@ -1096,7 +1095,7 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="guide_repo_action">Open repository</string>
     <string name="guide_features_title">What\'s built in</string>
     <string name="guide_features_desc">Four engines run inside the manager, no extra module required.</string>
-    <string name="guide_feature_zygisk">FolkZygisk — Zygisk implementation</string>
+    <string name="guide_feature_zygisk">YukiZygisk — Zygisk implementation</string>
     <string name="guide_feature_sui">Sui — Shizuku API backend</string>
     <string name="guide_feature_nomount">NoMount — VFS path redirection</string>
     <string name="guide_feature_mount">Folk Mount — module mount engine</string>

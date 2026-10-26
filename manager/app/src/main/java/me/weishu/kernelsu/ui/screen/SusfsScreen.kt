@@ -63,7 +63,6 @@ fun susfsManagementLabel(status: String): String = stringResource(when (status) 
     "applied" -> R.string.susfs_applied
     "failed" -> R.string.susfs_failed
     "pending_reboot" -> R.string.susfs_pending
-    "deferred" -> R.string.susfs_deferred
     "idle" -> R.string.susfs_idle
     else -> R.string.susfs_saved
 })
@@ -179,27 +178,6 @@ fun SusfsScreen() {
                 text = stringResource(R.string.susfs_cancel),
                 onClick = { draft = null },
             ) })
-    }
-    if (state.pendingUnameApply) {
-        ExpressiveDialog(
-            onDismissRequest = vm::dismissPendingUnameApply,
-            title = { Text(stringResource(R.string.susfs_uts_apply_confirm_title)) },
-            text = { Text(stringResource(R.string.susfs_uts_apply_confirm_message)) },
-            confirmButton = {
-                MiuixTextButton(
-                    text = stringResource(R.string.susfs_uts_apply_confirm_action),
-                    onClick = vm::confirmPendingUnameApply,
-                    enabled = !state.busy,
-                )
-            },
-            dismissButton = {
-                MiuixTextButton(
-                    text = stringResource(R.string.susfs_cancel),
-                    onClick = vm::dismissPendingUnameApply,
-                    enabled = !state.busy,
-                )
-            },
-        )
     }
     if (confirmApplyAfterSave) {
         ExpressiveDialog(
@@ -359,11 +337,6 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
                 summaryColor = BasicComponentDefaults.summaryColor(color = MaterialTheme.colorScheme.error),
                 startAction = { Icon(Icons.Rounded.ErrorOutline, null) },
             ) } }
-            report.deferred.forEach { key -> item(key = "deferred:$key") { ArrowPreference(
-                title = susfsOperationName(key),
-                summary = stringResource(R.string.susfs_deferred),
-                startAction = { Icon(Icons.Rounded.Schedule, null) },
-            ) } }
             report.pendingReboot.forEach { key -> item(key = "pending:$key") { ArrowPreference(
                 title = susfsOperationName(key),
                 summary = stringResource(R.string.susfs_pending),
@@ -397,7 +370,6 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
 
 private fun susfsManagementHint(status: SusfsStatus): Int = when {
     status.management == "idle" -> R.string.susfs_idle_hint
-    status.management == "deferred" -> R.string.susfs_deferred_hint
     status.management == "saved" && !status.automatic -> R.string.susfs_saved_reboot
     else -> R.string.susfs_ack_hint
 }

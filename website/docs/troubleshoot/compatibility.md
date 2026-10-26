@@ -63,7 +63,7 @@ flowchart LR
 
 :::: table 当前 CI 资产范围
 
-| ABI | 驱动/NoMount | `ksud` | FolkZygisk | Sui |
+| ABI | 驱动/NoMount | `ksud` | YukiZygisk | Sui |
 | --- | --- | --- | --- | --- |
 | `arm64-v8a` | 提供当前 KMI 矩阵 | 提供 | 提供 64 位与 32 位注入资产 | 提供 |
 | `x86_64` | 提供当前 KMI 矩阵 | 提供 | 提供 64 位与 32 位注入资产 | 提供 |
@@ -71,7 +71,7 @@ flowchart LR
 
 ::::
 
-不要把 `ksud` 能否运行与完整能力支持混为一谈。`riscv64` 当前可以构建 `ksud` 与 `ksuinit`，但仓库的发布构建没有对应 KMI 的 KernelSU/NoMount 模块，也没有 Sui 与 FolkZygisk 载荷；管理器应显示载荷缺失，而不是假装可用。
+不要把 `ksud` 能否运行与完整能力支持混为一谈。`riscv64` 当前可以构建 `ksud` 与 `ksuinit`，但仓库的发布构建没有对应 KMI 的 KernelSU/NoMount 模块，也没有 Sui 与 YukiZygisk 载荷；管理器应显示载荷缺失，而不是假装可用。
 
 架构错误通常更直接：
 
@@ -120,7 +120,7 @@ KMI 标识是 ABI 兼容层的一部分，不是完整的构建指纹。即使�
 
 - LKM 失败时先核对确切的 KMI 资产、架构和启动分区。
 - Built-In 失败时不能只比对 KMI，要核对完整内核源码和配置。
-- 某个功能不可用不等于整个驱动不可用；例如网络隔离、UTS View、挂载视图过滤或 SUSFS 对接都有独立能力门控。
+- 某个功能不可用不等于整个驱动不可用；例如挂载视图过滤或 SUSFS 对接都有独立能力门控。
 
 ## 设备端的判断路径
 

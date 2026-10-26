@@ -30,7 +30,7 @@ flowchart TD
     B --> C["Manager identity and UAPI"]
     C --> D["Root authorization and Profile"]
     D --> E["Module mounting and boot scripts"]
-    E --> F["Built-in capabilities such as FolkZygisk / Sui / NoMount"]
+    E --> F["Built-in capabilities such as YukiZygisk / Sui / NoMount"]
     F --> G["Target app behavior and detection"]
 
     A -.fail.-> A1["No boot, wrong partition, KMI mismatch"]
@@ -97,7 +97,7 @@ For example, once an app is allowed Root, the non-Root Profile's "unmount module
 | Level | Example | Principle |
 | --- | --- | --- |
 | **Observable on the spot** | Check status, refresh lists, open the SU log, restart the target app | Do it first; it does not change persistent configuration |
-| **Requires a reboot** | Enable a module, switch the Folk Mount mode, enable FolkZygisk or Sui | Change one item at a time and record the pre-change state |
+| **Requires a reboot** | Enable a module, switch the Folk Mount mode, enable YukiZygisk or Sui | Change one item at a time and record the pre-change state |
 | **Requires restoring an image** | Wrong boot partition, wrong KMI, kernel will not boot, safe mode unreachable | Stop guessing and flash the stock image for the partition you actually modified |
 
 ::::
@@ -128,7 +128,7 @@ For example, once an app is allowed Root, the non-Root Profile's "unmount module
 
 6. **Record this boot's state**
 
-   Modules, Folk Mount, FolkZygisk, Sui, NoMount and UTS View may all distinguish "configuration for the next boot" from "result of this boot". Check the current boot first, then the persistent settings.
+   Modules, Folk Mount, YukiZygisk, Sui and NoMount may all distinguish "configuration for the next boot" from "result of this boot". Check the current boot first, then the persistent settings.
 
 7. **Change one item and reproduce**
 

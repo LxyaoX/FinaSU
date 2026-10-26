@@ -70,7 +70,7 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: Folk Mount、FolkZygisk、NoMount 和 Sui 随包提供，由 ksud 管理，无需再安装一组上游模块。
+        details: Folk Mount、YukiZygisk、NoMount 和 Sui 随包提供，由 ksud 管理，无需再安装一组上游模块。
         link: /builtin/
       - title: Zygisk 与 Sui
         icon:
@@ -79,8 +79,8 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: FolkZygisk 提供 Zygisk 环境；Sui 为兼容 Shizuku API 的应用提供后端，也支持外部兼容提供者。
-        link: /builtin/folkzygisk/
+        details: YukiZygisk 提供 Zygisk 环境；Sui 为兼容 Shizuku API 的应用提供后端，也支持外部兼容提供者。
+        link: /builtin/yukizygisk/
       - title: 内核功能
         icon:
           src: /icons/home/network.svg
@@ -88,8 +88,8 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: UTS View、网络隔离和 SUSFS 对接按内核实际支持开放；SUSFS 需要源码集成或匹配的 SUSFS-LKM。
-        link: /builtin/uts-view/
+        details: SUSFS 对接按内核实际支持开放；它需要源码集成或匹配的 SUSFS-LKM。
+        link: /builtin/susfs/
       - title: 模块与插件
         icon:
           src: /icons/home/cube.svg

@@ -13,8 +13,6 @@ import me.weishu.kernelsu.data.susfs.SusfsDataSource
 import me.weishu.kernelsu.data.susfs.SusfsRepository
 import me.weishu.kernelsu.data.susfs.SusfsStatus
 import me.weishu.kernelsu.data.susfs.SusfsApplyReport
-import me.weishu.kernelsu.data.uts.UtsDataSource
-import me.weishu.kernelsu.data.uts.UtsRepository
 import me.weishu.kernelsu.ui.util.RootShell
 import me.weishu.kernelsu.ui.util.RootShellStatus
 import org.json.JSONObject
@@ -26,12 +24,10 @@ data class SusfsUiState(
     val message: String? = null,
     val report: SusfsApplyReport? = null,
     val savedNotice: Boolean = false,
-    val pendingUnameApply: Boolean = false,
 )
 
 class SusfsViewModel(
     private val repository: SusfsDataSource = SusfsRepository(),
-    private val utsRepository: UtsDataSource = UtsRepository(),
     rootStatus: Flow<RootShellStatus> = RootShell.status,
     rootGeneration: Flow<Long> = RootShell.generation,
     private val shellGeneration: () -> Long = { RootShell.generation.value },
@@ -54,7 +50,6 @@ class SusfsViewModel(
                                 busy = false,
                                 report = null,
                                 savedNotice = false,
-                                pendingUnameApply = false,
                             )
                         }
                     }
@@ -116,7 +111,7 @@ class SusfsViewModel(
 
     fun apply() {
         if (!mutable.value.status.writable) return
-        startApplyCheck()
+        operation(applying = true) { repository.apply() }
     }
 
     fun change(edit: (JSONObject) -> Unit) {
@@ -130,53 +125,10 @@ class SusfsViewModel(
         }
     }
 
-    fun confirmPendingUnameApply() {
-        if (!mutable.value.pendingUnameApply || mutable.value.busy) return
-        mutable.update { it.copy(pendingUnameApply = false) }
-        operation(applying = true) { applySusfsWithUtsFallback(repository, utsRepository) }
-    }
-
-    fun dismissPendingUnameApply() {
-        mutable.update { it.copy(pendingUnameApply = false) }
-    }
-
     fun message(text: String) { mutable.update { it.copy(message = text) } }
 
-    private fun startApplyCheck() {
-        if (mutable.value.busy || mutable.value.pendingUnameApply) return
-        val request = ++token
-        val generation = shellGeneration()
-        mutable.update { it.copy(busy = true, message = null, savedNotice = false) }
-        viewModelScope.launch {
-            try {
-                val text = repository.export()
-                val confirmationRequired = requiresUtsConfirmation(text)
-                if (request != token || generation != shellGeneration()) return@launch
-                mutable.update {
-                    it.copy(
-                        busy = false,
-                        pendingUnameApply = confirmationRequired,
-                    )
-                }
-                if (!confirmationRequired) {
-                    operation(applying = true) { repository.apply() }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (request == token && generation == shellGeneration()) {
-                    mutable.update {
-                        it.copy(message = e.message ?: "Operation timed out; refresh status before retrying")
-                    }
-                }
-            } finally {
-                if (request == token) mutable.update { it.copy(busy = false) }
-            }
-        }
-    }
-
     private fun startSave(produce: suspend () -> String) {
-        if (mutable.value.busy || mutable.value.pendingUnameApply) return
+        if (mutable.value.busy) return
         val request = ++token
         val generation = shellGeneration()
         mutable.update {
@@ -210,90 +162,4 @@ class SusfsViewModel(
             }
         }
     }
-
-    private suspend fun requiresUtsConfirmation(text: String): Boolean {
-        if (!susfsUnameSpoofs(text)) return false
-        return utsRepository.status().provider == "uts"
-    }
-}
-
-internal fun susfsUnameSpoofs(text: String): Boolean {
-    val settings = JSONObject(text).optJSONObject("settings") ?: return false
-    val uname = settings.optJSONObject("uname") ?: return false
-    return uname.optString("release") != "default" || uname.optString("version") != "default"
-}
-
-internal suspend fun applySusfsWithUtsFallback(
-    repository: SusfsDataSource,
-    utsRepository: UtsDataSource,
-): String {
-    utsRepository.disable()
-    val result = try {
-        repository.apply()
-    } catch (error: CancellationException) {
-        throw error
-    } catch (error: Exception) {
-        val status = runCatching { repository.status() }.getOrNull()
-        when (susfsUnameOutcome(status, null)) {
-            SusfsUnameOutcome.Applied -> throw IllegalStateException(
-                "SUSFS apply reported an error after uname took effect; UTS View remains disabled",
-                error,
-            )
-            SusfsUnameOutcome.Unknown -> throw IllegalStateException(
-                "SUSFS uname result is unknown; UTS View remains disabled: ${error.message}",
-                error,
-            )
-            SusfsUnameOutcome.ConfirmedNotApplied -> restoreUts(utsRepository, error)
-        }
-    }
-    val report = runCatching { SusfsApplyReport.parse(result) }.getOrNull()
-    val status = runCatching { repository.status() }.getOrNull()
-    when (susfsUnameOutcome(status, report)) {
-        SusfsUnameOutcome.Applied -> Unit
-        SusfsUnameOutcome.Unknown -> throw IllegalStateException(
-            "SUSFS uname result is unknown; UTS View remains disabled",
-        )
-        SusfsUnameOutcome.ConfirmedNotApplied -> {
-            val detail = report?.failures?.get("uname") ?: "SUSFS uname was not applied"
-            restoreUts(utsRepository, IllegalStateException(detail))
-        }
-    }
-    return result
-}
-
-internal enum class SusfsUnameOutcome {
-    Applied,
-    ConfirmedNotApplied,
-    Unknown,
-}
-
-internal fun susfsUnameOutcome(
-    status: SusfsStatus?,
-    report: SusfsApplyReport?,
-): SusfsUnameOutcome {
-    if (status?.unameApplied == true || report?.applied?.contains("uname") == true) {
-        return SusfsUnameOutcome.Applied
-    }
-    if (report?.failures?.containsKey("uname") == true ||
-        report?.deferred?.contains("uname") == true
-    ) {
-        return SusfsUnameOutcome.ConfirmedNotApplied
-    }
-    if (status == null || status.unameUncertain) {
-        return SusfsUnameOutcome.Unknown
-    }
-    return SusfsUnameOutcome.ConfirmedNotApplied
-}
-
-private suspend fun restoreUts(utsRepository: UtsDataSource, cause: Throwable): Nothing {
-    val detail = cause.message ?: "SUSFS uname was not applied"
-    try {
-        utsRepository.enable()
-    } catch (error: Exception) {
-        throw IllegalStateException(
-            "$detail; UTS View could not be restored: ${error.message}",
-            cause,
-        )
-    }
-    throw IllegalStateException("$detail; UTS View was restored", cause)
 }

@@ -39,7 +39,7 @@ Development in FinaSU is not only compiling the kernel. Standard modules, Lua pl
 - **Lua plugin** — a standalone automation package with `plugin.json`; it does not take part in `system/` mounting.
 - **Kernel module** — a `.ko` file handled by the Linux kernel loader.
 - **Built-In** — compiles the FinaSU driver into the kernel image; it is not a built-in capabilities switch.
-- **FolkZygisk** — the built-in Zygisk provider; Zygisk modules are still standard modules.
+- **YukiZygisk** — the built-in Zygisk provider; Zygisk modules are still standard modules.
 
 :::
 
@@ -51,7 +51,7 @@ flowchart TD
     U --> D["ksud"]
     D --> M["standard module system"]
     D --> P["Lua plugin runtime"]
-    D --> Z["FolkZygisk"]
+    D --> Z["YukiZygisk"]
     Z --> ZM["Zygisk modules"]
     D --> T["theme import and apply"]
     M --> F["systemless files and boot scripts"]
@@ -89,7 +89,7 @@ FolkSU
 │   │   ├── module.rs          # standard module install and scripts
 │   │   ├── module_config.rs   # module configuration
 │   │   └── plugin/            # Lua plugin implementation
-│   └── folkzygisk/            # built-in Zygisk engine
+│   └── zygisk/                # YukiZygisk engine (core + daemons)
 ├── manager/                   # Android Manager and JNI
 ├── website/                   # docs site
 └── build.sh                   # local release build entry
@@ -97,7 +97,7 @@ FolkSU
 
 ::: warning Do Not Modify Vendored Engines Casually
 
-`userspace/folkzygisk/`, `userspace/sui/` and `userspace/nomount/` are vendored sources. The repository conventions require them to stay identical to their origin except for documented adaptations. Read the matching `UPSTREAM.md` before changing anything, and do not mix temporary debug patches into a local commit.
+`userspace/zygisk/`, `userspace/sui/` and `userspace/nomount/` are vendored sources. The repository conventions require them to stay identical to their origin except for documented adaptations. Read the matching `UPSTREAM.md` before changing anything, and do not mix temporary debug patches into a local commit.
 
 :::
 

@@ -15,9 +15,9 @@ copyright:
 
 功能页集中显示由 `ksud` 驱动的内置引擎。每项能力都有独立状态和可用条件。入口、依赖关系和完整说明请从 [内置能力总览](/builtin/) 开始。
 
-## FolkZygisk
+## YukiZygisk
 
-查看引擎开关、外部提供者、模块与最近启动诊断。启用和引擎更新通常需要重启。详见 [FolkZygisk](/builtin/folkzygisk/)。
+查看引擎开关、外部提供者、模块与最近启动诊断。启用和引擎更新通常需要重启。详见 [YukiZygisk](/builtin/yukizygisk/)。
 
 ## Sui
 
@@ -30,11 +30,3 @@ copyright:
 ## NoMount
 
 查看驱动、注入规则、模块贡献和例外应用。驱动 API 过旧或缺少当前 KMI 的模块时，应改用其他挂载后端。详见 [NoMount](/builtin/nomount/)。
-
-## UTS View（内核信息伪装）
-
-允许选中的应用看到不同的内核身份信息，也可以对全部应用生效。配置时应保持字段自洽；错误的版本、编译时间或架构组合可能引发新的兼容性问题。详见 [UTS View](/builtin/uts-view/)。
-
-## 网络隔离
-
-阻止所选应用建立新的互联网连接。已建立的连接不保证立即中断，系统组件与自身进程也不应被误加入列表。详见 [网络隔离](/builtin/net-isolate/)。

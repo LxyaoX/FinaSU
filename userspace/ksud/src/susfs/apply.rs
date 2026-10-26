@@ -20,7 +20,6 @@ pub struct Report {
     pub status: &'static str,
     pub applied: Vec<String>,
     pub failures: BTreeMap<String, String>,
-    pub deferred: Vec<String>,
     pub pending_reboot: Vec<String>,
 }
 
@@ -250,7 +249,6 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
         status: "saved",
         applied: Vec::new(),
         failures: BTreeMap::new(),
-        deferred: Vec::new(),
         pending_reboot: Vec::new(),
     };
     state.failures.retain(|key, _| desired.contains_key(key));

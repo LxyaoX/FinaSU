@@ -25,7 +25,6 @@
 #include "supercall/supercall.h"
 #include "hook/tp_marker.h"
 #include "feature/kernel_umount.h"
-#include "feature/uts_view.h"
 
 #ifdef CONFIG_KSU_SUSFS
 extern struct work_struct susfs_extra_works;
@@ -98,7 +97,6 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
     else
         return 0;
 
-    ksu_uts_view_on_setresuid(old_uid, ruid);
     return 0;
 #else
     uid_t old_uid = ruid;
@@ -116,7 +114,6 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 
         pr_info("install fd for manager: %d\n", new_uid);
         ksu_install_fd();
-        ksu_uts_view_on_setresuid(old_uid, new_uid);
         return 0;
     }
 
@@ -133,8 +130,6 @@ int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 
     // Handle kernel umount
     ksu_handle_umount(old_uid, new_uid);
-
-    ksu_uts_view_on_setresuid(old_uid, new_uid);
 
     return 0;
 #endif

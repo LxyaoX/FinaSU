@@ -101,8 +101,6 @@ fun rememberSettingsActions(
         onSetBootPropsEnabled = viewModel::setBootPropsEnabled,
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,
-        onOpenUtsView = { navigator.push(Route.UtsView) },
-        onOpenNetIsolate = { navigator.push(Route.NetIsolate) },
         onSetDefaultUmountModules = viewModel::setDefaultUmountModules,
         onSetEnableWebDebugging = viewModel::setEnableWebDebugging,
         onSetListWorkingCardModeHidden = viewModel::setListWorkingCardModeHidden,

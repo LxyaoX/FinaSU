@@ -210,7 +210,7 @@ Magisk 用户通常已经有永久 Root，不需要走越狱。只有在无法�
 | --- | --- | --- |
 | `/data/adb/modules` | 文件通常保留 | 先停用，再逐个启用兼容模块 |
 | Magisk 模块脚本 | 不保证兼容 | 依赖 `magisk`、`magiskpolicy` 等接口的脚本可能失败 |
-| Zygisk 模块 | 需要 Zygisk 提供者 | 使用内置 [FolkZygisk](/builtin/folkzygisk/) 或其他兼容提供者，只保留一个 |
+| Zygisk 模块 | 需要 Zygisk 提供者 | 使用内置 [YukiZygisk](/builtin/yukizygisk/) 或其他兼容提供者，只保留一个 |
 | Magisk DenyList / Shamiko | 不能按原方式使用 | 改用 FinaSU 的隐藏与 App Profile 配置 |
 | `/data/adb/magisk` | 不再需要 | 确认 FinaSU 正常后再清理 |
 | Magisk Root 授权 | 不迁移 | 在 FinaSU 中重新授权 |
@@ -245,7 +245,7 @@ Magisk 用户通常已经有永久 Root，不需要走越狱。只有在无法�
 
 5. **验证 Zygisk**
 
-   使用 Zygisk 模块时，确认只有一个 Zygisk 提供者，并检查 FolkZygisk 或外部提供者的状态。
+   使用 Zygisk 模块时，确认只有一个 Zygisk 提供者，并检查 YukiZygisk 或外部提供者的状态。
 
 :::
 
@@ -271,7 +271,7 @@ Magisk 用户通常已经有永久 Root，不需要走越狱。只有在无法�
 
 - **Zygisk 模块不工作**
 
-  确认 FolkZygisk 已启用，或只保留一个兼容的外部 Zygisk 提供者；切换提供者后通常需要重启。
+  确认 YukiZygisk 已启用，或只保留一个兼容的外部 Zygisk 提供者；切换提供者后通常需要重启。
 
 - **FinaSU 显示未安装**
 
@@ -304,7 +304,7 @@ Magisk 模块还能继续用吗？
 Zygisk 模块怎么办？
 
 {.}
-使用 FinaSU 内置的 FolkZygisk，或一个兼容的外部 Zygisk 提供者；只能保留一个活动实现。
+使用 FinaSU 内置的 YukiZygisk，或一个兼容的外部 Zygisk 提供者；只能保留一个活动实现。
 
 {用户}
 需要先卸载 Magisk 应用吗？

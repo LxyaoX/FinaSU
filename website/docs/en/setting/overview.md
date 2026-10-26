@@ -135,7 +135,7 @@ The current kernel lacks the corresponding capability. Upgrading to a kernel or 
 - [General](/en/setting/general/): updates, language, App Profile templates.
 - [Appearance](/en/setting/appearance/): theme, wallpaper, font, home layout.
 - [Behavior](/en/setting/behavior/): navigation, floating bar, SU compatibility, module display.
-- [Features](/en/setting/function/): mount policy, FolkZygisk, Sui, NoMount and more.
+- [Features](/en/setting/function/): mount policy, YukiZygisk, Sui, NoMount and more.
 - [Security](/en/setting/security/): SELinux, ADB Root and Shell restrictions.
 - [Verification](/en/setting/authentication/): Manager app lock and sensitive action protection.
 - [Multimedia](/en/setting/multimedia/): vibration, background music and sound effects.

@@ -63,7 +63,7 @@ The local default `KMIS` of `build.sh` is `android15-6.6`. Running a local `lkm`
 
 :::: table Scope of current CI assets
 
-| ABI | Driver/NoMount | `ksud` | FolkZygisk | Sui |
+| ABI | Driver/NoMount | `ksud` | YukiZygisk | Sui |
 | --- | --- | --- | --- | --- |
 | `arm64-v8a` | Current KMI matrix | Provided | 64-bit and 32-bit injection assets provided | Provided |
 | `x86_64` | Current KMI matrix | Provided | 64-bit and 32-bit injection assets provided | Provided |
@@ -71,7 +71,7 @@ The local default `KMIS` of `build.sh` is `android15-6.6`. Running a local `lkm`
 
 ::::
 
-Do not confuse whether `ksud` runs with full capability support. On `riscv64`, `ksud` and `ksuinit` can currently be built, but the repository's release build has no KernelSU/NoMount module for the corresponding KMI, and no Sui or FolkZygisk payloads; the Manager should report the missing payloads instead of pretending they are available.
+Do not confuse whether `ksud` runs with full capability support. On `riscv64`, `ksud` and `ksuinit` can currently be built, but the repository's release build has no KernelSU/NoMount module for the corresponding KMI, and no Sui or YukiZygisk payloads; the Manager should report the missing payloads instead of pretending they are available.
 
 Architecture errors are usually more direct:
 
@@ -120,7 +120,7 @@ Therefore:
 
 - when LKM fails, check the exact KMI asset, architecture and boot partition first;
 - when Built-In fails, do not compare only the KMI; check the full kernel source and configuration;
-- an unavailable feature does not mean the whole driver is unavailable; network isolation, UTS View, mount view filtering and SUSFS integration, for example, each have their own capability gating.
+- an unavailable feature does not mean the whole driver is unavailable; mount view filtering and SUSFS integration, for example, each have their own capability gating.
 
 ## Decision Path on the Device
 

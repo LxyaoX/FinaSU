@@ -234,13 +234,13 @@ A Metamodule is a special module that declares `metamodule=1` in `module.prop`. 
 | --- | --- | --- |
 | [Folk Mount](/en/builtin/folk-mount/) | Selects a mount provider and injects modules; can delegate to a Metamodule | FinaSU driver |
 | [NoMount](/en/builtin/nomount/) | Injects files through kernel VFS path redirection without creating a traditional mount | A NoMount module matching the KMI |
-| [FolkZygisk](/en/builtin/folkzygisk/) | Built-in Zygisk engine that injects during the Zygote startup stage | Enabled and rebooted |
+| [YukiZygisk](/en/builtin/yukizygisk/) | Built-in Zygisk engine that injects during the Zygote startup stage | Enabled and rebooted |
 | [Sui](/en/builtin/sui/) | Shizuku API backend | FinaSU driver and Zygisk |
 | [SUSFS](/en/builtin/susfs/) | Interface for hiding and path spoofing capabilities | Source integration or an already loaded SUSFS-LKM |
 
 :::
 
-FolkZygisk steps aside when an external Zygisk provider is detected; features that depend on Zygisk, such as Sui and LSPosed, need at least one available provider. SUSFS is not a kernel implementation built into FinaSU; it needs a source-integrated build or an already loaded SUSFS-LKM.
+YukiZygisk steps aside when an external Zygisk provider is detected; features that depend on Zygisk, such as Sui and LSPosed, need at least one available provider. SUSFS is not a kernel implementation built into FinaSU; it needs a source-integrated build or an already loaded SUSFS-LKM.
 
 ## SELinux and Hiding
 

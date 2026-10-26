@@ -344,8 +344,8 @@ export const docsSidebar: ThemeSidebarItem[] = [
         icon: 'ri:hard-drive-3-line',
       },
       {
-        text: 'FolkZygisk',
-        link: '/builtin/folkzygisk/',
+        text: 'YukiZygisk',
+        link: '/builtin/yukizygisk/',
         icon: 'ri:apps-2-line',
       },
       {
@@ -353,17 +353,6 @@ export const docsSidebar: ThemeSidebarItem[] = [
         link: '/builtin/sui/',
         icon: 'ri:water-flash-line',
         badge: { text: '需 Zygisk', type: 'warning' },
-      },
-      {
-        text: 'UTS View',
-        link: '/builtin/uts-view/',
-        icon: 'ri:text',
-      },
-      {
-        text: '网络隔离',
-        link: '/builtin/net-isolate/',
-        icon: 'ri:wifi-off-line',
-        badge: { text: '谨慎', type: 'warning' },
       },
       {
         text: 'NoMount',
@@ -1101,8 +1090,8 @@ export const enDocsSidebar: ThemeSidebarItem[] = [
         icon: 'ri:hard-drive-3-line',
       },
       {
-        text: 'FolkZygisk',
-        link: '/en/builtin/folkzygisk/',
+        text: 'YukiZygisk',
+        link: '/en/builtin/yukizygisk/',
         icon: 'ri:apps-2-line',
       },
       {
@@ -1110,17 +1099,6 @@ export const enDocsSidebar: ThemeSidebarItem[] = [
         link: '/en/builtin/sui/',
         icon: 'ri:water-flash-line',
         badge: { text: 'Requires Zygisk', type: 'warning' },
-      },
-      {
-        text: 'UTS View',
-        link: '/en/builtin/uts-view/',
-        icon: 'ri:text',
-      },
-      {
-        text: 'Network Isolation',
-        link: '/en/builtin/net-isolate/',
-        icon: 'ri:wifi-off-line',
-        badge: { text: 'Caution', type: 'warning' },
       },
       {
         text: 'NoMount',

@@ -12,12 +12,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import me.weishu.kernelsu.data.susfs.SusfsDataSource
 import me.weishu.kernelsu.data.susfs.SusfsStatus
-import me.weishu.kernelsu.data.uts.UtsDataSource
-import me.weishu.kernelsu.data.uts.UtsFields
-import me.weishu.kernelsu.data.uts.UtsTarget
-import me.weishu.kernelsu.data.uts.UtsTargetApp
-import me.weishu.kernelsu.data.uts.UtsViewMode
-import me.weishu.kernelsu.data.uts.UtsViewStatus
 import me.weishu.kernelsu.ui.util.RootShellStatus
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -29,7 +23,6 @@ import org.junit.Test
 class SusfsViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val repository = FakeSusfs()
-    private val uts = FakeUts()
     private var generation = 1L
 
     @Before
@@ -40,25 +33,10 @@ class SusfsViewModelTest {
 
     private fun model() = SusfsViewModel(
         repository = repository,
-        utsRepository = uts,
         rootStatus = flowOf(RootShellStatus.Ready),
         rootGeneration = flowOf(1L),
         shellGeneration = { generation },
     )
-
-    @Test
-    fun `saving uname never changes UTS`() = runTest(dispatcher) {
-        val model = model()
-        advanceUntilIdle()
-
-        model.save("""{"settings":{"uname":{"release":"6.6.0","version":"#1"}}}""")
-        advanceUntilIdle()
-
-        assertEquals(1, repository.saved.size)
-        assertEquals(0, uts.disableCalls)
-        assertEquals(0, uts.enableCalls)
-        assertEquals(0, uts.clearCalls)
-    }
 
     @Test
     fun `late stale refresh cannot overwrite newer status`() = runTest(dispatcher) {
@@ -81,7 +59,6 @@ class SusfsViewModelTest {
     private class FakeSusfs : SusfsDataSource {
         var statusValue = SusfsStatus(protocol = "compatible")
         var blockNextStatus: CompletableDeferred<Unit>? = null
-        val saved = mutableListOf<String>()
 
         override suspend fun status(): SusfsStatus {
             val snapshot = statusValue
@@ -93,44 +70,10 @@ class SusfsViewModelTest {
         }
 
         override suspend fun export() = """{"automatic":false,"settings":{},"rules":[],"lkm":{}}"""
-        override suspend fun save(text: String) {
-            saved += text
-        }
+        override suspend fun save(text: String) = Unit
 
         override suspend fun apply() =
             """{"status":"applied","applied":[],"failures":{},"pending_reboot":[]}"""
     }
 
-    private class FakeUts : UtsDataSource {
-        var disableCalls = 0
-        var enableCalls = 0
-        var clearCalls = 0
-
-        override suspend fun status() = UtsViewStatus()
-        override suspend fun loadApps(): List<UtsTargetApp> = emptyList()
-        override suspend fun save(
-            fields: UtsFields,
-            enabled: Boolean,
-            mode: UtsViewMode,
-            targets: List<UtsTarget>,
-        ) = Unit
-
-        override suspend fun enable() {
-            enableCalls++
-        }
-
-        override suspend fun disable() {
-            disableCalls++
-        }
-
-        override suspend fun clear() {
-            clearCalls++
-        }
-
-        override suspend fun takeOver(
-            fields: UtsFields,
-            mode: UtsViewMode,
-            targets: List<UtsTarget>,
-        ) = Unit
-    }
 }

@@ -126,8 +126,6 @@ data class SettingsScreenActions(
     val onSetBootPropsEnabled: (Boolean) -> Unit,
     val onSetAdbRootEnabled: (Boolean) -> Unit,
     val onSetShellSuAdbOnlyEnabled: (Boolean) -> Unit,
-    val onOpenUtsView: () -> Unit,
-    val onOpenNetIsolate: () -> Unit,
     val onSetDefaultUmountModules: (Boolean) -> Unit,
     val onSetEnableWebDebugging: (Boolean) -> Unit,
     val onSetListWorkingCardModeHidden: (Boolean) -> Unit,

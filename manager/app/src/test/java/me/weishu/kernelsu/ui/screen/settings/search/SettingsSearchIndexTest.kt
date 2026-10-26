@@ -50,20 +50,4 @@ class SettingsSearchIndexTest {
                 assertEquals(entry.category?.key, target.key)
             }
     }
-
-    @Test
-    fun `UTS View is searchable from functions`() {
-        val entry = settingsSearchIndex.single {
-            it.target == SettingsSearchTarget.Page(Route.UtsView)
-        }
-        assertEquals(SettingsCategory.FUNCTION, entry.category)
-    }
-
-    @Test
-    fun `network isolation is searchable from functions`() {
-        val entry = settingsSearchIndex.single {
-            it.target == SettingsSearchTarget.Page(Route.NetIsolate)
-        }
-        assertEquals(SettingsCategory.FUNCTION, entry.category)
-    }
 }

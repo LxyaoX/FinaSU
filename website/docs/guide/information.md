@@ -236,13 +236,13 @@ FinaSU 保留 `su` 兼容层：符合条件的应用执行 `/system/bin/su` 时�
 | --- | --- | --- |
 | [Folk Mount](/builtin/folk-mount/) | 选择挂载提供者并注入模块，可委托元模块 | FinaSU 驱动 |
 | [NoMount](/builtin/nomount/) | 通过内核 VFS 路径重定向注入文件，不建立传统挂载 | 匹配 KMI 的 NoMount 模块 |
-| [FolkZygisk](/builtin/folkzygisk/) | 内置 Zygisk 引擎，在 Zygote 启动阶段注入 | 启用并重启 |
+| [YukiZygisk](/builtin/yukizygisk/) | 内置 Zygisk 引擎，在 Zygote 启动阶段注入 | 启用并重启 |
 | [Sui](/builtin/sui/) | Shizuku API 后端 | FinaSU 驱动与 Zygisk |
 | [SUSFS](/builtin/susfs/) | 隐藏与路径伪装能力接口 | 内核源码集成或已加载 SUSFS-LKM |
 
 :::
 
-FolkZygisk 在检测到外部 Zygisk 提供者时会让位；Sui、LSPosed 等依赖 Zygisk 的功能需要至少一个可用提供者。SUSFS 不是 FinaSU 内置的内核实现；它需要内核源码集成版或已加载的 SUSFS-LKM。
+YukiZygisk 在检测到外部 Zygisk 提供者时会让位；Sui、LSPosed 等依赖 Zygisk 的功能需要至少一个可用提供者。SUSFS 不是 FinaSU 内置的内核实现；它需要内核源码集成版或已加载的 SUSFS-LKM。
 
 ## SELinux 与隐藏
 

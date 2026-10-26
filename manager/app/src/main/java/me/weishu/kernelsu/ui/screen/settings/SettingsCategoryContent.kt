@@ -25,10 +25,8 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.automirrored.rounded.LabelOff
 import androidx.compose.material.icons.rounded.SpaceDashboard
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -527,24 +525,6 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                         onClick = actions.onOpenTeesim,
                     )
                 },
-                {
-                    // UTS View has enough configuration that a switch in the
-                    // settings list would misrepresent it as a single toggle.
-                    ArrowPreference(
-                        title = stringResource(id = R.string.settings_uts_view),
-                        summary = stringResource(id = R.string.settings_uts_view_summary),
-                        startAction = { Icon(Icons.Rounded.TextFields, null) },
-                        onClick = actions.onOpenUtsView,
-                    )
-                },
-                {
-                    ArrowPreference(
-                        title = stringResource(id = R.string.settings_netisolate),
-                        summary = stringResource(id = R.string.settings_netisolate_summary),
-                        startAction = { Icon(Icons.Filled.WifiOff, null) },
-                        onClick = actions.onOpenNetIsolate,
-                    )
-                }
             )
         )
     }

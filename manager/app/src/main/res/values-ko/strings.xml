@@ -663,7 +663,6 @@
     <string name="settings_bug_feedback">버그 신고</string>
     <string name="settings_search_hint">설정 검색</string>
     <string name="settings_search_empty">설정을 찾을 수 없습니다</string>
-    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="module_more_actions">추가 작업</string>
     <string name="collapse">접기</string>
     <string name="kernel_modules">커널 모듈</string>
@@ -760,7 +759,7 @@
     <string name="guide_repo_action">저장소 열기</string>
     <string name="guide_features_title">내장 기능</string>
     <string name="guide_features_desc">관리자에 네 개의 엔진이 내장되어 있어 추가 모듈이 필요하지 않습니다.</string>
-    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 구현</string>
+    <string name="guide_feature_zygisk">YukiZygisk — Zygisk 구현</string>
     <string name="guide_feature_sui">Sui — Shizuku API 백엔드</string>
     <string name="guide_feature_nomount">NoMount — VFS 경로 리디렉션</string>
     <string name="guide_feature_mount">Folk Mount — 모듈 마운트 엔진</string>

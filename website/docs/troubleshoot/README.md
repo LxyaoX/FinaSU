@@ -30,7 +30,7 @@ flowchart TD
     B --> C["管理器身份与 UAPI"]
     C --> D["Root 授权与 Profile"]
     D --> E["模块挂载与启动脚本"]
-    E --> F["FolkZygisk / Sui / NoMount 等内置能力"]
+    E --> F["YukiZygisk / Sui / NoMount 等内置能力"]
     F --> G["目标应用行为与检测"]
 
     A -.失败.-> A1["无法开机、分区错误、KMI 不匹配"]
@@ -85,7 +85,7 @@ flowchart TD
 
 :::: field 本来就不会生效
 @type `策略或范围`
-例如应用已经允许 Root 时，非 Root Profile 的“卸载模块”不再控制该 UID；已有连接也不会被后来的网络隔离规则追溯切断。
+例如应用已经允许 Root 时，非 Root Profile 的“卸载模块”不再控制该 UID。
 ::::
 
 :::::
@@ -97,7 +97,7 @@ flowchart TD
 | 等级 | 例子 | 原则 |
 | --- | --- | --- |
 | **可现场观察** | 查看状态、刷新列表、打开 SU 日志、重启目标应用 | 先做；不改变持久配置 |
-| **需要重启** | 启用模块、切换 Folk Mount 模式、启用 FolkZygisk 或 Sui | 一次只改一项，并记录改前状态 |
+| **需要重启** | 启用模块、切换 Folk Mount 模式、启用 YukiZygisk 或 Sui | 一次只改一项，并记录改前状态 |
 | **需要恢复镜像** | 错误启动分区、错误 KMI、内核无法启动、安全模式无法进入 | 停止猜测，按实际修改的分区刷回原厂镜像 |
 
 ::::
@@ -128,7 +128,7 @@ flowchart TD
 
 6. **记录本次启动状态**
 
-   模块、Folk Mount、FolkZygisk、Sui、NoMount 和 UTS View 都可能区分“下次启动配置”和“本次启动结果”。先看当前启动，再看持久设置。
+   模块、Folk Mount、YukiZygisk、Sui 和 NoMount 都可能区分“下次启动配置”和“本次启动结果”。先看当前启动，再看持久设置。
 
 7. **只改一项并复现**
 

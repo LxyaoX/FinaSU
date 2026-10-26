@@ -39,16 +39,6 @@ enum Commands {
         #[command(subcommand)]
         command: crate::susfs::Command,
     },
-    /// Manage the built-in UTS view (uname spoof)
-    UtsView {
-        #[command(subcommand)]
-        command: crate::uts_view::Command,
-    },
-    /// Manage kernel UID network isolation
-    Netisolate {
-        #[command(subcommand)]
-        command: crate::netisolate::Command,
-    },
     /// Manage KernelSU modules
     Module {
         #[command(subcommand)]
@@ -774,8 +764,6 @@ pub fn run() -> Result<()> {
             crate::anykernel3::flash(&zip, inactive_slot)
         }
         Commands::Susfs { command } => crate::susfs::run(command),
-        Commands::UtsView { command } => crate::uts_view::run(&command),
-        Commands::Netisolate { command } => crate::netisolate::run(&command),
         Commands::Yukizygisk { command } => crate::yukizygisk::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
         Commands::BootCompleted => {

@@ -39,15 +39,7 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
-    data object UtsView : Route
-
-    @Parcelize
-    @Serializable
     data object YukiZygisk : Route
-
-    @Parcelize
-    @Serializable
-    data object NetIsolate : Route
 
     @Parcelize
     @Serializable

@@ -28,7 +28,7 @@ class DownloaderTest {
 
     @Test
     fun `ignores non-apk release assets`() {
-        assertNull(parseReleaseAssetName("folkzygisk-source-1.0.tar.gz"))
+        assertNull(parseReleaseAssetName("zygisk-source-1.0.tar.gz"))
         assertNull(parseReleaseAssetName("lkm-6.6.118_kernelsu.ko"))
     }
 

@@ -63,7 +63,6 @@ mod mount_capture;
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod mount_guard;
 #[cfg(target_os = "android")]
-mod netisolate;
 #[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod nomount;
@@ -95,20 +94,17 @@ mod sulog;
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod yukizygisk;
 // SUSFS is an Android control interface; Linux hosts only compile it for tests.
+#[cfg(target_os = "android")]
+#[cfg(any(target_os = "android", test))]
+#[cfg(target_os = "android")]
+#[allow(nonstandard_style, unused, unsafe_op_in_unsafe_fn)]
+mod ksu_uapi;
 #[cfg(any(target_os = "android", all(test, target_os = "linux")))]
 mod susfs;
 #[cfg(target_os = "android")]
 mod unload;
 #[cfg(target_os = "android")]
 mod utils;
-#[cfg(target_os = "android")]
-mod uts_view;
-#[cfg(any(target_os = "android", test))]
-mod uts_view_config;
-
-#[cfg(target_os = "android")]
-#[allow(nonstandard_style, unused, unsafe_op_in_unsafe_fn)]
-mod ksu_uapi;
 
 fn main() -> anyhow::Result<()> {
     #[cfg(target_os = "android")]

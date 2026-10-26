@@ -14,14 +14,13 @@ pub enum FeatureId {
     // ID 5 is the read-only dynamic-manager capability, not a toggle.
     AvcSpoof = 6,
     ShellSuAdbOnly = 7,
-    UtsView = 9,
     MountViewFilter = 10,
     /// YukiZygisk's injection runtime. Not a user toggle, so it stays out of `ALL`.
     YukiZygisk = 11,
 }
 
 impl FeatureId {
-    pub const ALL: [Self; 9] = [
+    pub const ALL: [Self; 8] = [
         Self::SuCompat,
         Self::KernelUmount,
         Self::Sulog,
@@ -29,7 +28,6 @@ impl FeatureId {
         Self::SelinuxHide,
         Self::AvcSpoof,
         Self::ShellSuAdbOnly,
-        Self::UtsView,
         Self::MountViewFilter,
     ];
 
@@ -42,7 +40,6 @@ impl FeatureId {
             4 => Some(Self::SelinuxHide),
             6 => Some(Self::AvcSpoof),
             7 => Some(Self::ShellSuAdbOnly),
-            9 => Some(Self::UtsView),
             10 => Some(Self::MountViewFilter),
             11 => Some(Self::YukiZygisk),
             _ => None,
@@ -58,7 +55,6 @@ impl FeatureId {
             Self::SelinuxHide => "selinux_hide",
             Self::AvcSpoof => "avc_spoof",
             Self::ShellSuAdbOnly => "shell_su_adb_only",
-            Self::UtsView => "uts_view",
             Self::MountViewFilter => "mount_view_filter",
             Self::YukiZygisk => "yukizygisk",
         }
@@ -85,9 +81,6 @@ impl FeatureId {
             Self::ShellSuAdbOnly => {
                 "Shell SU ADB Only - when shell is granted root, additionally require the process to be spawned by adbd or a KernelSU root process (ksu domain)"
             }
-            Self::UtsView => {
-                "UTS View - expose a configured kernel identity to selected apps or the initial UTS namespace"
-            }
             Self::YukiZygisk => {
                 "YukiZygisk - kernel-assisted Zygisk injection runtime (not a user toggle)"
             }
@@ -95,10 +88,6 @@ impl FeatureId {
                 "Mount View Filter - hide root and module mounts from app and isolated-process proc mount views"
             }
         }
-    }
-
-    pub const fn has_dedicated_manager(self) -> bool {
-        matches!(self, Self::UtsView)
     }
 }
 
@@ -121,13 +110,10 @@ mod tests {
         }
         assert_eq!(FeatureId::AvcSpoof as u32, 6);
         assert_eq!(FeatureId::ShellSuAdbOnly as u32, 7);
-        assert_eq!(FeatureId::UtsView as u32, 9);
         assert_eq!(FeatureId::MountViewFilter as u32, 10);
         assert_eq!(FeatureId::from_u32(6), Some(FeatureId::AvcSpoof));
         assert_eq!(FeatureId::from_u32(7), Some(FeatureId::ShellSuAdbOnly));
-        assert_eq!(FeatureId::from_u32(9), Some(FeatureId::UtsView));
         assert_eq!(FeatureId::from_u32(10), Some(FeatureId::MountViewFilter));
-        assert!(FeatureId::UtsView.has_dedicated_manager());
         assert!(!FeatureId::KernelUmount.has_dedicated_manager());
         assert!(parse_feature_id("5").is_err());
         assert!(parse_feature_id("dynamic_manager").is_err());

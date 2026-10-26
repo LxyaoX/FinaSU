@@ -44,7 +44,7 @@ The following basic facts are always shown:
 - SELinux;
 - Seccomp.
 
-Hiding Zygisk or SUSFS does not turn off FolkZygisk, an external provider or SUSFS kernel features. When troubleshooting detection problems, either show the corresponding row again or check the current boot state on the feature page.
+Hiding Zygisk or SUSFS does not turn off YukiZygisk, an external provider or SUSFS kernel features. When troubleshooting detection problems, either show the corresponding row again or check the current boot state on the feature page.
 
 ## Bottom Support Card
 

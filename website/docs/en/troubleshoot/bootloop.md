@@ -104,7 +104,7 @@ With a persistent installation, FinaSU counts volume-down key presses early in b
 
 4. **Handle suspicious modules**
 
-   FinaSU safe mode skips the module boot scripts, Folk Mount, FolkZygisk, Sui and other boot flows, and disables regular modules and managed kernel modules. After booting, re-enable one module at a time and verify with a reboot each time.
+   FinaSU safe mode skips the module boot scripts, Folk Mount, YukiZygisk, Sui and other boot flows, and disables regular modules and managed kernel modules. After booting, re-enable one module at a time and verify with a reboot each time.
 
 ::::
 
@@ -158,7 +158,7 @@ If the boot animation appears, try FinaSU safe mode first. After the system boot
 
 1. **Preserve the current state**
 
-   Record safe mode, recently installed modules, the mount provider, the FolkZygisk/Sui state and the time point. Do not clear `/data/adb` yet.
+   Record safe mode, recently installed modules, the mount provider, the YukiZygisk/Sui state and the time point. Do not clear `/data/adb` yet.
 
 2. **Restore modules one by one**
 
@@ -170,7 +170,7 @@ If the boot animation appears, try FinaSU safe mode first. After the system boot
 
 4. **Restore a minimal capability set**
 
-   Temporarily disable non-essential capabilities such as Folk Mount, NoMount, FolkZygisk, Sui and UTS View. Once basic Root and system boot are stable, enable them one by one following their dependencies.
+   Temporarily disable non-essential capabilities such as Folk Mount, NoMount, YukiZygisk and Sui. Once basic Root and system boot are stable, enable them one by one following their dependencies.
 
 ::::
 

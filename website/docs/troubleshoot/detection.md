@@ -28,10 +28,9 @@ flowchart TD
     E --> G["NoMount<br/>VFS 重定向，避免传统挂载"]
     A --> H["SELinux Hide / AVC Spoof"]
     A --> I["SUSFS 对接（可选）"]
-    A --> J["UTS View<br/>只改 uname 字段"]
 ```
 
-这些能力可能互相影响，但不是同一种“隐身等级”。例如 NoMount 减少传统挂载记录，Mount View Filter 过滤读到的挂载表，SELinux Hide 处理安全策略查询，UTS View 只改变指定进程的 `uname` 字段。
+这些能力可能互相影响，但不是同一种“隐身等级”。例如 NoMount 减少传统挂载记录，Mount View Filter 过滤读到的挂载表，SELinux Hide 处理安全策略查询。
 
 ## App Profile 的“卸载模块”
 
@@ -108,13 +107,11 @@ NoMount 与 Mount View Filter 解决不同问题。前者减少传统挂载本�
 
 SELinux 设置错误还可能直接破坏应用功能。若开启后应用无法访问自己的文件、模块读取失败或服务启动失败，先回退最近一项，而不是继续叠加更多隐藏开关。
 
-## SUSFS、UTS View 与其他表面
+## SUSFS 与其他表面
 
 **SUSFS** 不由 FinaSU 内核本体提供。只有内核源码集成或加载匹配的 SUSFS-LKM 后，FinaSU 才能对接其配置。源码集成与 LKM 的功能范围可能不同，隐藏项应以当前实现和页面状态为准。见[SUSFS](/builtin/susfs/)。
 
-**UTS View** 只影响选定进程看到的 `uname` 字段。它不能改变硬件证明、系统属性、应用缓存或完整的设备指纹。见[UTS View](/builtin/uts-view/)。
-
-**FolkZygisk 与 Sui** 是功能提供者，不是隐藏开关。它们本身可能产生新的可观察面，不能因为启用了 Zygisk 或 Sui 就认为系统更隐蔽。
+**YukiZygisk 与 Sui** 是功能提供者，不是隐藏开关。它们本身可能产生新的可观察面，不能因为启用了 Zygisk 或 Sui 就认为系统更隐蔽。
 
 ## 先问四个问题
 
@@ -173,7 +170,6 @@ FinaSU 无法验证其注入结果。到外部提供者自己的管理页面检�
 - 给所有应用统一关闭“卸载模块”，再指望一个隐藏开关覆盖全部检测；
 - 同时叠加 NoMount、Mount View Filter、SUSFS 和所有 SELinux 隐藏项；
 - 为了通过检测长期把 SELinux 设为 Permissive；
-- 把 UTS View 当作完整设备指纹伪装；
 - 使用来源不明的隐藏模块，并让它与 FinaSU 修改同一内核接口；
 - 通过直接编辑 `/data/adb/ksu` 状态文件强制打开内核不支持的能力。
 
@@ -196,5 +192,4 @@ FinaSU 无法验证其注入结果。到外部提供者自己的管理页面检�
 - [Folk Mount](/builtin/folk-mount/)：挂载提供者与可见性模型。
 - [NoMount](/builtin/nomount/)：VFS 重定向、例外 UID 与检测边界。
 - [SUSFS](/builtin/susfs/)：可选内核集成与 LKM。
-- [UTS View](/builtin/uts-view/)：只改变 `uname` 字段。
 - [过检测](/troubleshoot/pass-detection/)：检测工具没有全绿时，先判断是否值得继续处理。

@@ -691,7 +691,6 @@
     <string name="settings_bug_feedback">Bug 反馈</string>
     <string name="settings_search_hint">搜索设置</string>
     <string name="settings_search_empty">未找到相关设置</string>
-    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="module_preinit_no_space">预初始化未同步：metadata 空间不足</string>
     <string name="module_preinit_error">预初始化同步失败，保留上次配置</string>
     <string name="module_preinit_bootloop">多次启动未完成，预初始化已暂停</string>

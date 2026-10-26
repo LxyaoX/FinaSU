@@ -104,7 +104,7 @@ copyright:
 
 4. **处理可疑模块**
 
-   FinaSU 安全模式会跳过模块启动脚本、Folk Mount、FolkZygisk、Sui 等启动流程，并禁用普通模块和受管内核模块。进入系统后一次只重新启用一个模块，每次重启验证。
+   FinaSU 安全模式会跳过模块启动脚本、Folk Mount、YukiZygisk、Sui 等启动流程，并禁用普通模块和受管内核模块。进入系统后一次只重新启用一个模块，每次重启验证。
 
 ::::
 
@@ -158,7 +158,7 @@ copyright:
 
 1. **保留当前状态**
 
-   记录安全模式、最近安装的模块、挂载提供者、FolkZygisk/Sui 状态和时间点。先不要清空 `/data/adb`。
+   记录安全模式、最近安装的模块、挂载提供者、YukiZygisk/Sui 状态和时间点。先不要清空 `/data/adb`。
 
 2. **逐个恢复模块**
 
@@ -170,7 +170,7 @@ copyright:
 
 4. **恢复最小能力集合**
 
-   暂时关闭 Folk Mount、NoMount、FolkZygisk、Sui 和 UTS View 等非必要能力。确认基础 Root 和系统启动稳定后，再按依赖逐个开启。
+   暂时关闭 Folk Mount、NoMount、YukiZygisk 和 Sui 等非必要能力。确认基础 Root 和系统启动稳定后，再按依赖逐个开启。
 
 ::::
 

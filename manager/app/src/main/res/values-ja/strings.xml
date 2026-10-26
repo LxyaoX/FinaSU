@@ -663,7 +663,6 @@
     <string name="settings_bug_feedback">バグ報告</string>
     <string name="settings_search_hint">設定を検索</string>
     <string name="settings_search_empty">設定が見つかりません</string>
-    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="module_more_actions">その他の操作</string>
     <string name="collapse">折りたたむ</string>
     <string name="kernel_modules">カーネルモジュール</string>
@@ -760,7 +759,7 @@
     <string name="guide_repo_action">リポジトリを開く</string>
     <string name="guide_features_title">内蔵機能</string>
     <string name="guide_features_desc">4つのエンジンをマネージャーに内蔵。追加モジュールは不要です。</string>
-    <string name="guide_feature_zygisk">FolkZygisk — Zygisk 実装</string>
+    <string name="guide_feature_zygisk">YukiZygisk — Zygisk 実装</string>
     <string name="guide_feature_sui">Sui — Shizuku API バックエンド</string>
     <string name="guide_feature_nomount">NoMount — VFS パスリダイレクト</string>
     <string name="guide_feature_mount">Folk Mount — モジュールマウントエンジン</string>

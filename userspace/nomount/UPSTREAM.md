@@ -2,7 +2,7 @@
 
 NoMount is vendored into FinaSU so that the kernel module is built by this
 repository's own pipeline instead of being downloaded from upstream releases.
-This mirrors how FolkZygisk vendors ReZygisk under `userspace/folkzygisk`.
+This mirrors how YukiZygisk vendors its engine under `userspace/zygisk`.
 
 Only the kernel-side sources are imported here. FinaSU reimplements the
 userspace control path (the `nm` CLI's keyring payload protocol) in Rust inside

@@ -101,16 +101,11 @@
     <string name="susfs_add_entry">항목 추가</string>
     <string name="susfs_module_hint">모듈 이름: ASCII 문자, 숫자, 밑줄 1–63자입니다. 모듈을 로드하거나 언로드하지 않습니다.</string>
     <string name="susfs_prefix_hint">노출된 LKM 제어를 통해 마운트 접두사를 숨깁니다. 기존 규칙을 전역으로 지우지 않습니다.</string>
-    <string name="susfs_deferred">UTS View 활성 중 보류됨</string>
     <string name="susfs_idle">적용할 항목 없음</string>
     <string name="susfs_idle_hint">구성된 관리 규칙이나 설정이 없습니다.</string>
-    <string name="susfs_deferred_hint">UTS View가 커널 정보 위조를 제공하고 있어 SUSFS uname 설정이 적용되지 않았습니다.</string>
     <string name="susfs_saved_reboot">구성이 저장되었지만 이번 부팅에서는 다시 적용되지 않았습니다. 지금 적용하거나 부팅 시 적용을 활성화하세요.</string>
     <string name="susfs_apply_saved">저장 후 적용</string>
     <string name="susfs_apply_saved_title">저장된 구성을 적용할까요?</string>
     <string name="susfs_apply_saved_message">구성은 이미 저장되어 있습니다. 지금 이번 부팅에 적용할까요?</string>
     <string name="susfs_apply_saved_action">지금 적용</string>
-    <string name="susfs_uts_apply_confirm_title">SUSFS uname을 적용할까요?</string>
-    <string name="susfs_uts_apply_confirm_message">SUSFS uname을 적용하는 동안 UTS View가 꺼집니다. 설정은 유지됩니다. SUSFS가 uname 적용을 확인한 경우에만 UTS View가 꺼진 상태로 유지되며, 그렇지 않으면 복원됩니다.</string>
-    <string name="susfs_uts_apply_confirm_action">SUSFS 적용</string>
 </resources>

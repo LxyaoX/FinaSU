@@ -13,7 +13,6 @@ enum ksu_feature_id {
     KSU_FEATURE_SHELL_SU_ADB_ONLY = 7,
     /* Additive: the kernel honours the authorized-appid list for dynamic managers. */
     KSU_FEATURE_DYNAMIC_MANAGER_GRANTS = 8,
-    KSU_FEATURE_UTS_VIEW = 9,
     KSU_FEATURE_MOUNT_VIEW_FILTER = 10,
     /* Additive: YukiZygisk injection runtime. */
     KSU_FEATURE_YUKIZYGISK = 11,

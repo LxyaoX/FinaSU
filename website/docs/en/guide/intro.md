@@ -24,7 +24,7 @@ The Manager handles operation, `ksud` handles userspace execution, and the kerne
 flowchart LR
     A["FinaSU Manager"] --> B["ksud"]
     B --> C["Kernel driver"]
-    B --> D["Folk Mount / FolkZygisk / Sui / NoMount"]
+    B --> D["Folk Mount / YukiZygisk / Sui / NoMount"]
     C --> E["Root authorization / App Profile"]
 ```
 
@@ -39,7 +39,7 @@ flowchart LR
   </Card>
   <Card title="Built-in Capabilities" icon="ri:apps-2-line">
     <ul>
-      <li>Folk Mount, FolkZygisk, Sui and NoMount ship with FinaSU and are managed by <code>ksud</code>.</li>
+      <li>Folk Mount, YukiZygisk, Sui and NoMount ship with FinaSU and are managed by <code>ksud</code>.</li>
       <li>Sui depends on Zygisk; compatible external providers also work, but FinaSU cannot verify their injection result.</li>
     </ul>
   </Card>

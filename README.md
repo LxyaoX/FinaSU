@@ -20,7 +20,7 @@ FinaSU provides:
 - Kernel-based `su` with whitelist-based root access management
 - A Magisk-like module system based on overlayfs and metamodules
 - App Profile, to confine root power to a per-app policy
-- The built-in FolkZygisk engine, with manager controls
+- The built-in YukiZygisk engine (kernel-assisted injection), with a master switch and per-engine settings
 - SUSFS support, gated by kernel capability
 - Kernel-level hiding: mount hiding, SELinux hiding, AVC log spoofing, and unmount policy
 - `.fpt` themes with FolkPatch-compatible exchange
@@ -46,9 +46,9 @@ FinaSU provides:
 
 Standard KernelSU modules are managed from the manager. Modules are injected through NoMount, the built-in VFS backend, so no metamodule is needed; a single active metamodule is still recognised and listed.
 
-### FolkZygisk
+### YukiZygisk
 
-FolkZygisk is a built-in Zygisk engine. The manager exposes its installation and activation controls, and `ksud` steps the built-in engine aside whenever an external Zygisk provider is active, so provider modules install normally.
+YukiZygisk is the built-in Zygisk engine. Injection happens in the kernel feature that ships in `kernelsu.ko`; `ksud` installs the payload, starts the daemons at boot, and keeps `/data/adb/ksu/yukizygisk/yzconfig.json` in sync with the manager. Because the runtime is kernel-side, updating the manager alone injects nothing - the matching kernel module has to be flashed.
 
 ### SUSFS
 
@@ -100,7 +100,7 @@ See [AGENTS.md](./AGENTS.md) for the per-component build and check commands.
 ## Credits
 
 - [KernelSU](https://github.com/tiann/KernelSU) - upstream project
-- [ReZygisk](https://github.com/PerformanC/ReZygisk) - FolkZygisk is adapted from it
+- [YukiSU](https://github.com/Anatdx/YukiSU) - YukiZygisk kernel feature and userspace payload
 - [YukiSU](https://github.com/Anatdx/YukiSU) - dynamic manager reference
 - [BakaSU](https://github.com/Baka-SU/BakaSU) - AnyKernel3 flashing and smaller-feature reference
 - [Magisk](https://github.com/topjohnwu/Magisk) - `magiskpolicy` and module concepts

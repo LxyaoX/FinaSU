@@ -15,7 +15,6 @@
 #include "policy/app_profile.h"
 #include "policy/feature.h"
 #include "feature/module_blacklist.h"
-#include "feature/netisolate.h"
 #include "feature/shell_su_adb_only.h"
 #include "klog.h" // IWYU pragma: keep
 #include "manager/dynamic_manager.h"
@@ -38,7 +37,6 @@
 #include "feature/adb_root.h"
 #include "feature/selinux_hide.h"
 #include "feature/avc_spoof.h"
-#include "feature/uts_view.h"
 #include "feature/mount_view_filter.h"
 #include "infra/symbol_resolver.h"
 #include "preinit/preinit.h"
@@ -166,10 +164,6 @@ int __init kernelsu_init(void)
     ksu_yukizygisk_init();
 #endif
     ksu_mvf_init();
-    if (ksu_uts_view_init())
-        pr_info("uts_view: feature unavailable\n");
-    if (ksu_netisolate_init())
-        pr_info("netisolate: feature unavailable\n");
 
     ksu_supercalls_init();
     ksu_app_profile_init();
@@ -234,8 +228,6 @@ int __init kernelsu_init(void)
 
 void __exit kernelsu_exit(void)
 {
-    ksu_netisolate_exit();
-
     // Phase 1: Stop all hooks first to prevent new callbacks
     ksu_syscall_hook_manager_exit();
     ksu_avc_spoof_exit();
@@ -270,7 +262,6 @@ void __exit kernelsu_exit(void)
     ksu_lsm_hook_exit();
     ksu_adb_root_exit();
     ksu_sulog_exit();
-    ksu_uts_view_exit();
     ksu_feature_exit();
     ksu_module_blacklist_exit();
 

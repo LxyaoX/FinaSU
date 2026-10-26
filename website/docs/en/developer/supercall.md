@@ -26,7 +26,7 @@ flowchart LR
     K --> U["ksud ksu_uapi.rs"]
     U --> S["ksud business modules"]
     J --> M["Manager UI / device policy"]
-    D --> P["allowlist / profile / feature<br/>mount / sulog / netisolate"]
+    D --> P["allowlist / profile / feature<br/>mount / sulog"]
 ```
 
 Two API layers must be kept apart:
@@ -117,7 +117,6 @@ The permission helpers are defined in `kernel/supercall/perm.c`:
 | Mount | `GET_WRAPPER_FD`, `MANAGE_MARK`, `ADD_TRY_UMOUNT`, `NUKE_EXT4_SYSFS` | file wrapping, marks and unmounting |
 | Diagnostics | `GET_SULOG_FD`, `LOOKUP_SYMBOLS` | SU log stream and kernel symbol resolution |
 | Dynamic Manager | `SET_DYNAMIC_MANAGERS`, `GET_DYNAMIC_MANAGERS`, `SET_DYNAMIC_MANAGER_GRANTS` | persist candidates and authorized UIDs |
-| Kernel Policy | GET/SET/POLICY/EVENT for UTS View and NetIsolate | kernel-side policy and event streams |
 
 ::::
 

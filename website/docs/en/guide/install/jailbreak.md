@@ -303,7 +303,7 @@ A soft reboot keeps the loaded kernel modules and restarts only the Android user
 
 5. **Verify the built-in engines**
 
-   When using Sui, FolkZygisk or NoMount, check each status; injection-based features usually need one full reboot.
+   When using Sui, YukiZygisk or NoMount, check each status; injection-based features usually need one full reboot.
 
 :::
 

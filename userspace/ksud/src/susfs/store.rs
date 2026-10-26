@@ -154,20 +154,12 @@ pub fn write_state(state: &State) -> Result<()> {
 }
 
 pub fn summary(config: &Config) -> Result<&'static str> {
-    summary_with_deferred(config, false)
-}
-
-pub fn summary_with_deferred(config: &Config, deferred: bool) -> Result<&'static str> {
     let state = read_state()?;
     let desired = super::apply::operations(config)?;
-    Ok(summarize(&state, &desired, deferred))
+    Ok(summarize(&state, &desired))
 }
 
-pub fn summarize(
-    state: &State,
-    desired: &BTreeMap<String, String>,
-    deferred: bool,
-) -> &'static str {
+pub fn summarize(state: &State, desired: &BTreeMap<String, String>) -> &'static str {
     if state.uncertain.keys().any(|key| desired.contains_key(key))
         || state.failures.keys().any(|key| desired.contains_key(key))
     {
@@ -179,8 +171,6 @@ pub fn summarize(
         })
     {
         "pending_reboot"
-    } else if deferred && desired.contains_key("uname") {
-        "deferred"
     } else if !desired.is_empty() && *desired == state.applied {
         "applied"
     } else if desired.is_empty() {
@@ -197,37 +187,26 @@ mod tests {
     fn status_never_claims_saved_is_applied() {
         let mut state = State::default();
         let desired = BTreeMap::from([("path:/x".to_owned(), "hash".to_owned())]);
-        assert_eq!(summarize(&state, &desired, false), "saved");
+        assert_eq!(summarize(&state, &desired), "saved");
         state.applied = desired.clone();
-        assert_eq!(summarize(&state, &desired, false), "applied");
+        assert_eq!(summarize(&state, &desired), "applied");
         assert_eq!(summarize(&state, &BTreeMap::new(), false), "pending_reboot");
         let changed = BTreeMap::from([("path:/x".to_owned(), "changed".to_owned())]);
-        assert_eq!(summarize(&state, &changed, false), "pending_reboot");
+        assert_eq!(summarize(&state, &changed), "pending_reboot");
         state
             .failures
             .insert("path:/x".to_owned(), "126".to_owned());
-        assert_eq!(summarize(&state, &desired, false), "failed");
+        assert_eq!(summarize(&state, &desired), "failed");
         state.failures.clear();
         state
             .uncertain
             .insert("path:/x".to_owned(), "hash".to_owned());
-        assert_eq!(summarize(&state, &desired, false), "failed");
+        assert_eq!(summarize(&state, &desired), "failed");
         state.uncertain.clear();
         state.applied.clear();
         assert_eq!(summarize(&state, &BTreeMap::new(), false), "idle");
         state.kstat_pending.push("kstat:/old".to_owned());
         assert_eq!(summarize(&state, &BTreeMap::new(), false), "pending_reboot");
-    }
-
-    #[test]
-    fn deferred_requires_a_matching_desired_operation() {
-        let state = State::default();
-        let uname = BTreeMap::from([("uname".to_owned(), "spoofed".to_owned())]);
-        let path = BTreeMap::from([("path:/x".to_owned(), "hash".to_owned())]);
-
-        assert_eq!(summarize(&state, &uname, true), "deferred");
-        assert_eq!(summarize(&state, &path, true), "saved");
-        assert_eq!(summarize(&state, &BTreeMap::new(), true), "idle");
     }
 
     #[test]

@@ -628,7 +628,7 @@ Modules that depend on interfaces specific to the old Manager may fail under the
 
 5. **Verify the built-in engines**
 
-   When using Sui, FolkZygisk or NoMount, check each status one by one. Zygisk and Sui usually require a reboot to finish injection.
+   When using Sui, YukiZygisk or NoMount, check each status one by one. Zygisk and Sui usually require a reboot to finish injection.
 
 :::
 

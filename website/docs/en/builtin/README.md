@@ -18,7 +18,7 @@ copyright:
 
 ::: warning "Built-in capabilities" is not the Built-In installation
 
-The word "built-in" here describes that the feature ships with FinaSU. It is not the same concept as the [Built-In kernel build option](/en/guide/install/built-in/) in the installation article. An LKM installation can also use Folk Mount, FolkZygisk, Sui, UTS View and Network Isolation.
+The word "built-in" here describes that the feature ships with FinaSU. It is not the same concept as the [Built-In kernel build option](/en/guide/install/built-in/) in the installation article. An LKM installation can also use Folk Mount, YukiZygisk and Sui.
 
 :::
 
@@ -29,25 +29,21 @@ The word "built-in" here describes that the feature ships with FinaSU. It is not
 | Goal | Use | Check First | When It Takes Effect |
 | --- | --- | --- | --- |
 | Make Magisk-style modules appear in system paths | [Folk Mount](/en/builtin/folk-mount/) | Current mount mode, module directory | Usually next boot |
-| Run Zygisk modules | [FolkZygisk](/en/builtin/folkzygisk/) | Whether an external Zygisk provider already exists | Next boot |
+| Run Zygisk modules | YukiZygisk | Whether the kernel module ships the injection runtime | Next boot |
 | Give apps that support the Shizuku API Root or Shell | [Sui](/en/builtin/sui/) | FinaSU driver, Zygisk backend, Sui payload | Usually a reboot after enabling |
 | Inject modules without creating traditional mount records | [NoMount](/en/builtin/nomount/) | VFS driver state, current KMI, mount mode | Injected at boot, rules can be changed while running |
-| Spoof `uname` information for selected apps | [UTS View](/en/builtin/uts-view/) | Kernel features, whether SUSFS has taken over | Newly started target processes |
-| Block selected apps from opening new network connections | [Network Isolation](/en/builtin/net-isolate/) | Kernel hooks, target UID, isolation mode | Rules update immediately after saving |
 | Use existing SUSFS hiding capabilities | [SUSFS](/en/builtin/susfs/) | Kernel source integration or a loaded SUSFS-LKM | Depends on the current implementation |
 
 :::
 
 ## How They Work Together
 
-These capabilities are not a linear feature list. Folk Mount and NoMount decide how module files are seen; FolkZygisk injects code into app processes; Sui then uses Zygisk to provide the Shizuku API backend. UTS View and Network Isolation depend directly on kernel features, while SUSFS depends on kernel source integration or a loaded SUSFS-LKM.
+These capabilities are not a linear feature list. Folk Mount and NoMount decide how module files are seen; YukiZygisk injects code into app processes with kernel help; Sui then uses Zygisk to provide the Shizuku API backend. SUSFS depends on kernel source integration or a loaded SUSFS-LKM.
 
 ```mermaid
 flowchart TD
     K["FinaSU kernel driver"] --> M["Folk Mount"]
-    K --> Z["FolkZygisk"]
-    K --> U["UTS View"]
-    K --> N["Network Isolation"]
+    K --> Z["YukiZygisk"]
 
     M --> B["Built-in Magic Mount"]
     M --> MM["Metamodule"]
@@ -62,21 +58,20 @@ flowchart TD
     O -. Takes over uname .-> U
 ```
 
-Solid lines in the diagram mean FinaSU provides or drives the capability directly; dashed lines mean an external provider. Sui can use the built-in FolkZygisk, and it can also use an external compatible Zygisk provider. The real difference with an external provider is that ==Sui can run, but FinaSU cannot verify its injection result==.
+Solid lines in the diagram mean FinaSU provides or drives the capability directly; dashed lines mean an external provider. Sui can use the built-in YukiZygisk, and it can also use an external compatible Zygisk provider. The real difference with an external provider is that ==Sui can run, but FinaSU cannot verify its injection result==.
 
 ## Three Kinds of Capabilities, Do Not Mix Them Up
 
 ### Userspace Engines
 
-**Folk Mount, FolkZygisk and Sui** have their lifecycle managed by `ksud`, with configuration written to `/data/adb/ksu/`. Whether they actually run during a boot depends on that boot's record, not on the switch alone.
+**Folk Mount, YukiZygisk and Sui** have their lifecycle managed by `ksud`, with configuration written to `/data/adb/ksu/`. Whether they actually run during a boot depends on that boot's record, not on the switch alone.
 
-- FolkZygisk may stand down at boot in favor of an external Zygisk provider.
+- YukiZygisk may stand down at boot in favor of an external Zygisk provider.
 - Sui depends on a working Zygisk backend and is not a Zygisk provider itself.
 - The Folk Mount "provider for this boot" may fall back because the NoMount driver is unavailable or the previous boot was interrupted.
 
 ### Kernel Features
 
-**UTS View and Network Isolation** work through kernel hooks or kernel features. Whether the Manager can edit them depends on whether the current kernel reports support; a successful save also does not mean the target process has already adopted the new state.
 
 ### Kernel Patches and LKMs
 
@@ -88,7 +83,7 @@ Solid lines in the diagram mean FinaSU provides or drives the capability directl
 
 ::: field Next Boot Configuration
 @type `Persistent setting`
-For example the Folk Mount mode, the FolkZygisk switch and the Sui enable intent. After being written to disk they still require restarting the relevant component or the device.
+For example the Folk Mount mode, the YukiZygisk switch and the Sui enable intent. After being written to disk they still require restarting the relevant component or the device.
 :::
 
 ::: field This Boot State
@@ -98,12 +93,11 @@ Indicates which provider this boot actually selected, whether injection complete
 
 ::: field Live Rules
 @type `Hot update`
-NoMount module rules and exceptions, plus Network Isolation targets and modes, can usually be updated within the current boot. Existing processes or connections may still keep the old state.
+NoMount module rules and exceptions can usually be updated within the current boot. Existing processes may still keep the old state.
 :::
 
 ::: field Takes Effect for New Processes
 @type `Process level`
-UTS View mainly affects processes started later that still use the initial UTS namespace. Apps that are already running usually need to be fully closed and reopened.
 :::
 
 ::::
@@ -128,11 +122,11 @@ The configuration page stores the desired state. External modules, boot protecti
 
 3. **Check whether a reboot is needed**
 
-   FolkZygisk, Sui and Folk Mount modes usually need a reboot to enter the new state. Network Isolation updates kernel rules after saving, but existing connections are not guaranteed to be cut.
+   YukiZygisk, Sui and Folk Mount modes usually need a reboot to enter the new state.
 
 4. **Verify with the target app**
 
-   Go back to the target app and check the actual effect. Zygisk modules, Sui permissions and UTS View should all be judged by the result in the target process, not just the global switch.
+   Go back to the target app and check the actual effect. Zygisk modules and Sui permissions should both be judged by the result in the target process, not just the global switch.
 
 5. **Return to a minimal configuration on failure**
 
@@ -152,7 +146,7 @@ The configuration page stores the desired state. External modules, boot protecti
 | **Unsupported** | The current kernel lacks a feature or the driver does not respond | The Manager button is broken |
 | **Taken Over by an External Provider** | Another module or kernel feature is in charge | FinaSU's configuration must have been modified |
 
-Different features use different verification standards. For example FolkZygisk "Injected" requires the current boot, the corresponding ABI, the daemon and the Zygote process to all be confirmed; for Sui, an external provider state may only verify that the service exists, not the full injection chain.
+Different features use different verification standards. For example YukiZygisk "Injected" requires the current boot, the corresponding ABI, the daemon and the Zygote process to all be confirmed; for Sui, an external provider state may only verify that the service exists, not the full injection chain.
 
 ## Data and Diagnostics
 
@@ -161,12 +155,10 @@ Different features use different verification standards. For example FolkZygisk 
 ├── mount_mode                  # Folk Mount next-boot mode
 ├── mount_runtime               # provider and result for this boot
 ├── mount_log                   # Folk Mount runtime log
-├── zygisk.json                 # FolkZygisk next-boot switch
+├── zygisk.json                 # YukiZygisk next-boot switch
 ├── zygisk-boot.json            # boot protection and failure count
 ├── .zygisk/state.json          # current injection state
 ├── sui/                        # Sui state and daemon records
-├── uts_view.json               # UTS View persistent configuration
-├── netisolate.json             # Network Isolation persistent configuration
 ├── nomount_runtime             # last NoMount injection result
 ├── nomount_uids                # NoMount exception UIDs
 └── folksu-susfs/               # SUSFS integration configuration and state
@@ -180,7 +172,7 @@ These files are for diagnostics, not manual configuration entry points. Editing 
 
 1. **Check the dependency**
 
-   For Sui check Zygisk first; for NoMount check the driver and mount mode first; for UTS View check kernel features and the SUSFS takeover state first.
+   For Sui check Zygisk first; for NoMount check the driver and mount mode first; 
 
 2. **Check the boot generation**
 
@@ -188,7 +180,7 @@ These files are for diagnostics, not manual configuration entry points. Editing 
 
 3. **Check protection and fallback**
 
-   FolkZygisk pauses attempts after three consecutive boot failures; Folk Mount falls back conservatively after an exception in the NoMount or Metamodule stage. Handle warnings first instead of triggering them again.
+   YukiZygisk pauses attempts after three consecutive boot failures; Folk Mount falls back conservatively after an exception in the NoMount or Metamodule stage. Handle warnings first instead of triggering them again.
 
 4. **Verify with the target process**
 
@@ -202,10 +194,8 @@ These files are for diagnostics, not manual configuration entry points. Editing 
 
 ## Capability Boundaries
 
-- **Built-in capabilities are not a hiding guarantee.** NoMount, SUSFS, UTS View and Network Isolation each cover only part of the observable surface.
+- **Built-in capabilities are not a hiding guarantee.** NoMount and SUSFS each cover only part of the observable surface.
 - **Sui is not unconditional Root.** Apps still need to connect to Sui and obtain per-app permission.
-- **Network Isolation is not a system-level firewall.** It only constrains selected apps, and it does not guarantee that existing connections are cut.
-- **UTS View is not a complete device fingerprint spoof.** It handles `uname` fields and does not change system properties, hardware attestation or app-side caches.
 - **External Zygisk providers are not managed by FinaSU.** FinaSU can stand down and detect the service, but it will not verify or repair the external provider's injection chain for you.
 
 ## Continue Reading
@@ -215,11 +205,8 @@ These files are for diagnostics, not manual configuration entry points. Editing 
 | Capability | Key Content |
 | --- | --- |
 | [Folk Mount](/en/builtin/folk-mount/) | Five modes, module merging, Metamodule, NoMount fallback and runtime state |
-| [FolkZygisk](/en/builtin/folkzygisk/) | External provider priority, five injection states, three-boot protection and recovery |
 | [Sui](/en/builtin/sui/) | Payload, boot lifecycle, Manager identity, permissions, background notifications and full troubleshooting |
 | [NoMount](/en/builtin/nomount/) | VFS driver, rule injection, exception UIDs, hot injection and fallback boundaries |
-| [UTS View](/en/builtin/uts-view/) | Six `uname` fields, global/selected scope, SUSFS takeover and observation log |
-| [Network Isolation](/en/builtin/net-isolate/) | Three modes, per-UID policy, private network/local discovery exceptions and blocked events |
 | [SUSFS](/en/builtin/susfs/) | Kernel source integration, SUSFS-LKM, feature gaps and usage boundaries |
 
 :::
@@ -228,11 +215,11 @@ These files are for diagnostics, not manual configuration entry points. Editing 
 
 ### Why is the switch on but the feature has no effect?
 
-Check the dependency and this boot's state first. FolkZygisk, Sui and Folk Mount modes all need a new boot cycle; UTS View usually only affects newly started target processes; Network Isolation only blocks new connections.
+Check the dependency and this boot's state first. YukiZygisk, Sui and Folk Mount modes all need a new boot cycle.
 
 ### Can several built-in capabilities be used at the same time?
 
-Yes, but keep their responsibilities from conflicting. Folk Mount and NoMount are mutually exclusive mount provider choices; Sui clearly depends on Zygisk; SUSFS and UTS View's `uname` spoofing arbitrate a single provider.
+Yes, but keep their responsibilities from conflicting. Folk Mount and NoMount are mutually exclusive mount provider choices; Sui clearly depends on Zygisk.
 
 ### Do I need to uninstall modules to turn off a built-in capability?
 

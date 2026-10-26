@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
@@ -40,7 +39,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
@@ -61,7 +59,6 @@ import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.SwipeUp
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.runtime.Composable
@@ -698,11 +695,13 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
         )
     )
     add(
-        SettingsCategory.FUNCTION.row(
-            id = "function.folk_zygisk",
-            titleRes = R.string.settings_folk_zygisk,
-            icon = Icons.Filled.Code,
-            aliases = listOf("folkzygisk", "zygisk", "injection"),
+        SettingsCategory.FUNCTION.page(
+            id = "function.yukizygisk",
+            titleRes = R.string.yukizygisk_title,
+            summaryRes = R.string.yukizygisk_summary,
+            icon = Icons.Filled.Vaccines,
+            route = Route.YukiZygisk,
+            aliases = listOf("yukizygisk", "zygisk", "injection", "注入"),
         )
     )
     add(
@@ -756,26 +755,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.rekernel_x_search_summary,
             icon = Icons.Rounded.Bedtime,
             aliases = listOf("rekernel", "tombstone", "freeze", "frozen", "binder"),
-        )
-    )
-    add(
-        SettingsCategory.FUNCTION.page(
-            id = "function.uts_view",
-            titleRes = R.string.settings_uts_view,
-            summaryRes = R.string.settings_uts_view_summary,
-            icon = Icons.Rounded.TextFields,
-            route = Route.UtsView,
-            aliases = listOf("uts", "uname", "kernel version", "内核版本", "伪装"),
-        )
-    )
-    add(
-        SettingsCategory.FUNCTION.page(
-            id = "function.netisolate",
-            titleRes = R.string.settings_netisolate,
-            summaryRes = R.string.settings_netisolate_summary,
-            icon = Icons.Filled.WifiOff,
-            route = Route.NetIsolate,
-            aliases = listOf("network", "isolate", "offline", "uid", "网络隔离", "断网"),
         )
     )
 

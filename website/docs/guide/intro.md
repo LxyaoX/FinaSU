@@ -24,7 +24,7 @@ FinaSU 不要求所有用户接受同一种界面。无论你喜欢简约布局�
 flowchart LR
     A["FinaSU 管理器"] --> B["ksud"]
     B --> C["内核驱动"]
-    B --> D["Folk Mount / FolkZygisk / Sui / NoMount"]
+    B --> D["Folk Mount / YukiZygisk / Sui / NoMount"]
     C --> E["Root 授权 / App Profile"]
 ```
 
@@ -39,7 +39,7 @@ flowchart LR
   </Card>
   <Card title="内置能力" icon="ri:apps-2-line">
     <ul>
-      <li>Folk Mount、FolkZygisk、Sui 和 NoMount 随 FinaSU 发布，由 <code>ksud</code> 管理。</li>
+      <li>Folk Mount、YukiZygisk、Sui 和 NoMount 随 FinaSU 发布，由 <code>ksud</code> 管理。</li>
       <li>Sui 依赖 Zygisk；外部兼容提供者也可使用，但 FinaSU 无法验证其注入结果。</li>
     </ul>
   </Card>

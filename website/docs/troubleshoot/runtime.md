@@ -25,9 +25,8 @@ flowchart TD
     D --> M["管理器 Root Shell"]
     D --> S["启动脚本与预初始化"]
     D --> F["Folk Mount / NoMount"]
-    D --> Z["FolkZygisk / 外部提供者"]
+    D --> Z["YukiZygisk / 外部提供者"]
     Z --> SUI["Sui"]
-    K --> E["内核能力：UTS View / 网络隔离 / 过滤"]
 
     M --> A["授权与状态管理"]
     S --> MOD["普通模块与内核模块"]
@@ -46,7 +45,7 @@ flowchart TD
 | 首页有版本，但 Root Shell 一直不可用 | `ksud`、UAPI、Root Shell 回退 | 本页 |
 | 应用没有 Root | UID、Profile、Shell 来源、请求记录 | [Root 授权请求不出现](/troubleshoot/root-request/) |
 | 模块开关保存了但文件或脚本没生效 | 本次启动、挂载提供者、脚本、安全模式 | 本页 |
-| Zygisk 状态异常 | 外部提供者、ABI、注入回执、启动保护 | [FolkZygisk](/builtin/folkzygisk/) |
+| Zygisk 状态异常 | 外部提供者、ABI、注入回执、启动保护 | [YukiZygisk](/builtin/yukizygisk/) |
 | Sui 不可用 | Zygisk 后端、Sui 状态、应用权限 | [Sui](/builtin/sui/) |
 | NoMount 回退或规则为 0 | 驱动、KMI 资产、例外 UID、模块贡献 | [NoMount](/builtin/nomount/) |
 | 内置能力显示不支持 | 内核特性、配置、外部提供者 | [内置能力总览](/builtin/) |
@@ -150,9 +149,9 @@ NoMount 驱动加载成功还需要 API 探测通过。加载调用返回、`/pr
 /data/adb/ksud nomount status --json
 ```
 
-## FolkZygisk 与 Sui
+## YukiZygisk 与 Sui
 
-### FolkZygisk
+### YukiZygisk
 
 需要区分：
 
@@ -161,11 +160,11 @@ NoMount 驱动加载成功还需要 API 探测通过。加载调用返回、`/pr
 - “外部提供者接管”：内置引擎按设计让位；
 - “启动保护已暂停”：连续失败后不再自动尝试。
 
-只有当前启动显示已注入，并覆盖目标应用所需 ABI，才能认为 FolkZygisk 完成了自己的注入检查。外部提供者接管时，Sui 仍可能运行，但 FinaSU 无法验证外部提供者的注入结果；到外部模块自己的入口检查。
+只有当前启动显示已注入，并覆盖目标应用所需 ABI，才能认为 YukiZygisk 完成了自己的注入检查。外部提供者接管时，Sui 仍可能运行，但 FinaSU 无法验证外部提供者的注入结果；到外部模块自己的入口检查。
 
 ### Sui
 
-Sui ==依赖可用的 Zygisk 后端==。FinaSU 驱动正常、FolkZygisk 开关打开，都不自动等于 Sui 已经可用。还要检查：
+Sui ==依赖可用的 Zygisk 后端==。FinaSU 驱动正常、YukiZygisk 开关打开，都不自动等于 Sui 已经可用。还要检查：
 
 - 本次启动是否真有 Zygisk 提供者工作；
 - Sui 服务是否处于可用状态；
@@ -179,8 +178,6 @@ Sui ==依赖可用的 Zygisk 后端==。FinaSU 驱动正常、FolkZygisk 开关�
 管理器能显示某个功能，不代表当前内核实现了它。不同功能有不同门控：
 
 - **挂载视图过滤**需要在当前内核成功安装 proc 展示 hook；
-- **UTS View**需要对应内核特性，SUSFS 接管时还可能改变可用状态；
-- **网络隔离**需要内核侧规则接口；
 - **SUSFS**只对接已有的源码集成或匹配的 SUSFS-LKM；
 - **NoMount**需要当前 KMI 的资产或内核内建驱动。
 
@@ -233,7 +230,7 @@ ls -l /data/adb/ksud /data/adb/ksu/log
 
 以下情况适合安装匹配的完整发布包：
 
-- 内嵌 `ksud`、FolkZygisk、Sui 或 NoMount 载荷缺失；
+- 内嵌 `ksud`、YukiZygisk、Sui 或 NoMount 载荷缺失；
 - 管理器提示引擎文件缺失或资产损坏；
 - 设备上的 `ksud` 被手工替换、权限异常或版本不明；
 - 内核和管理器已确认 UAPI 不匹配，且更新方向明确。
@@ -253,5 +250,5 @@ ls -l /data/adb/ksud /data/adb/ksu/log
 - [Root 授权请求不出现](/troubleshoot/root-request/)：应用授权和 Shell 来源。
 - [Folk Mount](/builtin/folk-mount/)：提供者选择与回退。
 - [NoMount](/builtin/nomount/)：驱动、规则和例外 UID。
-- [FolkZygisk](/builtin/folkzygisk/)：注入状态与启动保护。
+- [YukiZygisk](/builtin/yukizygisk/)：注入状态与启动保护。
 - [Sui](/builtin/sui/)：Zygisk 依赖、权限和服务状态。

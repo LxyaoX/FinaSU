@@ -41,7 +41,7 @@ copyright:
 
 ## 救砖机制
 
-FinaSU 内置了一套启动早期安全模式：检测到触发条件后，会禁用普通模块和受管内核模块，并跳过模块脚本、Folk Mount、FolkZygisk 和 Sui 等启动流程。
+FinaSU 内置了一套启动早期安全模式：检测到触发条件后，会禁用普通模块和受管内核模块，并跳过模块脚本、Folk Mount、YukiZygisk 和 Sui 等启动流程。
 
 ### 音量键救砖
 

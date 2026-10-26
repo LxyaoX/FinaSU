@@ -70,7 +70,7 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: Folk Mount, FolkZygisk, NoMount, and Sui ship with FinaSU and are managed by ksud, so you no longer install a matching set of upstream modules.
+        details: Folk Mount, YukiZygisk, NoMount, and Sui ship with FinaSU and are managed by ksud, so you no longer install a matching set of upstream modules.
         link: /en/builtin/
       - title: Zygisk & Sui
         icon:
@@ -79,8 +79,8 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: FolkZygisk provides the Zygisk environment. Sui provides a backend for apps that use the Shizuku API, and external compatible providers work too.
-        link: /en/builtin/folkzygisk/
+        details: YukiZygisk provides the Zygisk environment. Sui provides a backend for apps that use the Shizuku API, and external compatible providers work too.
+        link: /en/builtin/yukizygisk/
       - title: Kernel Features
         icon:
           src: /icons/home/network.svg
@@ -88,8 +88,8 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: UTS View, network isolation, and SUSFS integration are exposed according to actual kernel support. SUSFS requires source integration or a matching SUSFS-LKM.
-        link: /en/builtin/uts-view/
+        details: SUSFS integration is exposed according to actual kernel support. It requires source integration or a matching SUSFS-LKM.
+        link: /en/builtin/susfs/
       - title: Modules & Plugins
         icon:
           src: /icons/home/cube.svg

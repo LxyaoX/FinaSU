@@ -26,7 +26,7 @@ flowchart LR
     K --> U["ksud ksu_uapi.rs"]
     U --> S["ksud 业务模块"]
     J --> M["Manager UI / 机型策略"]
-    D --> P["allowlist / profile / feature<br/>mount / sulog / netisolate"]
+    D --> P["allowlist / profile / feature<br/>mount / sulog"]
 ```
 
 两层 API 必须分清：
@@ -117,7 +117,6 @@ flowchart TD
 | 挂载 | `GET_WRAPPER_FD`、`MANAGE_MARK`、`ADD_TRY_UMOUNT`、`NUKE_EXT4_SYSFS` | 文件包装、标记与卸载 |
 | 诊断 | `GET_SULOG_FD`、`LOOKUP_SYMBOLS` | SU 日志流与内核符号解析 |
 | 动态管理器 | `SET_DYNAMIC_MANAGERS`、`GET_DYNAMIC_MANAGERS`、`SET_DYNAMIC_MANAGER_GRANTS` | 持久化候选与授权 UID |
-| 内核策略 | UTS View、NetIsolate 的 GET/SET/POLICY/EVENT | 内核态策略和事件流 |
 
 ::::
 

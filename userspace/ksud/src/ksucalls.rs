@@ -326,54 +326,6 @@ pub fn set_feature(feature_id: u32, value: u64) -> Result<()> {
     Ok(())
 }
 
-pub fn get_uts_view_config() -> Result<ksu_uapi::ksu_uts_view_config> {
-    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_uts_view_config>() };
-    ksuctl(ksu_uapi::KSU_IOCTL_GET_UTS_VIEW_CONFIG, &raw mut cmd)?;
-    Ok(cmd)
-}
-
-pub fn set_uts_view_config(config: &ksu_uapi::ksu_uts_view_config) -> Result<()> {
-    let mut cmd = *config;
-    ksuctl(ksu_uapi::KSU_IOCTL_SET_UTS_VIEW_CONFIG, &raw mut cmd)?;
-    Ok(())
-}
-
-pub fn get_netisolate_config() -> Result<ksu_uapi::ksu_netisolate_config> {
-    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_config>() };
-    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_CONFIG, &raw mut cmd)?;
-    Ok(cmd)
-}
-
-pub fn set_netisolate_config(config: &ksu_uapi::ksu_netisolate_config) -> Result<()> {
-    let mut cmd = *config;
-    ksuctl(ksu_uapi::KSU_IOCTL_SET_NETISOLATE_CONFIG, &raw mut cmd)?;
-    Ok(())
-}
-
-pub fn get_netisolate_policies() -> Result<ksu_uapi::ksu_netisolate_policies> {
-    let mut cmd = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_policies>() };
-    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_POLICIES, &raw mut cmd)?;
-    Ok(cmd)
-}
-
-pub fn set_netisolate_policies(config: &ksu_uapi::ksu_netisolate_policies) -> Result<()> {
-    let mut cmd = *config;
-    ksuctl(ksu_uapi::KSU_IOCTL_SET_NETISOLATE_POLICIES, &raw mut cmd)?;
-    Ok(())
-}
-
-pub fn get_netisolate_events() -> Result<ksu_uapi::ksu_netisolate_events> {
-    let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
-    ksuctl(ksu_uapi::KSU_IOCTL_GET_NETISOLATE_EVENTS, &raw mut events)?;
-    Ok(events)
-}
-
-pub fn clear_netisolate_events() -> Result<()> {
-    let mut events = unsafe { std::mem::zeroed::<ksu_uapi::ksu_netisolate_events>() };
-    ksuctl(ksu_uapi::KSU_IOCTL_CLEAR_NETISOLATE_EVENTS, &raw mut events)?;
-    Ok(())
-}
-
 pub fn get_wrapped_fd(fd: RawFd) -> Result<RawFd> {
     let mut cmd = ksu_uapi::ksu_get_wrapper_fd_cmd {
         fd: fd as u32,

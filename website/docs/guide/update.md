@@ -360,9 +360,9 @@ make ... KSU_REQUIRE_PREINIT=1
 
 ## 随包引擎与模块
 
-`ksud`、FolkZygisk、Sui、NoMount 载荷和管理器 APK 一起发布。更新 APK 后，这些用户态组件会在下一次启动或对应功能重新发布载荷时生效。
+`ksud`、YukiZygisk、Sui、NoMount 载荷和管理器 APK 一起发布。更新 APK 后，这些用户态组件会在下一次启动或对应功能重新发布载荷时生效。
 
-- **FolkZygisk** 和 **Sui** 需要重启才能重新注入 Zygote。
+- **YukiZygisk** 和 **Sui** 需要重启才能重新注入 Zygote。
 - **Sui** 状态异常时，可以在其页面执行“修复载荷”，从当前 `ksud` 重新发布文件。
 - **NoMount** 的内核模块按 KMI 编译；更换系统内核后必须使用匹配新 KMI 的版本。
 - 已安装模块由“检查模块更新”独立检查，与 FinaSU 自身的版本更新不是同一件事。
@@ -395,7 +395,7 @@ make ... KSU_REQUIRE_PREINIT=1
 
 5. **验证内置引擎**
 
-   使用 Sui、FolkZygisk 或 NoMount 时，分别检查其运行状态。注入类功能通常需要一次完整重启。
+   使用 Sui、YukiZygisk 或 NoMount 时，分别检查其运行状态。注入类功能通常需要一次完整重启。
 
 :::
 

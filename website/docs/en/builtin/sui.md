@@ -59,7 +59,7 @@ The device must already have a working FinaSU Root, and `ksud` must be able to r
 ::: field Zygisk
 @type `required`
 @default `Built-in or external provider`
-Sui needs a working Zygisk backend. You can use the built-in [FolkZygisk](/en/builtin/folkzygisk/) or another compatible Zygisk provider, but only one active implementation may remain. With an external provider Sui runs normally; FinaSU simply cannot verify its injection result.
+Sui needs a working Zygisk backend. You can use the built-in [YukiZygisk](/en/builtin/yukizygisk/) or another compatible Zygisk provider, but only one active implementation may remain. With an external provider Sui runs normally; FinaSU simply cannot verify its injection result.
 :::
 
 ::: field Architecture
@@ -86,7 +86,7 @@ Sui uses notifications to announce authorization requests while the app is in th
 
 1. **Confirm the Zygisk backend**
 
-   Check the Zygisk provider in use, and confirm that the engine is enabled and not blocked by boot protection. The built-in **FolkZygisk** and other compatible providers can both serve as the Sui backend, but only one active implementation may remain.
+   Check the Zygisk provider in use, and confirm that the engine is enabled and not blocked by boot protection. The built-in **YukiZygisk** and other compatible providers can both serve as the Sui backend, but only one active implementation may remain.
 
 2. **Enable Sui**
 
@@ -126,7 +126,7 @@ Sui does not run persistently inside the Manager UI. It goes through payload pub
 - Zygisk injection
   time=Step 2 type=tip
 
-  On the next boot, the Zygisk provider injects the Sui code into system processes. With the built-in FolkZygisk, FinaSU can verify the injection state.
+  On the next boot, the Zygisk provider injects the Sui code into system processes. With the built-in YukiZygisk, FinaSU can verify the injection state.
 
 - Start the daemons
   time=Step 3 type=success
@@ -172,7 +172,7 @@ The Manager's switch means "whether the user wants Sui enabled", while the runti
 | --- | --- | --- |
 | **Disabled** | Sui is currently not requested to start, or the payload is not installed yet | Turn on the switch and confirm |
 | **Enabled, waiting for reboot to take effect** | The payload is installed, but the current session has not finished injection or boot registration | Reboot the device and check again |
-| **Running** | Using the built-in FolkZygisk, and both injection and the two daemons are confirmed | App permissions can be managed |
+| **Running** | Using the built-in YukiZygisk, and both injection and the two daemons are confirmed | App permissions can be managed |
 | **Third-party injection, cannot verify** | An external Zygisk provider is working; the Sui service process exists, but FinaSU cannot verify the injection chain | Test the connection in a compatible app; check the external provider's boot log on failure |
 | **Unavailable** | Zygisk is not enabled, the engine is missing, or boot protection or the injection check failed | Check the dependencies and injection reason in the status card |
 | **State abnormal** | A conflicting Sui exists, the payload is damaged, the module is disabled or externally modified | Expand the diagnostics; repair the payload if necessary |
@@ -183,15 +183,15 @@ The Manager's switch means "whether the user wants Sui enabled", while the runti
 
 - **Zygisk is not enabled**
 
-  Open the FolkZygisk page, enable the engine and reboot. Sui will not force injection while Zygisk is off.
+  Open the YukiZygisk page, enable the engine and reboot. Sui will not force injection while Zygisk is off.
 
 - **Zygisk engine unavailable**
 
-  Check the specific reason shown in parentheses. Repair the FolkZygisk payload or engine first, then enable Sui.
+  Check the specific reason shown in parentheses. Repair the YukiZygisk payload or engine first, then enable Sui.
 
 - **Zygisk boot protection is locked**
 
-  This means boot protection blocked Zygisk injection for this session. Handle the FolkZygisk boot protection state first, then reboot and check again.
+  This means boot protection blocked Zygisk injection for this session. Handle the YukiZygisk boot protection state first, then reboot and check again.
 
 - **Zygisk injection failed**
 

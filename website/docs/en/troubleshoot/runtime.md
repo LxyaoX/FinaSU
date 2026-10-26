@@ -25,9 +25,8 @@ flowchart TD
     D --> M["Manager Root Shell"]
     D --> S["Boot scripts and pre-initialization"]
     D --> F["Folk Mount / NoMount"]
-    D --> Z["FolkZygisk / external provider"]
+    D --> Z["YukiZygisk / external provider"]
     Z --> SUI["Sui"]
-    K --> E["Kernel capabilities: UTS View / network isolation / filtering"]
 
     M --> A["Authorization and state management"]
     S --> MOD["Regular modules and kernel modules"]
@@ -46,7 +45,7 @@ A failure in any layer can make the Manager pages look like "it opens but does n
 | A version shows, but the Root Shell stays unavailable | `ksud`, UAPI, Root Shell fallback | This page |
 | Apps have no Root | UID, Profile, Shell origin, request records | [No Root Request Prompt](/en/troubleshoot/root-request/) |
 | The module switch is saved but files or scripts do not take effect | This boot, mount provider, scripts, safe mode | This page |
-| Abnormal Zygisk state | External provider, ABI, injection receipt, boot protection | [FolkZygisk](/en/builtin/folkzygisk/) |
+| Abnormal Zygisk state | External provider, ABI, injection receipt, boot protection | [YukiZygisk](/en/builtin/yukizygisk/) |
 | Sui unavailable | Zygisk backend, Sui state, app permissions | [Sui](/en/builtin/sui/) |
 | NoMount falls back or has no rules | Driver, KMI assets, exception UIDs, module contributions | [NoMount](/en/builtin/nomount/) |
 | A built-in capability reports not supported | Kernel features, configuration, external provider | [Built-In Capabilities Overview](/en/builtin/) |
@@ -150,9 +149,9 @@ A successful NoMount driver load also requires API probing to pass. A load call 
 /data/adb/ksud nomount status --json
 ```
 
-## FolkZygisk and Sui
+## YukiZygisk and Sui
 
-### FolkZygisk
+### YukiZygisk
 
 Distinguish between:
 
@@ -161,11 +160,11 @@ Distinguish between:
 - "external provider took over": the built-in engine steps aside by design;
 - "boot protection paused": automatic attempts stop after consecutive failures.
 
-Only when the current boot shows injected, and the ABIs the target app needs are covered, can you consider FolkZygisk's own injection check complete. When an external provider takes over, Sui may still run, but FinaSU cannot verify that provider's injection result; check the external module's own entry point.
+Only when the current boot shows injected, and the ABIs the target app needs are covered, can you consider YukiZygisk's own injection check complete. When an external provider takes over, Sui may still run, but FinaSU cannot verify that provider's injection result; check the external module's own entry point.
 
 ### Sui
 
-Sui ==depends on a working Zygisk backend==. A working FinaSU driver and an enabled FolkZygisk switch do not automatically mean Sui is available. Also check:
+Sui ==depends on a working Zygisk backend==. A working FinaSU driver and an enabled YukiZygisk switch do not automatically mean Sui is available. Also check:
 
 - whether a Zygisk provider really works on this boot;
 - whether the Sui service is in a usable state;
@@ -179,8 +178,6 @@ See [Sui](/en/builtin/sui/) for the full diagnosis.
 The Manager being able to display a feature does not mean the current kernel implements it. Different features have different gating:
 
 - **Mount view filtering** requires the proc display hook to install successfully on the current kernel;
-- **UTS View** requires the matching kernel feature, and the available state may change when SUSFS takes over;
-- **Network isolation** requires the kernel-side rule interface;
 - **SUSFS** only configures an existing source integration or a matching SUSFS-LKM;
 - **NoMount** requires the assets for the current KMI or a driver built into the kernel.
 
@@ -233,7 +230,7 @@ These files are for diagnostics. Editing them directly can bypass transactions, 
 
 Installing the matching complete release package suits these cases:
 
-- the embedded `ksud`, FolkZygisk, Sui or NoMount payloads are missing;
+- the embedded `ksud`, YukiZygisk, Sui or NoMount payloads are missing;
 - the Manager reports missing engine files or corrupt assets;
 - the `ksud` on the device was replaced by hand, has abnormal permissions or is of unknown version;
 - the kernel and Manager have a confirmed UAPI mismatch with a clear update direction.
@@ -253,5 +250,5 @@ Reinstalling the APK will not solve these cases:
 - [No Root Request Prompt](/en/troubleshoot/root-request/): app authorization and Shell origins.
 - [Folk Mount](/en/builtin/folk-mount/): provider selection and fallback.
 - [NoMount](/en/builtin/nomount/): driver, rules and exception UIDs.
-- [FolkZygisk](/en/builtin/folkzygisk/): injection state and boot protection.
+- [YukiZygisk](/en/builtin/yukizygisk/): injection state and boot protection.
 - [Sui](/en/builtin/sui/): Zygisk dependency, permissions and service state.

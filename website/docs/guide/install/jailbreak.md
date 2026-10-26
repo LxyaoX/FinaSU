@@ -303,7 +303,7 @@ GhostLock 需要与设备内核精确匹配的 profile，不能只凭 Android �
 
 5. **验证内置引擎**
 
-   使用 Sui、FolkZygisk 或 NoMount 时，逐个检查状态；注入类功能通常需要一次完整重启。
+   使用 Sui、YukiZygisk 或 NoMount 时，逐个检查状态；注入类功能通常需要一次完整重启。
 
 :::
 

@@ -360,9 +360,9 @@ On A/B devices, "Install to inactive slot" can only be done after the OTA has be
 
 ## Bundled Engines and Modules
 
-`ksud`, the FolkZygisk, Sui and NoMount payloads and the Manager APK are released together. After updating the APK, these userspace components take effect on the next boot or when the matching feature publishes its payload again.
+`ksud`, the YukiZygisk, Sui and NoMount payloads and the Manager APK are released together. After updating the APK, these userspace components take effect on the next boot or when the matching feature publishes its payload again.
 
-- **FolkZygisk** and **Sui** need a reboot to inject into Zygote again.
+- **YukiZygisk** and **Sui** need a reboot to inject into Zygote again.
 - If **Sui** is in an abnormal state, you can run "Repair payload" on its page to republish the files from the current `ksud`.
 - The **NoMount** kernel module is compiled per KMI; after changing the system kernel you must use the version matching the new KMI.
 - Installed modules are checked separately by "Check module updates", which is not the same thing as FinaSU's own version update.
@@ -395,7 +395,7 @@ If a module author does not provide reliable version information, the Manager ma
 
 5. **Verify the built-in engines**
 
-   If you use Sui, FolkZygisk or NoMount, check their running state separately. Injection features usually need one full reboot.
+   If you use Sui, YukiZygisk or NoMount, check their running state separately. Injection features usually need one full reboot.
 
 :::
 

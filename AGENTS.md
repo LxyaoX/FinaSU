@@ -12,7 +12,7 @@
 
 FinaSU is a KernelSU-based root solution for Android with a kernel module, Rust userspace daemons, a
 Kotlin Manager app, and docs/web assets. Unlike upstream KernelSU, engines that upstream expects
-users to install as modules are vendored into this repository and driven by ksud: FolkZygisk
+users to install as modules are vendored into this repository and driven by ksud: YukiZygisk
 (Zygisk) and NoMount (VFS path redirection).
 
 ## Repository Structure
@@ -21,7 +21,7 @@ users to install as modules are vendored into this repository and driven by ksud
 /kernel/                      # Kernel module - C code for Linux kernel integration
 /userspace/ksud/              # Userspace daemon - Rust binary, hosts the built-in engines
 /userspace/ksuinit/           # Statically linked init helper that ksud embeds (boot-patch)
-/userspace/folkzygisk/        # Vendored Zygisk engine (ReZygisk-derived, C/C++ + make)
+/userspace/zygisk/            # YukiZygisk engine (core + daemons, C++ + CMake, vendored)
 /userspace/nomount/           # Vendored NoMount kernel module sources (C, built per KMI)
 /manager/                     # Android manager app - Kotlin/Jetpack Compose UI
 /website/                     # Documentation website - VitePress
@@ -56,7 +56,7 @@ users to install as modules are vendored into this repository and driven by ksud
 - **sucompat**: Exec/FS compatibility layer that reroutes `/system/bin/su` to ksud for allowed UIDs, keeping legacy “call su to root” flows working. The hooks live in `kernel/feature/sucompat.c` and are registered by `kernel/hook/syscall_hook_manager.c`; feature toggle `KSU_FEATURE_SU_COMPAT` is declared in `kernel/include/uapi/feature.h` and dispatched in `kernel/policy/feature.c`.
 - **allowlist**: Kernel-managed list of UIDs permitted for root, persisted at `/data/adb/ksu/.allowlist` with default root/non-root profiles. Core logic is in `kernel/policy/allowlist.c` (bitmap storage, persistence, default profile caching) and is initialized from `kernel/core/init.c`; the supercall handlers under `kernel/supercall/` expose getters, deny-list checks, and “should umount modules” decisions. Manager reads and edits it through the JNI calls in `manager/app/src/main/cpp/ksu.cc` and Kotlin `Natives` façade.
 - **built-in engines**: Code that upstream KernelSU expects users to install as modules, vendored here and driven by ksud. Their user-visible contracts are part of this repository's own API surface, and vendored sources must stay byte-identical to upstream unless the change is recorded in the matching `UPSTREAM.md`:
-  - **FolkZygisk** (`userspace/folkzygisk/`, ReZygisk-derived) - controlled from `userspace/ksud/src/zygisk.rs` with assets staged by `userspace/ksud/src/zygisk_assets.rs`; it stands down when an external Zygisk provider is installed.
+  - **YukiZygisk** (`kernel/feature/yukizygisk/` + `userspace/zygisk/`) - injection is a kernel feature; `userspace/ksud/src/yukizygisk.rs` installs the payload into `/data/adb/ksu/lib/yukizygisk`, starts the daemons and drives `/data/adb/ksu/yukizygisk/yzconfig.json`. Its ioctls are dispatched by `kernel/supercall/dispatch.c`; the engine does nothing on a kernel module built without the feature.
   - **NoMount** (`userspace/nomount/kernel/src/`) - compiled per KMI into `<kmi>_nomount.ko` and embedded; the userspace rule path lives in `userspace/ksud/src/nomount.rs` and `nomount_plan.rs`.
   - **SUSFS** - `userspace/ksud/src/susfs/` configures an existing kernel-side SUSFS installation only; this repository neither patches nor implements SUSFS.
   - **Folk Mount** - mode selection, the per-boot runtime record and the guards in `userspace/ksud/src/magic_mount.rs`. Only `nomount` and `off` exist, and there is no second engine: the magic-mount executor, its planner (`mount_plan.rs`) and the UI-readiness observer (`mount_ui.rs`) were deleted, so a driver that cannot be loaded means nothing is injected for that boot.
@@ -109,12 +109,12 @@ of them, ALWAYS run these commands in sequence after making code changes:
 3. `cargo fmt` (format)
 4. Fix any errors or warnings before considering the task complete.
 
-### Vendored engines (`userspace/folkzygisk`, `userspace/nomount`)
+### Vendored engines (`userspace/zygisk`, `userspace/nomount`)
 
 These are not cargo crates. Build them through their own entry points so the vendored sources stay
 byte-identical to upstream:
 
-- `userspace/folkzygisk` - C/C++ Zygisk engine built from `common.mk` / `Makefile` and packaged by `package.py`.
+- `userspace/zygisk` - C/C++ engine sources (core + daemons) built by CMake with the NDK; CI compiles both ABIs and stages the eight files under `userspace/ksud/bin/<abi>/yukizygisk/` for ksud to embed.
 - `userspace/nomount` - kernel-module sources compiled per KMI inside the DDK image by `userspace/nomount/build-lkm.sh` (invoked by `./build.sh nomount`).
 
 ### Android Manager App (`manager/`)
@@ -156,13 +156,13 @@ yarn docs:build  # Production build
 - Do not skip the `cargo ndk` steps; plain `cargo check` will not validate Android targets.
 - Manager builds fail if `libksud.so` is missing; create it before any Gradle command.
 - For a release APK use `./build.sh all` (or at least `./build.sh ksud apk repack`) rather than shipping a hand-built `assembleRelease` output.
-- FolkZygisk is not unconditionally active: it stands down when another Zygisk provider is installed, so the built-in engine alone does not prove Zygisk is running.
+- YukiZygisk's injection half lives in the kernel: an APK build alone injects nothing, and a kernel module without the feature reports "kernel module too old" on its page.
 - SUSFS controls only work on kernels that already carry the kernel-side SUSFS patch; never describe the module as providing SUSFS.
 - NoMount is a second kernel module built per KMI. A single-KMI local build silently ships NoMount for one KMI only.
 
 ## Git Commit
 
-- Mirror existing history style: `<scope>: <summary>` with a short lowercase scope tied to the touched area (e.g., `kernel`, `ksud`, `manager`, `nomount`, `folkzygisk`, `docs`, `scripts`). Keep the summary concise, sentence case, and avoid trailing period.
+- Mirror existing history style: `<scope>: <summary>` with a short lowercase scope tied to the touched area (e.g., `kernel`, `ksud`, `manager`, `nomount`, `yukizygisk`, `docs`, `scripts`). Keep the summary concise, sentence case, and avoid trailing period.
 - Prefer one scope; if multiple areas change, pick the primary one rather than chaining scopes. For doc-only changes use `docs:`; for multi-lang string updates use `translations:` if that matches log history.
 - Keep subject lines brief (target ≤72 chars), no body unless necessary. If referencing a PR/issue, append `(#1234)` at the end as seen in history.
 - Before committing, glance at recent `git log --oneline` to stay consistent with current prefixes and capitalization used in this repo.

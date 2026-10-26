@@ -321,14 +321,8 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.About> { AboutScreen() }
                                 entry<Route.Sulog> { SulogScreen() }
                                 entry<Route.Susfs> { me.weishu.kernelsu.ui.screen.SusfsScreen() }
-                                entry<Route.UtsView> {
-                                    me.weishu.kernelsu.ui.screen.uts.UtsViewScreen()
-                                }
                                 entry<Route.YukiZygisk> {
                                     me.weishu.kernelsu.ui.screen.yukizygisk.YukiZygiskScreen()
-                                }
-                                entry<Route.NetIsolate> {
-                                    me.weishu.kernelsu.ui.screen.netisolate.NetIsolateScreen()
                                 }
                                 entry<Route.Nomount> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountScreen()

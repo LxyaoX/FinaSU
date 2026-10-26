@@ -90,11 +90,11 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 | --- | --- |
 | `kernelsu.ko` (4 KMIs) | yes |
 | `nomount.ko` (4 KMIs) | yes |
-| FolkZygisk, 32 and 64 bit | yes |
+| YukiZygisk payload (daemons + libraries), 32 and 64 bit | yes |
 | `ksuinit`, `waitsys`, `bootctl`, `busybox`, `mkbootfs` | yes |
 
-- The modules and the FolkZygisk tree live under `userspace/ksud/bin/<abi>/`, are
-  gitignored, and are staged by CI before `ksud` is compiled: modules in `ddk-lkm.yml`, FolkZygisk in
+- The modules and the YukiZygisk payload live under `userspace/ksud/bin/<abi>/`, are
+  gitignored, and are staged by CI before `ksud` is compiled: modules in `ddk-lkm.yml`, the payload in
   `ksud.yml`. Whatever is not staged is silently absent from the APK.
 - The manager ships `arm64-v8a` only (`abiFilters` in `manager/app/build.gradle.kts`) and the LKM
   matrix in `build-lkm.yml` covers `android14-6.1`, `android15-6.6`, `android16-6.12` and
@@ -114,7 +114,7 @@ curl -s https://api.github.com/repos/LyraVoid/FinaSU/releases/latest |
 ```bash
 unzip -p KernelSU_vX.Y.Z_<code>-release.apk lib/arm64-v8a/libksud.so > /tmp/libksud.so
 for p in 'android1[2-7]-[0-9]+\.[0-9]+_kernelsu\.ko' 'android1[2-7]-[0-9]+\.[0-9]+_nomount\.ko' \
-         'folkzygisk/AGPL-3\.0\.txt'; do
+         'yukizygisk/zygiskd64'; do
   printf '%-46s %s\n' "$p" "$(grep -a -o -E -- "$p" /tmp/libksud.so | wc -l)"
 done
 ```

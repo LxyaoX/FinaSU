@@ -665,7 +665,6 @@
     <string name="settings_bug_feedback">Сообщить об ошибке</string>
     <string name="settings_search_hint">Поиск настроек</string>
     <string name="settings_search_empty">Настройки не найдены</string>
-    <string name="settings_folk_zygisk">FolkZygisk</string>
     <string name="module_more_actions">Дополнительные действия</string>
     <string name="collapse">Свернуть</string>
     <string name="kernel_modules">Модули ядра</string>
@@ -762,7 +761,7 @@
     <string name="guide_repo_action">Открыть репозиторий</string>
     <string name="guide_features_title">Встроенные функции</string>
     <string name="guide_features_desc">В менеджере работают четыре движка; дополнительный модуль не требуется.</string>
-    <string name="guide_feature_zygisk">FolkZygisk — реализация Zygisk</string>
+    <string name="guide_feature_zygisk">YukiZygisk — реализация Zygisk</string>
     <string name="guide_feature_sui">Sui — бэкенд Shizuku API</string>
     <string name="guide_feature_nomount">NoMount — перенаправление путей VFS</string>
     <string name="guide_feature_mount">Folk Mount — движок монтирования модулей</string>

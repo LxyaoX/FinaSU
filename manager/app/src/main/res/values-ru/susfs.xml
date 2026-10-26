@@ -101,16 +101,11 @@
     <string name="susfs_add_entry">Добавить запись</string>
     <string name="susfs_module_hint">Имя модуля: 1–63 символа ASCII (буквы, цифры или подчёркивания). Не загружает и не выгружает модули.</string>
     <string name="susfs_prefix_hint">Скрыть префикс монтирования через предоставленные элементы управления LKM. Без глобальной очистки существующих правил.</string>
-    <string name="susfs_deferred">Отложено, пока UTS View активен</string>
     <string name="susfs_idle">Нечего применять</string>
     <string name="susfs_idle_hint">Управляемые правила или параметры не настроены.</string>
-    <string name="susfs_deferred_hint">UTS View выполняет подмену сведений о ядре, поэтому параметр uname SUSFS не применён.</string>
     <string name="susfs_saved_reboot">Конфигурация сохранена, но не применена повторно при этой загрузке. Примените её сейчас или включите «Применять при загрузке».</string>
     <string name="susfs_apply_saved">Сохранить и применить</string>
     <string name="susfs_apply_saved_title">Применить сохранённую конфигурацию?</string>
     <string name="susfs_apply_saved_message">Конфигурация уже сохранена. Применить её сейчас в этой загрузке?</string>
     <string name="susfs_apply_saved_action">Применить сейчас</string>
-    <string name="susfs_uts_apply_confirm_title">Применить uname SUSFS?</string>
-    <string name="susfs_uts_apply_confirm_message">На время применения uname SUSFS функция UTS View будет отключена, а её настройки сохранены. UTS View останется отключённой только после подтверждения SUSFS, что uname применён; иначе она будет восстановлена.</string>
-    <string name="susfs_uts_apply_confirm_action">Применить SUSFS</string>
 </resources>

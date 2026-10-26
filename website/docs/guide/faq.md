@@ -45,7 +45,7 @@ copyright:
 
 ### FinaSU 是什么？
 
-FinaSU 是 KernelSU 系的下游分支，核心 Root 裁决发生在内核中。它提供内核级 `su` 与白名单、Folk Mount、App Profile、FolkZygisk、Sui、SUSFS 能力接口、NoMount、`.fpt` 主题和模块仓库。
+FinaSU 是 KernelSU 系的下游分支，核心 Root 裁决发生在内核中。它提供内核级 `su` 与白名单、Folk Mount、App Profile、YukiZygisk、Sui、SUSFS 能力接口、NoMount、`.fpt` 主题和模块仓库。
 
 ::: important 它不只是管理器
 
@@ -208,13 +208,13 @@ FinaSU、Magisk、KernelSU 或其分支、APatch/KernelPatch 同时接管启动�
 
 Folk Mount 是选择挂载提供者并注入模块的引擎；NoMount 通过内核 VFS 路径重定向注入文件，不建立传统挂载。NoMount 随 `ksud` 发布并按 KMI 匹配。
 
-### FolkZygisk 是什么？还需要安装其他 Zygisk 提供者吗？
+### YukiZygisk 是什么？还需要安装其他 Zygisk 提供者吗？
 
-FolkZygisk 是内置 Zygisk 引擎。启用并重启即可运行 Zygisk 模块；检测到外部提供者时，内置引擎会让位。FinaSU 只保留一个活动的 Zygisk 实现。
+YukiZygisk 是内置 Zygisk 引擎。启用并重启即可运行 Zygisk 模块；检测到外部提供者时，内置引擎会让位。FinaSU 只保留一个活动的 Zygisk 实现。
 
 ### FinaSU 支持 Xposed 吗？
 
-支持。在可用的 Zygisk 提供者上安装 LSPosed 等现代 Xposed 衍生框架即可。内置 FolkZygisk 与外部提供者只能保留一个。
+支持。在可用的 Zygisk 提供者上安装 LSPosed 等现代 Xposed 衍生框架即可。内置 YukiZygisk 与外部提供者只能保留一个。
 
 ### 什么是 Sui？还需要 Shizuku 吗？
 

@@ -1,6 +1,6 @@
 ---
 title: 功能
-description: 挂载策略、FolkZygisk、Sui、NoMount、内核信息伪装与网络隔离
+description: 挂载策略、YukiZygisk、Sui 与 NoMount
 createTime: 2026/10/24 00:00:00
 permalink: /setting/function/
 copyright:
@@ -31,10 +31,9 @@ flowchart TD
     C --> D["Built-in Magic Mount"]
     C --> E["Metamodule"]
     C --> F["NoMount VFS"]
-    A --> G["FolkZygisk"]
+    A --> G["YukiZygisk"]
     G --> H["Zygisk 模块"]
     G --> I["Sui<br/>Shizuku API 后端"]
-    A --> J["内核信息伪装 / 网络隔离"]
 ```
 
 ::: important 开关可点不等于当前内核支持
@@ -101,33 +100,31 @@ flowchart TD
 
 动态管理器流程见 [动态管理器](/manager/dynamic-manager/)。
 
-## FolkZygisk
+## YukiZygisk
 
-FolkZygisk 是 FinaSU 驱动的 Zygisk 后端，用于向 Android 应用进程注入 Zygisk 模块。
+YukiZygisk 是随 FinaSU 提供的 Zygisk 引擎。注入由内核完成，`ksud` 负责安装载荷、在开机时拉起守护进程，并把设置写进 `yzconfig.json`。
 
-状态行可能显示：
+页面顶部是总开关（默认开启）。状态区可能显示：
 
-- **已注入**：本次启动检测到注入成功。
-- **部分注入**：只有部分目标或进程注入成功。
-- **正在启动**：注入流程尚未完成。
-- **注入失败**：启动期间失败。
-- **未验证**：没有拿到可以证明注入成功的结果。
+- **运行中**：守护进程已就绪，并已注册注入端点。
+- **内核注入未开启**：守护进程在运行，但内核的注入开关没有打开，点该行可重启引擎。
+- **内核模块版本过旧**：当前 `kernelsu.ko` 不含注入运行时，需要刷入本版本的内核模块。
+- **引擎已退出**：守护进程启动失败，页面会显示它写下的最后一行日志。
+- **未运行**：载荷已安装，但进程没有启动。
 
-列表中还会显示下一次启动是否启用、检测到的外部提供者、需要重启或启动保护信息。启动保护暂停注入时，会出现“恢复”操作。
+修改下方任一设置会立即写入配置并重启引擎。
 
-::: warning 开启状态不等于本次启动已经生效
+::: warning 注入的一半在内核
 
-开关表达的是下次启动选择。若同时安装外部 Zygisk 提供者，内置 FolkZygisk 会让位；实际注入状态以状态行和重启后的结果为准。
+只更新管理器不会产生注入：必须同时刷入本版本的 `kernelsu.ko`。
 
 :::
-
-详见 [FolkZygisk](/builtin/folkzygisk/)。
 
 ## Sui
 
 <Badge text="依赖 Zygisk 后端" type="warning" />
 
-Sui 是 FinaSU 内置的 Shizuku API 后端。Sui 本身不是 Zygisk 提供者，==它必须依赖可用的 Zygisk 后端才能运行==。可以使用内置 FolkZygisk，也可以使用外部兼容的 Zygisk 提供者；两者都能作为 Sui 的后端。
+Sui 是 FinaSU 内置的 Shizuku API 后端。Sui 本身不是 Zygisk 提供者，==它必须依赖可用的 Zygisk 后端才能运行==。可以使用内置 YukiZygisk，也可以使用外部兼容的 Zygisk 提供者；两者都能作为 Sui 的后端。
 
 外部提供者与内置提供者的实际差异是：==Sui 可以运行，但 FinaSU 无法验证该外部提供者的注入结果==。因此状态可能显示为“外部提供者已启用，但注入未验证”，这不等于 Sui 一定不可用。
 
@@ -207,85 +204,6 @@ NoMount 的默认模型是“所有应用都能看到注入文件”。在“例
 
 详见 [NoMount](/builtin/nomount/)。
 
-## 内核信息伪装（UTS View）
-
-UTS View 让选定应用或所有仍使用初始 UTS namespace 的进程看到不同的 `uname` 信息。
-
-### 常用字段
-
-- **系统名**
-- **节点名**
-- **内核版本**
-- **构建版本**
-- **机器架构**
-- **域名**
-
-通常只需修改“内核版本”。字段应保持自洽；版本、构建时间和架构组合明显冲突时，可能引发新的兼容性问题。
-
-### 生效范围
-
-- **只让选中的应用生效**：最多选择 128 个应用。
-- **所有应用和终端**：忽略应用列表，对仍使用初始 UTS namespace 的进程生效。
-
-已经拥有私有 UTS namespace 的进程不会被追溯修改。修改后，目标应用通常要彻底关闭再重新打开。
-
-### 与 SUSFS 的关系
-
-如果 SUSFS 正在提供 UTS 伪装，UTS View 会显示“由 SUSFS 接管”。可以使用“改用本功能伪装”让 UTS View 接管；这会先恢复 SUSFS 的 `uname` 伪装，再由 UTS View 保存的值接管。
-
-“恢复真实信息”会关闭 UTS View 并删除内容；若当前由 SUSFS 提供伪装，则只删除 UTS View 设置，不影响 SUSFS 的设置。
-
-### 诊断
-
-“运行日志”显示命中次数、最近 UID/PID、跳过原因和创建独立 UTS namespace 的失败次数。目标应用仍看到旧值时，先彻底关闭应用并重新打开，再看日志。
-
-## 网络隔离
-
-网络隔离阻止选定应用创建新的 IPv4/IPv6 出站连接。
-
-:::: field-group
-
-::: field 普通隔离
-@type `模式`
-阻止新的外网连接，也阻止回环。
-:::
-
-::: field 允许回环
-@type `模式`
-只允许以 `127.0.0.0/8` 和 `::1` 为目的地的回环连接。本机代理仍可能把流量转发到外网。
-:::
-
-::: field 彻底断网
-@type `模式`
-阻止应用创建 IPv4/IPv6 套接字；已有连接不会中断。
-:::
-
-::: field 应用策略
-@type `逐应用`
-内核支持时，可以为每个目标应用单独选择普通、回环或彻底模式。
-:::
-
-::: field 例外
-@type `可选`
-允许私有网络、mDNS/SSDP 本地发现。严格封锁套接字开启时，这些例外不可同时使用。
-:::
-
-::::
-
-补充规则：
-
-- 已经建立的连接不保证立即断开。
-- 管理器自身始终豁免，包括工作资料中的管理器。
-- 最多选择 256 个 UID。
-- 当前内核不支持逐应用策略或 32 位应用覆盖时，相关控件会置灰。
-- “最近拦截现场”用于查看拦截事件；清空事件不会改变隔离配置。
-
-::: warning 隔离不是关机断网
-
-它只约束选中的应用新建连接的范围。不要把它当作系统级防火墙，也不要把关键系统进程加入列表。
-
-:::
-
 ## 推荐排查顺序
 
 :::: steps
@@ -316,16 +234,16 @@ UTS View 让选定应用或所有仍使用初始 UTS namespace 的进程看到�
 
 ::: chat title="功能设置问答"
 {用户}
-FolkZygisk 显示已开启，为什么 Sui 还不能用？
+YukiZygisk 显示已开启，为什么 Sui 还不能用？
 
 {.}
-检查本次启动的 Zygisk 注入状态。开启是下次启动选择；若 FolkZygisk 让位给外部提供者，或注入尚未完成，Sui 仍可能不可用。
+检查本次启动的 Zygisk 注入状态。开启是下次启动选择；若 YukiZygisk 让位给外部提供者，或注入尚未完成，Sui 仍可能不可用。
 
 {用户}
 外部 Zygisk 提供者能用 Sui 吗？
 
 {.}
-可以。Sui 依赖可用的 Zygisk 后端，内置 FolkZygisk 和外部兼容提供者都可以。区别只是 FinaSU 无法验证外部提供者的注入结果。
+可以。Sui 依赖可用的 Zygisk 后端，内置 YukiZygisk 和外部兼容提供者都可以。区别只是 FinaSU 无法验证外部提供者的注入结果。
 
 {用户}
 切换到 NoMount 后为什么应用都能看到模块？
@@ -339,22 +257,15 @@ NoMount 初始没有例外应用。需要隐藏时，在“NoMount → 例外应
 {.}
 不会删除已安装模块。它只是本次启动不注入模块内容，模块会保持已安装但不生效的状态。
 
-{用户}
-网络隔离能立即切断正在下载的应用吗？
-
-{.}
-不保证。它主要阻止新建连接；已有连接可能继续工作到自行结束。
 :::
 
 ## 相关页面
 
 - [Root 与挂载策略](/setting/root-policy/)
-- [FolkZygisk](/builtin/folkzygisk/)
+- [YukiZygisk](/builtin/yukizygisk/)
 - [Folk Mount](/builtin/folk-mount/)
 - [NoMount](/builtin/nomount/)
 - [Sui 使用指南](/builtin/sui/)
-- [UTS View](/builtin/uts-view/)
-- [网络隔离](/builtin/net-isolate/)
 - [SUSFS](/builtin/susfs/)
 - [SU 日志](/manager/su-log/)
 - [动态管理器](/manager/dynamic-manager/)

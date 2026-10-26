@@ -20,7 +20,7 @@ FinaSU 提供：
 - 内核级 `su` 与基于白名单的 Root 权限管理
 - 基于 overlayfs 与 metamodule 的类 Magisk 模块系统
 - App Profile，将 Root 权限限制在单个应用策略内
-- 内置 FolkZygisk 引擎，并提供管理器控制
+- 内置 YukiZygisk 引擎（内核辅助注入），提供总开关与引擎设置
 - SUSFS 支持，按内核能力开关
 - 内核级隐藏：挂载隐藏、SELinux 隐藏、AVC 日志伪装与卸载策略
 - `.fpt` 主题，与 FolkPatch 互通
@@ -46,9 +46,9 @@ FinaSU 提供：
 
 标准 KernelSU 模块由管理器管理。模块通过内置的 NoMount VFS 后端注入，不再需要 metamodule；已安装的 metamodule 仍会被识别并列出。
 
-### FolkZygisk
+### YukiZygisk
 
-FolkZygisk 是内置的 Zygisk 引擎。管理器提供安装与激活控制；已有外置 Zygisk provider 时 `ksud` 会让内置引擎自动让位，因此 provider 模块可正常安装。
+YukiZygisk 是内置的 Zygisk 引擎。注入由 `kernelsu.ko` 内的内核特性完成；`ksud` 负责安装载荷、开机拉起守护进程，并让 `/data/adb/ksu/yukizygisk/yzconfig.json` 与管理器保持一致。运行时在内核里，所以只更新管理器不会产生注入——必须刷入同版本的内核模块。
 
 ### SUSFS
 
@@ -100,7 +100,7 @@ TEESimulator 为选定的应用回应密钥认证请求：它把 AOSP 的参考 
 ## 开源致谢
 
 - [KernelSU](https://github.com/tiann/KernelSU)：上游项目
-- [ReZygisk](https://github.com/PerformanC/ReZygisk)：FolkZygisk 由其改写而来
+- [YukiSU](https://github.com/Anatdx/YukiSU)：YukiZygisk 的内核特性与用户态载荷
 - [YukiSU](https://github.com/Anatdx/YukiSU)：动态管理器参考
 - [BakaSU](https://github.com/Baka-SU/BakaSU)：AnyKernel3 刷写及部分小功能参考
 - [Magisk](https://github.com/topjohnwu/Magisk)：`magiskpolicy` 与模块概念

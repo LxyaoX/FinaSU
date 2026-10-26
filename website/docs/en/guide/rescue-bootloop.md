@@ -41,7 +41,7 @@ If the device starts a boot loop after installing or updating a module, try Fina
 
 ## Rescue Mechanisms
 
-FinaSU includes an early-boot safe mode: once the trigger condition is detected, it disables regular modules and managed kernel modules and skips the module scripts, Folk Mount, FolkZygisk and Sui startup flows.
+FinaSU includes an early-boot safe mode: once the trigger condition is detected, it disables regular modules and managed kernel modules and skips the module scripts, Folk Mount, YukiZygisk and Sui startup flows.
 
 ### Volume Key Rescue
 

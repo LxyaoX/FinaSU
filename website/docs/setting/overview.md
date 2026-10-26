@@ -31,7 +31,6 @@ copyright:
 | 查管理器更新、模块更新，换语言或改 App Profile 模板 | [通用](/setting/general/) | 设置 → 通用 |
 | 换颜色、壁纸、字体、图标或首页布局 | [外观](/setting/appearance/) | 设置 → 外观 |
 | 改导航栏、手势、模块卡片、SU 兼容或 WebView 调试 | [行为](/setting/behavior/) | 设置 → 行为 |
-| 开 Zygisk、Sui、Folk Mount、NoMount、网络隔离 | [功能](/setting/function/) | 设置 → 功能 |
 | 改 SELinux、ADB Root、Shell Root 限制 | [安全](/setting/security/) | 设置 → 安全 |
 | 给管理器或敏感操作加密码、图案、指纹 | [验证](/setting/authentication/) | 设置 → 验证 |
 | 改振动、背景音乐、触摸音效或启动音效 | [多媒体](/setting/multimedia/) | 设置 → 多媒体 |
@@ -48,7 +47,6 @@ copyright:
 | **通用** | 放置不属于外观、Root 能力或数据维护的全局选项。 | 更新、语言、App Profile 模板 |
 | **外观** | 决定界面看起来是什么样。 | 主题、壁纸、字体、首页与模块卡片外观 |
 | **行为** | 决定界面如何操作、如何导航，以及部分交互兼容。 | 导航、悬浮栏、手势、模块卡片行为 |
-| **功能** | 管理内核特性、内置引擎和文件系统隔离。 | Zygisk、Sui、Folk Mount、NoMount、网络隔离 |
 | **安全** | 管理内核安全边界与调试入口。 | SELinux、ADB Root、Shell Root 限制 |
 | **验证** | 用管理器自己的凭据保护启动和敏感操作。 | 应用锁、PIN、图案、操作保护 |
 | **多媒体** | 管理界面振动与声音。 | 振动、背景音乐、触摸音效、启动音效 |
@@ -135,7 +133,7 @@ copyright:
 - [通用](/setting/general/)：更新、语言、App Profile 模板。
 - [外观](/setting/appearance/)：主题、壁纸、字体、首页布局。
 - [行为](/setting/behavior/)：导航、悬浮栏、SU 兼容、模块展示。
-- [功能](/setting/function/)：挂载策略、FolkZygisk、Sui、NoMount 等。
+- [功能](/setting/function/)：挂载策略、YukiZygisk、Sui、NoMount 等。
 - [安全](/setting/security/)：SELinux、ADB Root 与 Shell 限制。
 - [验证](/setting/authentication/)：管理器应用锁与敏感操作保护。
 - [多媒体](/setting/multimedia/)：振动、背景音乐与音效。

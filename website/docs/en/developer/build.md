@@ -113,7 +113,7 @@ Check `dist/` when it finishes. The final APK should contain the `ksud` from thi
 
 3. **Cross-compile `ksud`**
 
-   `ksud` compiles the kernel module, NoMount, Sui, FolkZygisk and `ksuinit` assets for the current ABI into itself.
+   `ksud` compiles the kernel module, NoMount, Sui, YukiZygisk and `ksuinit` assets for the current ABI into itself.
 
 4. **Build and re-sign the APK**
 
@@ -218,7 +218,7 @@ android16-6.12
 android17-6.18
 ```
 
-Current CI Manager targets include `ksud` builds for `arm64-v8a`, `x86_64` and `riscv64`. Sui and FolkZygisk have no `riscv64` payload; the current KernelSU/NoMount module release matrix targets aarch64 and x86_64.
+Current CI Manager targets include `ksud` builds for `arm64-v8a`, `x86_64` and `riscv64`. Sui and YukiZygisk have no `riscv64` payload; the current KernelSU/NoMount module release matrix targets aarch64 and x86_64.
 
 ## Local vs CI Differences
 

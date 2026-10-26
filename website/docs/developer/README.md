@@ -39,7 +39,7 @@ FinaSU 的“开发”不是只有编译内核。标准模块、Lua 插件、内
 - **Lua 插件**：带 `plugin.json` 的独立自动化包，不参与 `system/` 挂载。
 - **内核模块**：`.ko` 文件，由 Linux 内核加载器处理。
 - **Built-In**：把 FinaSU 驱动编进内核镜像，不是“内置能力”开关。
-- **FolkZygisk**：内置的 Zygisk 提供者；Zygisk 模块仍然是标准模块。
+- **YukiZygisk**：内置的 Zygisk 提供者；Zygisk 模块仍然是标准模块。
 
 :::
 
@@ -51,7 +51,7 @@ flowchart TD
     U --> D["ksud"]
     D --> M["标准模块系统"]
     D --> P["Lua 插件运行时"]
-    D --> Z["FolkZygisk"]
+    D --> Z["YukiZygisk"]
     Z --> ZM["Zygisk 模块"]
     D --> T["主题导入与应用"]
     M --> F["systemless 文件与启动脚本"]
@@ -89,7 +89,7 @@ FolkSU
 │   │   ├── module.rs          # 标准模块安装与脚本
 │   │   ├── module_config.rs   # 模块配置
 │   │   └── plugin/            # Lua 插件实现
-│   └── folkzygisk/            # 内置 Zygisk 引擎
+│   └── zygisk/                # YukiZygisk 引擎（core + daemon）
 ├── manager/                   # Android 管理器与 JNI
 ├── website/                   # 文档站
 └── build.sh                   # 本地发布构建入口
@@ -97,7 +97,7 @@ FolkSU
 
 ::: warning 不要随意修改 vendored 引擎
 
-`userspace/folkzygisk/`、`userspace/sui/` 和 `userspace/nomount/` 是 vendored 源码。仓库约定要求它们除有记录的适配外保持与来源一致。修改前先读对应的 `UPSTREAM.md`，不要把临时调试补丁混进本地提交。
+`userspace/zygisk/`、`userspace/sui/` 和 `userspace/nomount/` 是 vendored 源码。仓库约定要求它们除有记录的适配外保持与来源一致。修改前先读对应的 `UPSTREAM.md`，不要把临时调试补丁混进本地提交。
 
 :::
 

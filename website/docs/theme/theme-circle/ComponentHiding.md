@@ -44,7 +44,7 @@ CircleUI 的隐藏设置不会改变检测结果，也不会卸载模块或禁�
 - SELinux；
 - Seccomp。
 
-隐藏 Zygisk 或 SUSFS 不会关闭 FolkZygisk、外部提供者或 SUSFS 内核功能。排查检测问题时，应重新显示对应行或去功能页查看本次启动状态。
+隐藏 Zygisk 或 SUSFS 不会关闭 YukiZygisk、外部提供者或 SUSFS 内核功能。排查检测问题时，应重新显示对应行或去功能页查看本次启动状态。
 
 ## 底部支持卡片
 

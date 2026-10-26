@@ -1,6 +1,6 @@
 ---
 title: Feature Settings
-description: Mount policies, FolkZygisk, Sui, NoMount, kernel info spoofing and network isolation
+description: Mount policies, YukiZygisk, Sui, NoMount, kernel info spoofing and network isolation
 createTime: 2026/10/24 00:00:00
 permalink: /en/setting/function/
 copyright:
@@ -31,7 +31,7 @@ flowchart TD
     C --> D["Built-in Magic Mount"]
     C --> E["Metamodule"]
     C --> F["NoMount VFS"]
-    A --> G["FolkZygisk"]
+    A --> G["YukiZygisk"]
     G --> H["Zygisk modules"]
     G --> I["Sui<br/>Shizuku API backend"]
     A --> J["Kernel info spoofing / network isolation"]
@@ -101,33 +101,31 @@ Do not set unknown apps as dynamic manager just to try it. The entry is hidden c
 
 For the dynamic manager flow, see [Dynamic Manager](/en/manager/dynamic-manager/).
 
-## FolkZygisk
+## YukiZygisk
 
-FolkZygisk is the Zygisk backend driven by FinaSU, used to inject Zygisk modules into Android app processes.
+YukiZygisk is the Zygisk engine that ships with FinaSU. Injection happens in the kernel; `ksud` installs the payload, starts the daemons at boot, and writes the settings into `yzconfig.json`.
 
-The status line may show:
+The switch at the top of the page is the master control (on by default). The status area can show:
 
-- **Injected**: injection succeeded during this boot.
-- **Partially injected**: only some targets or processes were injected.
-- **Starting**: the injection flow has not finished yet.
-- **Injection failed**: it failed during boot.
-- **Unverified**: no result proving successful injection was obtained.
+- **Running**: the daemon is up and its injection endpoint is registered.
+- **Injection is off in the kernel**: the daemon runs, but the kernel's injection bit is clear; tapping the row restarts the engine.
+- **Kernel module too old**: this `kernelsu.ko` has no injection runtime, so flash a kernel module from this release.
+- **Engine stopped**: the daemon failed to start; the page shows the last line it logged.
+- **Not running**: the payload is installed but no process is up.
 
-The list also shows whether it is enabled for the next boot, the external provider detected, and whether a reboot or boot protection is needed. When boot protection pauses injection, a "Restore" action appears.
+Changing any setting below writes the configuration and restarts the engine immediately.
 
-::: warning An enabled switch does not mean it took effect this boot
+::: warning Half of injection lives in the kernel
 
-The switch expresses the choice for the next boot. If an external Zygisk provider is also installed, the built-in FolkZygisk steps aside; the actual injection state is determined by the status line and by the result after a reboot.
+Installing the manager alone injects nothing: the matching `kernelsu.ko` has to be flashed as well.
 
 :::
-
-See [FolkZygisk](/en/builtin/folkzygisk/).
 
 ## Sui
 
 <Badge text="Requires a Zygisk backend" type="warning" />
 
-Sui is the Shizuku API backend built into FinaSU. Sui is not a Zygisk provider itself; ==it must rely on a working Zygisk backend to run==. You can use the built-in FolkZygisk or an external compatible Zygisk provider; either can serve as Sui's backend.
+Sui is the Shizuku API backend built into FinaSU. Sui is not a Zygisk provider itself; ==it must rely on a working Zygisk backend to run==. You can use the built-in YukiZygisk or an external compatible Zygisk provider; either can serve as Sui's backend.
 
 The practical difference between an external and a built-in provider is this: ==Sui can run, but FinaSU cannot verify the injection result of that external provider==. The status may therefore read "external provider enabled, but injection unverified", which does not mean Sui is necessarily unusable.
 
@@ -207,85 +205,6 @@ NoMount's default model is "every app can see injected files". Apps selected und
 
 See [NoMount](/en/builtin/nomount/).
 
-## Kernel Info Spoofing (UTS View)
-
-UTS View makes selected apps, or every process that still uses the initial UTS namespace, see different `uname` information.
-
-### Common Fields
-
-- **System name**
-- **Node name**
-- **Kernel release**
-- **Build version**
-- **Machine architecture**
-- **Domain name**
-
-Usually only "kernel release" needs changing. Keep the fields self-consistent; a version, build time and architecture combination that clearly conflicts may cause new compatibility problems.
-
-### Scope
-
-- **Selected apps only**: up to 128 apps can be selected.
-- **All apps and terminals**: ignores the app list and applies to every process that still uses the initial UTS namespace.
-
-Processes that already have a private UTS namespace are not modified retroactively. After a change, target apps usually have to be closed completely and opened again.
-
-### Relation to SUSFS
-
-If SUSFS is currently providing UTS spoofing, UTS View shows "managed by SUSFS". You can use "Spoof with this feature instead" to let UTS View take over; this first restores SUSFS's `uname` spoofing, then the values saved by UTS View take over.
-
-"Restore real information" turns UTS View off and deletes its contents; if SUSFS is currently providing the spoofing, only the UTS View settings are deleted and the SUSFS settings are untouched.
-
-### Diagnostics
-
-The "run log" shows the hit count, the most recent UID/PID, the skip reasons, and the number of failures to create a separate UTS namespace. When a target app still sees the old values, close the app completely and open it again, then read the log.
-
-## Network Isolation
-
-Network isolation prevents selected apps from creating new outbound IPv4/IPv6 connections.
-
-:::: field-group
-
-::: field Normal isolation
-@type `Mode`
-Blocks new external connections, and also blocks loopback.
-:::
-
-::: field Allow loopback
-@type `Mode`
-Allows only loopback connections to `127.0.0.0/8` and `::1`. A local proxy may still forward traffic to the internet.
-:::
-
-::: field Total block
-@type `Mode`
-Prevents apps from creating IPv4/IPv6 sockets; existing connections are not interrupted.
-:::
-
-::: field App policy
-@type `Per-app`
-When the kernel supports it, each target app can choose normal, loopback or total mode separately.
-:::
-
-::: field Exceptions
-@type `Optional`
-Allows private networks and mDNS/SSDP local discovery. When strict socket blocking is enabled, these exceptions cannot be used at the same time.
-:::
-
-::::
-
-Additional rules:
-
-- Established connections are not guaranteed to drop immediately.
-- Manager itself is always exempt, including Manager in a work profile.
-- Up to 256 UIDs can be selected.
-- When the current kernel does not support per-app policies or 32-bit app coverage, the related controls are grayed out.
-- "Recent blocked events" shows interception events; clearing events does not change the isolation configuration.
-
-::: warning Isolation is not an offline switch
-
-It only constrains what new connections the selected apps can open. Do not treat it as a system-wide firewall, and do not add critical system processes to the list.
-
-:::
-
 ## Recommended Troubleshooting Order
 
 :::: steps
@@ -316,16 +235,16 @@ It only constrains what new connections the selected apps can open. Do not treat
 
 ::: chat title="Feature settings Q&A"
 {User}
-FolkZygisk shows enabled, so why can't Sui work yet?
+YukiZygisk shows enabled, so why can't Sui work yet?
 
 {.}
-Check the Zygisk injection state for this boot. Enabled is the choice for the next boot; if FolkZygisk stepped aside for an external provider, or injection has not finished, Sui may still be unavailable.
+Check the Zygisk injection state for this boot. Enabled is the choice for the next boot; if YukiZygisk stepped aside for an external provider, or injection has not finished, Sui may still be unavailable.
 
 {User}
 Can Sui work with an external Zygisk provider?
 
 {.}
-Yes. Sui relies on a working Zygisk backend, and both the built-in FolkZygisk and external compatible providers can serve. The only difference is that FinaSU cannot verify the external provider's injection result.
+Yes. Sui relies on a working Zygisk backend, and both the built-in YukiZygisk and external compatible providers can serve. The only difference is that FinaSU cannot verify the external provider's injection result.
 
 {User}
 Why can every app see modules after switching to NoMount?
@@ -339,22 +258,15 @@ Does turning Folk Mount off uninstall modules?
 {.}
 No. Installed modules are not deleted. It only stops injecting module content during this boot, so the modules stay installed but do not take effect.
 
-{User}
-Can network isolation cut off an app that is downloading right away?
-
-{.}
-Not guaranteed. It mainly blocks new connections; existing connections may keep working until they end on their own.
 :::
 
 ## Related Pages
 
 - [Root & Mount Policy](/en/setting/root-policy/)
-- [FolkZygisk](/en/builtin/folkzygisk/)
+- [YukiZygisk](/en/builtin/yukizygisk/)
 - [Folk Mount](/en/builtin/folk-mount/)
 - [NoMount](/en/builtin/nomount/)
 - [Sui Guide](/en/builtin/sui/)
-- [UTS View](/en/builtin/uts-view/)
-- [Network Isolation](/en/builtin/net-isolate/)
 - [SUSFS](/en/builtin/susfs/)
 - [SU Log](/en/manager/su-log/)
 - [Dynamic Manager](/en/manager/dynamic-manager/)

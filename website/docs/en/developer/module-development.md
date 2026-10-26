@@ -237,7 +237,7 @@ zygisk/x86_64.so
 zygisk/x86.so
 ```
 
-The standard module format only places files in the module directory; the actual injection is done by the currently available Zygisk provider. Do not assume injection succeeds just because the module contains `zygisk/`, and do not assume inside module scripts that the built-in FolkZygisk is the current provider.
+The standard module format only places files in the module directory; the actual injection is done by the currently available Zygisk provider. Do not assume injection succeeds just because the module contains `zygisk/`, and do not assume inside module scripts that the built-in YukiZygisk is the current provider.
 
 ### WebUI and Manual Actions
 
@@ -385,5 +385,5 @@ No. It belongs to a blocking stage with an overall budget. Resident work belongs
 
 - [Module Configuration](/en/developer/module-config/): CLI and limits for persistent and temporary configuration.
 - [Folk Mount](/en/builtin/folk-mount/): which mount backend publishes module files.
-- [FolkZygisk](/en/builtin/folkzygisk/): the injection provider Zygisk modules depend on.
+- [YukiZygisk](/en/builtin/yukizygisk/): the injection provider Zygisk modules depend on.
 - [Managed Kernel Modules](/en/manager/kernel-module/): the `.ko` load path, which differs from standard modules.

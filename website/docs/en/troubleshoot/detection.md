@@ -28,10 +28,9 @@ flowchart TD
     E --> G["NoMount<br/>VFS redirection, avoids traditional mounts"]
     A --> H["SELinux Hide / AVC Spoof"]
     A --> I["SUSFS integration (optional)"]
-    A --> J["UTS View<br/>changes uname fields only"]
 ```
 
-These capabilities can affect each other, but they are not the same "invisibility level". NoMount reduces traditional mount records, Mount View Filter filters the mount table that is read, SELinux Hide handles security policy queries, and UTS View only changes the `uname` fields of the selected process.
+These capabilities can affect each other, but they are not the same "invisibility level". NoMount reduces traditional mount records, Mount View Filter filters the mount table that is read, SELinux Hide handles security policy queries.
 
 ## Unmount Modules in App Profile
 
@@ -108,13 +107,11 @@ The two features are related but not equivalent:
 
 A wrong SELinux setting can also break app features directly. If an app cannot access its own files after enabling it, module reads fail, or a service fails to start, roll back the most recent item instead of stacking more hiding switches.
 
-## SUSFS, UTS View and Other Surfaces
+## SUSFS and Other Surfaces
 
 **SUSFS** is not provided by the FinaSU kernel itself. Only after kernel source integration or loading a matching SUSFS-LKM can FinaSU configure it. The source integration and the LKM may differ in feature scope; judge hiding items by the current implementation and page state. See [SUSFS](/en/builtin/susfs/).
 
-**UTS View** only affects the `uname` fields that selected processes see. It cannot change hardware attestation, system properties, app caches or a full device fingerprint. See [UTS View](/en/builtin/uts-view/).
-
-**FolkZygisk and Sui** are feature providers, not hiding switches. They may themselves create new observable surfaces; do not assume the system is stealthier because Zygisk or Sui is enabled.
+**YukiZygisk and Sui** are feature providers, not hiding switches. They may themselves create new observable surfaces; do not assume the system is stealthier because Zygisk or Sui is enabled.
 
 ## Ask Four Questions First
 
@@ -173,7 +170,6 @@ FinaSU cannot verify its injection result. Check the external provider's own man
 - disabling "unmount modules" for all apps uniformly and then expecting one hiding switch to cover every check;
 - stacking NoMount, Mount View Filter, SUSFS and every SELinux hiding item at the same time;
 - keeping SELinux in Permissive mode long term to pass detection;
-- treating UTS View as full device fingerprint spoofing;
 - using hiding modules of unknown origin that modify the same kernel interface as FinaSU;
 - force-enabling capabilities the kernel does not support by editing state files under `/data/adb/ksu`.
 
@@ -196,5 +192,4 @@ FinaSU cannot verify its injection result. Check the external provider's own man
 - [Folk Mount](/en/builtin/folk-mount/): mount providers and the visibility model.
 - [NoMount](/en/builtin/nomount/): VFS redirection, exception UIDs and detection boundaries.
 - [SUSFS](/en/builtin/susfs/): optional kernel integration and the LKM.
-- [UTS View](/en/builtin/uts-view/): changes `uname` fields only.
 - [Passing Detection](/en/troubleshoot/pass-detection/): when a detector is not all green, decide whether more work is worth it.

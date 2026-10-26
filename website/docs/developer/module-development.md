@@ -237,7 +237,7 @@ zygisk/x86_64.so
 zygisk/x86.so
 ```
 
-标准模块格式只负责把文件放到模块目录；真正完成注入的是当前可用的 Zygisk 提供者。不要因为模块包含 `zygisk/` 就认为注入一定成功，也不要在模块脚本里假定内置 FolkZygisk 一定是当前提供者。
+标准模块格式只负责把文件放到模块目录；真正完成注入的是当前可用的 Zygisk 提供者。不要因为模块包含 `zygisk/` 就认为注入一定成功，也不要在模块脚本里假定内置 YukiZygisk 一定是当前提供者。
 
 ### WebUI 与手动操作
 
@@ -385,5 +385,5 @@ adb shell su -c 'ksud module skip example_module --off'
 
 - [模块配置](/developer/module-config/)：持久与临时配置的 CLI 和限制。
 - [Folk Mount](/builtin/folk-mount/)：模块文件由哪个挂载后端发布。
-- [FolkZygisk](/builtin/folkzygisk/)：Zygisk 模块依赖的注入提供者。
+- [YukiZygisk](/builtin/yukizygisk/)：Zygisk 模块依赖的注入提供者。
 - [受管内核模块](/manager/kernel-module/)：与标准模块不同的 `.ko` 加载路径。

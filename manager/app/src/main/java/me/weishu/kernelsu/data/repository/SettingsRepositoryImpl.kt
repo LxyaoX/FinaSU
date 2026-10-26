@@ -483,7 +483,7 @@ class SettingsRepositoryImpl : SettingsRepository {
         fun segment(index: Int) = segments.getOrNull(index)
 
         // `[ENABLED (1)] su_compat (ID=0) [FORCED]` / `[DISABLED] kernel_umount (ID=1)` /
-        // `[NOT_SUPPORTED] uts_view (ID=6) [MODULE_MANAGED]`, one line per feature.
+        // `[NOT_SUPPORTED] avc_spoof (ID=6) [MODULE_MANAGED]`, one line per feature.
         val statuses = mutableMapOf<String, String>()
         val values = mutableMapOf<String, Long?>()
         val statusLine =

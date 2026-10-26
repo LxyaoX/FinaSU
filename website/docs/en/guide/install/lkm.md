@@ -271,7 +271,7 @@ Without a clear reason, use the LKM shipped with the Manager. Before swapping in
 
 5. **Verify the built-in engines**
 
-   When using Sui, FolkZygisk or NoMount, check each status; Zygisk and Sui usually need a reboot to finish injection.
+   When using Sui, YukiZygisk or NoMount, check each status; Zygisk and Sui usually need a reboot to finish injection.
 
 :::
 

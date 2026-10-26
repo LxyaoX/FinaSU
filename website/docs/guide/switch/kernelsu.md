@@ -628,7 +628,7 @@ KernelSU 与 FinaSU 可能使用相同路径，所以数据看起来“还在”
 
 5. **验证内置引擎**
 
-   使用 Sui、FolkZygisk 或 NoMount 时，逐个检查状态。Zygisk 和 Sui 通常需要重启才能完成注入。
+   使用 Sui、YukiZygisk 或 NoMount 时，逐个检查状态。Zygisk 和 Sui 通常需要重启才能完成注入。
 
 :::
 

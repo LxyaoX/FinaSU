@@ -210,7 +210,7 @@ Jailbreak is only valid for the current boot session; root is lost after a norma
 | --- | --- | --- |
 | `/data/adb/modules` | files are usually kept | disable first, then enable compatible modules one by one |
 | Magisk module scripts | compatibility not guaranteed | scripts that depend on interfaces such as `magisk` and `magiskpolicy` may fail |
-| Zygisk modules | a Zygisk provider is required | use the built-in [FolkZygisk](/en/builtin/folkzygisk/) or another compatible provider, and keep only one |
+| Zygisk modules | a Zygisk provider is required | use the built-in [YukiZygisk](/en/builtin/yukizygisk/) or another compatible provider, and keep only one |
 | Magisk DenyList / Shamiko | cannot be used the same way | switch to the FinaSU hiding and App Profile configuration |
 | `/data/adb/magisk` | no longer needed | clean it up after FinaSU is confirmed working |
 | Magisk root grants | not migrated | grant again in FinaSU |
@@ -245,7 +245,7 @@ Jailbreak is only valid for the current boot session; root is lost after a norma
 
 5. **Verify Zygisk**
 
-   When using Zygisk modules, confirm there is only one Zygisk provider and check the status of FolkZygisk or the external provider.
+   When using Zygisk modules, confirm there is only one Zygisk provider and check the status of YukiZygisk or the external provider.
 
 :::
 
@@ -271,7 +271,7 @@ Jailbreak is only valid for the current boot session; root is lost after a norma
 
 - **Zygisk modules do not work**
 
-  Confirm FolkZygisk is enabled, or keep only one compatible external Zygisk provider; switching providers usually requires a reboot.
+  Confirm YukiZygisk is enabled, or keep only one compatible external Zygisk provider; switching providers usually requires a reboot.
 
 - **FinaSU shows not installed**
 
@@ -304,7 +304,7 @@ The module files may still be there, but compatibility is not guaranteed. Module
 What about Zygisk modules?
 
 {.}
-Use the FolkZygisk built into FinaSU, or one compatible external Zygisk provider; only one active implementation may exist.
+Use the YukiZygisk built into FinaSU, or one compatible external Zygisk provider; only one active implementation may exist.
 
 {User}
 Should I uninstall the Magisk app first?

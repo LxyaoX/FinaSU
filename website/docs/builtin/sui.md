@@ -59,7 +59,7 @@ Sui 同时依赖 FinaSU 驱动、Zygisk 提供者、内置载荷和管理通道�
 ::: field Zygisk
 @type `required`
 @default `内置或外部提供者`
-Sui 需要可用的 Zygisk 后端。可以使用内置 [FolkZygisk](/builtin/folkzygisk/)，也可以使用其他兼容的 Zygisk 提供者，但只能保留一个活动实现。使用外部提供者时 Sui 可以正常运行，只是 FinaSU 无法验证其注入结果。
+Sui 需要可用的 Zygisk 后端。可以使用内置 [YukiZygisk](/builtin/yukizygisk/)，也可以使用其他兼容的 Zygisk 提供者，但只能保留一个活动实现。使用外部提供者时 Sui 可以正常运行，只是 FinaSU 无法验证其注入结果。
 :::
 
 ::: field 架构
@@ -86,7 +86,7 @@ Sui 在应用处于后台时通过通知提示授权请求。Android 13 及以�
 
 1. **确认 Zygisk 后端**
 
-   检查当前使用的 Zygisk 提供者，确认引擎已启用且没有启动保护拦截。内置 **FolkZygisk** 和其他兼容提供者都可以作为 Sui 的后端，但只能保留一个活动实现。
+   检查当前使用的 Zygisk 提供者，确认引擎已启用且没有启动保护拦截。内置 **YukiZygisk** 和其他兼容提供者都可以作为 Sui 的后端，但只能保留一个活动实现。
 
 2. **启用 Sui**
 
@@ -126,7 +126,7 @@ Sui 不是在管理器界面内常驻运行。它需要经过载荷发布、系�
 - Zygisk 注入
   time=步骤 2 type=tip
 
-  下一次启动时，Zygisk 提供者把 Sui 代码注入系统进程。使用内置 FolkZygisk 时，FinaSU 可以核对注入状态。
+  下一次启动时，Zygisk 提供者把 Sui 代码注入系统进程。使用内置 YukiZygisk 时，FinaSU 可以核对注入状态。
 
 - 启动守护进程
   time=步骤 3 type=success
@@ -172,7 +172,7 @@ flowchart LR
 | --- | --- | --- |
 | **未启用** | 当前没有要求启动 Sui，或载荷尚未安装 | 打开开关并确认 |
 | **已启用，等待重启生效** | 载荷已安装，但当前会话尚未完成注入或启动登记 | 重启设备后复查 |
-| **运行中** | 使用内置 FolkZygisk，注入与两个守护进程均已确认 | 可以管理应用权限 |
+| **运行中** | 使用内置 YukiZygisk，注入与两个守护进程均已确认 | 可以管理应用权限 |
 | **第三方注入，无法验证** | 外部 Zygisk 提供者正在工作；Sui 服务进程已出现，但 FinaSU 无法验证注入链 | 在兼容应用中测试连接；失败时检查外部提供者的启动日志 |
 | **不可用** | Zygisk 未启用、引擎缺失、启动保护或注入检查失败 | 查看状态卡的依赖与注入原因 |
 | **状态异常** | 存在冲突 Sui、载荷损坏、模块被禁用或外部修改 | 展开诊断；必要时修复载荷 |
@@ -183,15 +183,15 @@ flowchart LR
 
 - **Zygisk 未启用**
 
-  进入 FolkZygisk 页面启用引擎并重启。Sui 不会在 Zygisk 关闭时强行注入。
+  进入 YukiZygisk 页面启用引擎并重启。Sui 不会在 Zygisk 关闭时强行注入。
 
 - **Zygisk 引擎不可用**
 
-  查看显示在括号中的具体原因。先修复 FolkZygisk 载荷或引擎，再启用 Sui。
+  查看显示在括号中的具体原因。先修复 YukiZygisk 载荷或引擎，再启用 Sui。
 
 - **Zygisk 启动保护已锁定**
 
-  这表示启动保护阻止了本会话的 Zygisk 注入。先处理 FolkZygisk 的启动保护状态，再重启复查。
+  这表示启动保护阻止了本会话的 Zygisk 注入。先处理 YukiZygisk 的启动保护状态，再重启复查。
 
 - **Zygisk 注入失败**
 

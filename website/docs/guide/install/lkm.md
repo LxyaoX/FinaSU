@@ -271,7 +271,7 @@ LKM 日常安装使用“选择文件并修补”或“直接安装”，不需�
 
 5. **验证内置引擎**
 
-   使用 Sui、FolkZygisk 或 NoMount 时，逐个检查状态；Zygisk 和 Sui 通常需要重启完成注入。
+   使用 Sui、YukiZygisk 或 NoMount 时，逐个检查状态；Zygisk 和 Sui 通常需要重启完成注入。
 
 :::
 

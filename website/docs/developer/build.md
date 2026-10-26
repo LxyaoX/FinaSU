@@ -113,7 +113,7 @@ cp manager/sign.example.properties manager/keystore.properties
 
 3. **交叉编译 `ksud`**
 
-   `ksud` 会把当前 ABI 的内核模块、NoMount、Sui、FolkZygisk 与 `ksuinit` 资产编入自身。
+   `ksud` 会把当前 ABI 的内核模块、NoMount、Sui、YukiZygisk 与 `ksuinit` 资产编入自身。
 
 4. **构建并重签 APK**
 
@@ -218,7 +218,7 @@ android16-6.12
 android17-6.18
 ```
 
-当前 CI 管理器目标包括 `arm64-v8a`、`x86_64` 和 `riscv64` 的 `ksud` 构建。Sui 与 FolkZygisk 没有 `riscv64` 载荷；KernelSU/NoMount 模块发布矩阵当前针对 aarch64 与 x86_64。
+当前 CI 管理器目标包括 `arm64-v8a`、`x86_64` 和 `riscv64` 的 `ksud` 构建。Sui 与 YukiZygisk 没有 `riscv64` 载荷；KernelSU/NoMount 模块发布矩阵当前针对 aarch64 与 x86_64。
 
 ## 本地与 CI 的差异
 
