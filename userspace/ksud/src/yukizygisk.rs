@@ -488,7 +488,7 @@ fn wait_ready(read_end: &mut std::fs::File) -> Result<Startup> {
     loop {
         let remaining = deadline.saturating_duration_since(Instant::now());
         if remaining.is_zero() {
-            bail!("no readiness report within {:?}", READY_TIMEOUT);
+            bail!("no readiness report within {READY_TIMEOUT:?}");
         }
         let mut poll = libc::pollfd {
             fd: read_end.as_raw_fd(),
