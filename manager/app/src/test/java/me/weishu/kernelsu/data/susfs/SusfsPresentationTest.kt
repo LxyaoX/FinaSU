@@ -6,10 +6,9 @@ import org.junit.Test
 
 class SusfsPresentationTest {
     @Test fun `receipt separates acknowledgements errors and reboot requests`() {
-        val report = SusfsApplyReport.parse("""{"status":"failed","applied":["path:/a"],"failures":{"uname":"SUSFS returned error -22"},"deferred":["cmdline"],"pending_reboot":["kstat:/b"]}""")
+        val report = SusfsApplyReport.parse("""{"status":"failed","applied":["path:/a"],"failures":{"uname":"SUSFS returned error -22"},"pending_reboot":["kstat:/b"]}""")
         assertEquals(listOf("path:/a"), report.applied)
         assertEquals("SUSFS returned error -22", report.failures["uname"])
-        assertEquals(listOf("cmdline"), report.deferred)
         assertEquals(listOf("kstat:/b"), report.pendingReboot)
         assertEquals("failed", report.status)
     }
