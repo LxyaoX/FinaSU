@@ -218,8 +218,10 @@ jobs:
             echo "::error title=Build::no log captured"
             exit 0
           fi
-          grep -E '^(e|w): |^\* What went wrong|^Execution failed|^> Task .* FAILED' "$RUNNER_TEMP/build.log" \
-            | grep -v '^w: ' | head -25 | while IFS= read -r line; do
+          # AAPT and the resource merger report on their own lines, without the "e:" prefix the
+          # Kotlin compiler uses; keep both shapes or a resource failure prints nothing useful.
+          grep -E '^(e|w): |error:|ERROR:|AAPT|^\* What went wrong|^Execution failed|^> Task .* FAILED|^ *> A failure occurred|^ *> [A-Za-z].*' "$RUNNER_TEMP/build.log" \
+            | grep -v '^w: ' | grep -v '^ *> Task :[a-z]' | head -25 | while IFS= read -r line; do
               echo "::error title=Gradle::${line//$'\n'/ }"
             done
 

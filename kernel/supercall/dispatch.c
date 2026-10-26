@@ -1187,7 +1187,6 @@ static int do_yz_allow_module_load_policy(void __user *arg)
     struct yz_module_load_policy_cmd cmd;
     struct task_struct *task;
     const struct cred *cred;
-    struct fd payload;
     struct file *file;
     bool directory;
     bool source_image;
@@ -1203,8 +1202,9 @@ static int do_yz_allow_module_load_policy(void __user *arg)
     if (!task)
         return -ESRCH;
     cred = get_task_cred(task);
-    payload = fdget(cmd.dirfd);
-    file = payload.file;
+    /* fget rather than fdget: `struct fd` is a tagged pointer from 6.13 on, so neither `.file`
+     * nor `fd_file()` compiles across the whole range this module is built for. */
+    file = fget(cmd.dirfd);
     if (!file) {
         ret = -EBADF;
         goto out_cred;
@@ -1223,7 +1223,7 @@ static int do_yz_allow_module_load_policy(void __user *arg)
     }
     ret = ksu_yukizygisk_allow_module_load_policy(task, file, cred);
 out_fd:
-    fdput(payload);
+    fput(file);
 out_cred:
     put_cred(cred);
     put_task_struct(task);

@@ -38,5 +38,5 @@
     <string name="yukizygisk_kernel_missing_summary">This kernelsu.ko was built without the YukiZygisk runtime. Flash a kernel module from this release to use it.</string>
     <string name="yukizygisk_last_error_title">Engine stopped</string>
     <string name="yukizygisk_injection_off_title">Injection is off in the kernel</string>
-    <string name="yukizygisk_injection_off_summary">The daemon is running but the kernel's injection bit is clear, so no module reaches an app. Tapping this restarts the engine.</string>
+    <string name="yukizygisk_injection_off_summary">The daemon is running but injection is off in the kernel, so no module reaches an app. Tapping this restarts the engine.</string>
 </resources>
