@@ -50,6 +50,30 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
+          LOG=/tmp/clippy.log
+          exec > >(tee "$LOG") 2>&1
           rustup target add aarch64-linux-android
           source .github/scripts/setup-rust-build.sh aarch64-linux-android 26
           cargo clippy --target aarch64-linux-android --release
+
+      - name: Report clippy findings
+        if: failure()
+        shell: bash
+        run: |
+          # The run log needs admin rights to download; annotations do not.
+          set +e
+          LOG=/tmp/clippy.log
+          if [ ! -s "$LOG" ]; then
+            echo "::error title=Clippy::no log captured"
+            exit 0
+          fi
+          plain=/tmp/clippy.plain.log
+          sed -r 's/\x1b\[[0-9;]*[A-Za-z]//g' "$LOG" > "$plain"
+          matches=$(grep -E '^(error|warning)(\[|:)|^ *--> ' "$plain" | head -n 40)
+          if [ -z "$matches" ]; then
+            matches=$(tail -n 30 "$plain")
+          fi
+          printf '%s\n' "$matches" | while IFS= read -r line; do
+            echo "::error title=Clippy::${line}"
+          done
+          exit 0
