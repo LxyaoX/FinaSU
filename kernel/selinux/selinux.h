@@ -66,13 +66,10 @@ struct ksu_file_load_policy {
 
 u32 ksu_get_ksu_file_sid(void);
 
-int ksu_file_load_policy_allow_current(struct file *file,
-                                       struct ksu_file_load_policy *state);
-int ksu_file_load_policy_allow_cred(struct file *file, const struct cred *cred,
-                                    struct ksu_file_load_policy *state);
+int ksu_file_load_policy_allow_current(struct file *file, struct ksu_file_load_policy *state);
+int ksu_file_load_policy_allow_cred(struct file *file, const struct cred *cred, struct ksu_file_load_policy *state);
 int ksu_file_load_policy_allow_execmem_current(struct ksu_file_load_policy *state);
-int ksu_file_load_policy_allow_execmem_cred(const struct cred *cred,
-                                            struct ksu_file_load_policy *state);
+int ksu_file_load_policy_allow_execmem_cred(const struct cred *cred, struct ksu_file_load_policy *state);
 int ksu_file_load_policy_restore(const struct ksu_file_load_policy *state);
 
 extern u32 ksu_file_sid;

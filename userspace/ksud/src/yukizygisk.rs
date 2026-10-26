@@ -14,7 +14,7 @@ use serde_json::{Map, Value, json};
 use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::{Duration, Instant};
 
 /// Where the payload lives. The daemon and the kernel feature both derive their paths from this
@@ -132,7 +132,7 @@ pub fn set(key: &str, value: &str) -> Result<()> {
     };
 
     let mut document = config()?;
-    if let Value::Object(ref mut object) = document {
+    if let Some(object) = document.as_object_mut() {
         object.insert(key.to_string(), new_value);
     }
     write_config(&document)
@@ -390,9 +390,4 @@ pub fn detach_from_service_cgroup() -> std::io::Result<()> {
         libc::close(fd);
         error.map_or(Ok(()), Err)
     }
-}
-
-/// The payload directory, for callers that need to point at a file inside it.
-pub fn bin_path(name: &str) -> PathBuf {
-    Path::new(BIN_DIR).join(name)
 }

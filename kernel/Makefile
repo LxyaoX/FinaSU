@@ -28,7 +28,10 @@ clean:
 	rm check_symbol
 check_symbol: tools/check_symbol.c
 	$(CC) tools/check_symbol.c -o check_symbol
-FORMAT_FILES = find . -path ./preinit/runner/nolibc -prune -o \( -name "*.c" -o -name "*.h" \) -print0
+# Vendored upstream code keeps its own style: feature/yukizygisk is the YukiZygisk kernel
+# feature as published upstream and is re-synced from there, so reformatting it would make
+# every future sync a large, meaningless conflict.
+FORMAT_FILES = find . -path ./preinit/runner/nolibc -prune -o -path ./feature/yukizygisk -prune -o \( -name "*.c" -o -name "*.h" \) -print0
 
 format:
 	$(FORMAT_FILES) | xargs -0 clang-format -i

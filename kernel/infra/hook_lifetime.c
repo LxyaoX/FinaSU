@@ -15,18 +15,18 @@ static struct srcu_struct *const hook_domains[] = {
 
 int ksu_hook_enter(enum ksu_hook_domain domain)
 {
-	return srcu_read_lock(hook_domains[domain]);
+    return srcu_read_lock(hook_domains[domain]);
 }
 
 void ksu_hook_leave(enum ksu_hook_domain domain, int index)
 {
-	srcu_read_unlock(hook_domains[domain], index);
+    srcu_read_unlock(hook_domains[domain], index);
 }
 
 void ksu_hook_synchronize(enum ksu_hook_domain domain)
 {
-	/* Let callers holding a retired function pointer enter the SRCU scope.
+    /* Let callers holding a retired function pointer enter the SRCU scope.
 	 */
-	synchronize_rcu_tasks();
-	synchronize_srcu(hook_domains[domain]);
+    synchronize_rcu_tasks();
+    synchronize_srcu(hook_domains[domain]);
 }

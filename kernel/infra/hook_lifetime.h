@@ -2,9 +2,9 @@
 #define __KSU_HOOK_LIFETIME_H
 
 enum ksu_hook_domain {
-	KSU_HOOK_LSM,
-	KSU_HOOK_SELINUXFS,
-	KSU_HOOK_INITRC,
+    KSU_HOOK_LSM,
+    KSU_HOOK_SELINUXFS,
+    KSU_HOOK_INITRC,
 };
 
 int ksu_hook_enter(enum ksu_hook_domain domain);
