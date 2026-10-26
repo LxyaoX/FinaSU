@@ -148,10 +148,6 @@ pub fn detect() -> Detection {
     detection
 }
 
-pub fn lock_store() -> Result<store::Lock> {
-    store::lock()
-}
-
 pub fn uname_provider_state() -> Result<UnameProviderState> {
     if !detect().supports("CONFIG_KSU_SUSFS_SPOOF_UNAME") {
         return Ok(UnameProviderState::default());
