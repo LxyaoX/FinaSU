@@ -37,8 +37,8 @@ fun getVersionCode(): Int {
 }
 
 /**
- * Manager version name, in upstream KernelSU's shape: `v3.3.2` on the commit that raises the
- * base version, and `v3.3.2-<commits>-g<hash>` after it, where `<commits>` counts from that
+ * Manager version name, in upstream KernelSU's shape: `v3.3.4` on the commit that raises the
+ * base version, and `v3.3.4-<commits>-g<hash>` after it, where `<commits>` counts from that
  * commit - the same 0-based number `git describe` would print.
  *
  * `git describe --tags --always` stays the source of truth, so a reachable `v*` tag reproduces
@@ -51,7 +51,7 @@ fun getVersionName(): String {
     if (described.isNotEmpty() && !isCommitId) return described
 
     val base = (findProperty("managerBaseVersion") as String?)?.takeIf { it.isNotBlank() }
-        ?: "v3.3.2"
+        ?: "v3.3.4"
     val since = commitsSinceBaseVersion(base)
     return if (since <= 0) base else "$base-$since-g${getGitShortHash()}"
 }
