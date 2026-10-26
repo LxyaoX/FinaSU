@@ -81,6 +81,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.ui.animation.FolkAnimatedSlot
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Height reserved for the large search bar, used as the scroll range of its collapse animation. */
 private val SearchBarExpandedHeight = 69.dp
@@ -238,8 +239,8 @@ fun SearchAppBar(
                             modifier = Modifier.padding(end = 8.dp),
                             onClick = { collapseAndClear() },
                             colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                containerColor = MiuixTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                             ),
                         ) {
                             Icon(Icons.AutoMirrored.Rounded.ArrowBack, null)
@@ -265,7 +266,7 @@ fun SearchAppBar(
     // container must stay transparent instead of painting an opaque band over the wallpaper.
     val wallpaperTokens = LocalFolkWallpaperTokens.current
     Surface(
-        color = if (wallpaperTokens != null) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer,
+        color = if (wallpaperTokens != null) Color.Transparent else MiuixTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -304,7 +305,7 @@ fun SearchAppBar(
                     inputField = inputField,
                     colors = SearchBarDefaults.colors(
                         containerColor = wallpaperTokens?.raisedOverChrome()
-                            ?: MaterialTheme.colorScheme.surfaceContainerHighest
+                            ?: MiuixTheme.colorScheme.surfaceContainer
                     ),
                 )
             }

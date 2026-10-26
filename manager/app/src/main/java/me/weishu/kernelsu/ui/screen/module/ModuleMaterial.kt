@@ -137,6 +137,7 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navThemeSignature
 import me.weishu.kernelsu.ui.util.reboot
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @SuppressLint("StringFormatInvalid")
 @Composable
@@ -756,7 +757,7 @@ private fun ModuleShortcutSheet(
                 FolkTextButton(
                     onClick = onPickShortcutIcon,
                     colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        containerColor = MiuixTheme.colorScheme.surfaceContainerHigh,
                     )
                 ) {
                     Text(
@@ -794,7 +795,7 @@ private fun ModuleShortcutSheet(
                     onClick = onDeleteShortcut,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        containerColor = MiuixTheme.colorScheme.surfaceContainerHigh,
                         contentColor = MaterialTheme.colorScheme.error,
                     )
                 ) {
@@ -805,7 +806,7 @@ private fun ModuleShortcutSheet(
                 onClick = ::copyShortcutUrl,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.textButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    containerColor = MiuixTheme.colorScheme.surfaceContainerHigh,
                 )
             ) {
                 Text(stringResource(id = R.string.module_shortcut_copy_scheme))
