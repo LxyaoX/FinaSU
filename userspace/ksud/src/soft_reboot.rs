@@ -236,6 +236,19 @@ pub fn soft_reboot() -> Result<()> {
 
     crate::yukizygisk::prepare_soft_reboot();
 
+    info!("stop");
+    let status = match Command::new("stop").status() {
+        Ok(status) => status,
+        Err(error) => {
+            return Err(restart_after_failed_soft_reboot(&format!(
+                "could not execute stop: {error}"
+            )));
+        }
+    };
+    if !status.success() {
+        warn!("stop exited with status: {status}");
+    }
+
     let waited_for_stop = waitsys.as_ref().map(|waitsys| {
         if let Err(error) = waitsys.wait_for_signal(2, defs::WAITSYS_STOP_TIMEOUT) {
             warn!("waitsys failed while waiting for services to stop: {error:#}");
