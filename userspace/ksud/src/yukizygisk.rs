@@ -394,7 +394,7 @@ pub fn status() -> Result<Value> {
         "installed": installed(),
         // A build without a payload for this architecture (x86_64, riscv64) is not broken -
         // YukiZygisk is arm-only - and the page says that instead of "not installed".
-        "supported": crate::assets::embedded(&format!("yukizygisk/{}", FILES[0])).is_some(),
+        "supported": crate::assets::embedded(&format!("yukizygisk/{}", DAEMONS[0])).is_some(),
         "configPath": CONFIG,
         "daemons": live
             .iter()

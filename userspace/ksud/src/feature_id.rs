@@ -44,6 +44,7 @@ impl FeatureId {
             7 => Some(Self::ShellSuAdbOnly),
             9 => Some(Self::UtsView),
             10 => Some(Self::MountViewFilter),
+            11 => Some(Self::YukiZygisk),
             _ => None,
         }
     }
@@ -59,6 +60,7 @@ impl FeatureId {
             Self::ShellSuAdbOnly => "shell_su_adb_only",
             Self::UtsView => "uts_view",
             Self::MountViewFilter => "mount_view_filter",
+            Self::YukiZygisk => "yukizygisk",
         }
     }
 
@@ -85,6 +87,9 @@ impl FeatureId {
             }
             Self::UtsView => {
                 "UTS View - expose a configured kernel identity to selected apps or the initial UTS namespace"
+            }
+            Self::YukiZygisk => {
+                "YukiZygisk - kernel-assisted Zygisk injection runtime (not a user toggle)"
             }
             Self::MountViewFilter => {
                 "Mount View Filter - hide root and module mounts from app and isolated-process proc mount views"
