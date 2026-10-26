@@ -450,7 +450,7 @@ pub fn run(command: &Command) -> Result<()> {
         }
         Command::Enable => set_enabled(true)?,
         Command::Disable => set_enabled(false)?,
-    }
+    };
     Ok(())
 }
 
