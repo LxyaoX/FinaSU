@@ -190,7 +190,7 @@ mod tests {
         assert_eq!(summarize(&state, &desired), "saved");
         state.applied = desired.clone();
         assert_eq!(summarize(&state, &desired), "applied");
-        assert_eq!(summarize(&state, &BTreeMap::new(), false), "pending_reboot");
+        assert_eq!(summarize(&state, &BTreeMap::new()), "pending_reboot");
         let changed = BTreeMap::from([("path:/x".to_owned(), "changed".to_owned())]);
         assert_eq!(summarize(&state, &changed), "pending_reboot");
         state
@@ -204,9 +204,9 @@ mod tests {
         assert_eq!(summarize(&state, &desired), "failed");
         state.uncertain.clear();
         state.applied.clear();
-        assert_eq!(summarize(&state, &BTreeMap::new(), false), "idle");
+        assert_eq!(summarize(&state, &BTreeMap::new()), "idle");
         state.kstat_pending.push("kstat:/old".to_owned());
-        assert_eq!(summarize(&state, &BTreeMap::new(), false), "pending_reboot");
+        assert_eq!(summarize(&state, &BTreeMap::new()), "pending_reboot");
     }
 
     #[test]

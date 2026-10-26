@@ -5,7 +5,7 @@ mod apply;
 mod model;
 mod store;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Result, bail};
 use serde::Serialize;
 use std::io::Read;
 
