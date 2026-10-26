@@ -58,7 +58,7 @@ fun ExecuteModuleActionEffect(
             return@LaunchedEffect
         }
         if (moduleInfo.zygiskRequired &&
-            SettingsRepositoryImpl().getFolkZygiskStatus().getOrNull()?.providesImplementation() == false
+            SettingsRepositoryImpl().getYukiZygiskStatus().getOrNull()?.installed == false
         ) {
             Toast.makeText(context, R.string.zygisk_required, Toast.LENGTH_SHORT).show()
             onExit()

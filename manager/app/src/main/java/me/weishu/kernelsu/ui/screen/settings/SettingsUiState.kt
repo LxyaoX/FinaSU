@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.materialkolor.PaletteStyle
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountStatus
-import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
@@ -64,11 +63,6 @@ data class SettingsUiState(
     val nomountStatus: NomountStatus? = null,
     val isNomountLoading: Boolean = true,
     val nomountReadError: Boolean = false,
-    val folkZygiskStatus: FolkZygiskStatus? = null,
-    val isFolkZygiskLoading: Boolean = true,
-    val folkZygiskReadError: Boolean = false,
-    val isFolkZygiskWriting: Boolean = false,
-    val folkZygiskRebootPending: Boolean = false,
     /** Whether the kernel reports a usable SUSFS: gates the home card's SUSFS row switch. */
     val susfsDetected: Boolean = false,
 
@@ -130,8 +124,6 @@ data class SettingsScreenActions(
     val onOpenTeesim: () -> Unit,
     val onSetRekernelXEnabled: (Boolean) -> Unit,
     val onSetBootPropsEnabled: (Boolean) -> Unit,
-    val onSetFolkZygiskEnabled: (Boolean) -> Unit,
-    val onRecoverFolkZygisk: () -> Unit,
     val onSetAdbRootEnabled: (Boolean) -> Unit,
     val onSetShellSuAdbOnlyEnabled: (Boolean) -> Unit,
     val onOpenUtsView: () -> Unit,

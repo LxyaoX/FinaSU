@@ -300,7 +300,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             summaryRes = R.string.settings_hide_home_zygisk_summary,
             icon = Icons.Filled.Vaccines,
             aliases = listOf("home", "zygisk", "hide", "card"),
-            available = { it.folkZygiskStatus?.providesImplementation() == true },
         )
     )
     add(

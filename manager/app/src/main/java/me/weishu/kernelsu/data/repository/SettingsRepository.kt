@@ -1,10 +1,10 @@
 package me.weishu.kernelsu.data.repository
 
 import me.weishu.kernelsu.data.model.FolkMountMode
-import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
+import me.weishu.kernelsu.data.model.YukiZygiskStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.model.ModuleSortGroup
@@ -22,7 +22,6 @@ data class FeatureSnapshot(
     val values: Map<String, Long?>,
     val persists: Map<String, Long?>,
     val folkMount: Result<FolkMountStatus>,
-    val folkZygisk: Result<FolkZygiskStatus>,
     val nomount: Result<NomountStatus>,
 )
 
@@ -105,12 +104,12 @@ interface SettingsRepository {
     fun setAvcSpoofEnabled(enabled: Boolean): Boolean
     suspend fun getSulogPersistValue(): Long?
     suspend fun getSulogValue(): Long?
+
+    /** The built-in Zygisk engine, as `ksud yukizygisk status` reports it. */
+    suspend fun getYukiZygiskStatus(): Result<YukiZygiskStatus>
     fun setSulogEnabled(enabled: Boolean): Boolean
 
     suspend fun getFolkMountStatus(): Result<FolkMountStatus>
-    suspend fun getFolkZygiskStatus(): Result<FolkZygiskStatus>
-    suspend fun setFolkZygiskEnabled(enabled: Boolean): Result<Unit>
-    suspend fun recoverFolkZygisk(): Result<Unit>
     suspend fun setFolkMountMode(mode: FolkMountMode): Result<Unit>
     suspend fun getRekernelXStatus(): Result<RekernelXStatus>
     suspend fun setRekernelXEnabled(enabled: Boolean): Result<Unit>

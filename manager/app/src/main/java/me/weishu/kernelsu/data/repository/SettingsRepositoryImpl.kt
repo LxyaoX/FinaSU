@@ -11,12 +11,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.data.model.FolkMountMode
-import me.weishu.kernelsu.data.model.FolkZygiskStatus
 import me.weishu.kernelsu.data.model.FolkMountStatus
 import me.weishu.kernelsu.data.model.HomeLayoutStyle
 import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.bootprops.BootPropsInstaller
 import me.weishu.kernelsu.data.model.BootPropsStatus
+import me.weishu.kernelsu.data.model.YukiZygiskStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
 import me.weishu.kernelsu.data.teesim.TeesimInstaller
@@ -329,6 +329,16 @@ class SettingsRepositoryImpl : SettingsRepository {
     override fun setAvcSpoofEnabled(enabled: Boolean): Boolean = Natives.setAvcSpoofEnabled(enabled)
 
     override suspend fun getSulogPersistValue(): Long? = getFeaturePersistValue("sulog")
+    override suspend fun getYukiZygiskStatus(): Result<YukiZygiskStatus> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val result = execKsudResult("yukizygisk status")
+                check(result.isSuccess) { "ksud yukizygisk status failed (exit ${result.code})" }
+                YukiZygiskStatus.fromJson(result.out.joinToString("\n"))
+                    ?: error("Invalid ksud yukizygisk status output")
+            }
+        }
+
     override suspend fun getSulogValue(): Long? = getFeatureValue("sulog")
 
     override fun setSulogEnabled(enabled: Boolean): Boolean = execKsud("feature set sulog ${if (enabled) 1 else 0}", true)
@@ -345,46 +355,6 @@ class SettingsRepositoryImpl : SettingsRepository {
                 "unsupported folk mount schema_version $schema"
             }
             FolkMountStatus.fromJson(json)
-        }
-    }
-
-    override suspend fun getFolkZygiskStatus(): Result<FolkZygiskStatus> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                val result = execKsudResult("zygisk status --json")
-                check(result.isSuccess) { "ksud zygisk status failed (exit ${result.code})" }
-                val payload = result.out.filter { it.isNotBlank() }
-                check(payload.size == 1) { "Invalid ksud zygisk status output" }
-                FolkZygiskStatus.fromJson(JSONObject(payload.single()))
-            }
-        }
-
-    override suspend fun setFolkZygiskEnabled(enabled: Boolean): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                if (enabled) {
-                    val status = getFolkZygiskStatus().getOrThrow()
-                    if (!status.engineAvailable) {
-                        requireKsud(
-                            execKsudResult("zygisk install-engine"),
-                            "Engine installation failed",
-                        )
-                    }
-                }
-                val command = if (enabled) "enable" else "disable"
-                requireKsud(
-                    execKsudResult("zygisk $command"),
-                    "FolkZygisk configuration failed",
-                )
-            }
-        }
-
-    override suspend fun recoverFolkZygisk(): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
-            requireKsud(
-                execKsudResult("zygisk recover"),
-                "FolkZygisk recovery failed",
-            )
         }
     }
 
@@ -564,7 +534,6 @@ class SettingsRepositoryImpl : SettingsRepository {
                 }
                 FolkMountStatus.fromJson(json)
             },
-            folkZygisk = jsonBody(6, "zygisk status").mapCatching { FolkZygiskStatus.fromJson(it) },
             nomount = jsonBody(7, "nomount status").mapCatching { NomountStatus.fromJson(it) },
         )
     }

@@ -324,6 +324,9 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.UtsView> {
                                     me.weishu.kernelsu.ui.screen.uts.UtsViewScreen()
                                 }
+                                entry<Route.YukiZygisk> {
+                                    me.weishu.kernelsu.ui.screen.yukizygisk.YukiZygiskScreen()
+                                }
                                 entry<Route.NetIsolate> {
                                     me.weishu.kernelsu.ui.screen.netisolate.NetIsolateScreen()
                                 }

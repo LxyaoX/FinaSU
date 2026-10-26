@@ -99,8 +99,6 @@ fun rememberSettingsActions(
         onOpenTeesim = { navigator.push(Route.Teesim) },
         onSetRekernelXEnabled = viewModel::setRekernelXEnabled,
         onSetBootPropsEnabled = viewModel::setBootPropsEnabled,
-        onSetFolkZygiskEnabled = viewModel::setFolkZygiskEnabled,
-        onRecoverFolkZygisk = viewModel::recoverFolkZygisk,
         onSetAdbRootEnabled = viewModel::setAdbRootEnabled,
         onSetShellSuAdbOnlyEnabled = viewModel::setShellSuAdbOnlyEnabled,
         onOpenUtsView = { navigator.push(Route.UtsView) },

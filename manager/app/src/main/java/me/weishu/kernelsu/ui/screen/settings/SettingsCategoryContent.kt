@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.ui.navigation3.LocalNavigator
+import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.data.model.FolkMountMode
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.data.model.NomountDriverState
@@ -171,7 +173,8 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
     AdvancedTitleSettings(modifier = GroupModifier)
 
     // The identifying rows only, mirroring FP: the base facts of the card stay visible everywhere.
-    val zygiskRowPresent = uiState.folkZygiskStatus?.providesImplementation() == true
+    // The Zygisk row is always there now - the engine ships with the build, so there is no
+    // configuration in which the home card cannot show it.
     SegmentedColumn(
         modifier = GroupModifier,
         title = stringResource(R.string.settings_home_info),
@@ -185,7 +188,7 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 onCheckedChange = actions.onSetHideHomeFingerprint,
             )
         }
-        item(visible = zygiskRowPresent) {
+        item {
             SwitchPreference(
                 title = stringResource(R.string.settings_hide_home_zygisk),
                 summary = stringResource(R.string.settings_hide_home_zygisk_summary),
@@ -287,6 +290,7 @@ fun BehaviorCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
 
 @Composable
 fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenActions) {
+    val navigator = LocalNavigator.current
     KsuIsValid {
         SegmentedColumn(
             modifier = GroupModifier,
@@ -390,7 +394,12 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
             modifier = GroupModifier,
             content = listOf(
                 {
-                    FolkZygiskStatusItem(uiState, actions)
+                    ArrowPreference(
+                        title = stringResource(id = R.string.yukizygisk_title),
+                        summary = stringResource(id = R.string.yukizygisk_summary),
+                        startAction = { Icon(Icons.Filled.Vaccines, stringResource(id = R.string.yukizygisk_title)) },
+                        onClick = { navigator.push(Route.YukiZygisk) },
+                    )
                 },
                 {
                     val folkMountStatus = uiState.folkMountStatus

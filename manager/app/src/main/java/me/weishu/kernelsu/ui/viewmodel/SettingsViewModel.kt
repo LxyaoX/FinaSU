@@ -35,12 +35,10 @@ class SettingsViewModel(
     }
 
     fun refresh() {
-        if (_uiState.value.isFolkZygiskWriting) return
         val generation = ++refreshGeneration
         _uiState.update {
             it.copy(
                 isFolkMountLoading = true,
-                isFolkZygiskLoading = true,
                 isRekernelXLoading = true,
                 isBootPropsLoading = true,
             )
@@ -113,7 +111,6 @@ class SettingsViewModel(
 
             val folkMountResult = snapshot.folkMount
             val nomountResult = snapshot.nomount
-            val folkZygiskResult = snapshot.folkZygisk
             val rekernelXResult = repo.getRekernelXStatus()
             val bootPropsResult = repo.getBootPropsStatus()
             // The home card's SUSFS row switch only makes sense when the kernel reports SUSFS.
@@ -175,9 +172,6 @@ class SettingsViewModel(
                     nomountStatus = nomountResult.getOrNull(),
                     nomountReadError = nomountResult.isFailure,
                     isNomountLoading = false,
-                    folkZygiskStatus = folkZygiskResult.getOrNull(),
-                    folkZygiskReadError = folkZygiskResult.isFailure,
-                    isFolkZygiskLoading = false,
                     rekernelXStatus = rekernelXResult.getOrNull(),
                     rekernelXReadError = rekernelXResult.isFailure,
                     isRekernelXLoading = false,
@@ -222,55 +216,6 @@ class SettingsViewModel(
                     isLkmMode = repo.isLkmMode(),
                 )
             }
-        }
-    }
-
-    fun setFolkZygiskEnabled(enabled: Boolean) {
-        if (_uiState.value.isFolkZygiskWriting || _uiState.value.isFolkZygiskLoading) return
-        ++refreshGeneration
-        _uiState.update { it.copy(isFolkZygiskWriting = true) }
-        viewModelScope.launch {
-            val result = repo.setFolkZygiskEnabled(enabled)
-            val status = repo.getFolkZygiskStatus()
-            _uiState.update {
-                it.copy(isFolkZygiskWriting = false, folkZygiskStatus = status.getOrNull(),
-                    folkZygiskReadError = status.isFailure,
-                    folkZygiskRebootPending = it.folkZygiskRebootPending || result.isSuccess)
-            }
-            val message = if (result.isSuccess) {
-                ksuApp.getString(R.string.folkzygisk_reboot_required)
-            } else {
-                result.exceptionOrNull()?.message
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ksuApp.getString(R.string.folkzygisk_write_failed)
-            }
-            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun recoverFolkZygisk() {
-        if (_uiState.value.isFolkZygiskWriting || _uiState.value.isFolkZygiskLoading) return
-        ++refreshGeneration
-        _uiState.update { it.copy(isFolkZygiskWriting = true) }
-        viewModelScope.launch {
-            val result = repo.recoverFolkZygisk()
-            val status = repo.getFolkZygiskStatus()
-            _uiState.update {
-                it.copy(
-                    isFolkZygiskWriting = false,
-                    folkZygiskStatus = status.getOrNull(),
-                    folkZygiskReadError = status.isFailure,
-                    folkZygiskRebootPending = it.folkZygiskRebootPending || result.isSuccess,
-                )
-            }
-            val message = if (result.isSuccess) {
-                ksuApp.getString(R.string.folkzygisk_recovery_restart_required)
-            } else {
-                result.exceptionOrNull()?.message
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ksuApp.getString(R.string.folkzygisk_write_failed)
-            }
-            Toast.makeText(ksuApp, message, Toast.LENGTH_LONG).show()
         }
     }
 

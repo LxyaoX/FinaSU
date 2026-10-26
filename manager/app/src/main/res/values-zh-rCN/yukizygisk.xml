@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="yukizygisk_summary">内核辅助的 Zygisk 引擎</string>
+    <string name="yukizygisk_status_running">运行中 · %1$d 个守护进程</string>
+    <string name="yukizygisk_status_stopped">未运行</string>
+    <string name="yukizygisk_status_missing">载荷未安装</string>
+    <string name="yukizygisk_builtin_active">YukiZygisk（内置）</string>
+    <string name="yukizygisk_status_daemon">ABI %1$d · pid %2$d</string>
+
+    <string name="yukizygisk_yukilinker_title">使用 YukiLinker</string>
+    <string name="yukizygisk_yukilinker_summary">优先使用内置链接器加载模块。</string>
+    <string name="yukizygisk_anonymous_memory_title">匿名内存</string>
+    <string name="yukizygisk_anonymous_memory_summary">把运行时核心与模块映射到匿名内存。</string>
+    <string name="yukizygisk_early_load_title">早期原生加载</string>
+    <string name="yukizygisk_early_load_summary">在启动早期加载部分原生模块。</string>
+    <string name="yukizygisk_crash_protection_title">模块崩溃保护</string>
+    <string name="yukizygisk_crash_protection_summary">隔离导致系统框架崩溃的 Zygisk 模块，并重试系统启动。</string>
+    <string name="yukizygisk_dmesg_title">内核日志</string>
+    <string name="yukizygisk_dmesg_summary">把引擎日志写入内核日志。</string>
+    <string name="yukizygisk_denylist_title">拒绝名单模式</string>
+    <string name="yukizygisk_denylist_summary">对拒绝名单内应用的模块处理方式。</string>
+    <string name="yukizygisk_denylist_off">关闭</string>
+    <string name="yukizygisk_denylist_force">强制</string>
+    <string name="yukizygisk_denylist_restore">恢复</string>
+
+    <string name="yukizygisk_restart">重启引擎</string>
+    <string name="yukizygisk_restarted">引擎已重启</string>
+    <string name="yukizygisk_restart_hint">下次重启生效</string>
+    <string name="yukizygisk_apply_failed">修改失败</string>
+    <string name="yukizygisk_read_failed">读取引擎状态失败</string>
+</resources>

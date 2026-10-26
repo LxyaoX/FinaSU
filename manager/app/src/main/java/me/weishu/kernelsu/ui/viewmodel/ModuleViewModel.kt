@@ -260,7 +260,7 @@ class ModuleViewModel(
     }
 
     suspend fun loadModuleList(resort: Boolean = true) {
-        val zygiskAvailable = settingsRepo.getFolkZygiskStatus().getOrNull()?.providesImplementation()
+        val zygiskAvailable = settingsRepo.getYukiZygiskStatus().getOrNull()?.installed
         val parsedModules = withContext(Dispatchers.IO) {
             repo.getModules().getOrElse {
                 Log.e(TAG, "fetchModuleList: ", it)

@@ -186,19 +186,12 @@ class HomeViewModel(
     }
 
     private suspend fun resolveZygiskProvider(): String? {
-        val status = settingsRepo.getFolkZygiskStatus().getOrNull() ?: return null
-        // No provider means the home card has no Zygisk row to name, the same test the settings
-        // group uses to decide whether its switch exists.
-        if (!status.providesImplementation()) return null
-        val injecting = status.injectionState == "injected" ||
-            status.injectionState == "partial" ||
-            status.injectionState == "starting"
-        // The built-in engine only steps aside at boot, so while it is the one injecting it stays
-        // the effective implementation even after an external provider module is installed.
-        if (status.enabled && injecting) return ksuApp.getString(R.string.folkzygisk_builtin_active)
-        status.externalProviders.firstOrNull()?.let { return getModuleDisplayName(it) ?: it }
-        if (status.enabled && status.engineAvailable) return ksuApp.getString(R.string.folkzygisk_builtin_active)
-        return null
+        val status = settingsRepo.getYukiZygiskStatus().getOrNull() ?: return null
+        // No installed payload means the home card has no Zygisk row to name.
+        if (!status.installed) return null
+        // YukiZygisk is the only built-in engine this build ships: it is either running or it is
+        // not, and the page behind the settings row is where a failure is explained.
+        return ksuApp.getString(R.string.yukizygisk_builtin_active)
     }
 
     private fun buildState(): HomeUiState {

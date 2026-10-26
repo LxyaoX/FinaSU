@@ -65,7 +65,7 @@ internal suspend fun prepareWebView(
             return@withContext
         }
         if (moduleInfo.zygiskRequired &&
-            SettingsRepositoryImpl().getFolkZygiskStatus().getOrNull()?.providesImplementation() == false
+            SettingsRepositoryImpl().getYukiZygiskStatus().getOrNull()?.installed == false
         ) {
             withContext(Dispatchers.Main) {
                 webUIState.uiEvent = WebUIEvent.Error(activity.getString(R.string.zygisk_required))
