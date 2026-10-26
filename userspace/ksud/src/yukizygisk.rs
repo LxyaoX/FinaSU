@@ -312,8 +312,141 @@ fn write_config(document: &Value) -> Result<()> {
     Ok(())
 }
 
-/// Live daemon processes, as `(abi, pid)`.
+/// The lifetime lock a daemon holds for its ABI. It takes this in its first statements and keeps
+/// it open until it exits, so "who holds this file" is "which daemon is alive" - the command name
+/// is not usable for that, because every per-module companion shares it.
+fn daemon_lock(abi: u32) -> PathBuf {
+    Path::new(STATE_DIR).join("recovery").join(match abi {
+        32 => "daemon32.lock",
+        _ => "daemon64.lock",
+    })
+}
+
+fn run_dir() -> PathBuf {
+    Path::new(STATE_DIR).join("run")
+}
+
+fn pid_file(abi: u32) -> PathBuf {
+    run_dir().join(match abi {
+        32 => "daemon32.pid",
+        _ => "daemon64.pid",
+    })
+}
+
+/// Remember the pid the daemon reported, so the page can name it without guessing.
+fn write_pid_file(abi: u32, pid: i32) {
+    let _ = fs::create_dir_all(run_dir());
+    let _ = fs::set_permissions(run_dir(), fs::Permissions::from_mode(0o700));
+    let _ = fs::write(pid_file(abi), format!("{pid}\n"));
+}
+
+fn clear_pid_file(abi: u32) {
+    let _ = fs::remove_file(pid_file(abi));
+}
+
+fn expected_name(abi: u32) -> &'static str {
+    if abi == 32 { "zygiskd32" } else { "zygiskd64" }
+}
+
+/// Whether `pid` is still the daemon for `abi`: same executable name, so a recycled pid is not
+/// mistaken for it.
+fn is_daemon(abi: u32, pid: i32) -> bool {
+    let Ok(cmdline) = fs::read(format!("/proc/{pid}/cmdline")) else {
+        return false;
+    };
+    let executable = cmdline.split(|byte| *byte == 0).next().unwrap_or(&[]);
+    let executable = String::from_utf8_lossy(executable);
+    executable.rsplit('/').next().unwrap_or("") == expected_name(abi)
+}
+
+fn parent_of(pid: i32) -> Option<i32> {
+    let stat = fs::read_to_string(format!("/proc/{pid}/stat")).ok()?;
+    // `comm` may contain spaces and parentheses, so the fields after the last ')' are the ones to
+    // read: state, then ppid.
+    let rest = stat.rsplit_once(')')?.1;
+    let mut fields = rest.split_whitespace();
+    fields.next()?;
+    fields.next()?.parse().ok()
+}
+
+/// Every process that has the daemon's lifetime lock open. That is the daemon plus the companions
+/// it forked, which inherit the descriptor.
+fn lock_holders(abi: u32) -> Vec<i32> {
+    use std::os::unix::fs::MetadataExt;
+
+    let Ok(target) = fs::metadata(daemon_lock(abi)) else {
+        return Vec::new();
+    };
+    let (device, inode) = (target.dev(), target.ino());
+    let mut holders = Vec::new();
+    let Ok(entries) = fs::read_dir("/proc") else {
+        return holders;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name();
+        let Some(pid) = name.to_str().and_then(|value| value.parse::<i32>().ok()) else {
+            continue;
+        };
+        if pid <= 1 {
+            continue;
+        }
+        let Ok(fds) = fs::read_dir(entry.path().join("fd")) else {
+            continue;
+        };
+        for fd in fds.flatten() {
+            let Ok(meta) = fs::metadata(fd.path()) else {
+                continue;
+            };
+            if meta.dev() == device && meta.ino() == inode {
+                holders.push(pid);
+                break;
+            }
+        }
+    }
+    holders
+}
+
+/// The daemon among the lock holders: the companions are its children, so it is the one no other
+/// holder is the parent of.
+fn scan_daemon(abi: u32) -> Option<i32> {
+    let holders = lock_holders(abi);
+    if holders.is_empty() {
+        return None;
+    }
+    holders
+        .iter()
+        .copied()
+        .find(|pid| parent_of(*pid).is_none_or(|parent| !holders.contains(&parent)))
+        .or_else(|| holders.iter().copied().min())
+}
+
+/// The daemon for `abi`, if one is alive.
+fn daemon_pid(abi: u32) -> Option<i32> {
+    if let Some(pid) = fs::read_to_string(pid_file(abi))
+        .ok()
+        .and_then(|text| text.trim().parse::<i32>().ok())
+    {
+        if is_daemon(abi, pid) {
+            return Some(pid);
+        }
+    }
+    scan_daemon(abi)
+}
+
+/// Live daemons, as `(abi, pid)`: at most one per ABI.
 pub fn running() -> Vec<(u32, i32)> {
+    let mut found = Vec::new();
+    for abi in [64u32, 32] {
+        if let Some(pid) = daemon_pid(abi) {
+            found.push((abi, pid));
+        }
+    }
+    found
+}
+
+/// Every process running the daemon binary: the daemon itself plus the per-module companions it
+/// forked. Used to shut the engine down completely - the companions would otherwise outlive it.
+fn daemon_processes() -> Vec<i32> {
     let mut found = Vec::new();
     let Ok(entries) = fs::read_dir("/proc") else {
         return found;
@@ -332,12 +465,9 @@ pub fn running() -> Vec<(u32, i32)> {
         let executable = cmdline.split(|byte| *byte == 0).next().unwrap_or(&[]);
         let executable = String::from_utf8_lossy(executable);
         let executable = executable.rsplit('/').next().unwrap_or("");
-        let abi = match executable {
-            "zygiskd64" => 64,
-            "zygiskd32" => 32,
-            _ => continue,
-        };
-        found.push((abi, pid));
+        if executable == "zygiskd64" || executable == "zygiskd32" {
+            found.push(pid);
+        }
     }
     found
 }
@@ -376,10 +506,19 @@ pub fn start() -> Result<()> {
             continue;
         }
         match spawn_daemon(&path) {
-            Ok(pid) => log::info!("yukizygisk: {name} ready as pid {pid}"),
+            Ok(pid) => {
+                log::info!("yukizygisk: {name} ready as pid {pid}");
+                write_pid_file(abi, pid);
+            }
             Err(error) => {
-                log::warn!("yukizygisk: {name} failed to start: {error:#}");
-                failures.push(format!("{name}: {error:#}"));
+                // A second instance loses the lifetime lock and exits; if the ABI ended up with a
+                // live daemon anyway, that is the outcome we wanted.
+                if running().iter().any(|(running_abi, _)| *running_abi == abi) {
+                    log::info!("yukizygisk: {name} was already starting up");
+                } else {
+                    log::warn!("yukizygisk: {name} failed to start: {error:#}");
+                    failures.push(format!("{name}: {error:#}"));
+                }
             }
         }
     }
@@ -536,29 +675,38 @@ fn wait_ready(read_end: &mut std::fs::File) -> Result<Startup> {
 }
 
 /// Stop every daemon. Used by soft reboot and by an explicit restart.
+///
+/// The daemons are signalled first so they can take their companions with them; whatever is still
+/// running the binary afterwards is killed outright, because a companion left behind keeps a module
+/// loaded in a process that no longer has a daemon to talk to.
 pub fn stop() {
-    let live = running();
-    if live.is_empty() {
+    let daemons = running();
+    let all = daemon_processes();
+    if all.is_empty() {
         return;
     }
-    for (_, pid) in &live {
+    for (_, pid) in &daemons {
         // SAFETY: plain signal delivery to a pid we just discovered.
         unsafe {
             libc::kill(*pid, libc::SIGTERM);
         }
     }
     let deadline = Instant::now() + Duration::from_secs(2);
-    while Instant::now() < deadline {
-        if running().is_empty() {
-            return;
-        }
+    while Instant::now() < deadline && !running().is_empty() {
         std::thread::sleep(Duration::from_millis(50));
     }
-    for (_, pid) in running() {
-        // SAFETY: same as above; the daemon ignored SIGTERM for two seconds.
+    for pid in daemon_processes() {
+        // SAFETY: same as above; this one ignored SIGTERM for two seconds.
         unsafe {
             libc::kill(pid, libc::SIGKILL);
         }
+    }
+    let deadline = Instant::now() + Duration::from_secs(1);
+    while Instant::now() < deadline && !daemon_processes().is_empty() {
+        std::thread::sleep(Duration::from_millis(50));
+    }
+    for abi in [64u32, 32] {
+        clear_pid_file(abi);
     }
 }
 
