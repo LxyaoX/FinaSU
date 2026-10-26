@@ -33,6 +33,17 @@
 #include "supercall/supercall.h"
 #include "infra/symbol_resolver.h"
 #include "preinit/preinit.h"
+#include <linux/fdtable.h>
+#include <linux/file.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <linux/pid.h>
+#include <linux/ptrace.h>
+#include <linux/sched/task.h>
+#include "infra/task_work.h"
+#include "uapi/yukizygisk.h"
+#include "feature/yukizygisk/api.h"
+#include "feature/yukizygisk/patch_transaction.h"
 
 static int do_grant_root(void __user *arg)
 {
@@ -1041,6 +1052,389 @@ out:
     return ret;
 }
 
+#ifdef CONFIG_KSU_YUKIZYGISK
+static int do_yz_handoff(void __user *arg)
+{
+    return ksu_yukizygisk_handoff_module_fds(arg);
+}
+
+static int do_yz_set_dlopen(void __user *arg)
+{
+    struct yz_dlopen_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    ksu_yukizygisk_set_linker_offsets(cmd.dlopen_offset, cmd.dlsym_offset);
+    return 0;
+}
+
+static int do_yz_set_dlopen32(void __user *arg)
+{
+    struct yz_dlopen_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    ksu_yukizygisk_set_compat_linker_offsets(cmd.dlopen_offset, cmd.dlsym_offset);
+    return 0;
+}
+
+static int do_yz_reload(void __user *arg)
+{
+    (void)arg;
+    ksu_yukizygisk_emit_reload();
+    return 0;
+}
+
+static int do_yz_set_yukilinker(void __user *arg)
+{
+    struct yz_yukilinker_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    ksu_yukizygisk_set_first_stage_loader(cmd.enabled != 0);
+    return 0;
+}
+
+static int do_yz_set_native_targets(void __user *arg)
+{
+    struct yz_native_targets_cmd *cmd;
+    int ret;
+
+    cmd = memdup_user(arg, sizeof(*cmd));
+    if (IS_ERR(cmd))
+        return PTR_ERR(cmd);
+    ret = ksu_yukizygisk_set_native_targets(cmd);
+    kfree(cmd);
+    return ret;
+}
+
+static int do_yz_restore_native_load_policy(void __user *arg)
+{
+    struct yz_native_load_policy_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    return ksu_yukizygisk_restore_native_load_policy((pid_t)cmd.pid);
+}
+
+static int do_yz_get_safemode(void __user *arg)
+{
+    struct yz_safemode_status_cmd cmd;
+    int ret;
+
+    ret = ksu_yukizygisk_get_safemode(&cmd);
+    if (ret)
+        return ret;
+    if (copy_to_user(arg, &cmd, sizeof(cmd)))
+        return -EFAULT;
+    return 0;
+}
+
+static int do_yz_get_runtime(void __user *arg)
+{
+    struct yz_runtime_query_cmd cmd;
+    struct yz_runtime_record *entries = NULL;
+    void __user *user_entries;
+    int ret;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    if (cmd.capacity > YZ_RUNTIME_RECORD_MAX || (cmd.capacity && !cmd.entries))
+        return -EINVAL;
+
+    user_entries = (void __user *)(uintptr_t)cmd.entries;
+    if (cmd.capacity) {
+        entries = kvcalloc(cmd.capacity, sizeof(*entries), GFP_KERNEL);
+        if (!entries)
+            return -ENOMEM;
+    }
+    ret = ksu_yukizygisk_get_runtime(entries, cmd.capacity, &cmd);
+    if (ret)
+        goto out;
+    if (cmd.count && copy_to_user(user_entries, entries, sizeof(*entries) * cmd.count)) {
+        ret = -EFAULT;
+        goto out;
+    }
+    if (copy_to_user(arg, &cmd, sizeof(cmd)))
+        ret = -EFAULT;
+out:
+    kvfree(entries);
+    return ret;
+}
+
+static int do_yz_get_exit_history_fd(void __user *arg)
+{
+    return ksu_yukizygisk_get_exit_history_fd(arg);
+}
+
+static int do_yz_get_health(void __user *arg)
+{
+    return ksu_yukizygisk_get_health(arg);
+}
+
+static int do_yz_report_runtime(void __user *arg)
+{
+    struct yz_runtime_report_cmd cmd;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    cmd.module_id[sizeof(cmd.module_id) - 1] = '\0';
+    return ksu_yukizygisk_report_runtime(&cmd);
+}
+
+static int do_yz_allow_module_load_policy(void __user *arg)
+{
+    struct yz_module_load_policy_cmd cmd;
+    struct task_struct *task;
+    const struct cred *cred;
+    struct fd payload;
+    struct file *file;
+    bool directory;
+    bool source_image;
+    int ret;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    if (!cmd.pid || cmd.dirfd < 0)
+        return -EINVAL;
+    rcu_read_lock();
+    task = get_pid_task(find_vpid(cmd.pid), PIDTYPE_PID);
+    rcu_read_unlock();
+    if (!task)
+        return -ESRCH;
+    cred = get_task_cred(task);
+    payload = fdget(cmd.dirfd);
+    file = fd_file(payload);
+    if (!file) {
+        ret = -EBADF;
+        goto out_cred;
+    }
+    directory = S_ISDIR(file_inode(file)->i_mode);
+    source_image = S_ISREG(file_inode(file)->i_mode) && file_inode(file)->i_sb->s_magic == TMPFS_MAGIC &&
+                   (file->f_mode & FMODE_READ) && !(file->f_mode & FMODE_WRITE);
+    if (!directory && !source_image) {
+        ret = -EINVAL;
+        goto out_fd;
+    }
+    if (!is_zygote(cred) &&
+        !(source_image && ksu_yukizygisk_is_native_runtime(task->tgid, READ_ONCE(task->start_boottime)))) {
+        ret = -EPERM;
+        goto out_fd;
+    }
+    ret = ksu_yukizygisk_allow_module_load_policy(task, file, cred);
+out_fd:
+    fdput(payload);
+out_cred:
+    put_cred(cred);
+    put_task_struct(task);
+    pr_info("yukizygisk: module load policy request pid=%u fd=%d err=%d\n", cmd.pid, cmd.dirfd, ret);
+    return ret;
+}
+
+struct yz_unmap_tw {
+    struct callback_head cb;
+    unsigned long addr[YZ_MAX_UNMAP_SEGS];
+    unsigned long size[YZ_MAX_UNMAP_SEGS];
+    unsigned int n;
+    unsigned int retry;
+};
+
+/* Retry until the program counter leaves all requested ranges. */
+static void yz_unmap_tw_func(struct callback_head *cb)
+{
+    struct yz_unmap_tw *tw = container_of(cb, struct yz_unmap_tw, cb);
+    struct pt_regs *regs = task_pt_regs(current);
+    unsigned long pc = regs ? instruction_pointer(regs) : 0;
+    unsigned int i;
+
+    for (i = 0; i < tw->n; i++) {
+        if (pc >= tw->addr[i] && pc < tw->addr[i] + tw->size[i]) {
+            if (++tw->retry < 16) {
+                init_task_work(&tw->cb, yz_unmap_tw_func);
+                if (!task_work_add(current, &tw->cb, TWA_RESUME))
+                    return; /* re-queued; keep tw */
+            }
+            pr_warn("yukizygisk: core unmap skipped pid=%d "
+                    "pc=0x%lx retries=%u\n",
+                    current->pid, pc, tw->retry);
+            kfree(tw);
+            module_put(THIS_MODULE);
+            return;
+        }
+    }
+
+    for (i = 0; i < tw->n; i++) {
+        pr_info("yukizygisk: core segment unmap pid=%d address=0x%lx "
+                "size=0x%lx\n",
+                current->pid, tw->addr[i], tw->size[i]);
+        vm_munmap(tw->addr[i], tw->size[i]);
+    }
+    kfree(tw);
+    module_put(THIS_MODULE);
+}
+
+static int do_yz_unmap_pid(void __user *arg)
+{
+    struct yz_unmap_pid_cmd cmd;
+    struct task_struct *task;
+    struct yz_unmap_tw *tw;
+    unsigned int i;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    if (cmd.n_segs == 0 || cmd.n_segs > YZ_MAX_UNMAP_SEGS)
+        return -EINVAL;
+
+    rcu_read_lock();
+    task = get_pid_task(find_vpid(cmd.pid), PIDTYPE_PID);
+    rcu_read_unlock();
+    if (!task)
+        return -ESRCH;
+
+    if (!is_appuid(task_uid(task).val)) {
+        pr_info("yukizygisk: core unmap rejected pid=%u uid=%u\n", cmd.pid, task_uid(task).val);
+        put_task_struct(task);
+        return -EPERM;
+    }
+
+    tw = kzalloc(sizeof(*tw), GFP_KERNEL);
+    if (!tw) {
+        put_task_struct(task);
+        return -ENOMEM;
+    }
+    init_task_work(&tw->cb, yz_unmap_tw_func);
+    tw->n = cmd.n_segs;
+    for (i = 0; i < cmd.n_segs; i++) {
+        tw->addr[i] = (unsigned long)cmd.addr[i];
+        tw->size[i] = (unsigned long)cmd.size[i];
+    }
+    if (ksu_task_work_add(task, &tw->cb)) {
+        kfree(tw);
+        put_task_struct(task);
+        return -ESRCH;
+    }
+    put_task_struct(task);
+    pr_info("yukizygisk: core unmap scheduled pid=%u segments=%u\n", cmd.pid, cmd.n_segs);
+    return 0;
+}
+
+static int do_yz_unmap_self(void __user *arg)
+{
+    struct yz_unmap_self_cmd cmd;
+    struct yz_unmap_tw *tw;
+    unsigned int i;
+
+    if (!current->mm)
+        return -EINVAL;
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    if (cmd.n_segs == 0 || cmd.n_segs > YZ_MAX_UNMAP_SEGS)
+        return -EINVAL;
+    for (i = 0; i < cmd.n_segs; i++) {
+        unsigned long a = (unsigned long)cmd.addr[i];
+        unsigned long s = (unsigned long)cmd.size[i];
+
+        if (a == 0 || s == 0 || a >= TASK_SIZE || s > TASK_SIZE || a + s < a || a + s > TASK_SIZE) {
+            pr_warn("yukizygisk: invalid core segment pid=%d "
+                    "address=0x%lx size=0x%lx\n",
+                    current->pid, a, s);
+            return -EINVAL;
+        }
+    }
+
+    tw = kzalloc(sizeof(*tw), GFP_KERNEL);
+    if (!tw)
+        return -ENOMEM;
+    init_task_work(&tw->cb, yz_unmap_tw_func);
+    tw->n = cmd.n_segs;
+    for (i = 0; i < cmd.n_segs; i++) {
+        tw->addr[i] = (unsigned long)cmd.addr[i];
+        tw->size[i] = (unsigned long)cmd.size[i];
+    }
+    if (ksu_task_work_add(current, &tw->cb)) {
+        kfree(tw);
+        return -ESRCH;
+    }
+    pr_info("yukizygisk: self core unmap scheduled pid=%d segments=%u\n", current->pid, cmd.n_segs);
+    return 0;
+}
+
+/* COW-patch target text via access_process_vm(FOLL_FORCE|FOLL_WRITE). */
+static int do_yz_patch_text(void __user *arg)
+{
+    struct yz_patch_text_cmd cmd;
+    struct task_struct *task;
+    int n;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    if (cmd.len == 0 || cmd.len > YZ_PATCH_TEXT_MAX)
+        return -EINVAL;
+    if (cmd.addr == 0 || cmd.addr >= TASK_SIZE || cmd.addr + cmd.len < cmd.addr || cmd.addr + cmd.len > TASK_SIZE)
+        return -EINVAL;
+
+    rcu_read_lock();
+    task = get_pid_task(find_vpid(cmd.pid), PIDTYPE_PID);
+    rcu_read_unlock();
+    if (!task)
+        return -ESRCH;
+
+    /* zygiskd validates cmd.pid against the SO_PEERCRED peer PID. */
+
+    n = access_process_vm(task, (unsigned long)cmd.addr, cmd.bytes, cmd.len, FOLL_FORCE | FOLL_WRITE);
+    put_task_struct(task);
+    if (n != (int)cmd.len) {
+        pr_warn("yukizygisk: text patch incomplete pid=%u "
+                "address=0x%llx written=%d requested=%u\n",
+                cmd.pid, cmd.addr, n, cmd.len);
+        return -EFAULT;
+    }
+    pr_info("yukizygisk: text patched pid=%u address=0x%llx bytes=%u\n", cmd.pid, cmd.addr, cmd.len);
+    return 0;
+}
+
+static int yz_patch_v2_read(void *context, unsigned long address, void *buffer, unsigned int length)
+{
+    return access_process_vm(context, address, buffer, length, FOLL_FORCE);
+}
+
+static int yz_patch_v2_write(void *context, unsigned long address, void *buffer, unsigned int length)
+{
+    return access_process_vm(context, address, buffer, length, FOLL_FORCE | FOLL_WRITE);
+}
+
+static int do_yz_patch_text_v2(void __user *arg)
+{
+    struct yz_patch_text_v2_cmd cmd;
+    struct task_struct *task;
+    u8 before[YZ_PATCH_TEXT_MAX];
+    u8 after[YZ_PATCH_TEXT_MAX];
+    struct yz_patch_io io;
+
+    if (copy_from_user(&cmd, arg, sizeof(cmd)))
+        return -EFAULT;
+    if (!cmd.len || cmd.len > YZ_PATCH_TEXT_MAX || !cmd.addr || cmd.addr >= TASK_SIZE ||
+        cmd.addr + cmd.len < cmd.addr || cmd.addr + cmd.len > TASK_SIZE ||
+        (cmd.addr & (PAGE_SIZE - 1)) + cmd.len > PAGE_SIZE)
+        return -EINVAL;
+
+    cmd.result = YZ_PATCH_V2_REJECTED;
+    rcu_read_lock();
+    task = get_pid_task(find_vpid(cmd.pid), PIDTYPE_PID);
+    rcu_read_unlock();
+    if (!task)
+        return -ESRCH;
+
+    io.context = task;
+    io.read = yz_patch_v2_read;
+    io.write = yz_patch_v2_write;
+    cmd.result =
+        yz_patch_transaction(&io, (unsigned long)cmd.addr, cmd.len, cmd.expected, cmd.replacement, before, after);
+    put_task_struct(task);
+    return copy_to_user(arg, &cmd, sizeof(cmd)) ? -EFAULT : 0;
+}
+#endif // #ifdef CONFIG_KSU_YUKIZYGISK
+
 // IOCTL handlers mapping table
 // clang-format off
 static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
@@ -1270,6 +1664,85 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
         .handler = do_lookup_symbols,
         .perm_check = only_root
     },
+#ifdef CONFIG_KSU_YUKIZYGISK
+    {.cmd = KSU_IOCTL_YZ_HANDOFF,
+     .name = "YZ_HANDOFF",
+     .handler = do_yz_handoff,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_SET_DLOPEN,
+     .name = "YZ_SET_DLOPEN",
+     .handler = do_yz_set_dlopen,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_SET_DLOPEN32,
+     .name = "YZ_SET_DLOPEN32",
+     .handler = do_yz_set_dlopen32,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_SET_YUKILINKER,
+     .name = "YZ_SET_YUKILINKER",
+     .handler = do_yz_set_yukilinker,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_SET_NATIVE_TARGETS,
+     .name = "YZ_SET_NATIVE_TARGETS",
+     .handler = do_yz_set_native_targets,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_RESTORE_NATIVE_LOAD_POLICY,
+     .name = "YZ_RESTORE_NATIVE_LOAD_POLICY",
+     .handler = do_yz_restore_native_load_policy,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_GET_SAFEMODE,
+     .name = "YZ_GET_SAFEMODE",
+     .handler = do_yz_get_safemode,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_GET_RUNTIME,
+     .name = "YZ_GET_RUNTIME",
+     .handler = do_yz_get_runtime,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_GET_EXIT_HISTORY_FD,
+     .name = "YZ_GET_EXIT_HISTORY_FD",
+     .handler = do_yz_get_exit_history_fd,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_REGISTER_ENDPOINT,
+     .name = "YZ_REGISTER_ENDPOINT",
+     .handler = yz_endpoint_register,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_UNREGISTER_ENDPOINT,
+     .name = "YZ_UNREGISTER_ENDPOINT",
+     .handler = yz_endpoint_unregister,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_GET_ENDPOINT_STATE_FD,
+     .name = "YZ_GET_ENDPOINT_STATE_FD",
+     .handler = yz_endpoint_get_fd,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_GET_HEALTH,
+     .name = "YZ_GET_HEALTH",
+     .handler = do_yz_get_health,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_REPORT_RUNTIME,
+     .name = "YZ_REPORT_RUNTIME",
+     .handler = do_yz_report_runtime,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_ALLOW_MODULE_LOAD_POLICY,
+     .name = "YZ_ALLOW_MODULE_LOAD_POLICY",
+     .handler = do_yz_allow_module_load_policy,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_UNMAP_PID,
+     .name = "YZ_UNMAP_PID",
+     .handler = do_yz_unmap_pid,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_UNMAP_SELF,
+     .name = "YZ_UNMAP_SELF",
+     .handler = do_yz_unmap_self,
+     .perm_check = injected_app},
+    {.cmd = KSU_IOCTL_YZ_PATCH_TEXT,
+     .name = "YZ_PATCH_TEXT",
+     .handler = do_yz_patch_text,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_PATCH_TEXT_V2,
+     .name = "YZ_PATCH_TEXT_V2",
+     .handler = do_yz_patch_text_v2,
+     .perm_check = only_root},
+    {.cmd = KSU_IOCTL_YZ_RELOAD,
+#endif // #ifdef CONFIG_KSU_YUKIZYGISK
     {
         .cmd = 0,
         .name = NULL,

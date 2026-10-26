@@ -28,3 +28,11 @@ bool allowed_for_su(void)
 {
     return is_manager() || ksu_is_allow_uid_for_current(current_uid().val);
 }
+
+/* Gate for KSU_IOCTL_YZ_UNMAP_SELF: only an app process may ask the kernel to
+ * unmap part of its own address space. The handler re-validates the segments,
+ * so an app-uid gate is enough; it keeps root/system callers out. */
+bool injected_app(void)
+{
+    return is_appuid(current_uid().val);
+}
