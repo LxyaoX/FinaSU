@@ -344,7 +344,7 @@ fn clear_pid_file(abi: u32) {
     let _ = fs::remove_file(pid_file(abi));
 }
 
-fn expected_name(abi: u32) -> &'static str {
+const fn expected_name(abi: u32) -> &'static str {
     if abi == 32 { "zygiskd32" } else { "zygiskd64" }
 }
 
@@ -422,15 +422,11 @@ fn scan_daemon(abi: u32) -> Option<i32> {
 
 /// The daemon for `abi`, if one is alive.
 fn daemon_pid(abi: u32) -> Option<i32> {
-    if let Some(pid) = fs::read_to_string(pid_file(abi))
+    let recorded = fs::read_to_string(pid_file(abi))
         .ok()
         .and_then(|text| text.trim().parse::<i32>().ok())
-    {
-        if is_daemon(abi, pid) {
-            return Some(pid);
-        }
-    }
-    scan_daemon(abi)
+        .filter(|pid| is_daemon(abi, *pid));
+    recorded.or_else(|| scan_daemon(abi))
 }
 
 /// Live daemons, as `(abi, pid)`: at most one per ABI.
