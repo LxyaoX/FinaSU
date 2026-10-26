@@ -17,7 +17,9 @@ mod android {
             if file == "ksuinit"
                 || file == "waitsys"
                 || file.ends_with(".ko")
-                || file.starts_with("folkzygisk/")
+                // The Zygisk payload is installed to its own directory by `yukizygisk::install`,
+                // not extracted next to ksud's helpers.
+                || file.starts_with("yukizygisk/")
             {
                 // don't extract internal executables and kernel modules
                 continue;
@@ -80,4 +82,9 @@ pub fn list_supported_kmi() -> std::vec::Vec<std::string::String> {
         }
     }
     list
+}
+
+/// Read one embedded file by its path inside the architecture folder.
+pub fn embedded(name: &str) -> Option<rust_embed::EmbeddedFile> {
+    Asset::get(name)
 }

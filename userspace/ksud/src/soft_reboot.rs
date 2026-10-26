@@ -234,7 +234,7 @@ pub fn soft_reboot() -> Result<()> {
         ));
     }
 
-    if let Err(error) = crate::zygisk::prepare_soft_reboot() {
+    if let Err(error) = crate::yukizygisk::prepare_soft_reboot() {
         return Err(restart_after_failed_soft_reboot(&format!(
             "FolkZygisk could not prepare for a new userspace cycle: {error:#}"
         )));

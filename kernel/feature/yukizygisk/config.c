@@ -1,0 +1,156 @@
+#include <linux/compiler.h>
+#include <linux/mutex.h>
+#include <linux/string.h>
+#include <linux/types.h>
+
+#include "api.h"
+#include "internal.h"
+#include "policy/feature.h"
+#include "klog.h" // IWYU pragma: keep
+#include "uapi/yukizygisk.h"
+
+bool yukizygisk_enabled;
+
+/* Dynamic linker symbol offsets, split by userspace ABI. */
+u64 yz_dlopen_off;
+u64 yz_dlsym_off;
+u64 yz_dlopen32_off;
+u64 yz_dlsym32_off;
+
+void ksu_yukizygisk_set_linker_offsets(u64 dlopen_off, u64 dlsym_off)
+{
+	yz_dlopen_off = dlopen_off;
+	yz_dlsym_off = dlsym_off;
+	pr_info("yukizygisk: linker offsets updated abi=arm64 dlopen=0x%llx "
+		"dlsym=0x%llx\n",
+		dlopen_off, dlsym_off);
+}
+
+void ksu_yukizygisk_set_compat_linker_offsets(u64 dlopen_off, u64 dlsym_off)
+{
+	yz_dlopen32_off = dlopen_off;
+	yz_dlsym32_off = dlsym_off;
+	pr_info("yukizygisk: linker offsets updated abi=arm dlopen=0x%llx "
+		"dlsym=0x%llx\n",
+		dlopen_off, dlsym_off);
+}
+
+bool yz_yukilinker_enabled;
+
+static DEFINE_MUTEX(yz_native_targets_lock);
+static struct yz_native_target yz_native_targets[YZ_NATIVE_TARGET_MAX];
+static u32 yz_native_target_count;
+
+void ksu_yukizygisk_set_first_stage_loader(bool enabled)
+{
+	yz_yukilinker_enabled = enabled;
+	pr_info("yukizygisk: first-stage loader enabled=%d\n", enabled);
+}
+
+int ksu_yukizygisk_set_native_targets(const struct yz_native_targets_cmd *cmd)
+{
+	u32 i, n;
+
+	if (!cmd)
+		return -EINVAL;
+
+	n = cmd->count;
+	if (n > YZ_NATIVE_TARGET_MAX)
+		n = YZ_NATIVE_TARGET_MAX;
+
+	mutex_lock(&yz_native_targets_lock);
+	yz_native_target_count = 0;
+	for (i = 0; i < n; i++) {
+		const struct yz_native_target *src = &cmd->targets[i];
+		struct yz_native_target *dst =
+		    &yz_native_targets[yz_native_target_count];
+
+		if (src->type != YZ_NATIVE_TARGET_NAME &&
+		    src->type != YZ_NATIVE_TARGET_PATH)
+			continue;
+		if (src->value[0] == '\0')
+			continue;
+		memcpy(dst, src, sizeof(*dst));
+		dst->value[YZ_NATIVE_TARGET_VALUE_MAX - 1] = '\0';
+		yz_native_target_count++;
+	}
+	mutex_unlock(&yz_native_targets_lock);
+
+	pr_info("yukizygisk: native targets updated count=%u\n",
+		yz_native_target_count);
+	return 0;
+}
+
+static int yukizygisk_feature_get(u64 *value)
+{
+	*value = READ_ONCE(yukizygisk_enabled) ? 1 : 0;
+	return 0;
+}
+
+static int yukizygisk_feature_set(u64 value)
+{
+	return yz_feature_set_enabled(value != 0);
+}
+
+const struct ksu_feature_handler yukizygisk_feature_handler = {
+    .feature_id = KSU_FEATURE_YUKIZYGISK,
+    .name = "yukizygisk",
+    .get_handler = yukizygisk_feature_get,
+    .set_handler = yukizygisk_feature_set,
+};
+
+const char *yz_basename(const char *path)
+{
+	const char *base;
+
+	if (!path)
+		return NULL;
+	base = strrchr(path, '/');
+	return base ? base + 1 : path;
+}
+
+void yz_copy_name(char *dst, size_t dst_len, const char *src)
+{
+	size_t i;
+
+	if (!dst_len)
+		return;
+	for (i = 0; i + 1 < dst_len && src[i]; i++)
+		dst[i] = src[i];
+	dst[i] = '\0';
+}
+
+bool yz_match_live_native_target(const char *filename, char *label,
+				 size_t label_len, u8 *target_type)
+{
+	const char *base = yz_basename(filename);
+	bool matched = false;
+	u32 i;
+
+	if (target_type)
+		*target_type = 0;
+	if (!filename || !base)
+		return false;
+
+	mutex_lock(&yz_native_targets_lock);
+	for (i = 0; i < yz_native_target_count; i++) {
+		const struct yz_native_target *t = &yz_native_targets[i];
+
+		if (t->type == YZ_NATIVE_TARGET_NAME) {
+			if (strcmp(base, t->value))
+				continue;
+		} else if (t->type == YZ_NATIVE_TARGET_PATH) {
+			if (strcmp(filename, t->value))
+				continue;
+		} else {
+			continue;
+		}
+		yz_copy_name(label, label_len, t->value);
+		if (target_type)
+			*target_type = t->type;
+		matched = true;
+		break;
+	}
+	mutex_unlock(&yz_native_targets_lock);
+	return matched;
+}

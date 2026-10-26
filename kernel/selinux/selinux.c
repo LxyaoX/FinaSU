@@ -24,6 +24,11 @@ static u32 cached_init_sid __read_mostly = 0;
 static u32 cached_adbd_sid __read_mostly = 0;
 u32 ksu_file_sid __read_mostly = 0;
 
+u32 ksu_get_ksu_file_sid(void)
+{
+    return ksu_file_sid;
+}
+
 static int transive_to_domain(const char *domain, struct cred *cred, bool clear_exec_sid)
 {
     u32 sid;

@@ -263,4 +263,14 @@ static const __u32 KSU_IOCTL_CLEAR_NETISOLATE_EVENTS =
     _IOW('K', 32, struct ksu_netisolate_events);
 static const __u32 KSU_IOCTL_GET_FULL_VERSION = _IOR('K', 29, struct ksu_get_full_version_cmd);
 
+/* prctl(2) command the YukiZygisk daemon uses to obtain the driver fd. This tree has
+ * no prctl hook, so the call is a no-op and the daemon falls back to the
+ * KSU_INSTALL_MAGIC reboot-syscall install path it already implements. */
+#define KSU_PRCTL_GET_FD 0x59554B4A /* "YUKJ" */
+
+struct ksu_prctl_get_fd_cmd {
+    int result;
+    int fd;
+};
+
 #endif

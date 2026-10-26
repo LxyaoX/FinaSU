@@ -23,10 +23,10 @@ struct Args {
 
 #[derive(clap::Subcommand, Debug)]
 enum Commands {
-    /// Manage the built-in FolkZygisk provider
-    Zygisk {
+    /// Manage the built-in YukiZygisk engine
+    Yukizygisk {
         #[command(subcommand)]
-        command: crate::zygisk::Command,
+        command: crate::yukizygisk::Command,
     },
     /// Flash an AnyKernel3 ZIP to the current or unused A/B slot (requires root)
     Anykernel3 {
@@ -776,7 +776,7 @@ pub fn run() -> Result<()> {
         Commands::Susfs { command } => crate::susfs::run(command),
         Commands::UtsView { command } => crate::uts_view::run(&command),
         Commands::Netisolate { command } => crate::netisolate::run(&command),
-        Commands::Zygisk { command } => crate::zygisk::run(&command),
+        Commands::Yukizygisk { command } => crate::yukizygisk::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();

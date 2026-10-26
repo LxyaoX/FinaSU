@@ -62,34 +62,78 @@ jobs:
       with:
         ndk-version: r29
 
-    - name: Build and package FolkZygisk
-      if: ${{ inputs.target != 'riscv64-linux-android' }}
+    - name: Build YukiZygisk
+      if: ${{ inputs.target == 'aarch64-linux-android' }}
       env:
-        NDK_PATH: ${{ steps.setup-ndk.outputs.ndk-path }}
+        NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       run: |
-        case "${{ inputs.target }}" in
-          aarch64-linux-android) archs="arm64-v8a armeabi-v7a"; assets=aarch64 ;;
-          x86_64-linux-android) archs="x86_64 x86"; assets=x86_64 ;;
-          *) exit 1 ;;
-        esac
-        make -C userspace/folkzygisk BUILD_TYPE=release ARCHS="$archs" NDK_PATH="$NDK_PATH"
-        python3 userspace/folkzygisk/package.py --stage userspace/folkzygisk/build/stage/release --assets "userspace/ksud/bin/$assets" --target "$assets"
+        set -euo pipefail
+        # The run log needs admin rights to download; annotations do not. Mirror the
+        # step's own output to a file so a failure can be reported line by line.
+        LOG=/tmp/yukizygisk-build.log
+        exec > >(tee "$LOG") 2>&1
+        TC="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
+        export AR="$TC/bin/llvm-ar" RANLIB="$TC/bin/llvm-ranlib" STRIP="$TC/bin/llvm-strip"
 
-    - name: Archive matching FolkZygisk source
-      if: ${{ inputs.target != 'riscv64-linux-android' }}
-      run: git archive --format=tar.gz --output=folkzygisk-source-${{ inputs.target }}.tar.gz HEAD
+        # build <source dir> <abi> <build dir>. The NDK's own toolchain file picks the
+        # compiler, so the per-API triple names never have to be spelled out here.
+        build() {
+          cmake -S "$1" -B "$3" -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$NDK_HOME/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI="$2" \
+            -DANDROID_PLATFORM=android-31 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DYUKISU_ENABLE_CLANG_TIDY=OFF
+          cmake --build "$3" --parallel
+        }
 
-    - name: Upload FolkZygisk source
-      if: ${{ inputs.target != 'riscv64-linux-android' }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: folkzygisk-source-${{ inputs.target }}
-        path: folkzygisk-source-${{ inputs.target }}.tar.gz
+        CORE=userspace/zygisk/core
+        DAEMON=userspace/zygisk/daemon
+        build "$CORE" arm64-v8a "$CORE/build"
+        build "$CORE" armeabi-v7a "$CORE/build-armv7"
+        build "$DAEMON" arm64-v8a "$DAEMON/build"
+        build "$DAEMON" armeabi-v7a "$DAEMON/build-armv7"
+
+        OUT=userspace/ksud/bin/aarch64/yukizygisk
+        rm -rf "$OUT"
+        mkdir -p "$OUT"
+        cp "$DAEMON/build/zygiskd64" "$DAEMON/build-armv7/zygiskd32" \
+           "$CORE/build/libzygisk64.so" "$CORE/build-armv7/libzygisk32.so" \
+           "$CORE/build/libyukilinker64.so" "$CORE/build-armv7/libyukilinker32.so" \
+           "$CORE/build/libyukizncore64.so" "$CORE/build-armv7/libyukizncore32.so" "$OUT/"
+        for asset in zygiskd64 zygiskd32 libzygisk64.so libzygisk32.so \
+          libyukilinker64.so libyukilinker32.so libyukizncore64.so libyukizncore32.so; do
+          test -s "$OUT/$asset"
+        done
+        ls -l "$OUT"
+
+    - name: Report YukiZygisk build errors
+      if: failure() && inputs.target == 'aarch64-linux-android'
+      shell: bash
+      run: |
+        set +e
+        LOG=/tmp/yukizygisk-build.log
+        if [ ! -s "$LOG" ]; then
+          echo "::error title=YukiZygisk::no build log captured"
+          exit 0
+        fi
+        plain=/tmp/yukizygisk-build.plain.log
+        sed -r 's/\x1b\[[0-9;]*[A-Za-z]//g' "$LOG" > "$plain"
+        matches=$(grep -iE 'error|fatal|CMake Error|not found|No such file|undefined reference' "$plain" | head -n 40)
+        if [ -z "$matches" ]; then
+          matches=$(tail -n 30 "$plain")
+        fi
+        printf '%s\n' "$matches" | while IFS= read -r line; do
+          echo "::error title=YukiZygisk::${line}"
+        done
+        exit 0
 
     - name: Build ksud
       env:
         ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       run: |
+        LOG=/tmp/ksud-build.log
+        exec > >(tee "$LOG") 2>&1
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           export KSU_PACKAGE_NAME="me.yuki.fina.pr"
         fi
@@ -100,6 +144,27 @@ jobs:
           source .github/scripts/setup-rust-build.sh ${{ inputs.target }} 26
           cargo build --target "$TRIPLE" --release --manifest-path ./userspace/ksud/Cargo.toml
         fi
+
+    - name: Report ksud build errors
+      if: failure() && inputs.target != 'riscv64-linux-android'
+      shell: bash
+      run: |
+        set +e
+        LOG=/tmp/ksud-build.log
+        if [ ! -s "$LOG" ]; then
+          echo "::error title=ksud::no build log captured"
+          exit 0
+        fi
+        plain=/tmp/ksud-build.plain.log
+        sed -r 's/\x1b\[[0-9;]*[A-Za-z]//g' "$LOG" > "$plain"
+        matches=$(grep -E '^error(\[|:)|^  --> |^ *[0-9]+ \| ' "$plain" | head -n 40)
+        if [ -z "$matches" ]; then
+          matches=$(tail -n 30 "$plain")
+        fi
+        printf '%s\n' "$matches" | while IFS= read -r line; do
+          echo "::error title=ksud::${line}"
+        done
+        exit 0
 
     - name: Upload ksud artifact
       uses: actions/upload-artifact@v7

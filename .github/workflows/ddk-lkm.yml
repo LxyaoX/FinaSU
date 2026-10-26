@@ -55,6 +55,10 @@ jobs:
         # be the actual workspace path, which differs per repository.
         git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+        set -o pipefail
+        KERNEL_LOG=/tmp/ksu-kernel-build.log
+        : > "$KERNEL_LOG"
+
         cd kernel
 
         echo "=== Building kernelsu.ko for KMI: ${{ inputs.kmi }} ==="
@@ -74,7 +78,7 @@ jobs:
         if [ -n "$SECOND_SIGNATURE_RELEASE" ]; then
           EXTRA_ARGS="$EXTRA_ARGS KSU_SECOND_SIGNATURE_RELEASE=1"
         fi
-        CONFIG_KSU=m CC=clang make KSU_REQUIRE_PREINIT=1 $EXTRA_ARGS
+        CONFIG_KSU=m CC=clang make KSU_REQUIRE_PREINIT=1 $EXTRA_ARGS 2>&1 | tee -a "$KERNEL_LOG"
         
         echo "=== Build completed ==="
 
@@ -91,6 +95,37 @@ jobs:
         echo "Size: $(du -h "$OUT_DIR/$OUTPUT_NAME" | cut -f1)"
         llvm-strip -d "$OUT_DIR/$OUTPUT_NAME"
         echo "Size after stripping: $(du -h "$OUT_DIR/$OUTPUT_NAME" | cut -f1)"
+
+    - name: Report build errors
+      if: failure()
+      shell: bash
+      run: |
+        # The run log needs admin rights to download; annotations of a public
+        # repository do not. Repeat the compiler's own error lines as annotations so
+        # a failed kernel build is readable from the API. Never fail this step: its
+        # only job is to make the failure above legible.
+        set +e
+        KERNEL_LOG=/tmp/ksu-kernel-build.log
+        if [ ! -s "$KERNEL_LOG" ]; then
+          echo "::error title=Build::no kernel log captured"
+          exit 0
+        fi
+        # make prints with colour on a TTY, so the literal "error:" is preceded by an
+        # escape sequence; strip it before matching or every failure looks silent.
+        plain=/tmp/ksu-kernel-build.plain.log
+        sed -r 's/\x1b\[[0-9;]*[A-Za-z]//g' "$KERNEL_LOG" > "$plain"
+        matches=$(grep -iE 'error:|undefined|modpost|not found|relocation' "$plain" | head -n 40)
+        if [ -z "$matches" ]; then
+          echo "::error title=Kernel::no error line matched, tail follows"
+          tail -n 40 "$plain" | while IFS= read -r line; do
+            echo "::error title=Kernel-tail::${line}"
+          done
+          exit 0
+        fi
+        printf '%s\n' "$matches" | while IFS= read -r line; do
+          echo "::error title=Kernel::${line}"
+        done
+        exit 0
 
     - name: Build nomount.ko
       run: |

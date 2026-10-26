@@ -1,0 +1,26 @@
+kernelsu-objs += feature/yukizygisk/main.o
+kernelsu-objs += feature/yukizygisk/endpoint.o
+kernelsu-objs += feature/yukizygisk/config.o
+kernelsu-objs += feature/yukizygisk/load_policy.o
+kernelsu-objs += feature/yukizygisk/safemode.o
+kernelsu-objs += feature/yukizygisk/runtime.o
+kernelsu-objs += feature/yukizygisk/early_native.o
+kernelsu-objs += feature/yukizygisk/payload.o
+kernelsu-objs += feature/yukizygisk/injector.o
+kernelsu-objs += feature/yukizygisk/tango.o
+kernelsu-objs += feature/yukizygisk/exec.o
+kernelsu-objs += feature/yukizygisk/lifecycle.o
+kernelsu-objs += feature/yukizygisk/events.o
+kernelsu-objs += feature/yukizygisk/process_exit.o
+kernelsu-objs += feature/yukizygisk/exit_history.o
+kernelsu-objs += feature/yukizygisk/fd_handoff.o
+
+ifneq ($(shell grep -A3 'sched_process_exit,' $(srctree)/include/trace/events/sched.h | grep -c 'bool group_dead'),0)
+ccflags-y += -DYZ_EXIT_HAS_GROUP_DEAD
+endif
+
+yz-endpoint-symvers := $(firstword $(wildcard $(objtree)/Module.symvers $(KDIR)/Module.symvers $(KERNEL_SRC)/Module.symvers))
+yz-endpoint-vfs-ns := $(if $(yz-endpoint-symvers),$(shell awk '$$2 == "dentry_open" {print $$5; exit}' $(yz-endpoint-symvers)))
+ifneq ($(strip $(yz-endpoint-vfs-ns)),)
+ccflags-y += -DYZ_ENDPOINT_VFS_NS=$(yz-endpoint-vfs-ns)
+endif

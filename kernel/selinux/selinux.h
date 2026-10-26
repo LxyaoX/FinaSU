@@ -5,6 +5,8 @@
 #include <linux/version.h>
 #include <linux/cred.h>
 
+#define KSU_LEGACY_SU_DOMAIN "su"
+#define KSU_LEGACY_SU_CONTEXT "u:r:" KSU_LEGACY_SU_DOMAIN ":s0"
 #define KERNEL_SU_DOMAIN "ksu"
 #define KERNEL_SU_FILE "ksu_file"
 
@@ -38,6 +40,40 @@ int handle_sepolicy(void __user *user_data, u64 data_len);
 void setup_ksu_cred();
 
 void escape_to_root_for_adb_root();
+
+/* File load policy: temporarily widen the AV rules that let a payload be mapped
+ * executable, then restore the original state. Used by the YukiZygisk injector. */
+struct file;
+
+struct ksu_file_load_policy {
+    u32 src_type;
+    u32 tgt_type;
+    u32 tmpfs_type;
+    u32 process_type;
+    u16 target_class;
+    u16 process_class;
+    u16 dir_class;
+    u16 reserved;
+    u32 added_av;
+    u32 tmpfs_added_av;
+    u32 process_added_av;
+    u32 dir_added_av;
+    u32 file_lease_refs;
+    u32 tmpfs_lease_refs;
+    u32 dir_lease_refs;
+    u32 process_lease_refs;
+};
+
+u32 ksu_get_ksu_file_sid(void);
+
+int ksu_file_load_policy_allow_current(struct file *file,
+                                       struct ksu_file_load_policy *state);
+int ksu_file_load_policy_allow_cred(struct file *file, const struct cred *cred,
+                                    struct ksu_file_load_policy *state);
+int ksu_file_load_policy_allow_execmem_current(struct ksu_file_load_policy *state);
+int ksu_file_load_policy_allow_execmem_cred(const struct cred *cred,
+                                            struct ksu_file_load_policy *state);
+int ksu_file_load_policy_restore(const struct ksu_file_load_policy *state);
 
 extern u32 ksu_file_sid;
 

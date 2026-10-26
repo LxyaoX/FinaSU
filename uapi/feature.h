@@ -15,6 +15,8 @@ enum ksu_feature_id {
     KSU_FEATURE_DYNAMIC_MANAGER_GRANTS = 8,
     KSU_FEATURE_UTS_VIEW = 9,
     KSU_FEATURE_MOUNT_VIEW_FILTER = 10,
+    /* Additive: YukiZygisk injection runtime. */
+    KSU_FEATURE_YUKIZYGISK = 11,
 
     KSU_FEATURE_MAX
 };

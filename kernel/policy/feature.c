@@ -87,7 +87,9 @@ static const struct kernel_param_ops force_feature_param_ops = {
 };
 module_param_cb(force_feature, &force_feature_param_ops, NULL, 0);
 
-int __init ksu_register_feature_handler(const struct ksu_feature_handler *handler)
+/* Not __init: YukiZygisk registers and re-registers its handlers while the module is
+ * running, and a late-loaded module would call a freed .init.text on the first pass. */
+int ksu_register_feature_handler(const struct ksu_feature_handler *handler)
 {
     if (!handler) {
         pr_err("feature: register handler is NULL\n");

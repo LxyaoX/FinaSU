@@ -26,6 +26,10 @@
 #include "runtime/ksud.h"
 #include "runtime/ksud_boot.h"
 #include "feature/sulog.h"
+
+#if defined(CONFIG_KSU_YUKIZYGISK)
+#include "feature/yukizygisk/api.h"
+#endif
 #include "supercall/supercall.h"
 #include "ksu.h"
 #include "infra/file_wrapper.h"
@@ -158,6 +162,9 @@ int __init kernelsu_init(void)
     ksu_selinux_hide_init();
     ksu_shell_su_adb_only_init();
     ksu_avc_spoof_init();
+#if defined(CONFIG_KSU_YUKIZYGISK)
+    ksu_yukizygisk_init();
+#endif
     ksu_mvf_init();
     if (ksu_uts_view_init())
         pr_info("uts_view: feature unavailable\n");
@@ -254,6 +261,9 @@ void __exit kernelsu_exit(void)
 
     ksu_allowlist_exit();
 
+#if defined(CONFIG_KSU_YUKIZYGISK)
+    ksu_yukizygisk_exit();
+#endif
     ksu_shell_su_adb_only_exit();
     ksu_selinux_hide_exit();
     ksu_mvf_exit();
