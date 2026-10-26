@@ -14,21 +14,27 @@ use serde_json::{Map, Value, json};
 use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-/// Where the payload lives. The daemon and the kernel feature both derive their paths from this
-/// directory, so it is not a free choice.
-pub const BIN_DIR: &str = "/data/adb/ksu/lib/yukizygisk";
+/// The injected libraries. The engine derives these paths from this directory, so it is not a free
+/// choice.
+pub const LIB_DIR: &str = "/data/adb/ksu/lib/yukizygisk";
+/// The daemons sit next to ksud's other helpers: `/data/adb/ksu/bin/zygiskd64`, as the engine's own
+/// path constants expect.
+pub const DAEMON_DIR: &str = "/data/adb/ksu/bin";
 /// Runtime state: settings, catalogs, diagnostics.
 pub const STATE_DIR: &str = "/data/adb/ksu/yukizygisk";
 /// The settings document the daemon reads when it starts.
 pub const CONFIG: &str = "/data/adb/ksu/yukizygisk/yzconfig.json";
+/// Present when the user turned the engine off. Absence means on: the engine ships enabled, so a
+/// fresh install injects without anyone having to find the switch first.
+const DISABLED_MARKER: &str = "/data/adb/ksu/yukizygisk/disabled";
 
-/// The payload files, in the order they are installed.
-pub const FILES: [&str; 8] = [
-    "zygiskd64",
-    "zygiskd32",
+/// The daemons, one per ABI.
+pub const DAEMONS: [&str; 2] = ["zygiskd64", "zygiskd32"];
+/// The six injected libraries.
+pub const LIBRARIES: [&str; 6] = [
     "libzygisk64.so",
     "libzygisk32.so",
     "libyukilinker64.so",
@@ -36,6 +42,15 @@ pub const FILES: [&str; 8] = [
     "libyukizncore64.so",
     "libyukizncore32.so",
 ];
+
+/// Where a payload file goes: daemons next to ksud's helpers, libraries under `lib/`.
+pub fn target_path(name: &str) -> PathBuf {
+    if DAEMONS.contains(&name) {
+        Path::new(DAEMON_DIR).join(name)
+    } else {
+        Path::new(LIB_DIR).join(name)
+    }
+}
 
 /// Every setting the daemon understands, with the value it falls back to when the document does not
 /// carry the key. Mirrors `yukizygisk::settings::defaults()` in the engine.
@@ -62,20 +77,21 @@ fn defaults() -> Map<String, Value> {
 /// Called on every boot: a ksud update brings new payloads, and a partially written install has to
 /// heal itself.
 pub fn install() -> Result<()> {
-    fs::create_dir_all(BIN_DIR).with_context(|| format!("create {BIN_DIR}"))?;
+    fs::create_dir_all(LIB_DIR).with_context(|| format!("create {LIB_DIR}"))?;
+    fs::create_dir_all(DAEMON_DIR).with_context(|| format!("create {DAEMON_DIR}"))?;
     fs::create_dir_all(STATE_DIR).with_context(|| format!("create {STATE_DIR}"))?;
-    fs::set_permissions(BIN_DIR, fs::Permissions::from_mode(0o755))?;
+    fs::set_permissions(LIB_DIR, fs::Permissions::from_mode(0o755))?;
     fs::set_permissions(STATE_DIR, fs::Permissions::from_mode(0o700))?;
     // The directory needs the label as much as the files do: a zygote that cannot search it never
     // reaches the payload inside.
-    if let Err(error) = crate::restorecon::lsetfilecon(BIN_DIR, crate::restorecon::KSU_CON) {
-        log::warn!("yukizygisk: could not label {BIN_DIR}: {error:#}");
+    if let Err(error) = crate::restorecon::lsetfilecon(LIB_DIR, crate::restorecon::KSU_CON) {
+        log::warn!("yukizygisk: could not label {LIB_DIR}: {error:#}");
     }
 
-    for name in FILES {
+    for name in DAEMONS.into_iter().chain(LIBRARIES) {
         let asset = crate::assets::embedded(&format!("yukizygisk/{name}"))
             .with_context(|| format!("embedded payload {name} is missing"))?;
-        let target = Path::new(BIN_DIR).join(name);
+        let target = target_path(name);
         let unchanged =
             fs::read(&target).is_ok_and(|on_disk| on_disk.as_slice() == asset.data.as_ref());
         if unchanged {
@@ -99,9 +115,43 @@ pub fn install() -> Result<()> {
 
 /// Whether the payload is fully installed.
 pub fn installed() -> bool {
-    FILES
-        .iter()
-        .all(|name| Path::new(BIN_DIR).join(name).exists())
+    DAEMONS
+        .into_iter()
+        .chain(LIBRARIES)
+        .all(|name| target_path(name).exists())
+}
+
+/// Whether the user left the engine on. On unless the marker exists.
+pub fn enabled() -> bool {
+    !Path::new(DISABLED_MARKER).exists()
+}
+
+/// Turn the engine on or off. Disabling stops the daemons and leaves them down at the next boot,
+/// which is the escape hatch when a module makes the system unusable.
+pub fn set_enabled(enable: bool) -> Result<()> {
+    if enable {
+        match fs::remove_file(DISABLED_MARKER) {
+            Ok(()) => log::info!("yukizygisk: enabled"),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => return Err(error).context("remove the disable marker"),
+        }
+        install()?;
+        start()?;
+    } else {
+        fs::create_dir_all(STATE_DIR).with_context(|| format!("create {STATE_DIR}"))?;
+        fs::write(DISABLED_MARKER, b"1\n").context("write the disable marker")?;
+        let _ = fs::set_permissions(DISABLED_MARKER, fs::Permissions::from_mode(0o600));
+        stop();
+        log::info!("yukizygisk: disabled");
+    }
+    Ok(())
+}
+
+/// Whether the loaded kernel module carries the injection runtime. A module built before this
+/// feature existed answers "no", and that is the case worth naming: everything else in the page can
+/// look healthy while nothing injects.
+pub fn kernel_supported() -> bool {
+    crate::feature::feature_supported(crate::feature_id::FeatureId::YukiZygisk).unwrap_or(false)
 }
 
 /// The settings document, with the engine's defaults filled in for anything it does not carry.
@@ -212,13 +262,13 @@ pub fn start() -> Result<()> {
     for (abi, name) in [(64, "zygiskd64"), (32, "zygiskd32")] {
         // Only an ABI whose own file exists is expected to run: a 64-bit-only build has no 32-bit
         // daemon, and a device with 32-bit support needs both.
-        if !Path::new(BIN_DIR).join(name).exists() {
+        let path = target_path(name);
+        if !path.exists() {
             continue;
         }
         if live.iter().any(|(running_abi, _)| *running_abi == abi) {
             continue;
         }
-        let path = Path::new(BIN_DIR).join(name);
         match spawn_daemon(&path) {
             Ok(child) => {
                 log::info!("yukizygisk: {name} started as pid {child}");
@@ -299,6 +349,10 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
     if safe_mode || crate::utils::is_safe_mode() || crate::utils::has_magisk() {
         return Ok(());
     }
+    if !enabled() {
+        log::info!("yukizygisk: disabled by the user, not starting");
+        return Ok(());
+    }
     install()?;
     start()
 }
@@ -306,7 +360,7 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
 /// `on services`: the daemons are started at post-fs-data, but a daemon that died in between has to
 /// be brought back before any app is launched, otherwise the next zygote fork injects nothing.
 pub fn ensure_running() -> Result<()> {
-    if !installed() {
+    if !enabled() || !installed() {
         return Ok(());
     }
     if !running().is_empty() {
@@ -320,6 +374,16 @@ pub fn ensure_running() -> Result<()> {
 /// the new cycle starts them against the new zygote.
 pub fn prepare_soft_reboot() {
     stop()
+}
+
+/// The last line the daemon wrote, for the page to show when nothing is running.
+fn last_error() -> Option<String> {
+    let log = format!("{STATE_DIR}/diagnostics/current/logs/zygiskd64.log");
+    let text = fs::read_to_string(&log).ok()?;
+    // The daemon prefixes every line with a timestamp and level; the last non-empty one is the
+    // reason it stopped, if it said anything at all.
+    let line = text.lines().rev().find(|line| !line.trim().is_empty())?;
+    Some(line.chars().take(200).collect())
 }
 
 /// Everything the manager needs to render the page, in one document.
@@ -336,6 +400,11 @@ pub fn status() -> Result<Value> {
             .iter()
             .map(|(abi, pid)| json!({ "abi": abi, "pid": pid }))
             .collect::<Vec<_>>(),
+        "enabled": enabled(),
+        // A module built without the feature is the one failure the page cannot show by looking at
+        // pids: everything is installed, nothing runs, and the reason lives in the kernel.
+        "kernelSupported": kernel_supported(),
+        "lastError": last_error(),
         "config": config,
     }))
 }
@@ -355,6 +424,10 @@ pub enum Command {
     },
     /// Restart the daemons
     Restart,
+    /// Turn the engine on and start it
+    Enable,
+    /// Turn the engine off and stop it (nothing injects until it is enabled again)
+    Disable,
 }
 
 pub fn run(command: &Command) -> Result<()> {
@@ -375,6 +448,8 @@ pub fn run(command: &Command) -> Result<()> {
             stop();
             start()?;
         }
+        Command::Enable => set_enabled(true)?,
+        Command::Disable => set_enabled(false)?,
     }
     Ok(())
 }

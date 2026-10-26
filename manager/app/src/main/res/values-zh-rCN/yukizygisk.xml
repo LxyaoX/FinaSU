@@ -29,4 +29,11 @@
     <string name="yukizygisk_restart_hint">下次重启生效</string>
     <string name="yukizygisk_apply_failed">修改失败</string>
     <string name="yukizygisk_read_failed">读取引擎状态失败</string>
+
+    <string name="yukizygisk_enabled_title">启用 YukiZygisk</string>
+    <string name="yukizygisk_enabled_summary">开机启动引擎，对支持 Zygisk 的应用注入模块。</string>
+    <string name="yukizygisk_disabled_summary">已关闭：在重新打开之前不会注入任何模块。</string>
+    <string name="yukizygisk_kernel_missing_title">内核模块版本过旧</string>
+    <string name="yukizygisk_kernel_missing_summary">当前 kernelsu.ko 未包含 YukiZygisk 运行时，请刷入本版本的内核模块后再使用。</string>
+    <string name="yukizygisk_last_error_title">引擎已退出</string>
 </resources>

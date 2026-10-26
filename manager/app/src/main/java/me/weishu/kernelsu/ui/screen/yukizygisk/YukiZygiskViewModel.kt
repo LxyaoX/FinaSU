@@ -65,6 +65,20 @@ class YukiZygiskViewModel : ViewModel() {
         }
     }
 
+    /** The master switch: off means the daemons are stopped and stay down at the next boot. */
+    fun setEnabled(enable: Boolean) {
+        viewModelScope.launch {
+            val command = if (enable) "yukizygisk enable" else "yukizygisk disable"
+            val applied = withContext(Dispatchers.IO) { execKsud(command, newShell = true) }
+            if (!applied) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(ksuApp, R.string.yukizygisk_apply_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
+            refresh()
+        }
+    }
+
     fun restart() {
         viewModelScope.launch {
             val restarted = withContext(Dispatchers.IO) {

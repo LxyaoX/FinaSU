@@ -26,6 +26,12 @@ data class YukiZygiskStatus(
     val installed: Boolean,
     /** False when this build carries no payload for the device architecture (YukiZygisk is arm-only). */
     val supported: Boolean,
+    /** The user's master switch. On unless it was turned off. */
+    val enabled: Boolean,
+    /** Whether the loaded kernel module carries the injection runtime at all. */
+    val kernelSupported: Boolean,
+    /** The daemon's last log line, shown when nothing is running. */
+    val lastError: String?,
     val daemons: List<YukiZygiskDaemon>,
     val config: YukiZygiskConfig,
 ) {
@@ -51,6 +57,9 @@ data class YukiZygiskStatus(
             YukiZygiskStatus(
                 installed = root.optBoolean("installed", false),
                 supported = root.optBoolean("supported", true),
+                enabled = root.optBoolean("enabled", true),
+                kernelSupported = root.optBoolean("kernelSupported", false),
+                lastError = root.optString("lastError").takeIf { it.isNotBlank() },
                 daemons = daemons,
                 config = YukiZygiskConfig(
                     yukilinker = config.optBoolean("yukilinker", true),

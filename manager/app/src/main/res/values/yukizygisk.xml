@@ -30,4 +30,11 @@
     <string name="yukizygisk_restart_hint">Applied on the next restart</string>
     <string name="yukizygisk_apply_failed">Failed to apply the change</string>
     <string name="yukizygisk_read_failed">Could not read the engine status</string>
+
+    <string name="yukizygisk_enabled_title">Enable YukiZygisk</string>
+    <string name="yukizygisk_enabled_summary">Start the engine at boot and inject into Zygisk-capable apps.</string>
+    <string name="yukizygisk_disabled_summary">Off: nothing is injected until this is switched back on.</string>
+    <string name="yukizygisk_kernel_missing_title">Kernel module too old</string>
+    <string name="yukizygisk_kernel_missing_summary">This kernelsu.ko was built without the YukiZygisk runtime. Flash a kernel module from this release to use it.</string>
+    <string name="yukizygisk_last_error_title">Engine stopped</string>
 </resources>

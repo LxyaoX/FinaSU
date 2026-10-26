@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,6 +70,19 @@ fun YukiZygiskScreen() {
             val status = state.status
             SegmentedColumn(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 item {
+                    SwitchPreference(
+                        title = stringResource(R.string.yukizygisk_enabled_title),
+                        summary = if (status?.enabled != false) {
+                            stringResource(R.string.yukizygisk_enabled_summary)
+                        } else {
+                            stringResource(R.string.yukizygisk_disabled_summary)
+                        },
+                        startAction = { Icon(Icons.Filled.Vaccines, contentDescription = null) },
+                        checked = status?.enabled ?: true,
+                        onCheckedChange = viewModel::setEnabled,
+                    )
+                }
+                item {
                     ArrowPreference(
                         title = stringResource(R.string.yukizygisk_title),
                         summary = when {
@@ -81,6 +95,26 @@ fun YukiZygiskScreen() {
                         startAction = { Icon(Icons.Filled.Memory, contentDescription = null) },
                         onClick = viewModel::refresh,
                     )
+                }
+                if (status != null && !status.kernelSupported) {
+                    item {
+                        ArrowPreference(
+                            title = stringResource(R.string.yukizygisk_kernel_missing_title),
+                            summary = stringResource(R.string.yukizygisk_kernel_missing_summary),
+                            startAction = { Icon(Icons.Filled.Warning, contentDescription = null) },
+                            onClick = viewModel::refresh,
+                        )
+                    }
+                }
+                if (status != null && !status.running && status.lastError != null) {
+                    item {
+                        ArrowPreference(
+                            title = stringResource(R.string.yukizygisk_last_error_title),
+                            summary = status.lastError,
+                            startAction = { Icon(Icons.Filled.BugReport, contentDescription = null) },
+                            onClick = viewModel::refresh,
+                        )
+                    }
                 }
                 if (status != null && status.daemons.isNotEmpty()) {
                     status.daemons.forEach { daemon ->
@@ -95,7 +129,7 @@ fun YukiZygiskScreen() {
                 }
             }
 
-            if (status != null) {
+            if (status != null && status.kernelSupported) {
                 val config = status.config
                 SegmentedColumn(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),

@@ -16,6 +16,8 @@ pub enum FeatureId {
     ShellSuAdbOnly = 7,
     UtsView = 9,
     MountViewFilter = 10,
+    /// YukiZygisk's injection runtime. Not a user toggle, so it stays out of `ALL`.
+    YukiZygisk = 11,
 }
 
 impl FeatureId {
