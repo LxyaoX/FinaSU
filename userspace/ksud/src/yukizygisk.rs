@@ -163,8 +163,7 @@ pub fn kernel_supported() -> bool {
 /// is what decides whether a module reaches zygote.
 pub fn kernel_enabled() -> bool {
     crate::ksucalls::get_feature(crate::feature_id::FeatureId::YukiZygisk as u32)
-        .map(|state| state.supported && state.value != 0)
-        .unwrap_or(false)
+        .is_ok_and(|state| state.supported && state.value != 0)
 }
 
 fn set_kernel_enabled(enable: bool) -> Result<()> {
@@ -395,7 +394,8 @@ pub fn start() -> Result<()> {
         record_start(false, &detail);
         bail!("{detail}");
     }
-    record_start(true, &format!("{} daemon(s) running", alive.len()));
+    let count = alive.len();
+    record_start(true, &format!("{count} daemon(s) running"));
     Ok(())
 }
 
@@ -409,7 +409,7 @@ fn spawn_daemon(path: &Path) -> Result<i32> {
 
     // The daemon writes one byte here once it is serving; without it "started" only means a fork
     // happened, which is exactly the case that used to look healthy while nothing injected.
-    let mut pipe = [0 as libc::c_int; 2];
+    let mut pipe = [0; 2];
     // SAFETY: pipe2 fills both slots on success and reports failure otherwise.
     if unsafe { libc::pipe2(pipe.as_mut_ptr(), libc::O_CLOEXEC) } != 0 {
         return Err(std::io::Error::last_os_error()).context("create the readiness pipe");
@@ -451,13 +451,13 @@ fn spawn_daemon(path: &Path) -> Result<i32> {
 
     let pid = child.id() as i32;
     match wait_ready(&mut read_end) {
-        Ok(Ready::Ready) => Ok(pid),
-        Ok(Ready::RebootRequired) => {
+        Ok(Startup::Up) => Ok(pid),
+        Ok(Startup::RebootRequired) => {
             let _ = child.kill();
             let _ = child.wait();
             bail!("the daemon asked for a reboot before it can inject")
         }
-        Ok(Ready::Failed) => {
+        Ok(Startup::Failed) => {
             let _ = child.kill();
             let status = child.wait().ok();
             bail!(
@@ -473,15 +473,15 @@ fn spawn_daemon(path: &Path) -> Result<i32> {
     }
 }
 
-enum Ready {
-    Ready,
+enum Startup {
+    Up,
     Failed,
     RebootRequired,
 }
 
 /// Wait for the daemon's readiness byte. The daemon writes '1' when serving, '0' when it gave up
 /// and 'R' when it needs a reboot; end-of-file means it exited without saying anything.
-fn wait_ready(read_end: &mut std::fs::File) -> Result<Ready> {
+fn wait_ready(read_end: &mut std::fs::File) -> Result<Startup> {
     use std::os::fd::AsRawFd;
 
     let deadline = Instant::now() + READY_TIMEOUT;
@@ -496,7 +496,7 @@ fn wait_ready(read_end: &mut std::fs::File) -> Result<Ready> {
             revents: 0,
         };
         // SAFETY: one descriptor this function owns, for the timeout it computed.
-        let ready = unsafe { libc::poll(&mut poll, 1, remaining.as_millis() as libc::c_int) };
+        let ready = unsafe { libc::poll(&raw mut poll, 1, remaining.as_millis() as libc::c_int) };
         if ready < 0 {
             let error = std::io::Error::last_os_error();
             if error.kind() == std::io::ErrorKind::Interrupted {
@@ -518,12 +518,12 @@ fn wait_ready(read_end: &mut std::fs::File) -> Result<Ready> {
         };
         return Ok(match got {
             1 => match byte {
-                b'1' => Ready::Ready,
-                b'R' => Ready::RebootRequired,
-                _ => Ready::Failed,
+                b'1' => Startup::Up,
+                b'R' => Startup::RebootRequired,
+                _ => Startup::Failed,
             },
             // End of file: the process is gone, so no readiness byte is coming.
-            0 => Ready::Failed,
+            0 => Startup::Failed,
             _ => {
                 let error = std::io::Error::last_os_error();
                 if error.kind() == std::io::ErrorKind::Interrupted {
