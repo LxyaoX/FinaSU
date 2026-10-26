@@ -136,8 +136,13 @@ pub fn set_enabled(enable: bool) -> Result<()> {
             Err(error) => return Err(error).context("remove the disable marker"),
         }
         install()?;
+        // Daemon first: the kernel only accepts the enable bit once the injection runtime is up.
         start()?;
+        set_kernel_enabled(true)?;
     } else {
+        // Injection off before the daemon goes away, so nothing tries to inject into a zygote whose
+        // daemon is gone.
+        let _ = set_kernel_enabled(false);
         fs::create_dir_all(STATE_DIR).with_context(|| format!("create {STATE_DIR}"))?;
         fs::write(DISABLED_MARKER, b"1\n").context("write the disable marker")?;
         let _ = fs::set_permissions(DISABLED_MARKER, fs::Permissions::from_mode(0o600));
@@ -152,6 +157,92 @@ pub fn set_enabled(enable: bool) -> Result<()> {
 /// look healthy while nothing injects.
 pub fn kernel_supported() -> bool {
     crate::feature::feature_supported(crate::feature_id::FeatureId::YukiZygisk).unwrap_or(false)
+}
+
+/// The kernel's own enable bit. Injection happens in the kernel, so this - not the marker file -
+/// is what decides whether a module reaches zygote.
+pub fn kernel_enabled() -> bool {
+    crate::ksucalls::get_feature(crate::feature_id::FeatureId::YukiZygisk as u32)
+        .map(|state| state.supported && state.value != 0)
+        .unwrap_or(false)
+}
+
+fn set_kernel_enabled(enable: bool) -> Result<()> {
+    if !kernel_supported() {
+        bail!("the loaded kernel module does not carry the YukiZygisk runtime");
+    }
+    crate::ksucalls::set_feature(
+        crate::feature_id::FeatureId::YukiZygisk as u32,
+        u64::from(enable),
+    )
+    .context("set the YukiZygisk feature bit")
+}
+
+/// `diagnostics/current` is the generation the daemon logs into. It refuses to write unless the
+/// directory carries the current boot id, so without this the engine has nowhere to explain itself.
+fn prepare_diagnostics() -> Result<()> {
+    let root = Path::new(STATE_DIR).join("diagnostics");
+    let current = root.join("current");
+    let previous = root.join("old");
+    fs::create_dir_all(&root).with_context(|| format!("create {}", root.display()))?;
+    restrict(&root, 0o700)?;
+
+    let boot_id = fs::read_to_string("/proc/sys/kernel/random/boot_id")
+        .context("read the boot id")?
+        .trim()
+        .to_string();
+    let stored = fs::read_to_string(current.join("boot_id")).ok();
+    if stored.as_deref().map(str::trim) == Some(boot_id.as_str()) {
+        let logs = current.join("logs");
+        fs::create_dir_all(&logs).with_context(|| format!("create {}", logs.display()))?;
+        restrict(&logs, 0o700)?;
+        return Ok(());
+    }
+
+    // A different boot: the old generation becomes `old`, which is where the daemon looks for the
+    // previous boot's evidence.
+    let _ = fs::remove_dir_all(&previous);
+    if current.exists() {
+        let _ = fs::rename(&current, &previous);
+    }
+    let logs = current.join("logs");
+    fs::create_dir_all(&logs).with_context(|| format!("create {}", logs.display()))?;
+    restrict(&current, 0o700)?;
+    restrict(&logs, 0o700)?;
+    let file = current.join("boot_id");
+    fs::write(&file, format!("{boot_id}\n"))
+        .with_context(|| format!("write {}", file.display()))?;
+    restrict(&file, 0o600)?;
+    Ok(())
+}
+
+fn restrict(path: &Path, mode: u32) -> Result<()> {
+    fs::set_permissions(path, fs::Permissions::from_mode(mode))
+        .with_context(|| format!("chmod {mode:o} {}", path.display()))
+}
+
+/// The outcome of the last start, so the page can explain a daemon that never came up even when it
+/// died before it could write a log line.
+fn start_record_path() -> PathBuf {
+    Path::new(STATE_DIR).join("last-start.json")
+}
+
+fn record_start(ok: bool, detail: &str) {
+    let _ = fs::create_dir_all(STATE_DIR);
+    let document = json!({ "ok": ok, "detail": detail });
+    let _ = fs::write(start_record_path(), format!("{document}\n"));
+}
+
+fn last_start_failure() -> Option<String> {
+    let text = fs::read_to_string(start_record_path()).ok()?;
+    let record: Value = serde_json::from_str(&text).ok()?;
+    if record.get("ok").and_then(Value::as_bool) == Some(true) {
+        return None;
+    }
+    record
+        .get("detail")
+        .and_then(Value::as_str)
+        .map(|detail| detail.chars().take(200).collect())
 }
 
 /// The settings document, with the engine's defaults filled in for anything it does not carry.
@@ -253,12 +344,28 @@ pub fn running() -> Vec<(u32, i32)> {
 }
 
 /// Start a daemon for each installed ABI. Already-running daemons are left alone.
+///
+/// Every daemon is asked to report readiness before this returns, so "the engine is up" means the
+/// endpoint is registered, not that a process was forked a moment ago.
 pub fn start() -> Result<()> {
     if !installed() {
         bail!("yukizygisk payload is not installed");
     }
+    if !kernel_supported() {
+        bail!("the loaded kernel module does not carry the YukiZygisk runtime");
+    }
+    // The daemon scans /data/adb/modules and hands the injected libraries to zygote, so it has to
+    // see init's mount namespace; a manager-initiated restart would otherwise run it inside the
+    // app's view of the filesystem.
+    if let Err(error) = crate::utils::switch_mnt_ns(1) {
+        log::warn!("yukizygisk: could not enter the init mount namespace: {error:#}");
+    }
+    if let Err(error) = prepare_diagnostics() {
+        log::warn!("yukizygisk: could not prepare the diagnostics directory: {error:#}");
+    }
+
     let live = running();
-    let mut started = Vec::new();
+    let mut failures = Vec::new();
     for (abi, name) in [(64, "zygiskd64"), (32, "zygiskd32")] {
         // Only an ABI whose own file exists is expected to run: a 64-bit-only build has no 32-bit
         // daemon, and a device with 32-bit support needs both.
@@ -270,49 +377,162 @@ pub fn start() -> Result<()> {
             continue;
         }
         match spawn_daemon(&path) {
-            Ok(child) => {
-                log::info!("yukizygisk: {name} started as pid {child}");
-                started.push(child);
-            }
-            Err(error) => log::warn!("yukizygisk: {name} failed to start: {error:#}"),
-        }
-    }
-    // Give the daemons a moment to settle: a daemon that exits immediately is a startup failure
-    // worth reporting, not a success that silently leaves the device without injection.
-    if !started.is_empty() {
-        std::thread::sleep(Duration::from_millis(400));
-        for pid in started {
-            if !Path::new(&format!("/proc/{pid}")).exists() {
-                log::warn!("yukizygisk: daemon {pid} exited during startup");
+            Ok(pid) => log::info!("yukizygisk: {name} ready as pid {pid}"),
+            Err(error) => {
+                log::warn!("yukizygisk: {name} failed to start: {error:#}");
+                failures.push(format!("{name}: {error:#}"));
             }
         }
     }
+
+    let alive = running();
+    if alive.is_empty() {
+        let detail = if failures.is_empty() {
+            "no daemon is running".to_string()
+        } else {
+            failures.join("; ")
+        };
+        record_start(false, &detail);
+        bail!("{detail}");
+    }
+    record_start(true, &format!("{} daemon(s) running", alive.len()));
     Ok(())
 }
 
+/// How long a daemon may take to report that its endpoint is registered.
+const READY_TIMEOUT: Duration = Duration::from_secs(15);
+
 fn spawn_daemon(path: &Path) -> Result<i32> {
+    use std::os::fd::{AsRawFd, FromRawFd};
     use std::os::unix::process::CommandExt;
     use std::process::{Command, Stdio};
+
+    // The daemon writes one byte here once it is serving; without it "started" only means a fork
+    // happened, which is exactly the case that used to look healthy while nothing injected.
+    let mut pipe = [0 as libc::c_int; 2];
+    // SAFETY: pipe2 fills both slots on success and reports failure otherwise.
+    if unsafe { libc::pipe2(pipe.as_mut_ptr(), libc::O_CLOEXEC) } != 0 {
+        return Err(std::io::Error::last_os_error()).context("create the readiness pipe");
+    }
+    // SAFETY: both descriptors were just created by pipe2 and are owned here.
+    let (mut read_end, write_end) = unsafe {
+        (
+            std::fs::File::from_raw_fd(pipe[0]),
+            std::fs::File::from_raw_fd(pipe[1]),
+        )
+    };
+    let write_fd = write_end.as_raw_fd();
+
     let mut command = Command::new(path);
     command
+        .env("YUKIZYGISK_READY_FD", write_fd.to_string())
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());
-    // SAFETY: `pre_exec` runs in the forked child before `exec`; both calls are async-signal-safe.
-    // The daemon must outlive init's exec-service cgroup, and a fresh session keeps it out of a
-    // terminal's process group.
+    // SAFETY: only async-signal-safe calls between fork and exec. A fresh session keeps the daemon
+    // out of any terminal's process group; the cgroup move is best effort - failing it must not
+    // stop the daemon from starting, which is what a fatal error here used to do.
     unsafe {
-        command.pre_exec(|| {
-            if libc::setsid() == -1 {
-                return Err(std::io::Error::last_os_error());
-            }
-            detach_from_service_cgroup()
+        command.pre_exec(move || {
+            libc::setsid();
+            libc::setpgid(0, 0);
+            let _ = detach_from_service_cgroup();
+            // The readiness pipe has to survive exec, so its close-on-exec flag goes away.
+            libc::fcntl(write_fd, libc::F_SETFD, 0);
+            Ok(())
         });
     }
-    let child = command
+
+    let mut child = command
         .spawn()
         .with_context(|| format!("spawn {}", path.display()))?;
-    Ok(child.id() as i32)
+    // The child owns the write end now; keeping ours open would hide its exit from the reader.
+    drop(write_end);
+
+    let pid = child.id() as i32;
+    match wait_ready(&mut read_end) {
+        Ok(Ready::Ready) => Ok(pid),
+        Ok(Ready::RebootRequired) => {
+            let _ = child.kill();
+            let _ = child.wait();
+            bail!("the daemon asked for a reboot before it can inject")
+        }
+        Ok(Ready::Failed) => {
+            let _ = child.kill();
+            let status = child.wait().ok();
+            bail!(
+                "the daemon exited during startup ({})",
+                status.map_or_else(|| "no exit status".to_string(), |status| status.to_string())
+            )
+        }
+        Err(error) => {
+            let _ = child.kill();
+            let _ = child.wait();
+            Err(error).context("the daemon did not report ready")
+        }
+    }
+}
+
+enum Ready {
+    Ready,
+    Failed,
+    RebootRequired,
+}
+
+/// Wait for the daemon's readiness byte. The daemon writes '1' when serving, '0' when it gave up
+/// and 'R' when it needs a reboot; end-of-file means it exited without saying anything.
+fn wait_ready(read_end: &mut std::fs::File) -> Result<Ready> {
+    use std::os::fd::AsRawFd;
+
+    let deadline = Instant::now() + READY_TIMEOUT;
+    loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            bail!("no readiness report within {:?}", READY_TIMEOUT);
+        }
+        let mut poll = libc::pollfd {
+            fd: read_end.as_raw_fd(),
+            events: libc::POLLIN,
+            revents: 0,
+        };
+        // SAFETY: one descriptor this function owns, for the timeout it computed.
+        let ready = unsafe { libc::poll(&mut poll, 1, remaining.as_millis() as libc::c_int) };
+        if ready < 0 {
+            let error = std::io::Error::last_os_error();
+            if error.kind() == std::io::ErrorKind::Interrupted {
+                continue;
+            }
+            return Err(error).context("wait for the readiness report");
+        }
+        if ready == 0 {
+            continue;
+        }
+        let mut byte = 0u8;
+        // SAFETY: one byte into a local buffer.
+        let got = unsafe {
+            libc::read(
+                read_end.as_raw_fd(),
+                (&raw mut byte).cast(),
+                std::mem::size_of::<u8>(),
+            )
+        };
+        return Ok(match got {
+            1 => match byte {
+                b'1' => Ready::Ready,
+                b'R' => Ready::RebootRequired,
+                _ => Ready::Failed,
+            },
+            // End of file: the process is gone, so no readiness byte is coming.
+            0 => Ready::Failed,
+            _ => {
+                let error = std::io::Error::last_os_error();
+                if error.kind() == std::io::ErrorKind::Interrupted {
+                    continue;
+                }
+                return Err(error).context("read the readiness report");
+            }
+        });
+    }
 }
 
 /// Stop every daemon. Used by soft reboot and by an explicit restart.
@@ -354,7 +574,11 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
         return Ok(());
     }
     install()?;
-    start()
+    start()?;
+    if let Err(error) = set_kernel_enabled(true) {
+        log::warn!("yukizygisk: could not enable injection in the kernel: {error:#}");
+    }
+    Ok(())
 }
 
 /// `on services`: the daemons are started at post-fs-data, but a daemon that died in between has to
@@ -363,11 +587,15 @@ pub fn ensure_running() -> Result<()> {
     if !enabled() || !installed() {
         return Ok(());
     }
-    if !running().is_empty() {
-        return Ok(());
+    let before = running().len();
+    start()?;
+    if running().len() > before {
+        log::warn!("yukizygisk: restarted a daemon that had died before zygote started");
     }
-    log::warn!("yukizygisk: no daemon alive at services, restarting");
-    start()
+    if let Err(error) = set_kernel_enabled(true) {
+        log::warn!("yukizygisk: could not enable injection in the kernel: {error:#}");
+    }
+    Ok(())
 }
 
 /// Soft reboot tears down userspace while the kernel module stays loaded: the daemons have to go so
@@ -404,7 +632,8 @@ pub fn status() -> Result<Value> {
         // A module built without the feature is the one failure the page cannot show by looking at
         // pids: everything is installed, nothing runs, and the reason lives in the kernel.
         "kernelSupported": kernel_supported(),
-        "lastError": last_error(),
+        "featureEnabled": kernel_enabled(),
+        "lastError": last_error().or_else(last_start_failure),
         "config": config,
     }))
 }
@@ -442,11 +671,17 @@ pub fn run(command: &Command) -> Result<()> {
             if *restart {
                 stop();
                 start()?;
+                if let Err(error) = set_kernel_enabled(true) {
+                    log::warn!("yukizygisk: could not re-enable injection: {error:#}");
+                }
             }
         }
         Command::Restart => {
             stop();
             start()?;
+            if let Err(error) = set_kernel_enabled(true) {
+                log::warn!("yukizygisk: could not re-enable injection: {error:#}");
+            }
         }
         Command::Enable => set_enabled(true)?,
         Command::Disable => set_enabled(false)?,

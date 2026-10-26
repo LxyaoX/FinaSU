@@ -107,6 +107,16 @@ fun YukiZygiskScreen() {
                         )
                     }
                 }
+                if (status != null && status.running && !status.featureEnabled) {
+                    item {
+                        ArrowPreference(
+                            title = stringResource(R.string.yukizygisk_injection_off_title),
+                            summary = stringResource(R.string.yukizygisk_injection_off_summary),
+                            startAction = { Icon(Icons.Filled.Warning, contentDescription = null) },
+                            onClick = viewModel::restart,
+                        )
+                    }
+                }
                 if (status != null && !status.running && status.lastError != null) {
                     item {
                         ArrowPreference(

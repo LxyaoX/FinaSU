@@ -36,4 +36,6 @@
     <string name="yukizygisk_kernel_missing_title">内核模块版本过旧</string>
     <string name="yukizygisk_kernel_missing_summary">当前 kernelsu.ko 未包含 YukiZygisk 运行时，请刷入本版本的内核模块后再使用。</string>
     <string name="yukizygisk_last_error_title">引擎已退出</string>
+    <string name="yukizygisk_injection_off_title">内核注入未开启</string>
+    <string name="yukizygisk_injection_off_summary">守护进程在运行，但内核的注入开关没有打开，模块不会进入应用。点此重启引擎。</string>
 </resources>
