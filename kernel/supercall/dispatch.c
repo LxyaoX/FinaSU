@@ -1204,7 +1204,7 @@ static int do_yz_allow_module_load_policy(void __user *arg)
         return -ESRCH;
     cred = get_task_cred(task);
     payload = fdget(cmd.dirfd);
-    file = fd_file(payload);
+    file = payload.file;
     if (!file) {
         ret = -EBADF;
         goto out_cred;
@@ -1742,6 +1742,9 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
      .handler = do_yz_patch_text_v2,
      .perm_check = only_root},
     {.cmd = KSU_IOCTL_YZ_RELOAD,
+     .name = "YZ_RELOAD",
+     .handler = do_yz_reload,
+     .perm_check = manager_or_root},
 #endif // #ifdef CONFIG_KSU_YUKIZYGISK
     {
         .cmd = 0,
