@@ -65,7 +65,7 @@ fun settingsSearchGroups(
 }
 
 /** The navigation bar's persisted form, which decides whether its floating rows exist at all. */
-private data class NavBarForm(val floating: Boolean, val glass: Boolean)
+private data class NavBarForm(val floating: Boolean)
 
 @Composable
 private fun rememberNavBarForm(): NavBarForm {
@@ -74,16 +74,13 @@ private fun rememberNavBarForm(): NavBarForm {
     val navModeRevision by NavModeConfig.revision.collectAsState()
     val floatingBarRevision by FloatingBarConfig.revision.collectAsState()
     return remember(navModeRevision, floatingBarRevision) {
-        val floating = NavModeConfig.mode == NavMode.Floating
-        NavBarForm(floating = floating, glass = floating && FloatingBarConfig.glass)
+        NavBarForm(floating = NavModeConfig.mode == NavMode.Floating)
     }
 }
 
 private fun ResolvedSettingsEntry.isAvailable(uiState: SettingsUiState, navBar: NavBarForm): Boolean {
     val search = entry
-    return search.available(uiState) &&
-        (!search.requiresFloatingBar || navBar.floating) &&
-        (!search.requiresFloatingGlass || navBar.glass)
+    return search.available(uiState) && (!search.requiresFloatingBar || navBar.floating)
 }
 
 /**

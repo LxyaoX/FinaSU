@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- miuix-blur declares minSdk 33; the liquid style only runs where the bar's glass state exists. -->
+    <!-- miuix-blur declares minSdk 33; the override only keeps the manifest merge from rejecting it. -->
     <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
 
     <uses-permission android:name="android.permission.INTERNET" />

@@ -90,53 +90,9 @@ The following options only appear after you select "Floating bottom navigation b
 - **Standard**: a fixed-width floating capsule.
 - **Drawer**: more compact, and expands to show the navigation entries.
 
-### Frosted Glass
-
-Frosted glass requires Android 13 and above. Once enabled, you can adjust:
-
-:::: field-group
-
-::: field Blur strength
-@type `0–100%`
-Controls how much the content behind the floating bar is blurred in real time. Higher values soften more but cost more graphics performance.
-:::
-
-::: field Background transparency
-@type `0–100%`
-Controls how much the floating bar itself covers the background. Too high a transparency reduces text readability.
-:::
-
-::: field Highlight strength
-@type `0–100%`
-Adjusts the overall highlight intensity of the glass surface.
-:::
-
-::: field Specular reflection
-@type `Switch`
-Adds a specular highlight at the top of the navigation bar.
-:::
-
-::: field Inner glow
-@type `Switch`
-Adds a faint inner glow at the bottom of the navigation bar.
-:::
-
-::: field Glass border
-@type `Switch`
-Draws a thin border around the floating bar to strengthen the edges.
-:::
-
-::::
-
-::: warning Do not force it on older systems
-
-Real-time blur is not available below Android 13. Keep frosted glass off when the system does not support it, and use "Compact corners" and an ordinary background instead.
-
-:::
-
 ### Compact Corners and Auto-hide
 
-- **Compact corners**: only appears when frosted glass is off, and reduces the floating bar size and corner spacing.
+- **Compact corners**: reduces the floating bar size and corner spacing.
 - **Auto-hide floating bottom bar**: hides after about 3 seconds without interaction.
 - **Swipe to hide floating bottom bar**: swipe down to hide, swipe up to show.
 
@@ -297,7 +253,7 @@ For detailed configuration, see [Module Cards & Banners](/en/setting/module-card
 
 | Scenario | Suggestion |
 | --- | --- |
-| Ordinary phone user | Automatic legacy navigation; enable badges as needed, no need for frosted glass |
+| Ordinary phone user | Automatic legacy navigation; enable badges as needed, no need for the floating bar |
 | Tablet or landscape | Side navigation; hide unused entries when you need more content width |
 | Few Root apps | Keep legacy SU enabled for the best compatibility |
 | Many modules | Collapse and join cards; shorten the description lines as needed |
@@ -309,14 +265,6 @@ For detailed configuration, see [Module Cards & Banners](/en/setting/module-card
 ## FAQ
 
 :::: collapse accordion
-
-- **Why do I not see frosted glass?**
-
-  It requires Android 13 or above, and the navigation mode must be the floating bottom navigation bar.
-
-- **Why does "Compact corners" sometimes disappear?**
-
-  It only appears when frosted glass is off. With frosted glass on, the glass parameters control the appearance instead.
 
 - **I hid the "Superuser" entry, is the authorization still there?**
 

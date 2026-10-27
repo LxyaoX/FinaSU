@@ -19,19 +19,6 @@ The floating navigation bar collects the bottom entries into a floating capsule.
 - **Drawer**: a more compact expandable style.
 - **Compact rounded**: reduces the capsule size and corner spacing.
 
-## Frosted Glass
-
-Android 13 and later can enable live blur. The adjustable items include:
-
-- Blur strength
-- Background transparency
-- Highlight strength
-- Specular reflection
-- Inner glow
-- Glass border
-
-On older systems that do not support live blur, turn frosted glass off and use a plain background.
-
 ## Auto-Hide
 
 - **Auto-hide**: hides after 3 seconds without interaction.

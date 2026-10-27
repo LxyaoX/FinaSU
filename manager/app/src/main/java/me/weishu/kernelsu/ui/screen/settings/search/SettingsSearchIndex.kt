@@ -44,14 +44,8 @@ import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.BlurCircular
-import androidx.compose.material.icons.rounded.BlurOn
-import androidx.compose.material.icons.rounded.BorderOuter
-import androidx.compose.material.icons.rounded.Brightness7
 import androidx.compose.material.icons.rounded.Description
-import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.Opacity
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.automirrored.rounded.LabelOff
@@ -60,7 +54,6 @@ import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material.icons.rounded.SwipeUp
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -106,12 +99,11 @@ data class SettingsSearchEntry(
     val aliases: List<String> = emptyList(),
     val available: (SettingsUiState) -> Boolean = { true },
     /**
-     * A row that only exists while the floating navigation bar is on screen with this form. The
-     * form lives outside the settings state, so it is declared here and resolved by the caller
-     * rather than read from inside the predicate.
+     * A row that only exists while the floating navigation bar is on screen. The form lives
+     * outside the settings state, so it is declared here and resolved by the caller rather than
+     * read from inside the predicate.
      */
     val requiresFloatingBar: Boolean = false,
-    val requiresFloatingGlass: Boolean = false,
 )
 
 /** A row on a category screen: tapping it opens that category. */
@@ -123,7 +115,6 @@ private fun SettingsCategory.row(
     aliases: List<String> = emptyList(),
     available: (SettingsUiState) -> Boolean = { true },
     requiresFloatingBar: Boolean = false,
-    requiresFloatingGlass: Boolean = false,
 ) = SettingsSearchEntry(
     id = id,
     titleRes = titleRes,
@@ -134,7 +125,6 @@ private fun SettingsCategory.row(
     aliases = aliases,
     available = available,
     requiresFloatingBar = requiresFloatingBar,
-    requiresFloatingGlass = requiresFloatingGlass,
 )
 
 /** A row that opens a page of its own, filed under the category that links to it. */
@@ -400,73 +390,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Rounded.Style,
             aliases = listOf("floating", "bar", "style", "drawer"),
             requiresFloatingBar = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.floating_bar_glass",
-            titleRes = R.string.settings_floating_bar_glass,
-            summaryRes = R.string.settings_floating_bar_glass_summary,
-            icon = Icons.Rounded.BlurOn,
-            aliases = listOf("floating", "glass", "blur", "translucent"),
-            requiresFloatingBar = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.glass_blur_strength",
-            titleRes = R.string.settings_navbar_glass_blur_strength,
-            icon = Icons.Rounded.BlurCircular,
-            aliases = listOf("glass", "blur", "strength"),
-            requiresFloatingGlass = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.glass_transparency",
-            titleRes = R.string.settings_navbar_glass_transparency,
-            icon = Icons.Rounded.Opacity,
-            aliases = listOf("glass", "transparency", "alpha"),
-            requiresFloatingGlass = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.glass_highlight",
-            titleRes = R.string.settings_navbar_glass_highlight_strength,
-            icon = Icons.Rounded.Brightness7,
-            aliases = listOf("glass", "highlight", "brightness"),
-            requiresFloatingGlass = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.glass_specular",
-            titleRes = R.string.settings_navbar_glass_specular,
-            summaryRes = R.string.settings_navbar_glass_specular_summary,
-            icon = Icons.Rounded.FlashOn,
-            aliases = listOf("glass", "specular", "shine"),
-            requiresFloatingGlass = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.glass_inner_glow",
-            titleRes = R.string.settings_navbar_glass_inner_glow,
-            summaryRes = R.string.settings_navbar_glass_inner_glow_summary,
-            icon = Icons.Rounded.WbTwilight,
-            aliases = listOf("glass", "glow", "inner"),
-            requiresFloatingGlass = true,
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.glass_border",
-            titleRes = R.string.settings_navbar_glass_border,
-            summaryRes = R.string.settings_navbar_glass_border_summary,
-            icon = Icons.Rounded.BorderOuter,
-            aliases = listOf("glass", "border", "outline"),
-            requiresFloatingGlass = true,
         )
     )
     add(

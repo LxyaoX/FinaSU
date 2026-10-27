@@ -270,7 +270,6 @@ dependencies {
 
     implementation(libs.material.kolor)
 
-    implementation(libs.liquid.android)
 
     implementation(libs.coil.compose)
 

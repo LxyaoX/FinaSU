@@ -107,11 +107,8 @@ import me.weishu.kernelsu.ui.component.bottombar.NavModeConfig
 import me.weishu.kernelsu.ui.component.bottombar.NavigationBadgeState
 import me.weishu.kernelsu.ui.component.bottombar.SideRail
 import me.weishu.kernelsu.ui.component.bottombar.floatingBarReservedHeight
-import me.weishu.kernelsu.ui.component.bottombar.isRealTimeBlurAvailable
-import me.weishu.kernelsu.ui.component.bottombar.navBarLiquefiable
 import me.weishu.kernelsu.ui.component.bottombar.rememberFloatingBarVisibilityState
 import me.weishu.kernelsu.ui.component.bottombar.rememberMainPagerState
-import me.weishu.kernelsu.ui.component.bottombar.rememberNavBarGlassLiquidState
 import me.weishu.kernelsu.ui.component.bottombar.useNavigationRail
 import me.weishu.kernelsu.ui.component.onboarding.FirstRunGuide
 import me.weishu.kernelsu.ui.navigation3.EXTRA_INCOMING_URIS
@@ -661,10 +658,6 @@ fun MainScreen(
         val floatingBarEnabled = navMode == NavMode.Floating
         val floatingBarStyle = remember(floatingBarRevision) { FloatingBarConfig.style }
         val floatingBarCompact = remember(floatingBarRevision) { FloatingBarConfig.compact }
-        val floatingBarGlassEnabled = floatingBarEnabled &&
-            remember(floatingBarRevision) { FloatingBarConfig.glass } &&
-            isRealTimeBlurAvailable()
-        val floatingLiquidState = if (floatingBarGlassEnabled) rememberNavBarGlassLiquidState() else null
         val floatingAutoHide = remember(floatingBarRevision) { FloatingBarConfig.autoHide }
         val floatingSwipeHide = remember(floatingBarRevision) { FloatingBarConfig.swipeHide }
         val floatingBarVisibility = rememberFloatingBarVisibilityState(
@@ -673,29 +666,27 @@ fun MainScreen(
             swipeHide = floatingSwipeHide,
         )
         val pagerContent = @Composable { bottomInnerPadding: Dp ->
-            Box(modifier = Modifier.navBarLiquefiable(floatingLiquidState)) {
-                HorizontalPager(
+            HorizontalPager(
+                state = mainPagerState.pagerState,
+                beyondViewportPageCount = if (renderPagerPages) 1 else 0,
+                overscrollEffect = null,
+                userScrollEnabled = userScrollEnabled,
+                pageNestedScrollConnection = pageNestedScrollConnection(
                     state = mainPagerState.pagerState,
-                    beyondViewportPageCount = if (renderPagerPages) 1 else 0,
-                    overscrollEffect = null,
-                    userScrollEnabled = userScrollEnabled,
-                    pageNestedScrollConnection = pageNestedScrollConnection(
-                        state = mainPagerState.pagerState,
-                        orientation = androidx.compose.foundation.gestures.Orientation.Horizontal,
-                    ),
-                    flingBehavior = flingBehavior(
-                        state = mainPagerState.pagerState,
-                        snapAnimationSpec = PagerNavigationSpringSpec,
-                    ),
-                ) { page ->
-                    val isCurrentPage = page == settledPage
-                    when (destinations.getOrNull(page)) {
-                        BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
-                        BottomBarDestination.SuperUser -> if (renderPagerPages || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
-                        BottomBarDestination.Module -> if (renderPagerPages || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
-                        BottomBarDestination.Setting -> if (renderPagerPages || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)
-                        null -> Unit
-                    }
+                    orientation = androidx.compose.foundation.gestures.Orientation.Horizontal,
+                ),
+                flingBehavior = flingBehavior(
+                    state = mainPagerState.pagerState,
+                    snapAnimationSpec = PagerNavigationSpringSpec,
+                ),
+            ) { page ->
+                val isCurrentPage = page == settledPage
+                when (destinations.getOrNull(page)) {
+                    BottomBarDestination.Home -> if (renderPagerPages || isCurrentPage) HomePager(navController, bottomInnerPadding, isCurrentPage, superuserCount, moduleEnabledCount, homeMetamodule)
+                    BottomBarDestination.SuperUser -> if (renderPagerPages || isCurrentPage) SuperUserPager(navController, bottomInnerPadding, isCurrentPage)
+                    BottomBarDestination.Module -> if (renderPagerPages || isCurrentPage) ModulePager(bottomInnerPadding, isCurrentPage)
+                    BottomBarDestination.Setting -> if (renderPagerPages || isCurrentPage) SettingPager(navController, bottomInnerPadding, isCurrentPage)
+                    null -> Unit
                 }
             }
         }
@@ -757,7 +748,6 @@ fun MainScreen(
                     ) {
                         FloatingBar(
                             navigationBadge = navigationBadge,
-                            liquidState = floatingLiquidState,
                             onUserInteraction = { floatingBarVisibility.onUserInteraction() },
                         )
                     }

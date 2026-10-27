@@ -17,21 +17,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
-import androidx.compose.material.icons.rounded.BlurCircular
-import androidx.compose.material.icons.rounded.BlurOn
-import androidx.compose.material.icons.rounded.BorderOuter
-import androidx.compose.material.icons.rounded.Brightness7
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Description
-import androidx.compose.material.icons.rounded.FlashOn
-import androidx.compose.material.icons.rounded.Opacity
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material.icons.rounded.SwipeUp
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import top.yukonga.miuix.kmp.basic.Slider
@@ -66,7 +59,6 @@ import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
-import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
 import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.TonalCard
@@ -212,16 +204,8 @@ private fun NavModeSection() {
     val floatingRevision by FloatingBarConfig.revision.collectAsState()
     val floatingStyle = remember(floatingRevision) { FloatingBarConfig.style }
     val floatingCompact = remember(floatingRevision) { FloatingBarConfig.compact }
-    val floatingGlass = remember(floatingRevision) { FloatingBarConfig.glass }
     val floatingAutoHide = remember(floatingRevision) { FloatingBarConfig.autoHide }
     val floatingSwipeHide = remember(floatingRevision) { FloatingBarConfig.swipeHide }
-    val glassBlurStrength = remember(floatingRevision) { FloatingBarConfig.glassBlurStrength }
-    val glassTransparency = remember(floatingRevision) { FloatingBarConfig.glassTransparency }
-    val glassHighlightStrength = remember(floatingRevision) { FloatingBarConfig.glassHighlightStrength }
-    val glassSpecular = remember(floatingRevision) { FloatingBarConfig.glassSpecular }
-    val glassInnerGlow = remember(floatingRevision) { FloatingBarConfig.glassInnerGlow }
-    val glassBorder = remember(floatingRevision) { FloatingBarConfig.glassBorder }
-    val toPercent: (Float) -> String = { "${(it * 100).roundToInt()}%" }
     val navModes = NavMode.entries
     val navModeLabels = listOf(
         stringResource(R.string.settings_nav_mode_auto),
@@ -260,80 +244,11 @@ private fun NavModeSection() {
                 }
                 add {
                     SwitchPreference(
-                        title = stringResource(R.string.settings_floating_bar_glass),
-                        summary = stringResource(R.string.settings_floating_bar_glass_summary),
-                        startAction = { Icon(Icons.Rounded.BlurOn, contentDescription = null) },
-                        checked = floatingGlass,
-                        onCheckedChange = { FloatingBarConfig.glass = it },
+                        title = stringResource(R.string.settings_floating_bar_compact),
+                        startAction = { Icon(Icons.Rounded.RoundedCorner, contentDescription = null) },
+                        checked = floatingCompact,
+                        onCheckedChange = { FloatingBarConfig.compact = it },
                     )
-                }
-                if (floatingGlass) {
-                    add {
-                        SegmentedSliderItem(
-                            icon = Icons.Rounded.BlurCircular,
-                            title = stringResource(R.string.settings_navbar_glass_blur_strength),
-                            value = glassBlurStrength,
-                            valueRange = 0f..1f,
-                            valueText = toPercent,
-                            onValueChangeFinished = { FloatingBarConfig.glassBlurStrength = it },
-                        )
-                    }
-                    add {
-                        SegmentedSliderItem(
-                            icon = Icons.Rounded.Opacity,
-                            title = stringResource(R.string.settings_navbar_glass_transparency),
-                            value = glassTransparency,
-                            valueRange = 0f..1f,
-                            valueText = toPercent,
-                            onValueChangeFinished = { FloatingBarConfig.glassTransparency = it },
-                        )
-                    }
-                    add {
-                        SegmentedSliderItem(
-                            icon = Icons.Rounded.Brightness7,
-                            title = stringResource(R.string.settings_navbar_glass_highlight_strength),
-                            value = glassHighlightStrength,
-                            valueRange = 0f..1f,
-                            valueText = toPercent,
-                            onValueChangeFinished = { FloatingBarConfig.glassHighlightStrength = it },
-                        )
-                    }
-                    add {
-                        SwitchPreference(
-                            title = stringResource(R.string.settings_navbar_glass_specular),
-                            summary = stringResource(R.string.settings_navbar_glass_specular_summary),
-                            startAction = { Icon(Icons.Rounded.FlashOn, contentDescription = null) },
-                            checked = glassSpecular,
-                            onCheckedChange = { FloatingBarConfig.glassSpecular = it },
-                        )
-                    }
-                    add {
-                        SwitchPreference(
-                            title = stringResource(R.string.settings_navbar_glass_inner_glow),
-                            summary = stringResource(R.string.settings_navbar_glass_inner_glow_summary),
-                            startAction = { Icon(Icons.Rounded.WbTwilight, contentDescription = null) },
-                            checked = glassInnerGlow,
-                            onCheckedChange = { FloatingBarConfig.glassInnerGlow = it },
-                        )
-                    }
-                    add {
-                        SwitchPreference(
-                            title = stringResource(R.string.settings_navbar_glass_border),
-                            summary = stringResource(R.string.settings_navbar_glass_border_summary),
-                            startAction = { Icon(Icons.Rounded.BorderOuter, contentDescription = null) },
-                            checked = glassBorder,
-                            onCheckedChange = { FloatingBarConfig.glassBorder = it },
-                        )
-                    }
-                } else {
-                    add {
-                        SwitchPreference(
-                            title = stringResource(R.string.settings_floating_bar_compact),
-                            startAction = { Icon(Icons.Rounded.RoundedCorner, contentDescription = null) },
-                            checked = floatingCompact,
-                            onCheckedChange = { FloatingBarConfig.compact = it },
-                        )
-                    }
                 }
                 add {
                     SwitchPreference(

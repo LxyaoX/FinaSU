@@ -21,12 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.fletchmckee.liquid.LiquidState
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
@@ -39,13 +37,11 @@ fun floatingBarReservedHeight(compact: Boolean, style: FloatingBarConfig.Style):
  * Floating bottom navigation bar rendered above the page content.
  *
  * Two forms ([FloatingBarConfig.Style]): [Standard][FloatingBarStandard] capsule and the
- * expanding [Drawer][FloatingBarDrawer]. With [FloatingBarConfig.glass] the surface becomes a
- * frosted-glass panel (real-time blur on Android 13+) linked to [liquidState].
+ * expanding [Drawer][FloatingBarDrawer].
  */
 @Composable
 internal fun FloatingBar(
     navigationBadge: NavigationBadgeState,
-    liquidState: LiquidState?,
     modifier: Modifier = Modifier,
     onUserInteraction: () -> Unit = {},
 ) {
@@ -54,19 +50,10 @@ internal fun FloatingBar(
     val revision by FloatingBarConfig.revision.collectAsStateWithLifecycle()
     val style = remember(revision) { FloatingBarConfig.style }
     val compact = remember(revision) { FloatingBarConfig.compact }
-    val useGlass = remember(revision) { FloatingBarConfig.glass } && liquidState != null
     val barStyle = BottomBarControl.style(BottomBarLayout.Floating)
     val containerColor = barStyle.containerColor
-    // A wallpaper selection fill fades with the surface it sits on; the liquid film has to be the
-    // same colour, otherwise the lens below it is covered by an opaque pill again.
     val selectionColor = barStyle.indicatorColor
     val selectionContentColor = LocalFolkWallpaperTokens.current?.selection?.contentColor
-    val glassBlurStrength = remember(revision) { FloatingBarConfig.glassBlurStrength }
-    val glassTransparency = remember(revision) { FloatingBarConfig.glassTransparency }
-    val glassHighlightStrength = remember(revision) { FloatingBarConfig.glassHighlightStrength }
-    val glassSpecular = remember(revision) { FloatingBarConfig.glassSpecular }
-    val glassInnerGlow = remember(revision) { FloatingBarConfig.glassInnerGlow }
-    val glassBorder = remember(revision) { FloatingBarConfig.glassBorder }
     val wallpaperActive = LocalFolkWallpaperTokens.current != null
     val visibilityRevision by NavBarVisibilityConfig.revision.collectAsStateWithLifecycle()
     val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
@@ -94,40 +81,22 @@ internal fun FloatingBar(
             val barShape: Shape = when {
                 style == FloatingBarConfig.Style.Drawer -> CircleShape
                 compact -> RoundedCornerShape(percent = 50)
-                useGlass -> CircleShape
                 else -> MaterialTheme.shapes.large
             }
             Surface(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .clip(barShape)
-                    .then(
-                        if (useGlass) {
-                            Modifier.navBarGlassEffect(
-                                shape = barShape,
-                                blurStrength = glassBlurStrength,
-                                transparency = glassTransparency,
-                                highlightStrength = glassHighlightStrength,
-                                enableSpecular = glassSpecular,
-                                enableInnerGlow = glassInnerGlow,
-                                enableBorder = glassBorder,
-                                liquidState = liquidState,
-                            )
-                        } else {
-                            Modifier
-                        }
-                    ),
+                    .clip(barShape),
                 shape = barShape,
-                color = if (useGlass) Color.Transparent else containerColor,
+                color = containerColor,
                 // A translucent surface cannot carry a shadow: the shadow is painted behind a fill that
                 // no longer hides it, so it reads as a dark halo around the capsule instead of a lift.
                 tonalElevation = 0.dp,
-                shadowElevation = if (useGlass || wallpaperActive) 0.dp else 8.dp,
-                // A white specular rim is invisible on a bright page, so the liquid pill keeps a
-                // hairline of its own to hold the edge in either polarity.
-                border = when {
-                    useGlass || wallpaperActive -> null
-                    else -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                shadowElevation = if (wallpaperActive) 0.dp else 8.dp,
+                border = if (wallpaperActive) {
+                    null
+                } else {
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                 },
             ) {
                 if (style == FloatingBarConfig.Style.Drawer) {
