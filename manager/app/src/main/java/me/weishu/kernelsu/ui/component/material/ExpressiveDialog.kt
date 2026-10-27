@@ -3,6 +3,7 @@ package me.weishu.kernelsu.ui.component.material
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,8 +26,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * The dialog every screen in this manager shows, drawn the way miuix draws one: a rounded surface
- * on the miuix background colour, the icon above the title, and the buttons stacked full width at
- * the bottom instead of pushed into the bottom-right corner.
+ * on the miuix background colour, the icon above the title, and the buttons sharing one row at the
+ * bottom - dismiss on the left, confirm on the right - instead of stacked on top of each other.
  *
  * The signature is the one this app already used - slots for the icon, the title, the body and the
  * two buttons - so a caller keeps its own composables and only inherits the frame. Colours reach
@@ -82,15 +83,26 @@ fun ExpressiveDialog(
                         }
                         Spacer(modifier = Modifier.height(24.dp))
                     }
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         if (dismissButton != null) {
-                            Box(modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.Center,
+                                propagateMinConstraints = true,
+                            ) {
                                 CompositionLocalProvider(LocalContentColor provides titleContentColor) {
                                     dismissButton()
                                 }
                             }
                         }
-                        Box(modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center,
+                            propagateMinConstraints = true,
+                        ) {
                             CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.primary) {
                                 confirmButton()
                             }
