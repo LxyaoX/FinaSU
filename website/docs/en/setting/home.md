@@ -222,20 +222,6 @@ The range is `80%–110%`. Larger values read better, smaller values fit more co
 
 A module description is collapsed automatically when it exceeds `1–5` lines. This setting affects module cards, not the home screen body text.
 
-### Wallpaper Gallery
-
-The "Wallpaper gallery" on the settings home screen can:
-
-- Filter by phone, tablet or foldable device.
-- Switch between masonry or stacked presentation.
-- Preview and download wallpapers; on Android 10 and above they are saved to `Pictures/FinaSU`.
-
-::: warning Downloading is not applying
-
-An image downloaded from the gallery does not become a Manager wallpaper automatically. Go to "Appearance → Wallpaper → Select image" and pick the file you just downloaded in the system file picker.
-
-:::
-
 ## FAQ
 
 :::: collapse accordion
@@ -267,6 +253,5 @@ An image downloaded from the gallery does not become a Manager wallpaper automat
 - [Appearance](/en/setting/appearance/)
 - [Theme & Color](/en/setting/theme/)
 - [Wallpaper](/en/setting/wallpaper/)
-- [Wallpaper Gallery](/en/setting/wallpaper-gallery/)
 - [Navigation](/en/setting/navigation/)
 - [Module Cards & Banners](/en/setting/module-cards/)

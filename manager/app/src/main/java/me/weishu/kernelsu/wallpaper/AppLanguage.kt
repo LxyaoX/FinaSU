@@ -7,14 +7,13 @@ import android.os.Build
 import android.os.LocaleList
 
 /**
- * Application language, shared by the platform locale APIs and the theme protocol.
+ * The application language the manager runs in.
  *
  * Android 13+ owns the selection through [LocaleManager]; older releases fall back to the
- * `fpt_app_language` preference applied by [wrap] in `attachBaseContext`. The theme protocol's
- * `appLanguage` field reads and writes the very same state, so a theme import and the in-app
- * picker never disagree.
+ * `fpt_app_language` preference applied by [wrap] in `attachBaseContext`. The preference key keeps
+ * its historical `fpt_` prefix so an upgrade does not reset the language.
  */
-object ThemeLanguage {
+object AppLanguage {
     private const val PREFS = "settings"
     private const val KEY = "fpt_app_language"
 
@@ -41,7 +40,7 @@ object ThemeLanguage {
         }
     }
 
-    /** Android 12 locale fallback, using the protocol's language tags. */
+    /** Android 12 locale fallback, using the same BCP-47 tags. */
     fun wrap(context: Context): Context {
         if (Build.VERSION.SDK_INT >= 33) return context
         val tags = context.getSharedPreferences(PREFS, 0).getString(KEY, "").orEmpty()

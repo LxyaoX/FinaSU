@@ -35,4 +35,4 @@ copyright:
 - **按钮指示器**：在开关中加入状态图标。
 - **离散滑块**：在滑块轨道显示刻度。
 
-色彩协议字段还支持 `colorGenerationMode` 和 `colorContrast`，但当前页面没有这两个字段的独立滑块。完整说明见[夜间模式、颜色与标题](/theme/global/theme-style/)；主题包导入导出见[主题预览与使用](/theme/theme-use/)。
+色彩协议字段还支持 `colorGenerationMode` 和 `colorContrast`，但当前页面没有这两个字段的独立滑块。

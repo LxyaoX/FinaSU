@@ -203,6 +203,5 @@ copyright:
 
 ## 相关页面
 
-- [主题与颜色](/setting/theme/)
 - [壁纸](/setting/wallpaper/)
 - [SU 日志](/manager/su-log/)

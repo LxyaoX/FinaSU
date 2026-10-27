@@ -141,7 +141,6 @@ import me.weishu.kernelsu.ui.screen.superuser.SuperUserPager
 import me.weishu.kernelsu.ui.screen.template.AppProfileTemplateScreen
 import me.weishu.kernelsu.ui.screen.templateeditor.TemplateEditorScreen
 import me.weishu.kernelsu.ui.screen.font.FontScreen
-import me.weishu.kernelsu.ui.screen.wallpaper.WallpaperGalleryScreen
 import me.weishu.kernelsu.ui.screen.wallpaper.WallpaperScreen
 import me.weishu.kernelsu.ui.theme.KernelSUTheme
 import me.weishu.kernelsu.ui.theme.LocalColorMode
@@ -172,7 +171,7 @@ open class MainActivity : FragmentActivity() {
     private val splashAnimationDurationMs = 500L
 
     override fun attachBaseContext(newBase: android.content.Context) {
-        super.attachBaseContext(me.weishu.kernelsu.wallpaper.ThemeLanguage.wrap(newBase))
+        super.attachBaseContext(me.weishu.kernelsu.wallpaper.AppLanguage.wrap(newBase))
     }
 
     /**
@@ -367,7 +366,6 @@ open class MainActivity : FragmentActivity() {
                                     me.weishu.kernelsu.ui.screen.settings.BackupListScreen()
                                 }
                                 entry<Route.Language> { LanguagePickerScreen() }
-                                entry<Route.WallpaperGallery> { WallpaperGalleryScreen() }
                                 entry<Route.ApiMarketplace> {
                                     me.weishu.kernelsu.ui.screen.bannerapi.ApiMarketplaceScreen()
                                 }

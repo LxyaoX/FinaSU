@@ -29,7 +29,6 @@ FinaSU 的“开发”不是只有编译内核。标准模块、Lua 插件、内
 | 导入独立 Linux 内核模块 | [内核模块](/manager/kernel-module/) | 需要 | `.ko` |
 | 把 Root 驱动编入设备内核 | [Built-In 内核集成](/developer/builtin-integration/) | 需要完整内核构建 | 内核源码 + `CONFIG_KSU=y` |
 | 新增内核功能或用户态接口 | [SuperCall 与 UAPI](/developer/supercall/) | 需要内核与用户态构建 | ioctl / 结构体 |
-| 制作可导入的外观主题 | [主题包结构](/developer/theme-package/) | 不需要 | `.fpt` |
 
 ::::
 
@@ -205,4 +204,3 @@ pnpm docs:build
 - [模块配置](/developer/module-config/)：`ksud module config` 的命名、优先级和限制。
 - [Lua 插件包与生命周期](/developer/lua-plugin/)：清单、安装、回调、依赖和 CLI。
 - [Lua API 参考](/developer/lua-api/)：函数签名、返回值、错误和可运行示例。
-- [主题包结构](/developer/theme-package/)：`.fpt` 容器、元数据、资源和兼容规则。

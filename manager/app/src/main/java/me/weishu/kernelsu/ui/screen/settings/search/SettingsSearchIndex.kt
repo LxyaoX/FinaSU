@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DeveloperMode
@@ -78,7 +77,7 @@ sealed interface SettingsSearchTarget {
 }
 
 /** The rows the hub itself owns, which have no page of their own to push. */
-enum class SettingsHubAction { BUG_FEEDBACK, DISCLAIMER, SEND_LOG, UNINSTALL }
+enum class SettingsHubAction { BUG_FEEDBACK, SEND_LOG, UNINSTALL }
 
 /**
  * One searchable settings row.
@@ -817,29 +816,11 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
     // The rows the hub itself owns.
     add(
         hubRow(
-            id = "hub.wallpaper_gallery",
-            titleRes = R.string.settings_wallpaper_gallery,
-            icon = Icons.Filled.Collections,
-            target = SettingsSearchTarget.Page(Route.WallpaperGallery),
-            aliases = listOf("wallpaper", "gallery", "photo"),
-        )
-    )
-    add(
-        hubRow(
             id = "hub.bug_feedback",
             titleRes = R.string.settings_bug_feedback,
             icon = Icons.Filled.BugReport,
             target = SettingsSearchTarget.Hub(SettingsHubAction.BUG_FEEDBACK),
             aliases = listOf("bug", "feedback", "issue", "report"),
-        )
-    )
-    add(
-        hubRow(
-            id = "hub.disclaimer",
-            titleRes = R.string.settings_disclaimer,
-            icon = Icons.Filled.Policy,
-            target = SettingsSearchTarget.Hub(SettingsHubAction.DISCLAIMER),
-            aliases = listOf("disclaimer", "warning", "risk"),
         )
     )
     add(

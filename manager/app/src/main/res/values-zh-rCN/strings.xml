@@ -512,20 +512,6 @@
     <string name="wallpaper_night_dim">夜间遮罩</string>
     <string name="wallpaper_use_color">从壁纸取色</string>
     <string name="wallpaper_use_color_summary">从壁纸中提取主题强调色</string>
-    <string name="wallpaper_section_interop">主题包</string>
-    <string name="wallpaper_export">导出主题包</string>
-    <string name="wallpaper_export_summary">将壁纸保存为可移植的 .fpt 文件</string>
-    <string name="wallpaper_import">导入主题包</string>
-    <string name="wallpaper_import_summary">从 .fpt 文件应用背景</string>
-    <string name="wallpaper_export_success">主题包已导出</string>
-    <string name="wallpaper_export_failed">导出失败</string>
-    <string name="wallpaper_import_success">主题包已导入</string>
-    <string name="wallpaper_import_failed">导入失败</string>
-    <string name="wallpaper_reset_theme">恢复默认主题</string>
-    <string name="wallpaper_reset_theme_summary">清除壁纸、字体、首页布局、主题配色与语言</string>
-    <string name="wallpaper_reset_theme_confirm">确定要恢复默认主题吗？这会清除自定义壁纸、字体、主题配色和语言。</string>
-    <string name="wallpaper_theme_reset">主题已恢复默认</string>
-    <string name="wallpaper_theme_reset_failed">恢复主题失败</string>
     <string name="wallpaper_crop_title">裁剪图片</string>
     <string name="wallpaper_crop_message">将图片裁剪以适配屏幕，或直接使用？</string>
     <string name="wallpaper_crop_confirm">裁剪</string>
@@ -563,11 +549,6 @@
     <string name="font_apply_failed">字体应用失败</string>
     <string name="font_confirm">确定</string>
     <string name="font_cancel">取消</string>
-    <string name="theme_store_cancel">取消</string>
-    <string name="theme_store_apply">应用</string>
-    <string name="theme_store_version">版本：%1$s</string>
-    <string name="theme_type_phone">手机</string>
-    <string name="theme_type_tablet">平板</string>
     <string name="settings_category_backup">备份</string>
     <string name="backup_section_targets">备份至</string>
     <string name="backup_section_content">备份内容</string>
@@ -637,23 +618,6 @@
     <string name="sulog_filter_daemon_restart">守护进程重启</string>
     <string name="profile" translatable="false">App Profile</string>
     <string name="settings_adb_root" translatable="false">ADB Root</string>
-    <string name="settings_wallpaper_gallery">壁纸图鉴</string>
-    <string name="wallpaper_gallery_device_phone">手机</string>
-    <string name="wallpaper_gallery_device_tablet">平板</string>
-    <string name="wallpaper_gallery_device_mixed">融合</string>
-    <string name="wallpaper_gallery_layout_waterfall">瀑布流</string>
-    <string name="wallpaper_gallery_layout_stack">堆叠</string>
-    <string name="wallpaper_gallery_display_options">展示方案</string>
-    <string name="wallpaper_gallery_display_layout">展示方式</string>
-    <string name="wallpaper_gallery_loading">正在加载壁纸</string>
-    <string name="wallpaper_gallery_empty">暂无壁纸</string>
-    <string name="wallpaper_gallery_retry">重试</string>
-    <string name="wallpaper_gallery_saved">已保存</string>
-    <string name="wallpaper_gallery_download_failed">下载失败</string>
-    <string name="wallpaper_gallery_download">下载</string>
-    <string name="wallpaper_gallery_cancel">取消</string>
-    <string name="settings_disclaimer">免责声明</string>
-    <string name="settings_disclaimer_message">对设备进行 Root 后，系统更新、第三方模块或其它外部因素可能造成不可预期的风险与损失，需要你自行承担。请在充分了解风险后再继续使用。</string>
     <string name="settings_bug_feedback">Bug 反馈</string>
     <string name="settings_search_hint">搜索设置</string>
     <string name="settings_search_empty">未找到相关设置</string>

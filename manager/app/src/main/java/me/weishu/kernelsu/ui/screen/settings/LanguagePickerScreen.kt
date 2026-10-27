@@ -32,12 +32,12 @@ import me.weishu.kernelsu.ui.component.material.SegmentedRadioItem
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.component.settings.SettingsContentMaxWidth
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
-import me.weishu.kernelsu.wallpaper.ThemeLanguage
+import me.weishu.kernelsu.wallpaper.AppLanguage
 import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 
 /**
- * In-app language picker, mirroring FolkPatch's list. Selection flows through [ThemeLanguage],
+ * In-app language picker, mirroring FolkPatch's list. Selection flows through [AppLanguage],
  * the same state the theme protocol writes, so the two never disagree.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +48,7 @@ fun LanguagePickerScreen() {
     val activity = LocalActivity.current
     val languages = stringArrayResource(R.array.languages)
     val languageValues = stringArrayResource(R.array.languages_values)
-    val currentTags = ThemeLanguage.currentTags(context)
+    val currentTags = AppLanguage.currentTags(context)
 
     // Instant feedback: setApplicationLocales()/recreate() apply asynchronously.
     var lastSelected by remember { mutableStateOf(-1) }
@@ -89,7 +89,7 @@ fun LanguagePickerScreen() {
                             selected = selected,
                             onClick = {
                                 lastSelected = index
-                                ThemeLanguage.setTags(
+                                AppLanguage.setTags(
                                     context,
                                     if (index == 0) "" else languageValues[index],
                                 )

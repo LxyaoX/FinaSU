@@ -1,13 +1,7 @@
 package me.weishu.kernelsu.ui.screen.wallpaper
 
-import me.weishu.kernelsu.ui.component.rememberThemeImportRequest
-import me.weishu.kernelsu.ui.component.ThemeMetadataEditor
-import me.weishu.kernelsu.wallpaper.ThemeMetadata
-import me.weishu.kernelsu.wallpaper.ThemeExportService
 
-import android.app.Activity
 import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,14 +23,11 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -83,7 +74,6 @@ import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.settings.ClearMediaRow
 import me.weishu.kernelsu.ui.screen.settings.MediaFileRow
 import me.weishu.kernelsu.ui.screen.settings.MediaSlider
-import me.weishu.kernelsu.wallpaper.FolkThemeIO
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
 import me.weishu.kernelsu.wallpaper.WallpaperManager
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
@@ -163,9 +153,6 @@ data class WallpaperScreenActions(
     val onCommitVideoVolume: () -> Unit,
     val onPickSurfaceImage: (SurfaceId) -> Unit,
     val onClearSurfaceImage: (SurfaceId) -> Unit,
-    val onExport: () -> Unit,
-    val onImport: () -> Unit,
-    val onResetTheme: () -> Unit,
 )
 
 @Composable
@@ -182,8 +169,6 @@ fun WallpaperScreen() {
     var pendingPage by rememberSaveable { mutableStateOf(NO_PAGE) }
     var mainPickToken by rememberSaveable { mutableStateOf(0) }
     var pagePickToken by rememberSaveable { mutableStateOf(0) }
-    var showResetDialog by remember { mutableStateOf(false) }
-    var showExportDialog by remember { mutableStateOf(false) }
 
     val persist: (Uri) -> Unit = { picked ->
         scope.launch {
@@ -238,19 +223,6 @@ fun WallpaperScreen() {
         }
     }
 
-    val resetTheme: () -> Unit = {
-        scope.launch {
-            val ok = FolkThemeIO.resetTheme(context)
-            // Android 12 and older only pick the restored locale up on recreation, matching import.
-            if (ok && Build.VERSION.SDK_INT < 33) (context as? Activity)?.recreate()
-            snackbarHost.showSnackbar(
-                resources.getString(
-                    if (ok) R.string.wallpaper_theme_reset else R.string.wallpaper_theme_reset_failed
-                )
-            )
-        }
-    }
-
     // Wallpapers fill the app window with ContentScale.Crop, so the crop frame is locked to the
     // window aspect: whatever the user frames is exactly what the wallpaper shows.
     val configuration = LocalConfiguration.current
@@ -287,42 +259,8 @@ fun WallpaperScreen() {
         },
     )
 
-    val requestImport = rememberThemeImportRequest { result ->
-            scope.launch {
-                snackbarHost.showSnackbar(
-                    resources.getString(
-                        if (result.isSuccess) R.string.wallpaper_import_success else R.string.wallpaper_import_failed
-                    ) + (result.exceptionOrNull()?.message?.let { ": $it" } ?: "")
-                )
-            }
-    }
-    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let(requestImport)
-    }
     val videoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let(persistVideo)
-    }
-    if (showExportDialog) {
-        ThemeMetadataEditor(
-            initial = ThemeMetadata.current(context).let { if (it.name.isBlank()) it.copy(name = "FinaSU") else it },
-            onDismiss = { showExportDialog = false },
-            onExport = { metadata ->
-                showExportDialog = false
-                scope.launch {
-                    val fileName = "${metadata.name.replace(Regex("[^\\p{L}\\p{N}_ -]"), "_")}.fpt"
-                    val result = ThemeExportService.exportToDownloads(context, metadata, fileName)
-                    snackbarHost.showSnackbar(
-                        resources.getString(
-                            if (result.isSuccess) R.string.wallpaper_export_success else R.string.wallpaper_export_failed
-                        ) + if (result.isSuccess) {
-                            ": ${ThemeExportService.DOWNLOAD_DIR}/$fileName"
-                        } else {
-                            result.exceptionOrNull()?.message?.let { ": $it" } ?: ""
-                        }
-                    )
-                }
-            },
-        )
     }
 
     SurfaceImagePickerHost(
@@ -333,29 +271,6 @@ fun WallpaperScreen() {
             persistSurface(id, uri)
         },
     )
-
-    if (showResetDialog) {
-        ExpressiveDialog(
-            onDismissRequest = { showResetDialog = false },
-            title = { Text(stringResource(R.string.wallpaper_reset_theme)) },
-            text = { Text(stringResource(R.string.wallpaper_reset_theme_confirm)) },
-            confirmButton = {
-                MiuixTextButton(
-                    text = stringResource(R.string.wallpaper_reset_theme),
-                    onClick = {
-                    showResetDialog = false
-                    resetTheme()
-                },
-                )
-            },
-            dismissButton = {
-                MiuixTextButton(
-                    text = stringResource(android.R.string.cancel),
-                    onClick = { showResetDialog = false },
-                )
-            },
-        )
-    }
 
     val state = WallpaperUiState(
         enabled = WallpaperConfig.enabled,
@@ -474,9 +389,6 @@ fun WallpaperScreen() {
                 snackbarHost.showSnackbar(resources.getString(removedRes))
             }
         },
-        onExport = { showExportDialog = true },
-        onImport = { importLauncher.launch("*/*") },
-        onResetTheme = { showResetDialog = true },
     )
 
     WallpaperScreenMaterial(state, actions, snackbarHost)
@@ -716,37 +628,6 @@ fun WallpaperScreenMaterial(
             }
 
             SurfaceSettingsHost(state = state, actions = actions)
-
-            SegmentedColumn(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
-                title = stringResource(R.string.wallpaper_section_interop),
-                content = buildList {
-                    add {
-                        ArrowPreference(
-                            title = stringResource(R.string.wallpaper_export),
-                            summary = stringResource(R.string.wallpaper_export_summary),
-                            startAction = { Icon(Icons.Filled.FileDownload, null) },
-                            onClick = actions.onExport,
-                        )
-                    }
-                    add {
-                        ArrowPreference(
-                            title = stringResource(R.string.wallpaper_import),
-                            summary = stringResource(R.string.wallpaper_import_summary),
-                            startAction = { Icon(Icons.Filled.FileUpload, null) },
-                            onClick = actions.onImport,
-                        )
-                    }
-                    add {
-                        ArrowPreference(
-                            title = stringResource(R.string.wallpaper_reset_theme),
-                            summary = stringResource(R.string.wallpaper_reset_theme_summary),
-                            startAction = { Icon(Icons.Filled.RestartAlt, null) },
-                            onClick = actions.onResetTheme,
-                        )
-                    }
-                },
-            )
 
             Spacer(Modifier.height(24.dp))
         }

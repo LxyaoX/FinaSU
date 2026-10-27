@@ -50,13 +50,4 @@ class VisualMediaConfigTest {
         assertEquals(0f, VisualMediaConfig.titleDim, 0f)
         assertEquals(-2f, VisualMediaConfig.titleOffsetX, 0f)
     }
-
-    @Test
-    fun videoThemeEntryRetainsItsContainerExtension() {
-        val asset = me.weishu.kernelsu.wallpaper.VisualMediaThemeAsset(true)
-        assertEquals("video_background", asset.base)
-        assertEquals("mp4", asset.extension(java.io.File("video_background.mp4")))
-        assertEquals("webm", asset.extension(java.io.File("video_background.webm")))
-        assertEquals("mkv", asset.extension(java.io.File("video_background.mkv")))
-    }
 }

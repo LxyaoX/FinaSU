@@ -44,16 +44,7 @@ config:
           height: 26
           wrap: true
         details: CircleUI、GridUI、FocusUI、DashboardUI、StatsUI；FocusUI 和 StatsUI 提供实时指标。
-        link: /theme/theme-use/#五套首页布局
-      - title: 主题包与商店
-        icon:
-          src: /icons/home/store.svg
-          alt: 主题包与商店
-          width: 26
-          height: 26
-          wrap: true
-        details: 导入或导出 .fpt 主题，浏览在线主题库；主题可包含布局、颜色、壁纸、字体、图标与声音。
-        link: /setting/theme-store/
+        link: /setting/home/
       - title: 内核级 Root
         icon:
           src: /icons/home/shield-lock.svg

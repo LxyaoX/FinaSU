@@ -14,7 +14,7 @@ copyright:
 
 <Badge text="8 entries" type="tip" /> <Badge text="Start from a goal" type="warning" />
 
-The settings home screen is not a long list of switches. The device and profile header sits at the top, eight entries fill two rows of four in the middle, and only below that come the wallpaper gallery, feedback, disclaimer, logs, about, and the conditionally shown uninstall entry.
+The settings home screen is not a long list of switches. The device and profile header sits at the top, eight entries fill two rows of four in the middle, and only below that come feedback, logs, about, and the conditionally shown uninstall entry.
 
 ::: tip Fastest way to find an option
 
@@ -87,9 +87,7 @@ These entries are not part of the eight categories, but they can be used directl
 | Entry | What it can do | Note |
 | --- | --- | --- |
 | **Profile header** | Tap the avatar to edit the nickname, signature, avatar and avatar opacity. The avatar can be a local image, a QQ avatar or a Gravatar. | Only changes the displayed profile inside the Manager. |
-| **Wallpaper gallery** | Browse, preview and download wallpapers; on Android 10 and above they are saved to `Pictures/FinaSU`. | Downloads are not applied automatically; select an image later under "Appearance → Wallpaper". See [Wallpaper Gallery](/en/setting/wallpaper-gallery/). |
 | **Bug feedback** | Opens the project's public issue tracker. | Before submitting, prepare the version, runtime mode, reproduction steps and logs; never publish credentials. |
-| **Disclaimer** | Read the risk notes on Root, flashing, modules and security policy changes. | Does not replace backups and bootloop rescue preparation. |
 | **Send logs** | Select and export Manager diagnostic logs. | Logs may contain package names, paths and device information; check them before sending. |
 | **About** | View Manager, kernel, runtime mode and project information. | Record the version and runtime mode from here when reporting a problem. |
 | **Uninstall** | Shown only in LKM mode; provides permanent uninstall and restoring the stock image. | Not available in Jailbreak mode (late load); back up before using it. |

@@ -35,4 +35,4 @@ The wallpaper page can enable "Pick color from wallpaper". In multi-background m
 - **Button indicators**: adds a status icon inside switches.
 - **Discrete sliders**: shows ticks on the slider track.
 
-The color protocol also accepts the fields `colorGenerationMode` and `colorContrast`, but the current page has no separate sliders for them. For the full description see [Dark Mode, Colors & Titles](/en/theme/global/theme-style/); for theme package import and export see [Theme Preview & Usage](/en/theme/theme-use/).
+The color protocol also accepts the fields `colorGenerationMode` and `colorContrast`, but the current page has no separate sliders for them.

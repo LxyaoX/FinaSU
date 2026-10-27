@@ -1,6 +1,6 @@
 ---
 title: Maintenance & Risky Actions
-description: The disclaimer and uninstall entries on the Settings home screen
+description: The uninstall entry on the Settings home screen and what to prepare before flashing
 createTime: 2026/10/24 00:00:00
 permalink: /en/setting/maintenance/
 copyright:
@@ -14,13 +14,9 @@ copyright:
 
 <Badge text="Home screen shortcut" type="info" /> <Badge text="Back up first" type="danger" />
 
-The maintenance entry on the Settings home screen is not a ninth settings category. It currently contains the disclaimer and the "Uninstall" entry that appears only in LKM mode.
+The maintenance entry on the Settings home screen is not a ninth settings category. It currently contains only the "Uninstall" entry, which appears in LKM mode.
 
-## Disclaimer
-
-The disclaimer explains that Root, flashing, third-party modules and security policy changes can cause abnormal system updates, data loss, a changed warranty status or other unexpected consequences.
-
-Reading it and continuing to use Manager does not mean the safety preparation is done. Before you actually flash, you should still:
+Before you actually flash, you should still:
 
 - Save the stock boot image.
 - Back up modules and the Superuser list.

@@ -222,20 +222,6 @@ flowchart TD
 
 模块介绍超过 `1–5` 行时自动折叠。该设置影响模块卡片，不是首页正文。
 
-### 壁纸图鉴
-
-设置首页的“壁纸图鉴”可以：
-
-- 按手机、平板或融合设备筛选。
-- 切换瀑布流或堆叠展示。
-- 预览并下载壁纸；Android 10 及以上保存到 `Pictures/FinaSU`。
-
-::: warning 下载不等于应用
-
-图鉴下载的图片不会自动成为管理器壁纸。要到“外观 → 壁纸 → 选择图片”，从系统文件选择器中选中刚下载的文件。
-
-:::
-
 ## 常见问题
 
 :::: collapse accordion
@@ -267,6 +253,5 @@ flowchart TD
 - [外观](/setting/appearance/)
 - [主题与颜色](/setting/theme/)
 - [壁纸](/setting/wallpaper/)
-- [壁纸图鉴](/setting/wallpaper-gallery/)
 - [导航](/setting/navigation/)
 - [模块卡片与横幅](/setting/module-cards/)

@@ -44,16 +44,7 @@ config:
           height: 26
           wrap: true
         details: CircleUI, GridUI, FocusUI, DashboardUI, and StatsUI. FocusUI and StatsUI provide live metrics.
-        link: /en/theme/theme-use/#five-home-layouts
-      - title: Theme Packages & Store
-        icon:
-          src: /icons/home/store.svg
-          alt: Theme Packages & Store
-          width: 26
-          height: 26
-          wrap: true
-        details: Import or export .fpt themes and browse the online theme library. A theme can include layout, colors, wallpaper, fonts, icons, and sounds.
-        link: /en/setting/theme-store/
+        link: /en/setting/home/
       - title: Kernel-Level Root
         icon:
           src: /icons/home/shield-lock.svg

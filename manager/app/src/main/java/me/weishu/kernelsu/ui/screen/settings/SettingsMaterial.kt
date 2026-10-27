@@ -16,11 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -72,7 +70,6 @@ fun SettingPagerMaterial(
     val snackBarHost = remember { SnackbarHostState() }
     val showUninstallDialog = rememberSaveable { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
-    val showDisclaimerDialog = rememberSaveable { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.current
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -87,7 +84,6 @@ fun SettingPagerMaterial(
             is SettingsSearchTarget.Page -> navigator.push(target.route)
             is SettingsSearchTarget.Hub -> when (target.action) {
                 SettingsHubAction.BUG_FEEDBACK -> uriHandler.openUri(BUG_FEEDBACK_URL)
-                SettingsHubAction.DISCLAIMER -> showDisclaimerDialog.value = true
                 SettingsHubAction.SEND_LOG -> showBottomSheet = true
                 SettingsHubAction.UNINSTALL -> showUninstallDialog.value = true
             }
@@ -167,18 +163,6 @@ fun SettingPagerMaterial(
                 content = listOf(
                     {
                         ArrowPreference(
-                            title = stringResource(id = R.string.settings_wallpaper_gallery),
-                            startAction = {
-                                Icon(
-                                    Icons.Filled.Collections,
-                                    stringResource(id = R.string.settings_wallpaper_gallery)
-                                )
-                            },
-                            onClick = actions.onOpenGallery,
-                        )
-                    },
-                    {
-                        ArrowPreference(
                             title = stringResource(id = R.string.settings_bug_feedback),
                             startAction = {
                                 Icon(
@@ -187,18 +171,6 @@ fun SettingPagerMaterial(
                                 )
                             },
                             onClick = { uriHandler.openUri(BUG_FEEDBACK_URL) },
-                        )
-                    },
-                    {
-                        ArrowPreference(
-                            title = stringResource(id = R.string.settings_disclaimer),
-                            startAction = {
-                                Icon(
-                                    Icons.Filled.Policy,
-                                    stringResource(id = R.string.settings_disclaimer)
-                                )
-                            },
-                            onClick = { showDisclaimerDialog.value = true },
                         )
                     },
                     {
@@ -255,9 +227,5 @@ fun SettingPagerMaterial(
             }
             Spacer(modifier = Modifier.height(bottomInnerPadding))
         }
-    }
-
-    if (showDisclaimerDialog.value) {
-        SettingsDisclaimerDialog(showDisclaimerDialog)
     }
 }

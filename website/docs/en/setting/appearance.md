@@ -98,16 +98,6 @@ After the video background is enabled, the video replaces the static image:
 
 The scrim can still be used in video mode, but "Surface opacity", "Blur" and "Pick color from wallpaper" are hidden because they only apply to static images. Video decoding and continuous playback use more power, so use it with care on low-performance devices.
 
-### Wallpaper Gallery
-
-The "Wallpaper gallery" on the settings home screen is for browsing and previewing wallpapers, filtering by phone, tablet or foldable device, and switching between a masonry or stacked presentation.
-
-Tapping "Download" only saves the image: on Android 10 and above it is written to `Pictures/FinaSU`, and on Android 9 and below to the Manager's dedicated external picture directory. A download ==does not turn into a Manager wallpaper automatically==; to use the image, go back to "Appearance → Wallpaper" and pick it with "Select image" in the system file picker.
-
-For the full description, see [Wallpaper Gallery](/en/setting/wallpaper-gallery/).
-
-For the full description, see [Wallpaper](/en/setting/wallpaper/).
-
 ## Font
 
 The font page has three modes:
@@ -116,46 +106,11 @@ The font page has three modes:
 - **System default**: follows the device system font.
 - **Custom**: picks a font file from the device.
 
-A custom font only affects the Manager interface; it does not replace the Android system font and does not enter `.fpt` theme packages automatically. If the font is missing glyphs, damaged or in an incompatible format, restore the default font.
+A custom font only affects the manager UI; it does not replace the Android system font. If glyphs are missing, the file is damaged or the format is unsupported, restore the default font.
 
 "Restore default font" deletes the imported file and switches back to **App default**; if you want to follow the system font, restore first and then select "System default" manually.
 
 See [Font](/en/setting/font/).
-
-## Theme Store
-
-The theme store is for browsing, downloading and applying `.fpt` themes. A theme may contain wallpaper, font, colors, layout, navigation icons, sound effects and other resources.
-
-::: warning A successful download does not mean the theme is applied
-
-Downloading only brings the file to the device. You still have to confirm the import and apply it in the theme store or on the wallpaper page; check the author, the preview and the source before applying.
-
-:::
-
-### Theme Store Modes
-
-:::: code-tabs
-
-@tab Built-in mode
-
-```text
-The Manager downloads inside the app, shows progress and imports the file.
-Suits devices where in-app downloads and file handling work normally.
-```
-
-@tab Compatibility mode
-
-```text
-Hands the download to the system browser.
-Suits devices where WebView, built-in downloads or the file picker have problems.
-After downloading, open the .fpt file to complete the import.
-```
-
-::::
-
-You can switch between the two modes at any time on the appearance page; neither applies an already downloaded theme automatically.
-
-See [Theme Store](/en/setting/theme-store/).
 
 ## Launcher Icon
 
@@ -177,7 +132,7 @@ Five home layouts are currently available:
 
 :::
 
-Switching the layout only changes the home screen arrangement; it does not change theme colors, Root state or module data. For the detailed structure of each layout, see the matching page in the Themes section.
+Switching the layout only changes the home screen arrangement; it does not change theme colors, Root state or module data.
 
 ## Layout Variants
 
@@ -327,6 +282,4 @@ If a module author wrote long and important installation notes, do not set this 
 - [Theme & Color](/en/setting/theme/)
 - [Wallpaper](/en/setting/wallpaper/)
 - [Font](/en/setting/font/)
-- [Theme Store](/en/setting/theme-store/)
 - [Home & Layout](/en/setting/home/)
-- [Theme Usage and Export](/en/theme/theme-use/)

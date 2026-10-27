@@ -29,7 +29,6 @@ Development in FinaSU is not only compiling the kernel. Standard modules, Lua pl
 | Import a standalone Linux kernel module | [Kernel module](/en/manager/kernel-module/) | Yes | `.ko` |
 | Build the root driver into the device kernel | [Built-In kernel integration](/en/developer/builtin-integration/) | Full kernel build required | Kernel source + `CONFIG_KSU=y` |
 | Add a kernel feature or a userspace interface | [SuperCall & UAPI](/en/developer/supercall/) | Kernel and userspace builds required | ioctl / struct |
-| Create an importable appearance theme | [Theme package structure](/en/developer/theme-package/) | No | `.fpt` |
 
 ::::
 
@@ -205,4 +204,3 @@ Before running the Manager Gradle build, make sure a usable `libksud.so` exists 
 - [Module configuration](/en/developer/module-config/): naming, precedence and limits of `ksud module config`.
 - [Lua plugin package & lifecycle](/en/developer/lua-plugin/): manifest, installation, callbacks, dependencies and CLI.
 - [Lua API reference](/en/developer/lua-api/): function signatures, return values, errors and runnable examples.
-- [Theme package structure](/en/developer/theme-package/): `.fpt` container, metadata, resources and compatibility rules.

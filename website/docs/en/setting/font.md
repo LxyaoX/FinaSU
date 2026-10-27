@@ -85,4 +85,3 @@ The font is part of the Manager appearance, but it never replaces the system fon
 
 - [Appearance](/en/setting/appearance/)
 - [Theme & Color](/en/setting/theme/)
-- [Theme Store](/en/setting/theme-store/)

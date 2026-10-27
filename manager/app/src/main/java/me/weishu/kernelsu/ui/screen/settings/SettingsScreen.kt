@@ -84,7 +84,6 @@ fun rememberSettingsActions(
         onOpenTheme = { navigator.push(Route.ColorPalette) },
         onOpenLanguage = { navigator.push(Route.Language) },
         onOpenWallpaper = { navigator.push(Route.Wallpaper) },
-        onOpenGallery = { navigator.push(Route.WallpaperGallery) },
         onOpenFont = { navigator.push(Route.Font) },
         onOpenProfileTemplate = { navigator.push(Route.AppProfileTemplate) },
         onSetSuCompatMode = viewModel::setSuCompatMode,

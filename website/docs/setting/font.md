@@ -85,4 +85,3 @@ copyright:
 
 - [外观](/setting/appearance/)
 - [主题与颜色](/setting/theme/)
-- [主题商店](/setting/theme-store/)
