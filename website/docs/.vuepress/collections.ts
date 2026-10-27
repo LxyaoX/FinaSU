@@ -402,7 +402,6 @@ export const docsSidebar: ThemeSidebarItem[] = [
         items: [
           { text: 'Lua 插件包与生命周期', link: '/developer/lua-plugin/', icon: 'ri:braces-line' },
           { text: 'Lua API 参考', link: '/developer/lua-api/', icon: 'ri:code-line' },
-          { text: '主题包结构', link: '/developer/theme-package/', icon: 'ri:folder-settings-line' },
         ],
       },
     ],
@@ -916,7 +915,6 @@ export const enDocsSidebar: ThemeSidebarItem[] = [
         items: [
           { text: 'Lua Plugin Package & Lifecycle', link: '/en/developer/lua-plugin/', icon: 'ri:braces-line' },
           { text: 'Lua API Reference', link: '/en/developer/lua-api/', icon: 'ri:code-line' },
-          { text: 'Theme Package Structure', link: '/en/developer/theme-package/', icon: 'ri:folder-settings-line' },
         ],
       },
     ],
