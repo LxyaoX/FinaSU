@@ -77,7 +77,7 @@ Steps (usable individually, but keep the order above):
 - `lkm` - build `kernelsu.ko` for each `KMIS` in the DDK Docker image, then stage it into `userspace/ksud/bin/aarch64/` for ksud to embed.
 - `nomount` - build the vendored NoMount module the same way, staged as `<kmi>_nomount.ko`.
 - `ksuinit` - cross-compile the statically linked `ksuinit` helper ksud embeds (boot-patch fails without it).
-- `ksud` - cross-compile the daemon with cargo-ndk.
+- `ksud` - cross-compile the daemon with cargo-ndk. Only `userspace/ksud/bin/aarch64/` is populated: the prebuilt `busybox`/`waitsys`/`bootctl` for x86_64 and riscv64 were dropped, so building ksud for any other target means staging that target's busybox first (`RustEmbed` fails on a missing folder).
 - `apk` - `./gradlew :app:assembleRelease`, signed from `manager/keystore.properties`.
 - `repack` - inject the freshly built ksud into the APK and re-sign it, writing the deliverables to `dist/`.
 
