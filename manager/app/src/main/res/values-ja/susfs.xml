@@ -17,6 +17,7 @@
     <string name="susfs_skipped">スキップ · カーネル未対応</string>
     <string name="susfs_failed">適用に失敗</string>
     <string name="susfs_pending">再起動待ち</string>
+    <string name="susfs_deferred">UTS View の有効中は保留</string>
     <string name="susfs_probe">SUSFS を確認中…</string>
     <string name="susfs_absent">SUSFS が検出されません</string>
     <string name="susfs_readonly">不明なプロトコル · 読み取り専用</string>

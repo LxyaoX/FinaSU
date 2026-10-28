@@ -324,31 +324,24 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
     }
     state.report?.let { report ->
         SegmentedColumn(title = stringResource(R.string.susfs_last_report)) {
-            item { ArrowPreference(
-                title = susfsManagementLabel(report.status),
-                summary = stringResource(R.string.susfs_report_hint),
-            ) }
-            report.applied.forEach { key -> item(key = "ok:$key") { ArrowPreference(
-                title = susfsOperationName(key),
-                summary = stringResource(R.string.susfs_acknowledged),
-                startAction = { Icon(Icons.Rounded.CheckCircle, null) },
-            ) } }
-            report.failures.forEach { (key, error) -> item(key = "error:$key") { ArrowPreference(
-                title = susfsOperationName(key),
-                summary = error,
-                summaryColor = BasicComponentDefaults.summaryColor(color = MaterialTheme.colorScheme.error),
-                startAction = { Icon(Icons.Rounded.ErrorOutline, null) },
-            ) } }
-            report.skipped.forEach { (key, reason) -> item(key = "skipped:$key") { ArrowPreference(
-                title = susfsOperationName(key),
-                summary = reason.ifBlank { stringResource(R.string.susfs_skipped) },
-                startAction = { Icon(Icons.Rounded.Block, null) },
-            ) } }
-            report.pendingReboot.forEach { key -> item(key = "pending:$key") { ArrowPreference(
-                title = susfsOperationName(key),
-                summary = stringResource(R.string.susfs_pending),
-                startAction = { Icon(Icons.Rounded.Schedule, null) },
-            ) } }
+            item { SegmentedListItem(headlineContent = { Text(susfsManagementLabel(report.status)) },
+                supportingContent = { Text(stringResource(R.string.susfs_report_hint)) }) }
+            report.applied.forEach { key -> item(key = "ok:$key") { SegmentedListItem(
+                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_acknowledged)) },
+                leadingContent = { Icon(Icons.Rounded.CheckCircle, null) }) } }
+            report.failures.forEach { (key, error) -> item(key = "error:$key") { SegmentedListItem(
+                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(error, color = MaterialTheme.colorScheme.error) },
+                leadingContent = { Icon(Icons.Rounded.ErrorOutline, null) }) } }
+            report.skipped.forEach { (key, reason) -> item(key = "skipped:$key") { SegmentedListItem(
+                headlineContent = { Text(susfsOperationName(key)) },
+                supportingContent = { Text(reason.ifBlank { stringResource(R.string.susfs_skipped) }) },
+                leadingContent = { Icon(Icons.Rounded.Block, null) }) } }
+            report.deferred.forEach { key -> item(key = "deferred:$key") { SegmentedListItem(
+                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_deferred)) },
+                leadingContent = { Icon(Icons.Rounded.Schedule, null) }) } }
+            report.pendingReboot.forEach { key -> item(key = "pending:$key") { SegmentedListItem(
+                headlineContent = { Text(susfsOperationName(key)) }, supportingContent = { Text(stringResource(R.string.susfs_pending)) },
+                leadingContent = { Icon(Icons.Rounded.Schedule, null) }) } }
         }
     }
     SegmentedColumn(title = stringResource(R.string.susfs_config)) {

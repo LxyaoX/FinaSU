@@ -17,6 +17,7 @@
     <string name="susfs_skipped">Skipped, not supported</string>
     <string name="susfs_failed">Application failed</string>
     <string name="susfs_pending">Pending reboot</string>
+    <string name="susfs_deferred">Deferred while UTS View is active</string>
     <string name="susfs_idle">Nothing to apply</string>
     <string name="susfs_idle_hint">No rules or managed settings are configured.</string>
     <string name="susfs_saved_reboot">Configuration saved; not replayed this boot. Apply now or enable Apply on boot.</string>

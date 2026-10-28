@@ -17,6 +17,7 @@
     <string name="susfs_skipped">Пропущено · не поддерживается ядром</string>
     <string name="susfs_failed">Ошибка применения</string>
     <string name="susfs_pending">Ожидает перезагрузки</string>
+    <string name="susfs_deferred">Отложено, пока UTS View активен</string>
     <string name="susfs_probe">Проверка SUSFS…</string>
     <string name="susfs_absent">SUSFS не обнаружен</string>
     <string name="susfs_readonly">Неизвестный протокол · только чтение</string>

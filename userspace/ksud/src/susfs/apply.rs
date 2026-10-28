@@ -21,6 +21,7 @@ pub struct Report {
     pub applied: Vec<String>,
     pub failures: BTreeMap<String, String>,
     pub skipped: BTreeMap<String, String>,
+    pub deferred: Vec<String>,
     pub pending_reboot: Vec<String>,
 }
 
@@ -285,6 +286,7 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
         applied: Vec::new(),
         failures: BTreeMap::new(),
         skipped: BTreeMap::new(),
+        deferred: Vec::new(),
         pending_reboot: Vec::new(),
     };
     state.failures.retain(|key, _| desired.contains_key(key));
@@ -408,7 +410,7 @@ pub fn apply(config: &Config, detection: &Detection, phase: Stage) -> Result<Rep
     } else if !report.pending_reboot.is_empty() {
         "pending_reboot"
     } else {
-        store::summarize(&state, &desired)
+        store::summarize(&state, &desired, false)
     };
     store::write_state(&state)?;
     Ok(report)

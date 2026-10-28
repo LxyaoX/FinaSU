@@ -17,6 +17,7 @@
     <string name="susfs_skipped">已跳过 · 内核不支持</string>
     <string name="susfs_failed">应用失败</string>
     <string name="susfs_pending">待重启</string>
+    <string name="susfs_deferred">UTS 视图生效中，已暂缓</string>
     <string name="susfs_idle">无需应用</string>
     <string name="susfs_idle_hint">当前没有配置规则或由 FinaSU 管理的设置。</string>
     <string name="susfs_saved_reboot">配置已保存；本次启动未重放。可立即应用，或开启“开机应用”。</string>
