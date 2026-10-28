@@ -25,7 +25,7 @@ private const val STAMP_FILE = ".stamp"
  * (no shell, unwritable filesDir, unsupported `stat`) the callers fall back to reading through the
  * shell, which is what they did before this cache existed.
  */
-internal class WebRootCache(
+class WebRootCache(
     private val context: Context,
     private val moduleId: String,
     private val moduleDir: String,
