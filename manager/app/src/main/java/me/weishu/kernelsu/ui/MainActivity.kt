@@ -174,17 +174,6 @@ open class MainActivity : FragmentActivity() {
         super.attachBaseContext(me.weishu.kernelsu.wallpaper.AppLanguage.wrap(newBase))
     }
 
-    /**
-     * Drops what the removed settings identity header kept: its prefs file, the avatar copied into
-     * app storage and the cache directory remote avatars were downloaded into. Idempotent and
-     * cheap, so it runs at every start instead of needing a migration flag.
-     */
-    private fun purgeLegacyProfile() {
-        getSharedPreferences("profile", MODE_PRIVATE).edit().clear().apply()
-        getFileStreamPath("profile_avatar").delete()
-        cacheDir.resolve("profile_avatar_download").deleteRecursively()
-    }
-
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -211,7 +200,7 @@ open class MainActivity : FragmentActivity() {
 
         WallpaperConfig.load(this)
         FontConfig.load(this)
-        purgeLegacyProfile()
+        me.weishu.kernelsu.data.LegacyPreferences.purge(this)
         me.weishu.kernelsu.modulecard.ModuleCardConfig.load()
         me.weishu.kernelsu.ui.component.material.SliderTrackConfig.load(this)
         me.weishu.kernelsu.media.VisualMediaConfig.load(this)
