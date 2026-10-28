@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowInsetsControllerCompat
 import com.materialkolor.PaletteStyle
-import me.weishu.kernelsu.ui.webui.MonetColorsProvider
+import me.weishu.kernelsu.ui.webui.webview.asset.MonetColorsProvider
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.LocalWallpaperDim
 import me.weishu.kernelsu.wallpaper.LocalWallpaperPage

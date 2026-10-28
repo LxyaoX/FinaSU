@@ -1,10 +1,10 @@
-package me.weishu.kernelsu.ui.webui
+package me.weishu.kernelsu.ui.webui.webview.asset
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import java.util.concurrent.atomic.AtomicReference
@@ -28,7 +28,7 @@ object MonetColorsProvider {
 
     @Composable
     private fun UpdateCssMaterial(colorScheme: ColorScheme) {
-        LaunchedEffect(colorScheme) {
+        DisposableEffect(colorScheme) {
             val monetColors = mapOf(
                 "primary" to colorScheme.primary.toCssValue(),
                 "onPrimary" to colorScheme.onPrimary.toCssValue(),
@@ -78,6 +78,7 @@ object MonetColorsProvider {
             )
 
             colorsCss.set(monetColors.toCssVars())
+            onDispose {}
         }
     }
 
