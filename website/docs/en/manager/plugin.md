@@ -84,7 +84,7 @@ The installed page supports searching by plugin ID, name, and description. A car
 - the **Output log** button;
 - the **Uninstall** button.
 
-Long-press a card to edit its banner. If the list uses collapsed mode, expand the card before using the action buttons.
+If the list uses collapsed mode, expand the card before using the action buttons.
 
 ::: important Disabling a plugin
 

@@ -29,8 +29,6 @@ import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.model.ModuleUpdateInfo
 import me.weishu.kernelsu.data.model.customOrderComparator
 import me.weishu.kernelsu.data.model.moduleSortComparator
-import me.weishu.kernelsu.modulebanner.ApmBannerSlot
-import me.weishu.kernelsu.modulebanner.ModuleBannerCache
 import me.weishu.kernelsu.data.model.reconcileCustomOrder
 import me.weishu.kernelsu.data.repository.ModuleRepository
 import me.weishu.kernelsu.data.repository.ModuleRepositoryImpl
@@ -275,8 +273,6 @@ class ModuleViewModel(
                     zygiskAvailable = zygiskAvailable ?: it.zygiskAvailable,
                 )
             }
-            // Forget banners of modules that are no longer installed.
-            ModuleBannerCache.prune(ApmBannerSlot, parsedModules.map { it.id }.toSet())
             // Keep a stored manual order in step with what is installed before re-sorting.
             reconcileStoredCustomOrder(parsedModules)
             // Trigger recalculation of moduleList

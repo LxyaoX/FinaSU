@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_module_display">模块显示</string>
+    <string name="module_card_show_more_info">显示模块详情</string>
+    <string name="module_card_show_more_info_summary">在模块卡片上显示版本、作者与描述。</string>
+    <string name="module_card_fold_system">折叠模块卡片</string>
+    <string name="module_card_fold_system_summary">在卡片展开前收起操作按钮。</string>
+    <string name="module_card_spliced">拼接卡片布局</string>
+    <string name="module_card_spliced_summary">将相邻的模块卡片拼接为一个连续的整体。</string>
+    <string name="module_card_button_style">操作按钮样式</string>
+    <string name="module_card_button_style_summary">在完整按钮和纯图标按钮之间选择。</string>
+    <string name="module_card_style_full">完整</string>
+    <string name="module_card_style_icon">图标</string>
+</resources>

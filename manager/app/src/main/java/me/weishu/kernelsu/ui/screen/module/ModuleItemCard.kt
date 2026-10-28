@@ -48,14 +48,13 @@ enum class ModuleButtonStyle {
 
     companion object {
         fun fromKey(key: String): ModuleButtonStyle =
-            if (key == me.weishu.kernelsu.modulebanner.ModuleCardConfig.STYLE_ICON_ONLY) IconOnly else Full
+            if (key == me.weishu.kernelsu.modulecard.ModuleCardConfig.STYLE_ICON_ONLY) IconOnly else Full
     }
 }
 
 @Composable
 fun ModuleItemCard(
     module: Module,
-    visual: ModuleCardVisual,
     updateUrl: String,
     buttonStyle: ModuleButtonStyle,
     showMoreInfo: Boolean,
@@ -69,7 +68,6 @@ fun ModuleItemCard(
     onAddShortcut: (ShortcutType) -> Unit,
     onOpenWebUi: () -> Unit,
     onExecuteAction: () -> Unit,
-    onLongPress: () -> Unit,
     closeSearch: () -> Unit,
 ) {
     val iconOnly = buttonStyle == ModuleButtonStyle.IconOnly
@@ -77,10 +75,7 @@ fun ModuleItemCard(
     val canOpenWebUi = module.hasWebUi && !module.remove && module.enabled && !zygiskBlocked
 
     FolkCardFrame(
-        banner = visual.banner,
-        bannerCacheKey = "module:${module.id}",
         expanded = expanded,
-        onLongPress = onLongPress,
         onClick = {
             if (foldSystemModule) {
                 onExpandToggle()
@@ -92,7 +87,6 @@ fun ModuleItemCard(
     ) {
         ModuleCardContent(
             module = module,
-            customInfo = visual.customInfo,
             updateUrl = updateUrl,
             showMoreInfo = showMoreInfo,
             foldSystemModule = foldSystemModule,
@@ -114,7 +108,6 @@ fun ModuleItemCard(
 @Composable
 private fun ModuleCardContent(
     module: Module,
-    customInfo: me.weishu.kernelsu.modulebanner.CustomModuleInfo?,
     updateUrl: String,
     showMoreInfo: Boolean,
     foldSystemModule: Boolean,
@@ -135,10 +128,10 @@ private fun ModuleCardContent(
     val maxLinesLimit = LocalModuleDescriptionMaxLines.current
     val hasUpdate = updateUrl.isNotEmpty()
 
-    val displayName = customInfo?.name?.takeIf { it.isNotBlank() } ?: module.name
-    val displayVersion = customInfo?.version?.takeIf { it.isNotBlank() } ?: module.version
-    val displayAuthor = customInfo?.author?.takeIf { it.isNotBlank() } ?: module.author
-    val displayDescription = customInfo?.description?.takeIf { it.isNotBlank() } ?: module.description
+    val displayName = module.name
+    val displayVersion = module.version
+    val displayAuthor = module.author
+    val displayDescription = module.description
 
     val hasAnyLabel =
         showMoreInfo || module.remove || zygiskBlocked || (hasUpdate && !module.update) || module.update

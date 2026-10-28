@@ -469,8 +469,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="module_shortcut_scheme_copied">URL scheme copied</string>
     <string name="settings_navigation_badge">Navigation badge</string>
     <string name="settings_navigation_badge_summary">Show granted app and enabled module counts on the navigation bar</string>
-    <string name="settings_nav_custom_icons">Custom navigation icons</string>
-    <string name="settings_nav_custom_icons_summary">Use your own images for the bottom navigation icons</string>
     <string name="settings_nav_layout_title">Navigation layout</string>
     <string name="settings_show_superuser">Show superuser</string>
     <string name="settings_show_module">Show module</string>
@@ -488,11 +486,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="settings_nav_mode_bottom">Always Bottom Bar</string>
     <string name="settings_nav_mode_rail">Always Side Rail</string>
     <string name="settings_nav_mode_floating">Floating Bottom Bar</string>
-    <string name="nav_icon_default">Default icon</string>
-    <string name="nav_icon_custom_selected">Custom icon</string>
-    <string name="nav_icon_set">Icon updated</string>
-    <string name="nav_icon_set_failed">Could not load that image</string>
-    <string name="nav_icon_clear">Reset to default icon</string>
     <string name="settings_wallpaper_summary">Set a background image for the app</string>
     <string name="wallpaper_title">Wallpaper</string>
     <string name="wallpaper_enable">Enable wallpaper</string>
@@ -794,8 +787,6 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="guide_skip">Skip</string>
     <string name="guide_start">Get started</string>
     <string name="guide_page_indicator">Page %1$d of %2$d</string>
-    <string name="guide_about_entry_title">Show welcome guide again</string>
-    <string name="guide_about_entry_summary">Replay the first-launch introduction</string>
     <string name="webview_outdated_title">WebView is outdated</string>
     <string name="webview_outdated_message">Android System WebView %1$d is older than %2$d, so the page margins come from the app instead of the WebView. Tap to update.</string>
     <string name="webui_failed_to_open_link">No app found to open link: %s</string>

@@ -99,7 +99,6 @@ kernel panic.
     config.json
     disable
     last_result.json
-    banner.png
   .state/
     registry.lock
     locks/
@@ -108,6 +107,5 @@ kernel panic.
 ```
 
 Installs use a staging directory and an atomic publish step. Updates preserve
-the autoload preference, stored parameters, persistent disable marker, last
-result, and directory banner candidate. Scans ignore dot directories and
-symbolic links.
+the autoload preference, stored parameters, persistent disable marker and
+last result. Scans ignore dot directories and symbolic links.

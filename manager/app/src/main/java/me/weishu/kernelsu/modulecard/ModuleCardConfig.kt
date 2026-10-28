@@ -1,4 +1,4 @@
-package me.weishu.kernelsu.modulebanner
+package me.weishu.kernelsu.modulecard
 
 import android.content.Context
 import androidx.compose.runtime.getValue

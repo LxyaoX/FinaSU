@@ -16,8 +16,6 @@ import me.weishu.kernelsu.data.model.KernelModule
 import me.weishu.kernelsu.data.repository.KernelModuleRepository
 import me.weishu.kernelsu.data.repository.KernelModuleRepositoryImpl
 import me.weishu.kernelsu.ksuApp
-import me.weishu.kernelsu.modulebanner.LkmBannerSlot
-import me.weishu.kernelsu.modulebanner.ModuleBannerCache
 import me.weishu.kernelsu.ui.screen.kernelmodule.KernelModuleUiState
 import me.weishu.kernelsu.ui.screen.kernelmodule.stageKernelModule
 import me.weishu.kernelsu.ui.util.rootAvailable
@@ -52,7 +50,6 @@ class KernelModuleViewModel(
             }
             repo.getModules()
                 .onSuccess { collection ->
-                    ModuleBannerCache.prune(LkmBannerSlot, collection.modules.map { it.id }.toSet())
                     _uiState.update {
                         it.copy(
                             isRefreshing = false,
@@ -241,7 +238,6 @@ class KernelModuleViewModel(
         if (!rootAvailable()) return
         repo.getModules()
             .onSuccess { collection ->
-                ModuleBannerCache.prune(LkmBannerSlot, collection.modules.map { it.id }.toSet())
                 _uiState.update {
                     it.copy(
                         hasLoaded = true,

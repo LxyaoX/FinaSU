@@ -8,7 +8,6 @@ import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Adb
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cloud
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
@@ -39,7 +37,6 @@ import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.Lock
@@ -59,7 +56,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalResources
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.media.VisualMediaConfig
-import me.weishu.kernelsu.modulebanner.ModuleBannerConfig
 import me.weishu.kernelsu.ui.component.settings.SettingsCategory
 import me.weishu.kernelsu.ui.navigation3.Route
 import me.weishu.kernelsu.ui.screen.settings.SettingsUiState
@@ -348,15 +344,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
     )
     add(
         SettingsCategory.BEHAVIOR.row(
-            id = "behavior.nav_custom_icons",
-            titleRes = R.string.settings_nav_custom_icons,
-            summaryRes = R.string.settings_nav_custom_icons_summary,
-            icon = Icons.Rounded.Apps,
-            aliases = listOf("navigation", "icon", "custom"),
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
             id = "behavior.nav_mode",
             titleRes = R.string.settings_nav_mode,
             summaryRes = R.string.settings_nav_mode_summary,
@@ -492,83 +479,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             aliases = listOf("module", "card", "button", "style"),
         )
     )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_enabled",
-            titleRes = R.string.module_banner_enabled,
-            summaryRes = R.string.module_banner_enabled_summary,
-            icon = Icons.Filled.Wallpaper,
-            aliases = listOf("module", "banner", "cover", "image"),
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_folk",
-            titleRes = R.string.module_banner_folk,
-            summaryRes = R.string.module_banner_folk_summary,
-            icon = Icons.Filled.Wallpaper,
-            aliases = listOf("module", "banner", "folk"),
-            // The banner owns its switches: with the banner off, this row is not on the page.
-            available = { ModuleBannerConfig.enabled },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_api_mode",
-            titleRes = R.string.module_banner_api_mode,
-            summaryRes = R.string.module_banner_api_mode_summary,
-            icon = Icons.Outlined.Cloud,
-            aliases = listOf("module", "banner", "api", "mode", "custom"),
-            available = { ModuleBannerConfig.policy.active },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_api_source",
-            titleRes = R.string.module_banner_api_source,
-            icon = Icons.Outlined.Cloud,
-            aliases = listOf("module", "banner", "api", "source", "url"),
-            available = { ModuleBannerConfig.policy.apiActive },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_marketplace",
-            titleRes = R.string.module_banner_marketplace,
-            icon = Icons.Outlined.Cloud,
-            aliases = listOf("module", "banner", "marketplace", "store"),
-            available = { ModuleBannerConfig.policy.apiActive },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_clear_cache",
-            titleRes = R.string.module_banner_clear_cache,
-            icon = Icons.Outlined.Cloud,
-            aliases = listOf("module", "banner", "cache", "clear"),
-            available = { ModuleBannerConfig.policy.apiActive },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_opacity",
-            titleRes = R.string.module_banner_opacity,
-            icon = Icons.Filled.Wallpaper,
-            aliases = listOf("module", "banner", "opacity"),
-            available = { ModuleBannerConfig.enabled && ModuleBannerConfig.customOpacityEnabled },
-        )
-    )
-    add(
-        SettingsCategory.BEHAVIOR.row(
-            id = "behavior.module_banner_custom_opacity",
-            titleRes = R.string.module_banner_custom_opacity,
-            summaryRes = R.string.module_banner_custom_opacity_summary,
-            icon = Icons.Filled.Wallpaper,
-            aliases = listOf("module", "banner", "opacity", "custom"),
-            available = { ModuleBannerConfig.enabled },
-        )
-    )
-
     // Function
     add(
         SettingsCategory.FUNCTION.row(

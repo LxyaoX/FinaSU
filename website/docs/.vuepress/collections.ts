@@ -154,7 +154,7 @@ export const docsSidebar: ThemeSidebarItem[] = [
           },
           { text: '交互与兼容', link: '/setting/interaction/', icon: 'ri:hand-coin-line' },
           {
-            text: '模块卡片与横幅',
+            text: '模块卡片',
             link: '/setting/module-cards/',
             icon: 'ri:image-edit-line',
           },
@@ -667,7 +667,7 @@ export const enDocsSidebar: ThemeSidebarItem[] = [
             icon: 'ri:hand-coin-line',
           },
           {
-            text: 'Module Cards & Banners',
+            text: 'Module Cards',
             link: '/en/setting/module-cards/',
             icon: 'ri:image-edit-line',
           },

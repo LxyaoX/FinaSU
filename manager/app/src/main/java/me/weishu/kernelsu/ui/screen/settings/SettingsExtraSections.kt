@@ -1,23 +1,16 @@
 package me.weishu.kernelsu.ui.screen.settings
 
 import android.os.Build
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuOpen
-import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.AspectRatio
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.RoundedCorner
@@ -33,33 +26,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.bottombar.BottomBarDestination
-import me.weishu.kernelsu.ui.component.bottombar.BottomBarIconConfig
 import me.weishu.kernelsu.ui.component.bottombar.FloatingBarConfig
 import me.weishu.kernelsu.ui.component.bottombar.NavBarVisibilityConfig
 import me.weishu.kernelsu.ui.component.bottombar.NavMode
 import me.weishu.kernelsu.ui.component.bottombar.NavModeConfig
-import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
-import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
-import me.weishu.kernelsu.ui.component.material.SegmentedListItem
-import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SliderTrackConfig
 import me.weishu.kernelsu.ui.component.material.TonalCard
 import top.yukonga.miuix.kmp.preference.SwitchPreference
@@ -69,11 +49,11 @@ private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, botto
 
 /**
  * Navigation and chrome settings lifted out of the former "theme" screen: the navigation badge,
- * predictive back, custom bottom-bar icons and the bottom-bar / floating-bar configuration.
+ * predictive back and the bottom-bar / floating-bar configuration.
  *
  * Badge and predictive-back go through [SettingsScreenActions] because they are ViewModel state
- * (predictive back also flips the platform back callback). The icon and bar configs are written to
- * their own config objects directly, exactly as the theme screen did.
+ * (predictive back also flips the platform back callback). The bar configs are written to their own
+ * config objects directly, exactly as the theme screen did.
  */
 @Composable
 fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenActions) {
@@ -109,62 +89,8 @@ fun NavigationSettingsSection(uiState: SettingsUiState, actions: SettingsScreenA
         )
     }
 
-    NavCustomIconsSection()
     NavLayoutSection()
     NavModeSection()
-}
-
-@Composable
-private fun NavCustomIconsSection() {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val revision by BottomBarIconConfig.revision.collectAsState()
-    val customEnabled = remember(revision) { BottomBarIconConfig.isEnabled }
-    var iconPickTarget by remember { mutableStateOf<BottomBarDestination?>(null) }
-    val iconPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        val destination = iconPickTarget
-        iconPickTarget = null
-        if (uri != null && destination != null) {
-            val saved = BottomBarIconConfig.saveCustomIcon(context, destination.name, uri)
-            Toast.makeText(
-                context,
-                resources.getString(if (saved) R.string.nav_icon_set else R.string.nav_icon_set_failed),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
-    SegmentedColumn(
-        modifier = SectionModifier,
-        content = buildList<@Composable () -> Unit> {
-            add {
-                SwitchPreference(
-                    title = stringResource(R.string.settings_nav_custom_icons),
-                    summary = stringResource(R.string.settings_nav_custom_icons_summary),
-                    startAction = { Icon(Icons.Rounded.Apps, contentDescription = null) },
-                    checked = customEnabled,
-                    onCheckedChange = { BottomBarIconConfig.isEnabled = it },
-                )
-            }
-            if (customEnabled) {
-                BottomBarDestination.entries.forEach { destination ->
-                    add {
-                        NavIconItemRow(
-                            destination = destination,
-                            revision = revision,
-                            onPick = {
-                                iconPickTarget = destination
-                                iconPicker.launch("image/*")
-                            },
-                            onClear = {
-                                BottomBarIconConfig.clearCustomIcon(destination.name)
-                            },
-                        )
-                    }
-                }
-            }
-        }
-    )
 }
 
 @Composable
@@ -270,66 +196,6 @@ private fun NavModeSection() {
                 }
             }
         }
-    )
-}
-
-@Composable
-private fun NavIconItemRow(
-    destination: BottomBarDestination,
-    revision: Int,
-    onPick: () -> Unit,
-    onClear: () -> Unit,
-) {
-    val uri = remember(revision, destination.name) {
-        BottomBarIconConfig.getCustomIconUri(destination.name)
-    }
-    val bitmap by produceState<android.graphics.Bitmap?>(initialValue = null, uri) {
-        value = if (uri != null) {
-            withContext(Dispatchers.IO) { BottomBarIconConfig.loadIconBitmap(uri) }
-        } else {
-            null
-        }
-    }
-
-    SegmentedListItem(
-        onClick = onPick,
-        headlineContent = { Text(stringResource(destination.label)) },
-        supportingContent = {
-            Text(
-                stringResource(
-                    if (uri != null) R.string.nav_icon_custom_selected else R.string.nav_icon_default
-                )
-            )
-        },
-        leadingContent = {
-            val loaded = bitmap
-            if (loaded != null) {
-                Image(
-                    bitmap = loaded.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp),
-                    contentScale = ContentScale.Fit,
-                )
-            } else {
-                Icon(
-                    imageVector = destination.iconSelected,
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp),
-                )
-            }
-        },
-        trailingContent = if (uri != null) {
-            {
-                FolkIconButton(onClick = onClear) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = stringResource(R.string.nav_icon_clear),
-                    )
-                }
-            }
-        } else {
-            null
-        },
     )
 }
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_module_display">Module display</string>
+    <string name="module_card_show_more_info">Show module details</string>
+    <string name="module_card_show_more_info_summary">Show version, author and description on the module card.</string>
+    <string name="module_card_fold_system">Fold module cards</string>
+    <string name="module_card_fold_system_summary">Collapse action buttons until the card is expanded.</string>
+    <string name="module_card_spliced">Spliced card layout</string>
+    <string name="module_card_spliced_summary">Join adjacent module cards into one continuous group.</string>
+    <string name="module_card_button_style">Action button style</string>
+    <string name="module_card_button_style_summary">Choose between full buttons and icon-only buttons.</string>
+    <string name="module_card_style_full">Full</string>
+    <string name="module_card_style_icon">Icon</string>
+</resources>

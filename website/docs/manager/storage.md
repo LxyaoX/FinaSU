@@ -126,8 +126,7 @@ FinaSU 与其他 Root 组件共享 `/data/adb`。这里的目录包含授权、�
 │   ├── module.ko
 │   ├── config.json
 │   ├── disable
-│   ├── last_result.json
-│   └── banner.png
+│   └── last_result.json
 ├── .state/
 └── .stage/
 ```

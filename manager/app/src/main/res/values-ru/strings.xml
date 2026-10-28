@@ -442,8 +442,6 @@
     <string name="module_shortcut_scheme_copied">URL-схема скопирована</string>
     <string name="settings_navigation_badge">Значок на панели навигации</string>
     <string name="settings_navigation_badge_summary">Показывать количество приложений с правами и включённых модулей на панели навигации</string>
-    <string name="settings_nav_custom_icons">Пользовательские значки навигации</string>
-    <string name="settings_nav_custom_icons_summary">Использовать собственные изображения для значков нижней навигации</string>
     <string name="settings_nav_layout_title">Макет навигации</string>
     <string name="settings_show_superuser">Показывать суперюзера</string>
     <string name="settings_show_module">Показывать модули</string>
@@ -461,11 +459,6 @@
     <string name="settings_nav_mode_bottom">Всегда нижняя панель</string>
     <string name="settings_nav_mode_rail">Всегда боковая панель</string>
     <string name="settings_nav_mode_floating">Плавающая нижняя панель</string>
-    <string name="nav_icon_default">Значок по умолчанию</string>
-    <string name="nav_icon_custom_selected">Пользовательский значок</string>
-    <string name="nav_icon_set">Значок обновлён</string>
-    <string name="nav_icon_set_failed">Не удалось загрузить это изображение</string>
-    <string name="nav_icon_clear">Сбросить на значок по умолчанию</string>
     <string name="settings_wallpaper_summary">Установить фоновое изображение для приложения</string>
     <string name="wallpaper_title">Обои</string>
     <string name="wallpaper_enable">Включить обои</string>
@@ -703,8 +696,6 @@
     <string name="guide_skip">Пропустить</string>
     <string name="guide_start">Начать</string>
     <string name="guide_page_indicator">Страница %1$d из %2$d</string>
-    <string name="guide_about_entry_title">Снова показать приветственное руководство</string>
-    <string name="guide_about_entry_summary">Повторить вводную при первом запуске</string>
     <string name="install_anykernel_target_slot">Целевой слот</string>
     <string name="install_anykernel_current_slot">Текущий слот (%1$s)</string>
     <string name="install_anykernel_current_slot_no_suffix">Текущий слот</string>

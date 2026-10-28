@@ -59,10 +59,6 @@ In custom mode, "Restore default font" appears once a font file has been selecte
 - The restore target is **App default**, not "System default".
 - If you only want to follow the system font, restore first and then select "System default" manually.
 
-## Relation to Theme Packages
-
-The font is part of the Manager appearance, but it never replaces the system font automatically. When a theme package should contain font resources, use the complete `.fpt` export flow.
-
 ## FAQ
 
 :::: collapse accordion

@@ -82,10 +82,7 @@ import kotlinx.coroutines.launch
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.KernelModule
 import me.weishu.kernelsu.data.model.LoadState
-import me.weishu.kernelsu.modulebanner.LkmBannerSlot
-import me.weishu.kernelsu.modulebanner.ModuleCardConfig
-import me.weishu.kernelsu.ui.component.card.CardBannerDialog
-import me.weishu.kernelsu.ui.component.card.CardSubject
+import me.weishu.kernelsu.modulecard.ModuleCardConfig
 import me.weishu.kernelsu.ui.component.card.FolkCardFrame
 import me.weishu.kernelsu.ui.component.card.cardSurfaceOpacity
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
@@ -107,7 +104,6 @@ import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.module.ModuleButtonStyle
-import me.weishu.kernelsu.ui.screen.module.rememberModuleCardVisual
 import me.weishu.kernelsu.ui.theme.LocalModuleDescriptionMaxLines
 import me.weishu.kernelsu.ui.viewmodel.KernelModuleViewModel
 import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
@@ -124,7 +120,6 @@ fun KernelModuleScreen() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val searchScrollBehavior = rememberSearchAppBarScrollBehavior(scrollBehavior)
     val installingMessage = stringResource(R.string.kernel_modules_installing)
-    var bannerDialogModule by remember { mutableStateOf<KernelModule?>(null) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) viewModel.install(uri)
     }
@@ -155,7 +150,6 @@ fun KernelModuleScreen() {
                 .then(
                     Modifier.nestedScroll(searchScrollBehavior.nestedScrollConnection)
                 ),
-            onLongPress = { bannerDialogModule = it },
         )
     }
 
@@ -250,19 +244,6 @@ fun KernelModuleScreen() {
         }
     }
 
-    bannerDialogModule?.let { module ->
-        CardBannerDialog(
-            subject = CardSubject(
-                id = module.id,
-                name = module.name,
-                version = module.version,
-                author = module.author,
-                description = module.description,
-            ),
-            slot = LkmBannerSlot,
-            onDismiss = { bannerDialogModule = null },
-        )
-    }
     state.detailModule?.let { module ->
         KernelModuleDetailsSheet(
             module = module,
@@ -337,7 +318,6 @@ private fun KernelModuleList(
     state: KernelModuleUiState,
     actions: KernelModuleActions,
     modifier: Modifier,
-    onLongPress: (KernelModule) -> Unit,
 ) {
     when {
         !state.rootAvailable -> MessageState(
@@ -378,7 +358,6 @@ private fun KernelModuleList(
                     onExpandToggle = {
                         expandedModuleId = if (expandedModuleId == module.id) null else module.id
                     },
-                    onLongPress = onLongPress,
                 )
             }
             Column(modifier) {
@@ -476,9 +455,7 @@ private fun KernelModuleCard(
     actions: KernelModuleActions,
     expanded: Boolean,
     onExpandToggle: () -> Unit,
-    onLongPress: (KernelModule) -> Unit,
 ) {
-    val visual = rememberModuleCardVisual(module.id, LkmBannerSlot)
     val showMoreInfo = ModuleCardConfig.showMoreInfo
     val foldEnabled = ModuleCardConfig.foldSystemModule
     val iconOnly = ModuleButtonStyle.fromKey(ModuleCardConfig.buttonStyle) == ModuleButtonStyle.IconOnly
@@ -486,10 +463,10 @@ private fun KernelModuleCard(
     val haptics = LocalHapticFeedback.current
     val pending = module.id in state.pending
     val autoloadPending = module.id in state.autoloadPending
-    val displayName = visual.customInfo?.name?.takeIf { it.isNotBlank() } ?: module.name
-    val displayVersion = visual.customInfo?.version?.takeIf { it.isNotBlank() } ?: module.version
-    val displayAuthor = visual.customInfo?.author?.takeIf { it.isNotBlank() } ?: module.author
-    val displayDescription = visual.customInfo?.description?.takeIf { it.isNotBlank() } ?: module.description
+    val displayName = module.name
+    val displayVersion = module.version
+    val displayAuthor = module.author
+    val displayDescription = module.description
     val fileSize = if (module.fileSize > 0) {
         Formatter.formatShortFileSize(LocalContext.current, module.fileSize)
     } else {
@@ -596,15 +573,12 @@ private fun KernelModuleCard(
     )
 
     FolkCardFrame(
-        banner = visual.banner,
-        bannerCacheKey = "lkm:${module.id}",
         expanded = expanded,
         onClickLabel = when {
             !foldEnabled -> null
             expanded -> collapseLabel
             else -> expandLabel
         },
-        onLongPress = { onLongPress(module) },
         onClick = { if (foldEnabled) onExpandToggle() },
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {

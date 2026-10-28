@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_module_display">モジュール表示</string>
+    <string name="module_card_show_more_info">モジュールの詳細を表示</string>
+    <string name="module_card_show_more_info_summary">モジュールカードにバージョン、作者、説明を表示します。</string>
+    <string name="module_card_fold_system">モジュールカードを折りたたむ</string>
+    <string name="module_card_fold_system_summary">カードを展開するまで操作ボタンを隠します。</string>
+    <string name="module_card_spliced">連結カードレイアウト</string>
+    <string name="module_card_spliced_summary">隣り合うモジュールカードをひとつながりのグループにします。</string>
+    <string name="module_card_button_style">操作ボタンのスタイル</string>
+    <string name="module_card_button_style_summary">通常のボタンとアイコンのみのボタンから選びます。</string>
+    <string name="module_card_style_full">通常</string>
+    <string name="module_card_style_icon">アイコン</string>
+</resources>

@@ -440,8 +440,6 @@
     <string name="module_shortcut_scheme_copied">URL 스키마가 복사되었습니다</string>
     <string name="settings_navigation_badge">탐색 배지</string>
     <string name="settings_navigation_badge_summary">탐색 표시줄에 권한이 부여된 앱과 활성화된 모듈 수를 표시합니다</string>
-    <string name="settings_nav_custom_icons">사용자 지정 탐색 아이콘</string>
-    <string name="settings_nav_custom_icons_summary">하단 탐색 아이콘에 자신의 이미지를 사용합니다</string>
     <string name="settings_nav_layout_title">탐색 레이아웃</string>
     <string name="settings_show_superuser">슈퍼유저 표시</string>
     <string name="settings_show_module">모듈 표시</string>
@@ -459,11 +457,6 @@
     <string name="settings_nav_mode_bottom">항상 하단 표시줄</string>
     <string name="settings_nav_mode_rail">항상 측면 레일</string>
     <string name="settings_nav_mode_floating">플로팅 하단 표시줄</string>
-    <string name="nav_icon_default">기본 아이콘</string>
-    <string name="nav_icon_custom_selected">사용자 지정 아이콘</string>
-    <string name="nav_icon_set">아이콘이 업데이트되었습니다</string>
-    <string name="nav_icon_set_failed">해당 이미지를 불러올 수 없습니다</string>
-    <string name="nav_icon_clear">기본 아이콘으로 초기화</string>
     <string name="settings_wallpaper_summary">앱의 배경 이미지를 설정합니다</string>
     <string name="wallpaper_title">배경 화면</string>
     <string name="wallpaper_enable">배경 화면 활성화</string>
@@ -701,8 +694,6 @@
     <string name="guide_skip">건너뛰기</string>
     <string name="guide_start">시작하기</string>
     <string name="guide_page_indicator">%1$d / %2$d페이지</string>
-    <string name="guide_about_entry_title">환영 가이드 다시 보기</string>
-    <string name="guide_about_entry_summary">첫 실행 소개 다시 재생</string>
     <string name="install_anykernel_target_slot">대상 슬롯</string>
     <string name="install_anykernel_current_slot">현재 슬롯 (%1$s)</string>
     <string name="install_anykernel_current_slot_no_suffix">현재 슬롯</string>

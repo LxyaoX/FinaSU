@@ -112,13 +112,11 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.Module
 import me.weishu.kernelsu.data.model.ModuleUpdateInfo
 import me.weishu.kernelsu.data.repository.isSoftRebootPreferred
-import me.weishu.kernelsu.modulebanner.ModuleCardConfig
+import me.weishu.kernelsu.modulecard.ModuleCardConfig
 import me.weishu.kernelsu.ui.component.EmptyState
 import me.weishu.kernelsu.ui.component.ObserveAsEvents
 import me.weishu.kernelsu.ui.component.ScrollToTopOnChange
 import me.weishu.kernelsu.ui.component.SearchStatus
-import me.weishu.kernelsu.ui.component.card.CardBannerDialog
-import me.weishu.kernelsu.ui.component.card.CardSubject
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.component.dialog.rememberLoadingDialog
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
@@ -207,7 +205,6 @@ fun ModulePagerMaterial(
     val shortcutState = rememberModuleShortcutState(context)
     val showShortcutDialog = remember { mutableStateOf(false) }
     var showSortSheet by remember { mutableStateOf(false) }
-    var bannerDialogModule by remember { mutableStateOf<Module?>(null) }
     val confirmDialog = rememberConfirmDialog(
         onConfirm = {
             when (val request = confirmDialogState?.request) {
@@ -386,7 +383,6 @@ fun ModulePagerMaterial(
                         zygiskAvailable = uiState.zygiskAvailable,
                         actions = actions,
                         onModuleAddShortcut = { module, type -> onModuleAddShortcut(module, type) },
-                        onModuleLongPress = { bannerDialogModule = it },
                         closeSearch = closeSearch,
                     )
                 }
@@ -516,7 +512,6 @@ fun ModulePagerMaterial(
                 zygiskAvailable = uiState.zygiskAvailable,
                 actions = actions,
                 onModuleAddShortcut = { module, type -> onModuleAddShortcut(module, type) },
-                onModuleLongPress = { bannerDialogModule = it },
             )
         }
     }
@@ -549,18 +544,6 @@ fun ModulePagerMaterial(
         },
     )
 
-    bannerDialogModule?.let { module ->
-        CardBannerDialog(
-            subject = CardSubject(
-                id = module.id,
-                name = module.name,
-                version = module.version,
-                author = module.author,
-                description = module.description,
-            ),
-            onDismiss = { bannerDialogModule = null },
-        )
-    }
 }
 
 @Composable
@@ -574,7 +557,6 @@ private fun ModuleList(
     zygiskAvailable: Boolean,
     actions: ModuleActions,
     onModuleAddShortcut: (Module, ShortcutType) -> Unit,
-    onModuleLongPress: (Module) -> Unit,
     closeSearch: () -> Unit? = {},
 ) {
     if (displayModules.isEmpty() && emptyTitle != null) {
@@ -596,7 +578,6 @@ private fun ModuleList(
 
         ModuleItemCard(
             module = module,
-            visual = rememberModuleCardVisual(module.id),
             updateUrl = moduleUpdateInfo.downloadUrl,
             buttonStyle = ModuleButtonStyle.fromKey(ModuleCardConfig.buttonStyle),
             showMoreInfo = ModuleCardConfig.showMoreInfo,
@@ -630,7 +611,6 @@ private fun ModuleList(
                 }
             },
             onExecuteAction = { actions.onExecuteModuleAction(module) },
-            onLongPress = { onModuleLongPress(module) },
             closeSearch = { closeSearch() }
         )
     }

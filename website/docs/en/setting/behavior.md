@@ -1,6 +1,6 @@
 ---
 title: Behavior Settings
-description: Navigation, interaction compatibility, module cards and module banners
+description: Navigation, interaction compatibility and module cards
 createTime: 2026/10/24 00:00:00
 permalink: /en/setting/behavior/
 copyright:
@@ -39,14 +39,6 @@ A badge is only a status hint. Hiding the plugins, superuser or modules entry do
 This option is only shown on Android 14 and above. When enabled, the Manager turns on the system predictive back animation, so the back gesture provides a preview before switching pages.
 
 You can turn it off if system animations behave abnormally or gestures stutter. This setting does not change the actual back logic of a page.
-
-### Custom Bottom Navigation Icons
-
-When enabled, you can pick a local image for the home screen, plugins, superuser, modules and settings entries separately.
-
-- The image only replaces the navigation icon of the current Manager.
-- A single icon can be cleared to restore the default icon.
-- "Restore the default theme" or a wallpaper-related reset may also clear custom navigation icons.
 
 ### Navigation Entry Visibility
 
@@ -185,9 +177,7 @@ It only tries to restore temporary Root for the current boot session. After a fu
 
 :::
 
-## Module Cards and Banners
-
-### Module Cards
+## Module Cards
 
 - **Show module details**: shows the version, author and description on the module card.
 - **Collapse module cards**: tucks the action buttons away until the card is expanded, reducing list clutter.
@@ -195,57 +185,6 @@ It only tries to restore temporary Root for the current boot session. After a fu
 - **Action button style**: choose full buttons with text or icon-only buttons.
 
 These options only change how the modules page is displayed and do not change whether a module is enabled.
-
-### Module Banners
-
-Module banners can show a cover image for module cards; the source may be a built-in source, the module marketplace or a custom API.
-
-:::: field-group
-
-::: field Enable banners
-@type `Master switch`
-When turned off, the banner-related options are hidden.
-:::
-
-::: field Custom banners
-@type `Manual selection`
-When enabled, you can long-press a module card and pick that module's banner image yourself.
-:::
-
-::: field API mode
-@type `Optional`
-Fetches module banners from an API or a local directory. The row is not shown when the source policy does not support it.
-:::
-
-::: field API source
-@type `API / directory`
-Enter the banner API link or a local directory. Only shown when API mode is available.
-:::
-
-::: field API marketplace
-@type `Page`
-Opens the banner source marketplace to select or browse the available API sources.
-:::
-
-::: field Clear cache
-@type `Maintenance`
-Deletes downloaded banner caches so they are requested again the next time they are shown.
-:::
-
-::: field Custom opacity
-@type `Display`
-When enabled, an opacity slider appears, ranging from `10%–100%`.
-:::
-
-::::
-
-::: warning Remote banners involve the network
-
-A custom API, marketplace or remote image may expose device request information and may include third-party tracking. Use trusted sources only; turn module banners off when you do not need them.
-
-:::
-
-For detailed configuration, see [Module Cards & Banners](/en/setting/module-cards/).
 
 ## Suggested Configurations
 
@@ -285,5 +224,5 @@ For detailed configuration, see [Module Cards & Banners](/en/setting/module-card
 - [Navigation](/en/setting/navigation/)
 - [Floating Navigation Bar](/en/setting/floating-bar/)
 - [Interaction & Compatibility](/en/setting/interaction/)
-- [Module Cards & Banners](/en/setting/module-cards/)
+- [Module Cards](/en/setting/module-cards/)
 - [Module Management](/en/manager/module/)

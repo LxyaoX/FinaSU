@@ -102,7 +102,7 @@ A card can show the module name, version, author, description, and status badges
 
 ::::
 
-Module actions are affected by [Module Cards & Banners](/en/setting/module-cards/). Long-press a card to change the banner of the current module; if the card is collapsed, tap it first to expand the action buttons.
+Where the module actions sit is controlled by [Module Cards](/en/setting/module-cards/); if the card is collapsed, tap it first to expand them.
 
 ### WebUI and Action Scripts
 
@@ -231,4 +231,4 @@ Common readings:
 - [Kernel Modules](/en/manager/kernel-module/): import and load `.ko` files.
 - [App Profile](/en/manager/app-profile/): control whether a single app sees module files.
 - [Backup & WebDAV](/en/manager/backup/): save installers and module state before flashing.
-- [Module Cards & Banners](/en/setting/module-cards/): change how the module list is displayed.
+- [Module Cards](/en/setting/module-cards/): change how the module list is displayed.

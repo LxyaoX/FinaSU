@@ -254,4 +254,4 @@ flowchart TD
 - [主题与颜色](/setting/theme/)
 - [壁纸](/setting/wallpaper/)
 - [导航](/setting/navigation/)
-- [模块卡片与横幅](/setting/module-cards/)
+- [模块卡片](/setting/module-cards/)

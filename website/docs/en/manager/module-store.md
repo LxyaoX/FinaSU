@@ -167,4 +167,4 @@ Keep in mind:
 - [Module Management](/en/manager/module/): installation, enabling, WebUI, and updates.
 - [Backup & WebDAV](/en/manager/backup/): save module installers before flashing.
 - [Updating FinaSU](/en/guide/update/): update paths for the Manager and the driver.
-- [Module Cards & Banners](/en/setting/module-cards/): display settings for the module list.
+- [Module Cards](/en/setting/module-cards/): display settings for the module list.

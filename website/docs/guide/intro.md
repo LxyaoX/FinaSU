@@ -46,7 +46,6 @@ flowchart LR
   <Card title="高度自定义" icon="ri:palette-line">
     <ul>
       <li>5 套首页布局、15 组主题色，以及图片、视频、字体、图标、音乐、音效和振动。</li>
-      <li>支持 <code>.fpt</code> 主题导入导出与在线主题商店。</li>
     </ul>
   </Card>
   <Card title="模块与维护" icon="ri:tools-line">

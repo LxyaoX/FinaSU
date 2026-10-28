@@ -31,7 +31,6 @@ Open the Manager → Settings → tap **Appearance**, the second entry in the fi
 | Light and dark, accent color, Material style | Theme settings |
 | Background image, video, transparency, blur | Wallpaper |
 | Interface font | Font |
-| Download online or import a `.fpt` | Theme store |
 | The Manager icon on the home screen | Launcher icon |
 | Whether the home screen is circular, a grid, a dashboard or a stats page | Home layout |
 | Whether the top bar uses a large title or the traditional style | Layout variant |
@@ -265,15 +264,6 @@ If a module author wrote long and important installation notes, do not set this 
 
 - Set the font, launcher icon, title image, information visibility, scale and description lines
   time=Details
-
-- Export a `.fpt` from the wallpaper page if you need to migrate or share; otherwise keeping it on this device is enough
-  time=Save type=success
-
-:::
-
-::: warning Restoring defaults clears several items
-
-"Restore the default theme" does more than delete the current wallpaper; it may also clear the font, home layout and custom navigation icons. Before running it, decide whether you should export a theme package first.
 
 :::
 

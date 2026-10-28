@@ -102,7 +102,7 @@ copyright:
 
 ::::
 
-模块操作受[模块卡片与横幅设置](/setting/module-cards/)影响。长按卡片可以修改当前模块的横幅；卡片被折叠时，先点按展开操作按钮。
+模块操作的布局受[模块卡片设置](/setting/module-cards/)影响；卡片被折叠时，先点按展开操作按钮。
 
 ### WebUI 与操作脚本
 
@@ -231,4 +231,4 @@ flowchart TD
 - [内核模块](/manager/kernel-module/)：导入和加载 `.ko` 文件。
 - [App Profile](/manager/app-profile/)：控制单个应用是否看到模块文件。
 - [备份与 WebDAV](/manager/backup/)：保存刷写前安装包和模块状态。
-- [模块卡片与横幅](/setting/module-cards/)：改变模块列表的显示方式。
+- [模块卡片](/setting/module-cards/)：改变模块列表的显示方式。

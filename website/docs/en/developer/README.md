@@ -121,11 +121,6 @@ Plugin IDs are validated by the FinaSU plugin rules; the entry point defaults to
 When you change an ioctl, a struct or a feature, you must update the kernel, `ksud` and the Manager JNI together; compatibility for old lengths and old commands needs a separate design.
 ::::
 
-:::: field Theme Package
-@type `.fpt`
-It is essentially a restricted flat ZIP container wrapped in an AES-CBC stream; the format is not provenance authentication, and import still goes through structure validation and a transactional apply.
-::::
-
 :::::
 
 ## Recommended Workflow

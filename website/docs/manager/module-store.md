@@ -167,4 +167,4 @@ flowchart LR
 - [模块管理](/manager/module/)：安装、启停、WebUI 与更新。
 - [备份与 WebDAV](/manager/backup/)：保存刷写前模块安装包。
 - [更新 FinaSU](/guide/update/)：管理器与驱动更新路径。
-- [模块卡片与横幅](/setting/module-cards/)：模块列表展示设置。
+- [模块卡片](/setting/module-cards/)：模块列表展示设置。

@@ -88,7 +88,6 @@ You can enable the following protections separately:
 | **Module uninstall** | Deleting a module | Verification is required before uninstalling |
 | **Module disable** | Turning a module switch off | Verification is required before disabling |
 | **Partition flashing** | Patching, flashing or restoring a boot partition | Verification is required before writing |
-| **Theme / FPT import** | Importing a `.fpt` theme package | Verification is required before applying theme resources |
 | **Reboot operations** | A reboot, soft reboot or related recovery action started by Manager | Verification is required before executing |
 
 :::
@@ -158,7 +157,6 @@ In that case, back up the accessible data first, then investigate app storage or
 | --- | --- |
 | Personal device, frequent debugging | App launch + module install + partition flashing |
 | Daily driver | App launch + module install / uninstall / disable + reboot |
-| Frequently testing themes | Also enable "Theme / FPT import" |
 | Lending the device temporarily | At least app launch, and turn off ADB Root |
 | Jailbreak mode | Keep reboot protection; auto jailbreak still needs the autostart permission |
 

@@ -46,7 +46,6 @@ flowchart LR
   <Card title="Highly Customizable" icon="ri:palette-line">
     <ul>
       <li>5 home layouts, 15 theme color sets, plus images, video, fonts, icons, music, sound effects and vibration.</li>
-      <li>Supports <code>.fpt</code> theme import and export, and an online theme store.</li>
     </ul>
   </Card>
   <Card title="Modules and Maintenance" icon="ri:tools-line">

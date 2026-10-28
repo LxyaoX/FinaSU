@@ -440,8 +440,6 @@
     <string name="module_shortcut_scheme_copied">URL スキームをコピーしました</string>
     <string name="settings_navigation_badge">ナビゲーションのバッジ</string>
     <string name="settings_navigation_badge_summary">許可されたアプリと有効なモジュールの数をナビゲーションバーに表示します</string>
-    <string name="settings_nav_custom_icons">カスタムナビゲーションアイコン</string>
-    <string name="settings_nav_custom_icons_summary">下部ナビゲーションのアイコンに独自の画像を使用します</string>
     <string name="settings_nav_layout_title">ナビゲーションのレイアウト</string>
     <string name="settings_show_superuser">Superuser を表示</string>
     <string name="settings_show_module">モジュールを表示</string>
@@ -459,11 +457,6 @@
     <string name="settings_nav_mode_bottom">常に下部バー</string>
     <string name="settings_nav_mode_rail">常にサイドレール</string>
     <string name="settings_nav_mode_floating">フローティング下部バー</string>
-    <string name="nav_icon_default">デフォルトアイコン</string>
-    <string name="nav_icon_custom_selected">カスタムアイコン</string>
-    <string name="nav_icon_set">アイコンを更新しました</string>
-    <string name="nav_icon_set_failed">その画像を読み込めませんでした</string>
-    <string name="nav_icon_clear">デフォルトアイコンに戻す</string>
     <string name="settings_wallpaper_summary">アプリの背景画像を設定します</string>
     <string name="wallpaper_title">壁紙</string>
     <string name="wallpaper_enable">壁紙を有効にする</string>
@@ -701,8 +694,6 @@
     <string name="guide_skip">スキップ</string>
     <string name="guide_start">はじめる</string>
     <string name="guide_page_indicator">%1$d / %2$d ページ</string>
-    <string name="guide_about_entry_title">ウェルカムガイドをもう一度表示</string>
-    <string name="guide_about_entry_summary">初回起動の紹介をもう一度再生</string>
     <string name="install_anykernel_target_slot">対象スロット</string>
     <string name="install_anykernel_current_slot">現在のスロット（%1$s）</string>
     <string name="install_anykernel_current_slot_no_suffix">現在のスロット</string>

@@ -25,7 +25,6 @@ You can hide the plugins, Superuser and modules entries, and you can show naviga
 ## Gestures and Icons
 
 - **Predictive back gesture**: asks the system for the predictive back animation.
-- **Custom bottom navigation icons**: choose a local image for each of the home, plugins, Superuser, modules and Settings entries.
 - **Layout variant**: choose a classic or M3E top bar for the plugins, Superuser and modules pages.
 
-Navigation layout changes may require re-entering the page before they fully take effect. Restoring the default wallpaper also clears the custom navigation icons.
+Navigation layout changes may require re-entering the page before they fully take effect.

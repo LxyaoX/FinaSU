@@ -45,7 +45,7 @@ copyright:
 
 ### FinaSU 是什么？
 
-FinaSU 是 KernelSU 系的下游分支，核心 Root 裁决发生在内核中。它提供内核级 `su` 与白名单、Folk Mount、App Profile、YukiZygisk、Sui、SUSFS 能力接口、NoMount、`.fpt` 主题和模块仓库。
+FinaSU 是 KernelSU 系的下游分支，核心 Root 裁决发生在内核中。它提供内核级 `su` 与白名单、Folk Mount、App Profile、YukiZygisk、Sui、SUSFS 能力接口、NoMount 和模块仓库。
 
 ::: important 它不只是管理器
 

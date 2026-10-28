@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_module_display">Отображение модулей</string>
+    <string name="module_card_show_more_info">Показывать сведения о модуле</string>
+    <string name="module_card_show_more_info_summary">Показывает версию, автора и описание на карточке модуля.</string>
+    <string name="module_card_fold_system">Сворачивать карточки модулей</string>
+    <string name="module_card_fold_system_summary">Скрывает кнопки действий, пока карточка не развёрнута.</string>
+    <string name="module_card_spliced">Объединённый вид карточек</string>
+    <string name="module_card_spliced_summary">Соединяет соседние карточки модулей в одну непрерывную группу.</string>
+    <string name="module_card_button_style">Стиль кнопок действий</string>
+    <string name="module_card_button_style_summary">Выбор между полными кнопками и кнопками только со значком.</string>
+    <string name="module_card_style_full">Полный</string>
+    <string name="module_card_style_icon">Значок</string>
+</resources>

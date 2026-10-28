@@ -1,5 +1,5 @@
 ---
-title: Module Cards & Banners
+title: Module Cards
 createTime: 2026/10/24 00:00:00
 permalink: /en/setting/module-cards/
 copyright:
@@ -9,7 +9,7 @@ copyright:
     name: LyraVoid
 ---
 
-# Module Cards & Banners
+# Module Cards
 
 ## Cards
 
@@ -20,14 +20,3 @@ copyright:
 - **Maximum description lines**: descriptions longer than the limit collapse automatically; tap the card to expand.
 
 Group ordering distinguishes Metamodules, Zygisk, LSPosed, modules with a WebUI and modules with actions.
-
-## Banners
-
-Module cards can show a banner:
-
-- **Custom banner**: when on, long-press a module card to pick a local banner image for that module.
-- **API mode**: fetches the banner from an API or a local directory.
-- **Banner API source**: the API link or local directory.
-- **Market source**: reads the banner from module market metadata.
-
-"Clear banner cache" deletes downloaded banner cache, which is fetched again on the next display. Once custom opacity is on, the slider overrides the default transparency that follows the wallpaper. Remote images may contain third-party tracking content; confirm the source before enabling.

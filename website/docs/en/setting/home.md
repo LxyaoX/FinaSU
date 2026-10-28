@@ -254,4 +254,4 @@ A module description is collapsed automatically when it exceeds `1–5` lines. T
 - [Theme & Color](/en/setting/theme/)
 - [Wallpaper](/en/setting/wallpaper/)
 - [Navigation](/en/setting/navigation/)
-- [Module Cards & Banners](/en/setting/module-cards/)
+- [Module Cards](/en/setting/module-cards/)

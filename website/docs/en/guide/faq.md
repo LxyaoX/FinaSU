@@ -45,7 +45,7 @@ If the device currently gets root from Magisk, KernelSU or one of its forks, or 
 
 ### What is FinaSU?
 
-FinaSU is a downstream fork of the KernelSU family in which the core root decision happens in the kernel. It provides a kernel-level `su` with an allowlist, Folk Mount, App Profile, YukiZygisk, Sui, SUSFS capability interfaces, NoMount, `.fpt` themes and a module repository.
+FinaSU is a downstream fork of the KernelSU family in which the core root decision happens in the kernel. It provides a kernel-level `su` with an allowlist, Folk Mount, App Profile, YukiZygisk, Sui, SUSFS capability interfaces, NoMount and a module repository.
 
 ::: important It is not just a Manager
 

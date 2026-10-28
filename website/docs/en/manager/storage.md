@@ -126,8 +126,7 @@ Regular modules live in `/data/adb/modules/<module-id>/`. Common files inside a 
 │   ├── module.ko
 │   ├── config.json
 │   ├── disable
-│   ├── last_result.json
-│   └── banner.png
+│   └── last_result.json
 ├── .state/
 └── .stage/
 ```
