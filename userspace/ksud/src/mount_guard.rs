@@ -196,6 +196,13 @@ fn died_at(path: &Path, epoch: &crate::startup_epoch::StartupEpoch) -> bool {
     })
 }
 
+/// Drop the record; failures only warn.
+pub fn clear(path: &Path) {
+    if let Err(error) = try_clear(path) {
+        log::warn!("mount guard: {error:#}");
+    }
+}
+
 pub fn try_clear(path: &Path) -> Result<()> {
     remove(path, "")
 }

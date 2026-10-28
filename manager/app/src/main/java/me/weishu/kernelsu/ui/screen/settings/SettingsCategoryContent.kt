@@ -469,8 +469,13 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                                             id = R.string.settings_folk_mount_nomount_unavailable_hint
                                         )
 
-                                mode == FolkMountMode.NOMOUNT && uiState.nomountStatus?.apiOk == false ->
-                                    stringResource(id = R.string.settings_folk_mount_nomount_unavailable_hint)
+                                mode == FolkMountMode.NOMOUNT &&
+                                    folkMountStatus.bootProvider != null &&
+                                    folkMountStatus.bootProvider != FolkMountProvider.NOMOUNT ->
+                                    folkMountStatus.bootWarning
+                                        ?: stringResource(
+                                            id = R.string.settings_folk_mount_nomount_unavailable_hint
+                                        )
 
                                 else -> null
                             }
