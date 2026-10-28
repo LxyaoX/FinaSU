@@ -318,6 +318,18 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                     )
                 },
                 {
+                    SegmentedListItem(
+                        headlineContent = {
+                            Text(stringResource(R.string.umount_paths_title))
+                        },
+                        supportingContent = {
+                            Text(stringResource(R.string.umount_paths_summary))
+                        },
+                        leadingContent = { Icon(Icons.Filled.LayersClear, null) },
+                        onClick = actions.onOpenUmountPaths,
+                    )
+                },
+                {
                     val mountViewFilterSummary = when (uiState.mountViewFilterStatus) {
                         "forced" -> stringResource(R.string.feature_status_forced_summary)
                         "unsupported" -> stringResource(R.string.feature_status_unsupported_summary)
