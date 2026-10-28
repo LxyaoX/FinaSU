@@ -171,6 +171,12 @@ export const docsSidebar: ThemeSidebarItem[] = [
             icon: 'ri:shield-keyhole-line',
             badge: { text: '进阶', type: 'info' },
           },
+          {
+            text: '自定义卸载挂载点',
+            link: '/setting/umount-paths/',
+            icon: 'ri:attachment-line',
+            badge: { text: '入门', type: 'tip' },
+          },
         ],
       },
       {
@@ -682,6 +688,12 @@ export const enDocsSidebar: ThemeSidebarItem[] = [
             link: '/en/setting/root-policy/',
             icon: 'ri:shield-keyhole-line',
             badge: { text: 'Advanced', type: 'info' },
+          },
+          {
+            text: 'Custom Unmount Mountpoints',
+            link: '/en/setting/umount-paths/',
+            icon: 'ri:attachment-line',
+            badge: { text: 'Beginner', type: 'tip' },
           },
         ],
       },
