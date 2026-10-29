@@ -72,8 +72,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -83,7 +81,6 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.KernelModule
 import me.weishu.kernelsu.data.model.LoadState
 import me.weishu.kernelsu.modulecard.ModuleCardConfig
-import me.weishu.kernelsu.ui.component.card.FolkCardFrame
 import me.weishu.kernelsu.ui.component.card.cardSurfaceOpacity
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.ExpressiveSwitch
@@ -99,12 +96,12 @@ import me.weishu.kernelsu.ui.component.module.AdaptiveModuleButtonRow
 import me.weishu.kernelsu.ui.component.module.ModuleActionsSheet
 import me.weishu.kernelsu.ui.component.module.ModuleButtonConfig
 import me.weishu.kernelsu.ui.component.module.ModuleCardAction
-import me.weishu.kernelsu.ui.component.module.ModuleLabel
+import me.weishu.kernelsu.ui.component.module.ModuleCardLabel
+import me.weishu.kernelsu.ui.component.module.ModuleCardShell
 import me.weishu.kernelsu.ui.component.module.TwoColumnGrid
 import me.weishu.kernelsu.ui.component.module.splicedLazyColumnGroup
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.screen.module.ModuleButtonStyle
-import me.weishu.kernelsu.ui.theme.LocalModuleDescriptionMaxLines
 import me.weishu.kernelsu.ui.viewmodel.KernelModuleViewModel
 import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 
@@ -459,14 +456,9 @@ private fun KernelModuleCard(
     val showMoreInfo = ModuleCardConfig.showMoreInfo
     val foldEnabled = ModuleCardConfig.foldSystemModule
     val iconOnly = ModuleButtonStyle.fromKey(ModuleCardConfig.buttonStyle) == ModuleButtonStyle.IconOnly
-    val maxLinesLimit = LocalModuleDescriptionMaxLines.current
     val haptics = LocalHapticFeedback.current
     val pending = module.id in state.pending
     val autoloadPending = module.id in state.autoloadPending
-    val displayName = module.name
-    val displayVersion = module.version
-    val displayAuthor = module.author
-    val displayDescription = module.description
     val fileSize = if (module.fileSize > 0) {
         Formatter.formatShortFileSize(LocalContext.current, module.fileSize)
     } else {
@@ -572,7 +564,58 @@ private fun KernelModuleCard(
         onClick = { showMoreActions = true },
     )
 
-    FolkCardFrame(
+    val labels = buildList {
+        add(
+            ModuleCardLabel(
+                text = module.id,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        )
+        add(
+            ModuleCardLabel(
+                text = statusText,
+                containerColor = statusContainerColor,
+                contentColor = statusContentColor,
+            )
+        )
+        if (module.protected) {
+            add(
+                ModuleCardLabel(
+                    text = stringResource(R.string.kernel_modules_protected),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            )
+        }
+    }
+    val subtitles = if (showMoreInfo) {
+        buildList {
+            if (module.version.isNotBlank()) {
+                add("${stringResource(R.string.module_version)}: ${module.version}")
+            }
+            if (module.author.isNotBlank()) {
+                add("${stringResource(R.string.module_author)}: ${module.author}")
+            }
+            val internalName = module.internalName
+            if (!internalName.isNullOrBlank() && internalName != module.id && internalName != module.name) {
+                add("${stringResource(R.string.kernel_modules_internal_name)}: $internalName")
+            }
+            if (technicalMetadata.isNotBlank()) add(technicalMetadata)
+            if (module.vermagic.isNotBlank()) {
+                add("${stringResource(R.string.kernel_modules_vermagic)}: ${module.vermagic}")
+            }
+            add("${stringResource(R.string.kernel_modules_depends)}: $dependencySummary")
+        }
+    } else {
+        emptyList()
+    }
+
+    ModuleCardShell(
+        title = module.name,
+        labels = labels,
+        subtitles = subtitles,
+        description = module.description.takeIf { showMoreInfo },
         expanded = expanded,
         onClickLabel = when {
             !foldEnabled -> null
@@ -580,150 +623,43 @@ private fun KernelModuleCard(
             else -> expandLabel
         },
         onClick = { if (foldEnabled) onExpandToggle() },
+        errorText = module.error,
+        loading = pending,
+        switch = {
+            ExpressiveSwitch(
+                checked = module.effectiveAutoload,
+                enabled = !pending && !autoloadPending && !state.safeMode && module.internalName != null &&
+                    !module.protected,
+                onCheckedChange = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    actions.onToggleAutoload(module, it)
+                },
+                modifier = Modifier.semantics {
+                    contentDescription = autoloadLabel
+                },
+            )
+        },
     ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                Column(Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        ModuleLabel(
-                            text = module.id,
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                        ModuleLabel(
-                            text = statusText,
-                            containerColor = statusContainerColor,
-                            contentColor = statusContentColor,
-                        )
-                        if (module.protected) {
-                            ModuleLabel(
-                                text = stringResource(R.string.kernel_modules_protected),
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            )
-                        }
-                    }
-                    Text(
-                        text = displayName,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    )
-                    if (showMoreInfo) {
-                        if (displayVersion.isNotBlank()) {
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = "${stringResource(R.string.module_version)}: $displayVersion",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        if (displayAuthor.isNotBlank()) {
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = "${stringResource(R.string.module_author)}: $displayAuthor",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        val internalName = module.internalName
-                        if (!internalName.isNullOrBlank() && internalName != module.id && internalName != displayName) {
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = "${stringResource(R.string.kernel_modules_internal_name)}: $internalName",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        if (technicalMetadata.isNotBlank()) {
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = technicalMetadata,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        if (module.vermagic.isNotBlank()) {
-                            Spacer(Modifier.height(2.dp))
-                            Text(
-                                text = "${stringResource(R.string.kernel_modules_vermagic)}: ${module.vermagic}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            text = "${stringResource(R.string.kernel_modules_depends)}: $dependencySummary",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+        AnimatedVisibility(
+            visible = !foldEnabled || expanded,
+            enter = fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) +
+                expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()),
+            exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) +
+                fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
+        ) {
+            Column {
+                if (!pending) {
+                    Spacer(Modifier.height(16.dp))
+                } else {
+                    Spacer(Modifier.height(12.dp))
                 }
-                ExpressiveSwitch(
-                    checked = module.effectiveAutoload,
-                    enabled = !pending && !autoloadPending && !state.safeMode && module.internalName != null &&
-                        !module.protected,
-                    onCheckedChange = {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        actions.onToggleAutoload(module, it)
-                    },
-                    modifier = Modifier.semantics {
-                        contentDescription = autoloadLabel
-                    },
+                AdaptiveModuleButtonRow(
+                    buttons = listOfNotNull(loadButton),
+                    trailingButton = moreButton,
+                    iconOnly = iconOnly,
+                    spacing = if (iconOnly) 12 else 8,
+                    opacity = cardSurfaceOpacity(),
                 )
-            }
-
-            if (showMoreInfo && displayDescription.isNotBlank()) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    displayDescription,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = maxLinesLimit,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (module.error != null) {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    module.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (pending) {
-                Spacer(Modifier.height(12.dp))
-                LinearProgressIndicator(Modifier.fillMaxWidth())
-            }
-
-            AnimatedVisibility(
-                visible = !foldEnabled || expanded,
-                enter = fadeIn(MaterialTheme.motionScheme.defaultEffectsSpec()) +
-                    expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()),
-                exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) +
-                    fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
-            ) {
-                Column {
-                    if (!pending) {
-                        Spacer(Modifier.height(16.dp))
-                    } else {
-                        Spacer(Modifier.height(12.dp))
-                    }
-                    AdaptiveModuleButtonRow(
-                        buttons = listOfNotNull(loadButton),
-                        trailingButton = moreButton,
-                        iconOnly = iconOnly,
-                        spacing = if (iconOnly) 12 else 8,
-                        opacity = cardSurfaceOpacity(),
-                    )
-                }
             }
         }
     }
