@@ -126,19 +126,26 @@ fun TonalCard(
         // containers alike, so a warning card and a settings group agree on shape and press
         // behaviour instead of one of them being a Material card among miuix ones.
         //
+        // The neutral fill is miuix's own card colour, not Material's surfaceBright: a
+        // SegmentedColumn group is a bare miuix card, and the settings hub puts one of these panels
+        // directly above one of those. Asking Material for the fill made the two panels a shade
+        // apart in the same column, which read as a rendering fault rather than as grouping.
+        //
         // Off wallpaper this branch must win even when a wallpaperRole was passed: the role only
         // describes how the fill should join the wallpaper layering, which is not in play here.
+        val fill = if (containerColor == MaterialTheme.colorScheme.surfaceBright) {
+            CardDefaults.defaultColors()
+        } else {
+            CardDefaults.defaultColors(color = containerColor, contentColor = contentColor)
+        }
         MiuixCard(
             modifier = modifier.then(originModifier).then(clickModifier),
             cornerRadius = cornerRadius,
-            colors = CardDefaults.defaultColors(
-                color = containerColor,
-                contentColor = contentColor,
-            ),
+            colors = fill,
         ) {
             // miuix's card publishes miuix's own content colour; Material's `Text`/`Icon` read
             // Material's local, so the card's colour is published again for them.
-            CompositionLocalProvider(LocalContentColor provides contentColor) {
+            CompositionLocalProvider(LocalContentColor provides fill.contentColor) {
                 content()
             }
         }
