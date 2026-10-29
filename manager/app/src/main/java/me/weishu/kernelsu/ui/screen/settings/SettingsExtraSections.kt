@@ -48,6 +48,14 @@ import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 private val SectionModifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
 
 /**
+ * Page zoom is offered in two-percent steps between 80% and 110%, so 100% is one of the stops and a
+ * drag lands on a whole percentage of the default size.
+ */
+internal const val PAGE_SCALE_MIN = 0.8f
+internal const val PAGE_SCALE_MAX = 1.1f
+internal const val PAGE_SCALE_DISCRETE_STEPS = 14
+
+/**
  * Navigation and chrome settings lifted out of the former "theme" screen: the navigation badge,
  * predictive back and the bottom-bar / floating-bar configuration.
  *
@@ -208,7 +216,7 @@ fun DisplayDensitySection(uiState: SettingsUiState, actions: SettingsScreenActio
     TonalCard(modifier = SectionModifier) {
         // miuix's slider keeps no state of its own; the row drags this and only writes on release.
         var pageScale by remember(uiState.pageScale) { mutableFloatStateOf(uiState.pageScale) }
-        val pageScaleSteps = if (SliderTrackConfig.isDiscrete) 19 else 0
+        val pageScaleSteps = if (SliderTrackConfig.isDiscrete) PAGE_SCALE_DISCRETE_STEPS else 0
 
         Column(
             modifier = Modifier.padding(16.dp),
@@ -247,7 +255,7 @@ fun DisplayDensitySection(uiState: SettingsUiState, actions: SettingsScreenActio
                 value = pageScale,
                 onValueChange = { pageScale = it },
                 onValueChangeFinished = { actions.onSetPageScale(pageScale) },
-                valueRange = 0.8f..1.1f,
+                valueRange = PAGE_SCALE_MIN..PAGE_SCALE_MAX,
                 steps = pageScaleSteps,
                 modifier = Modifier.fillMaxWidth(),
             )

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Fingerprint
@@ -291,6 +292,16 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Filled.Layers,
             aliases = listOf("home", "mount", "metamodule", "vfs", "hide", "card"),
             available = { it.folkMountStatus != null && !it.folkMountReadError },
+        )
+    )
+    add(
+        SettingsCategory.APPEARANCE.row(
+            id = "appearance.hide_home_kernel_full_version",
+            titleRes = R.string.settings_hide_home_kernel_full_version,
+            summaryRes = R.string.settings_hide_home_kernel_full_version_summary,
+            icon = Icons.Filled.DeveloperBoard,
+            aliases = listOf("home", "kernel", "build", "version", "full", "hide", "card"),
+            available = { it.kernelFullVersionAvailable },
         )
     )
     add(

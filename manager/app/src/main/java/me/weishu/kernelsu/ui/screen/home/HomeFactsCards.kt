@@ -50,8 +50,10 @@ internal fun InfoCard(
     val systemRows = mutableListOf<SpecRow>()
     systemRows += SpecRow(managerVersionLabel, systemInfo.managerVersion)
     systemRows += SpecRow(kernelLabel, systemInfo.kernelVersion)
-    systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
-        systemRows += SpecRow(kernelFullVersionLabel, value)
+    if (!display.hideKernelFullVersion) {
+        systemInfo.kernelFullVersion?.takeIf { it.isNotBlank() }?.let { value ->
+            systemRows += SpecRow(kernelFullVersionLabel, value)
+        }
     }
     systemRows += SpecRow(deviceModelLabel, systemInfo.deviceModel)
     if (!display.hideFingerprint) {

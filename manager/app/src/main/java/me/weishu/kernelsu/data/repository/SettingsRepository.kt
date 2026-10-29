@@ -40,6 +40,7 @@ interface SettingsRepository {
     var hideHomeZygisk: Boolean
     var hideHomeSusfs: Boolean
     var hideHomeMount: Boolean
+    var hideHomeKernelFullVersion: Boolean
     var enablePredictiveBack: Boolean
     var enableNavigationBadge: Boolean
     var pageScale: Float

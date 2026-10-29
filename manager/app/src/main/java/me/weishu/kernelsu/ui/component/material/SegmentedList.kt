@@ -94,6 +94,7 @@ import me.weishu.kernelsu.ui.theme.FolkMotion
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.ui.state.ToggleableState
 
 val LocalListItemShapes = compositionLocalOf<ListItemShapes?> { null }
@@ -180,9 +181,9 @@ private fun defaultSegmentedColors(): ListItemColors {
         )
     }
     return ListItemDefaults.segmentedColors(
-        containerColor = colorScheme.surfaceBright,
-        disabledContainerColor = colorScheme.surfaceBright,
-        supportingContentColor = colorScheme.onSurfaceVariant
+        containerColor = MiuixTheme.colorScheme.surfaceContainer,
+        disabledContainerColor = MiuixTheme.colorScheme.surfaceContainer,
+        supportingContentColor = MiuixTheme.colorScheme.onSurfaceVariantSummary
     )
 }
 
@@ -469,7 +470,7 @@ fun SegmentedItemContainer(
     }
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = colorScheme.surfaceBright,
+        color = MiuixTheme.colorScheme.surfaceContainer,
         shape = shapes.shape,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -582,7 +583,7 @@ fun SegmentedListItem(
             shapes = LocalListItemShapes.current ?: ListItemDefaults.segmentedShapes(0, 1),
             modifier = rowModifier,
             enabled = enabled,
-            colors = colors,
+            colors = selectionRowColors(colors),
             interactionSource = source,
             leadingContent = leadingContent,
             trailingContent = trailingContent,
@@ -630,7 +631,7 @@ fun SegmentedListItem(
             shapes = LocalListItemShapes.current ?: ListItemDefaults.segmentedShapes(0, 1),
             modifier = rowModifier,
             enabled = enabled,
-            colors = colors,
+            colors = selectionRowColors(colors),
             interactionSource = source,
             leadingContent = leadingContent,
             trailingContent = trailingContent,

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.Adb
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Fingerprint
@@ -47,7 +48,6 @@ import me.weishu.kernelsu.ui.component.KsuIsValid
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedDropdownItem
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
-import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.screen.nomount.nomountUnavailableReason
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
@@ -202,6 +202,15 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                 startAction = { Icon(Icons.Filled.Layers, contentDescription = null) },
                 checked = uiState.hideHomeMount,
                 onCheckedChange = actions.onSetHideHomeMount,
+            )
+        }
+        item(visible = uiState.kernelFullVersionAvailable) {
+            SwitchPreference(
+                title = stringResource(R.string.settings_hide_home_kernel_full_version),
+                summary = stringResource(R.string.settings_hide_home_kernel_full_version_summary),
+                startAction = { Icon(Icons.Filled.DeveloperBoard, contentDescription = null) },
+                checked = uiState.hideHomeKernelFullVersion,
+                onCheckedChange = actions.onSetHideHomeKernelFullVersion,
             )
         }
     }

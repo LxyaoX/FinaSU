@@ -122,6 +122,7 @@ import me.weishu.kernelsu.ui.navigation3.rememberNavContainerTransformDecorator
 import me.weishu.kernelsu.ui.navigation3.rememberNavOriginState
 import me.weishu.kernelsu.ui.navigation3.rememberNavigator
 import me.weishu.kernelsu.ui.navigation3.trackNavPointer
+import me.weishu.kernelsu.ui.navigation3.wallpaperPageFor
 import me.weishu.kernelsu.ui.screen.about.AboutScreen
 import me.weishu.kernelsu.ui.screen.appprofile.AppProfileScreen
 import me.weishu.kernelsu.ui.screen.colorpalette.ColorPaletteScreen
@@ -232,6 +233,8 @@ open class MainActivity : FragmentActivity() {
             }
 
             val capability by CapabilityRepository.state.collectAsStateWithLifecycle()
+            // A pushed screen brings its own section's wallpaper instead of keeping the main page's.
+            val wallpaperPage = wallpaperPageFor(navigator.backStack.toList(), selectedMainPage)
 
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
@@ -240,7 +243,7 @@ open class MainActivity : FragmentActivity() {
                 LocalColorMode provides appSettings.colorMode.value,
                 LocalEnableNavigationBadge provides uiState.enableNavigationBadge,
                 LocalModuleDescriptionMaxLines provides uiState.moduleDescriptionMaxLines,
-                LocalWallpaperPage provides selectedMainPage,
+                LocalWallpaperPage provides wallpaperPage,
                 LocalCapabilityState provides capability,
             ) {
                 KernelSUTheme(appSettings = appSettings) {
