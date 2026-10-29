@@ -2,20 +2,9 @@ package me.weishu.kernelsu.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.sp
-
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-)
 
 /**
  * Material's sizes with our line breaking. The sizes stay Material's: a screen that wants one of
@@ -37,36 +26,37 @@ fun getTypography(): Typography {
         }
     }
 
+    val defaults = Typography()
     return Typography(
-        displayLarge = heading(Typography.displayLarge),
-        displayMedium = heading(Typography.displayMedium),
-        displaySmall = heading(Typography.displaySmall),
-        headlineLarge = heading(Typography.headlineLarge),
-        headlineMedium = heading(Typography.headlineMedium),
-        headlineSmall = heading(Typography.headlineSmall),
-        titleLarge = heading(Typography.titleLarge),
-        titleMedium = heading(Typography.titleMedium),
-        titleSmall = paragraph(Typography.titleSmall),
-        bodyLarge = paragraph(Typography.bodyLarge),
-        bodyMedium = paragraph(Typography.bodyMedium),
-        bodySmall = paragraph(Typography.bodySmall),
-        labelLarge = paragraph(Typography.labelLarge),
-        labelMedium = paragraph(Typography.labelMedium),
-        labelSmall = paragraph(Typography.labelSmall),
-        displayLargeEmphasized = emphasize(Typography.displayLargeEmphasized, true),
-        displayMediumEmphasized = emphasize(Typography.displayMediumEmphasized, true),
-        displaySmallEmphasized = emphasize(Typography.displaySmallEmphasized, true),
-        headlineLargeEmphasized = emphasize(Typography.headlineLargeEmphasized, true),
-        headlineMediumEmphasized = emphasize(Typography.headlineMediumEmphasized, true),
-        headlineSmallEmphasized = emphasize(Typography.headlineSmallEmphasized, true),
-        titleLargeEmphasized = emphasize(Typography.titleLargeEmphasized, true),
-        titleMediumEmphasized = emphasize(Typography.titleMediumEmphasized, true),
-        titleSmallEmphasized = emphasize(Typography.titleSmallEmphasized, true),
-        bodyLargeEmphasized = emphasize(Typography.bodyLargeEmphasized, false),
-        bodyMediumEmphasized = emphasize(Typography.bodyMediumEmphasized, false),
-        bodySmallEmphasized = emphasize(Typography.bodySmallEmphasized, false),
-        labelLargeEmphasized = emphasize(Typography.labelLargeEmphasized, false),
-        labelMediumEmphasized = emphasize(Typography.labelMediumEmphasized, false),
-        labelSmallEmphasized = emphasize(Typography.labelSmallEmphasized, false)
+        displayLarge = heading(defaults.displayLarge),
+        displayMedium = heading(defaults.displayMedium),
+        displaySmall = heading(defaults.displaySmall),
+        headlineLarge = heading(defaults.headlineLarge),
+        headlineMedium = heading(defaults.headlineMedium),
+        headlineSmall = heading(defaults.headlineSmall),
+        titleLarge = heading(defaults.titleLarge),
+        titleMedium = heading(defaults.titleMedium),
+        titleSmall = paragraph(defaults.titleSmall),
+        bodyLarge = paragraph(defaults.bodyLarge),
+        bodyMedium = paragraph(defaults.bodyMedium),
+        bodySmall = paragraph(defaults.bodySmall),
+        labelLarge = paragraph(defaults.labelLarge),
+        labelMedium = paragraph(defaults.labelMedium),
+        labelSmall = paragraph(defaults.labelSmall),
+        displayLargeEmphasized = emphasize(defaults.displayLargeEmphasized, true),
+        displayMediumEmphasized = emphasize(defaults.displayMediumEmphasized, true),
+        displaySmallEmphasized = emphasize(defaults.displaySmallEmphasized, true),
+        headlineLargeEmphasized = emphasize(defaults.headlineLargeEmphasized, true),
+        headlineMediumEmphasized = emphasize(defaults.headlineMediumEmphasized, true),
+        headlineSmallEmphasized = emphasize(defaults.headlineSmallEmphasized, true),
+        titleLargeEmphasized = emphasize(defaults.titleLargeEmphasized, true),
+        titleMediumEmphasized = emphasize(defaults.titleMediumEmphasized, true),
+        titleSmallEmphasized = emphasize(defaults.titleSmallEmphasized, true),
+        bodyLargeEmphasized = emphasize(defaults.bodyLargeEmphasized, false),
+        bodyMediumEmphasized = emphasize(defaults.bodyMediumEmphasized, false),
+        bodySmallEmphasized = emphasize(defaults.bodySmallEmphasized, false),
+        labelLargeEmphasized = emphasize(defaults.labelLargeEmphasized, false),
+        labelMediumEmphasized = emphasize(defaults.labelMediumEmphasized, false),
+        labelSmallEmphasized = emphasize(defaults.labelSmallEmphasized, false)
     )
 }
