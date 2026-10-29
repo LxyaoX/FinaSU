@@ -31,6 +31,16 @@ pub const CONFIG: &str = "/data/adb/ksu/yukizygisk/yzconfig.json";
 /// fresh install injects without anyone having to find the switch first.
 const DISABLED_MARKER: &str = "/data/adb/ksu/yukizygisk/disabled";
 
+/// Where a module installer looks to answer "is Zygisk available?".
+///
+/// PlayIntegrityFix and others test that with `find /data/adb/modules -name libzygisk.so`, and this
+/// engine keeps its libraries outside the module directory - so the lookup finds nothing and the
+/// installer refuses to run. The directory carries neither `module.prop` nor `zygisk/<abi>.so`, so
+/// nothing takes it for a module and zygiskd never loads it: it answers that one question.
+pub const DETECT_DIR: &str = "/data/adb/modules/yukizygisk";
+/// Inside [DETECT_DIR]; the name the lookup above matches.
+pub const DETECT_LINK: &str = "/data/adb/modules/yukizygisk/libzygisk.so";
+
 /// The daemons, one per ABI.
 pub const DAEMONS: [&str; 2] = ["zygiskd64", "zygiskd32"];
 /// The six injected libraries.
@@ -110,6 +120,37 @@ pub fn install() -> Result<()> {
         fs::rename(&temp, &target).with_context(|| format!("install {}", target.display()))?;
         log::info!("yukizygisk: installed {name}");
     }
+    if let Err(error) = write_detect_link() {
+        log::warn!("yukizygisk: could not publish the Zygisk marker: {error:#}");
+    }
+    Ok(())
+}
+
+/// Put a `libzygisk.so` where module installers look for one.
+///
+/// Only a link, and only the 64-bit library: it exists so a module script's existence check passes,
+/// not so anything loads it.
+fn write_detect_link() -> Result<()> {
+    let target = target_path("libzygisk64.so");
+    if !target.exists() {
+        return Ok(());
+    }
+    fs::create_dir_all(DETECT_DIR).with_context(|| format!("create {DETECT_DIR}"))?;
+    match fs::symlink_metadata(DETECT_LINK) {
+        Ok(meta) if meta.file_type().is_symlink() => {
+            if fs::read_link(DETECT_LINK).is_ok_and(|current| current == target) {
+                return Ok(());
+            }
+            fs::remove_file(DETECT_LINK).with_context(|| format!("remove {DETECT_LINK}"))?;
+        }
+        Ok(_) => {
+            fs::remove_file(DETECT_LINK).with_context(|| format!("remove {DETECT_LINK}"))?;
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error).with_context(|| format!("stat {DETECT_LINK}")),
+    }
+    std::os::unix::fs::symlink(&target, DETECT_LINK)
+        .with_context(|| format!("link {DETECT_LINK} -> {}", target.display()))?;
     Ok(())
 }
 

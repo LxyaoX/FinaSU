@@ -26,6 +26,7 @@ YukiZygisk is the Zygisk engine that ships with FinaSU. Unlike the earlier users
 | Settings | `/data/adb/ksu/yukizygisk/yzconfig.json` | Six switches, read when a daemon starts |
 | Diagnostics | `/data/adb/ksu/yukizygisk/diagnostics/current/` | Per-boot logs and evidence |
 | Bundled module | `/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix`, linked to `/data/adb/modules/playintegrityfix` | The PlayIntegrityFix payload that ships with `ksud` |
+| Presence marker | `/data/adb/modules/yukizygisk/libzygisk.so` (a symbolic link) | Lets an installer's `find -name libzygisk.so` check see this engine |
 
 ::: warning Installing the manager alone injects nothing
 
@@ -63,9 +64,15 @@ The switch and the identity live in **Settings → Function → Play Integrity**
 
 If the device already has the official module installed, `/data/adb/modules/playintegrityfix` is a real directory, the built-in payload stands aside and the page says so. "Take over the installed module" runs its `uninstall.sh` to put the properties back, then replaces it with the built-in payload and keeps the configuration.
 
-::: warning Do not edit `module.prop`
+::: tip Why the payload carries an `update` file
 
-The library checks its CRC32 at start-up and refuses to load when it does not match. The copy in the payload is upstream's original file; editing it simply disables PlayIntegrityFix.
+The library checks `module.prop`'s CRC32 at start-up and refuses to load when it does not match. `update` is upstream's own escape hatch: while it exists the library treats the module as freshly updated, skips the check and skips the one write-open it would otherwise perform. `ksud` rewrites this payload on every boot, so the checksum could never stay in step - which leaves `pif.prop`, the file you edit on the page, as the only thing written.
+
+:::
+
+::: warning An installer refuses to run without Zygisk
+
+Upstream module scripts test for a Zygisk implementation with `find /data/adb/modules -name libzygisk.so`. This engine keeps its libraries under `/data/adb/ksu/lib/yukizygisk/`, so that lookup finds nothing and the installer exits - one of the reasons these features ship inside the Manager. So that the same script also passes when installing *other* modules, `ksud` puts a `libzygisk.so` link to `libzygisk64.so` in `/data/adb/modules/yukizygisk/`. That directory has neither `module.prop` nor `zygisk/<abi>.so`, so it is not a module and zygiskd never loads it.
 
 :::
 

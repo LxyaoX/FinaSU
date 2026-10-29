@@ -26,6 +26,7 @@ YukiZygisk 是随 FinaSU 提供的 Zygisk 引擎。它和早期纯用户态实�
 | 设置 | `/data/adb/ksu/yukizygisk/yzconfig.json` | 六个开关，守护进程启动时读取 |
 | 诊断 | `/data/adb/ksu/yukizygisk/diagnostics/current/` | 每个启动周期的日志与证据 |
 | 内置模块 | `/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix`，链接到 `/data/adb/modules/playintegrityfix` | 随 `ksud` 分发的 PlayIntegrityFix 载荷 |
+| 检测标记 | `/data/adb/modules/yukizygisk/libzygisk.so`（符号链接） | 让用 `find -name libzygisk.so` 判断“有没有 Zygisk”的安装脚本认得出本引擎 |
 
 ::: warning 只更新管理器不会产生注入
 
@@ -63,9 +64,15 @@ YukiZygisk 是随 FinaSU 提供的 Zygisk 引擎。它和早期纯用户态实�
 
 如果设备上已经装了官方模块，`/data/adb/modules/playintegrityfix` 是一个真实目录，内置载荷会让位并在页面上说明原因。点“接管已安装的模块”会先运行它的 `uninstall.sh` 把属性还原，再用内置载荷替换，配置保留。
 
-::: warning `module.prop` 不要改
+::: tip 为什么载荷里有一个 `update` 文件
 
-这个库启动时会校验 `module.prop` 的 CRC32，不匹配就拒绝加载。载荷里的 `module.prop` 是上游原文件，编辑它等于让 PlayIntegrityFix 直接失效。
+这个库启动时会校验 `module.prop` 的 CRC32，不匹配就拒绝加载。`update` 是上游自己的逃生口：它看到这个文件就认为“模块刚更新过”，跳过校验，连那次唯一的写打开也一起跳过。载荷每次开机都由 `ksud` 重写，校验值不可能一直对齐，所以标记一直存在——真正会被写入的只有你在页面上改的 `pif.prop`。
+
+:::
+
+::: warning 没有 Zygisk 时安装器会拒绝运行
+
+上游模块的安装脚本用 `find /data/adb/modules -name libzygisk.so` 判断有没有 Zygisk 实现。本引擎的库放在 `/data/adb/ksu/lib/yukizygisk/`，不在模块目录里，所以那条命令找不到东西，安装脚本会直接退出——这也是这些能力内置在管理器里的原因之一。为了同样的脚本在装**其它**模块时也能过这一关，`ksud` 会在 `/data/adb/modules/yukizygisk/` 放一个指向 `libzygisk64.so` 的 `libzygisk.so` 链接；该目录既没有 `module.prop` 也没有 `zygisk/<abi>.so`，因此不会被当成模块，zygiskd 也不会加载它。
 
 :::
 
