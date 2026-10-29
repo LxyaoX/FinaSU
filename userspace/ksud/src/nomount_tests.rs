@@ -343,7 +343,7 @@ fn legacy_load_record_is_preserved_before_injection_reuses_the_file() {
         2,
     )
     .unwrap();
-    mount_guard::clear(&legacy);
+    mount_guard::try_clear(&legacy).unwrap();
     assert!(reject_unfinished_load(&attempt).is_err());
 }
 
