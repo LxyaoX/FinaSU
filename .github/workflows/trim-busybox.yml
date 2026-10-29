@@ -1,0 +1,62 @@
+name: Trim busybox
+
+# Builds the aarch64 busybox this repository ships, with only the applets module
+# scripts call. Triggered by a change to the trim list so the binary and the list
+# never drift apart; the result lands on `build/busybox-trimmed` for review.
+on:
+  push:
+    paths:
+      - '.github/workflows/trim-busybox.yml'
+      - 'scripts/trim_busybox.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install cross compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+
+      - name: Fetch busybox
+        run: |
+          curl -fsSL https://busybox.net/downloads/busybox-1.36.1.tar.bz2 -o busybox.tar.bz2
+          tar xf busybox.tar.bz2
+
+      - name: Configure
+        run: |
+          cd busybox-1.36.1
+          make defconfig
+          python3 ../scripts/trim_busybox.py .config
+          yes "" | make oldconfig > /dev/null
+          grep -E '^CONFIG_(STATIC|PIE)=' .config
+
+      - name: Build
+        run: |
+          cd busybox-1.36.1
+          make -j"$(nproc)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+            LDFLAGS="-static -s" busybox
+          aarch64-linux-gnu-strip --strip-all busybox
+          ls -l busybox
+          file busybox
+
+      - name: Report applets
+        run: |
+          cd busybox-1.36.1
+          echo "applets: $(./busybox --list 2>/dev/null | wc -l)"
+
+      - name: Publish
+        run: |
+          cp busybox-1.36.1/busybox userspace/ksud/bin/aarch64/busybox
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B build/busybox-trimmed
+          git add userspace/ksud/bin/aarch64/busybox
+          git commit -m "chore(userspace): trimmed busybox build" || echo "no change"
+          git push -f origin build/busybox-trimmed
