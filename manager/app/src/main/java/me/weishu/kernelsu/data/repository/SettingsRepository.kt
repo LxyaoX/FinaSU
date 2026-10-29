@@ -6,6 +6,8 @@ import me.weishu.kernelsu.data.model.NomountStatus
 import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.YukiZygiskStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
+import me.weishu.kernelsu.data.model.PifOption
+import me.weishu.kernelsu.data.model.PifStatus
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.model.ModuleSortGroup
 import me.weishu.kernelsu.data.modulestore.StoreSourceKind
@@ -123,6 +125,13 @@ interface SettingsRepository {
     suspend fun importTeesimKeybox(base64: String): Result<Unit>
     suspend fun removeTeesimKeybox(): Result<Unit>
     suspend fun setTeesimTargetApps(packages: List<String>): Result<Unit>
+
+    /** PlayIntegrityFix runs as a Zygisk module, so it lives in the module directory. */
+    suspend fun getPifStatus(): Result<PifStatus>
+    suspend fun installPif(): Result<Unit>
+    suspend fun setPifEnabled(enabled: Boolean): Result<Unit>
+    suspend fun uninstallPif(): Result<Unit>
+    suspend fun setPifOption(option: PifOption, value: Boolean): Result<Unit>
     suspend fun getNomountStatus(): Result<NomountStatus>
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>
     suspend fun injectNomountRules(): Result<Unit>

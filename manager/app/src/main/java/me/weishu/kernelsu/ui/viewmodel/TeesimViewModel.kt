@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.data.model.PifOption
+import me.weishu.kernelsu.data.model.PifStatus
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.repository.SettingsRepository
 import me.weishu.kernelsu.data.teesim.TeesimKeybox
@@ -37,6 +39,8 @@ data class TeesimUiState(
     val apps: List<TeesimApp> = emptyList(),
     val appsLoading: Boolean = false,
     val showSystemApps: Boolean = false,
+    /** The bundled PlayIntegrityFix module, or null while it has not been read yet. */
+    val pif: PifStatus? = null,
 )
 
 /**
@@ -60,11 +64,13 @@ class TeesimViewModel(
     fun refresh() {
         viewModelScope.launch {
             val result = repo.getTeesimStatus()
+            val pif = repo.getPifStatus()
             _uiState.update {
                 it.copy(
                     status = result.getOrNull() ?: it.status,
                     readError = result.isFailure,
                     loading = false,
+                    pif = pif.getOrNull() ?: it.pif,
                 )
             }
         }
@@ -110,6 +116,27 @@ class TeesimViewModel(
     fun removeKeybox() = write(R.string.teesim_keybox_removed, R.string.teesim_keybox_write_failed) {
         repo.removeTeesimKeybox()
     }
+
+    // PlayIntegrityFix is a Zygisk module, so every one of these only takes effect at the next
+    // boot; the page says so instead of claiming the new identity is live.
+
+    fun installPif() = write(R.string.pif_installed_toast, R.string.pif_write_failed) {
+        repo.installPif()
+    }
+
+    fun uninstallPif() = write(R.string.pif_uninstall_done, R.string.pif_write_failed) {
+        repo.uninstallPif()
+    }
+
+    fun setPifEnabled(enabled: Boolean) =
+        write(R.string.pif_saved, R.string.pif_write_failed) {
+            repo.setPifEnabled(enabled)
+        }
+
+    fun setPifOption(option: PifOption, value: Boolean) =
+        write(R.string.pif_saved, R.string.pif_write_failed) {
+            repo.setPifOption(option, value)
+        }
 
     fun setTargets(packages: List<String>) =
         write(R.string.teesim_targets_saved, R.string.teesim_write_failed) {
@@ -198,12 +225,14 @@ class TeesimViewModel(
         viewModelScope.launch {
             val result = block()
             val status = repo.getTeesimStatus()
+            val pif = repo.getPifStatus()
             _uiState.update {
                 it.copy(
                     writing = false,
                     loading = false,
                     status = status.getOrNull() ?: it.status,
                     readError = status.isFailure,
+                    pif = pif.getOrNull() ?: it.pif,
                 )
             }
             toast(if (result.isSuccess) successMessage else failureMessage)

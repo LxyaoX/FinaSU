@@ -32,6 +32,8 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.weishu.kernelsu.R
+import me.weishu.kernelsu.data.model.PifOption
+import me.weishu.kernelsu.data.pif.PifInstaller
 import me.weishu.kernelsu.data.teesim.TeesimInstaller
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
@@ -209,6 +211,82 @@ fun TeesimScreen() {
                     )
                 }
             }
+
+            // PlayIntegrityFix: the other half of a Play Integrity verdict. TEESimulator answers the
+            // key attestation, this one answers the device fingerprint, and upstream asks for the
+            // two to be configured together.
+            SegmentedColumn(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                title = stringResource(R.string.pif_section),
+            ) {
+                item {
+                    val pif = state.pif
+                    ArrowPreference(
+                        title = when {
+                            pif?.installed != true ->
+                                stringResource(R.string.pif_bundled_version, PifInstaller.VERSION)
+
+                            pif.version.isBlank() -> stringResource(R.string.pif_runtime_unversioned)
+                            else -> pif.version
+                        },
+                        summary = pifSummary(state),
+                        startAction = { Icon(Icons.Filled.VerifiedUser, null) },
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = stringResource(R.string.pif_enable),
+                        summary = stringResource(R.string.pif_enable_summary),
+                        startAction = { Icon(Icons.Filled.Security, null) },
+                        checked = state.pif?.enabled == true,
+                        onCheckedChange = viewModel::setPifEnabled,
+                        enabled = state.pif?.installed == true && !state.writing,
+                    )
+                }
+                item {
+                    // What the module will present, so a spoof can be confirmed without a reboot.
+                    val fingerprint = state.pif?.config?.fingerprint.orEmpty()
+                    ArrowPreference(
+                        title = stringResource(R.string.pif_fingerprint),
+                        summary = fingerprint.ifBlank {
+                            stringResource(R.string.pif_fingerprint_missing)
+                        },
+                        startAction = { Icon(Icons.Filled.Lock, null) },
+                    )
+                }
+                PifOption.entries.forEach { option ->
+                    item {
+                        SwitchPreference(
+                            title = pifOptionTitle(option),
+                            summary = pifOptionSummary(option),
+                            startAction = { Icon(pifOptionIcon(option), null) },
+                            checked = state.pif?.config?.isOn(option) == true,
+                            onCheckedChange = { viewModel.setPifOption(option, it) },
+                            enabled = state.pif?.installed == true && !state.writing,
+                        )
+                    }
+                }
+                item {
+                    ArrowPreference(
+                        title = stringResource(
+                            if (state.pif?.installed == true) R.string.pif_reinstall else R.string.pif_install
+                        ),
+                        summary = stringResource(R.string.pif_install_summary, PifInstaller.VERSION),
+                        startAction = { Icon(Icons.Filled.Download, null) },
+                        onClick = viewModel::installPif,
+                        enabled = !state.loading && !state.writing,
+                    )
+                }
+                item {
+                    ArrowPreference(
+                        title = stringResource(R.string.pif_uninstall),
+                        summary = stringResource(R.string.pif_uninstall_summary),
+                        startAction = { Icon(Icons.Filled.Delete, null) },
+                        onClick = viewModel::uninstallPif,
+                        enabled = state.pif?.installed == true && !state.writing,
+                    )
+                }
+            }
         }
     }
 
@@ -263,4 +341,51 @@ private fun teesimSummary(state: TeesimUiState): String {
 
         else -> stringResource(R.string.teesim_state_pending)
     }
+}
+
+/** One line per fact that changes what the module would do. */
+@Composable
+private fun pifSummary(state: TeesimUiState): String {
+    val pif = state.pif
+    return when {
+        state.loading -> stringResource(R.string.teesim_loading)
+        pif == null -> stringResource(R.string.teesim_read_error)
+        !pif.installed -> stringResource(R.string.pif_state_missing)
+        !pif.enabled -> stringResource(R.string.pif_state_disabled)
+        // A Zygisk module is loaded when zygote starts, so an installed module is never live until
+        // the device has booted once more.
+        else -> stringResource(R.string.pif_state_pending)
+    }
+}
+
+@Composable
+private fun pifOptionTitle(option: PifOption): String = stringResource(
+    when (option) {
+        PifOption.SPOOF_BUILD -> R.string.pif_option_build
+        PifOption.SPOOF_PROPS -> R.string.pif_option_props
+        PifOption.SPOOF_PROVIDER -> R.string.pif_option_provider
+        PifOption.SPOOF_SIGNATURE -> R.string.pif_option_signature
+        PifOption.SPOOF_VENDING_BUILD -> R.string.pif_option_vending_build
+        PifOption.SPOOF_VENDING_SDK -> R.string.pif_option_vending_sdk
+    }
+)
+
+@Composable
+private fun pifOptionSummary(option: PifOption): String = stringResource(
+    when (option) {
+        PifOption.SPOOF_BUILD -> R.string.pif_option_build_summary
+        PifOption.SPOOF_PROPS -> R.string.pif_option_props_summary
+        PifOption.SPOOF_PROVIDER -> R.string.pif_option_provider_summary
+        PifOption.SPOOF_SIGNATURE -> R.string.pif_option_signature_summary
+        PifOption.SPOOF_VENDING_BUILD -> R.string.pif_option_vending_build_summary
+        PifOption.SPOOF_VENDING_SDK -> R.string.pif_option_vending_sdk_summary
+    }
+)
+
+private fun pifOptionIcon(option: PifOption) = when (option) {
+    PifOption.SPOOF_BUILD, PifOption.SPOOF_VENDING_BUILD -> Icons.Filled.VerifiedUser
+    PifOption.SPOOF_PROPS -> Icons.Filled.Apps
+    PifOption.SPOOF_PROVIDER -> Icons.Filled.Lock
+    PifOption.SPOOF_SIGNATURE -> Icons.Filled.Security
+    PifOption.SPOOF_VENDING_SDK -> Icons.Filled.Download
 }

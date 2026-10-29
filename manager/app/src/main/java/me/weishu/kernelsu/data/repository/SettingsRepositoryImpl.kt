@@ -19,6 +19,9 @@ import me.weishu.kernelsu.data.model.BootPropsStatus
 import me.weishu.kernelsu.data.model.YukiZygiskStatus
 import me.weishu.kernelsu.data.model.RekernelXStatus
 import me.weishu.kernelsu.data.rekernelx.RekernelXInstaller
+import me.weishu.kernelsu.data.pif.PifInstaller
+import me.weishu.kernelsu.data.model.PifOption
+import me.weishu.kernelsu.data.model.PifStatus
 import me.weishu.kernelsu.data.teesim.TeesimInstaller
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.model.ModuleCustomOrderStore
@@ -455,6 +458,42 @@ class SettingsRepositoryImpl : SettingsRepository {
                 check(after.defaultApps.toSet() == packages.toSet()) {
                     "TEESimulator target apps did not change"
                 }
+            }
+        }
+
+    override suspend fun getPifStatus(): Result<PifStatus> = withContext(Dispatchers.IO) {
+        runCatching { PifInstaller.status() }
+    }
+
+    override suspend fun installPif(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            PifInstaller.install()
+            check(PifInstaller.status().installed) { "PlayIntegrityFix is not on disk" }
+        }
+    }
+
+    override suspend fun setPifEnabled(enabled: Boolean): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                PifInstaller.setEnabled(enabled)
+                // ksud acts on the marker at boot, so what the page must show is the marker's own
+                // state rather than the write that produced it.
+                check(PifInstaller.status().enabled == enabled) { "PlayIntegrityFix state did not change" }
+            }
+        }
+
+    override suspend fun uninstallPif(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            PifInstaller.uninstall()
+            check(!PifInstaller.status().installed) { "PlayIntegrityFix is still on disk" }
+        }
+    }
+
+    override suspend fun setPifOption(option: PifOption, value: Boolean): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                PifInstaller.setOption(option, value)
+                check(PifInstaller.config().isOn(option) == value) { "pif.prop did not change" }
             }
         }
 
