@@ -28,14 +28,20 @@ internal data class HomeWorkCardStyle(
 
 /**
  * The single place that decides how the work card is painted, so the card body only has to lay out
- * its content. [surface] is the work card's own wallpaper surface: when it carries a decoded photo
- * the card paints it and switches to the photo's palette, otherwise the semantic accent pair of
- * [working] is used and wallpaper mode drops it to the shared neutral material - an alpha-reduced
- * accent container loses the contrast of its paired on-colour once a photo shows through.
+ * its content.
+ *
+ * The card is neutral: a tinted container across the whole surface made a slab of colour sit on top
+ * of a page whose other cards are all the same quiet material, and with a saturated seed that slab
+ * read as the wrong colour rather than as status. The accent is left to the parts that carry the
+ * meaning - the state in the title, the run-mode tag and the mark behind the text.
+ *
+ * [surface] is the work card's own wallpaper surface: when it carries a decoded photo the card
+ * paints it and borrows the photo's palette. In wallpaper mode the card joins the shared neutral
+ * material instead, because an alpha-reduced fill loses the contrast of its paired on-colour once a
+ * wallpaper shows through.
  */
 @Composable
 internal fun homeWorkCardStyle(
-    working: Boolean,
     surface: SurfaceConfig,
     photo: SurfacePhoto,
 ): HomeWorkCardStyle {
@@ -46,21 +52,16 @@ internal fun homeWorkCardStyle(
             wallpaperRole = null,
         )
     }
-    val containerColor = if (working) {
-        MiuixTheme.colorScheme.secondaryContainer
-    } else {
-        MiuixTheme.colorScheme.errorContainer
-    }
     return if (LocalFolkWallpaperTokens.current != null) {
         HomeWorkCardStyle(
-            containerColor = containerColor,
+            containerColor = MiuixTheme.colorScheme.surfaceContainer,
             contentColor = MiuixTheme.colorScheme.onSurface,
             wallpaperRole = WallpaperSurfaceRole.Group,
         )
     } else {
         HomeWorkCardStyle(
-            containerColor = containerColor,
-            contentColor = null,
+            containerColor = MiuixTheme.colorScheme.surfaceContainer,
+            contentColor = MiuixTheme.colorScheme.onSurfaceContainer,
             wallpaperRole = null,
         )
     }

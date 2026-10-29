@@ -75,7 +75,7 @@ private fun WorkingCard(
     // the card borrows the photo's palette for its text.
     val surface = SurfaceStore.config(SurfaceRegistry.WORK_CARD)
     val photo = rememberSurfacePhoto(surface.imageUri.takeIf { surface.hasImage })
-    val style = homeWorkCardStyle(working = true, surface = surface, photo = photo)
+    val style = homeWorkCardStyle(surface = surface, photo = photo)
     val overPhoto = surface.hasImage && photo.ready
 
     val workingMode = when (state.lkmMode) {
@@ -93,9 +93,12 @@ private fun WorkingCard(
         supportingColor != null -> supportingColor
         else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
     }
+    // The mark sits on a neutral card now, so it carries the accent on its own instead of reading
+    // as a second layer over a tinted fill; keep it faint enough that the version line stays legible
+    // where the two overlap.
     val markTint = when {
         overPhoto -> onPhotoColor?.copy(alpha = 0.12f) ?: MiuixTheme.colorScheme.primary
-        else -> MiuixTheme.colorScheme.primary.copy(alpha = if (isInDarkTheme()) 0.22f else 0.28f)
+        else -> MiuixTheme.colorScheme.primary.copy(alpha = if (isInDarkTheme()) 0.12f else 0.16f)
     }
     val modeTagColor = MiuixTheme.colorScheme.primary
     val modeTagContent = MiuixTheme.colorScheme.onPrimary
@@ -175,6 +178,7 @@ private fun WorkingCard(
                     Text(
                         text = stringResource(R.string.home_working),
                         style = FolkType.Hero,
+                        color = MiuixTheme.colorScheme.primary,
                     )
                     if (!surface.hasFlag(SurfaceFlag.HideText)) {
                         Text(
