@@ -9,6 +9,11 @@ on:
     paths:
       - '.github/workflows/shellcheck.yml'
       - '**/*.sh'
+      # Payload scripts carried for the device. They run under busybox ash, where
+      # `local` and `[[ ]]` are builtins and the helper next to them is on the
+      # source path; shellcheck measures them against strict POSIX sh and cannot
+      # be told otherwise without a shebang the device would not accept.
+      - '!userspace/ksud/bin/**'
   pull_request:
     branches:
       - 'main'
@@ -17,6 +22,7 @@ on:
     paths:
       - '.github/workflows/shellcheck.yml'
       - '**/*.sh'
+      - '!userspace/ksud/bin/**'
 
 jobs:
   shellcheck:
@@ -29,8 +35,5 @@ jobs:
         with:
           ignore_names: gradlew
           # installer.sh keeps upstream content byte for byte; its scripts run
-          # on the device, not in CI. The payloads under bin/ are upstream's
-          # scripts (or trimmed copies of them) executed by busybox ash on the
-          # device, which accepts `local` and `[[ ]]` that shellcheck rejects as
-          # POSIX violations.
-          ignore_paths: ./userspace/ksud/src/installer.sh './userspace/ksud/bin/*' ./.github/scripts/setup-rust-build.sh
+          # on the device, not in CI.
+          ignore_paths: ./userspace/ksud/src/installer.sh ./.github/scripts/setup-rust-build.sh

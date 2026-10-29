@@ -1,5 +1,5 @@
-#!/system/bin/sh
-# shellcheck disable=SC1091,SC3010,SC3043,SC2155
+#!/bin/sh
+# shellcheck shell=sh disable=SC1091,SC3010,SC3043,SC2155
 # Run under busybox ash on the device: `local` and `[[ ]]` are ash builtins there, and the sourced
 # helper sits next to this file rather than in shellcheck's search path.
 # PlayIntegrityFix's early property work, run by ksud at post-fs-data instead of by a module.
