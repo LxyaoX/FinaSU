@@ -140,7 +140,6 @@ import me.weishu.kernelsu.ui.screen.sulog.SulogScreen
 import me.weishu.kernelsu.ui.screen.superuser.SuperUserPager
 import me.weishu.kernelsu.ui.screen.template.AppProfileTemplateScreen
 import me.weishu.kernelsu.ui.screen.templateeditor.TemplateEditorScreen
-import me.weishu.kernelsu.ui.screen.font.FontScreen
 import me.weishu.kernelsu.ui.screen.wallpaper.WallpaperScreen
 import me.weishu.kernelsu.ui.theme.KernelSUTheme
 import me.weishu.kernelsu.ui.theme.LocalColorMode
@@ -161,7 +160,6 @@ import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.LocalWallpaperPage
 import me.weishu.kernelsu.wallpaper.WallpaperBackgroundLayer
-import me.weishu.kernelsu.ui.theme.FontConfig
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
 
 open class MainActivity : FragmentActivity() {
@@ -199,7 +197,6 @@ open class MainActivity : FragmentActivity() {
         }
 
         WallpaperConfig.load(this)
-        FontConfig.load(this)
         me.weishu.kernelsu.data.LegacyPreferences.purge(this)
         me.weishu.kernelsu.modulecard.ModuleCardConfig.load()
         me.weishu.kernelsu.ui.component.material.SliderTrackConfig.load(this)
@@ -344,7 +341,6 @@ open class MainActivity : FragmentActivity() {
                                     )
                                 }
                                 entry<Route.Wallpaper> { WallpaperScreen() }
-                                entry<Route.Font> { FontScreen() }
                                 entry<Route.SettingsCategory> { key -> CategorySettingsScreen(key.key) }
                                 entry<Route.WebDavBrowser> { key ->
                                     me.weishu.kernelsu.ui.screen.settings.WebDavBrowserScreen(key.path)

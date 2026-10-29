@@ -34,7 +34,7 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: Five home layouts, plus replaceable wallpaper, video backgrounds, fonts, colors, music, sound effects, and haptic feedback.
+        details: Five home layouts, plus replaceable wallpaper, video backgrounds, colors, music, sound effects, and haptic feedback.
         link: /en/setting/appearance/
       - title: Five Home Layouts
         icon:

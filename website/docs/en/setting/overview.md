@@ -29,7 +29,7 @@ First ask yourself "what do I want to do", then look it up in the table below. I
 | I want to | Go to | Most common location |
 | --- | --- | --- |
 | Check Manager updates and module updates, change the language or edit App Profile templates | [General](/en/setting/general/) | Settings → General |
-| Change colors, wallpaper, font, icons or the home layout | [Appearance](/en/setting/appearance/) | Settings → Appearance |
+| Change colors, wallpaper, icons or the home layout | [Appearance](/en/setting/appearance/) | Settings → Appearance |
 | Change the navigation bar, gestures, module cards, SU compatibility or WebView debugging | [Behavior](/en/setting/behavior/) | Settings → Behavior |
 | Turn on Zygisk, Sui, Folk Mount, NoMount or network isolation | [Features](/en/setting/function/) | Settings → Features |
 | Change SELinux, ADB Root or Shell Root restrictions | [Security](/en/setting/security/) | Settings → Security |
@@ -46,7 +46,7 @@ First ask yourself "what do I want to do", then look it up in the table below. I
 | Entry | What it does in one line | If you do not know where to start |
 | --- | --- | --- |
 | **General** | Holds global options that do not belong to appearance, Root capabilities or data maintenance. | Updates, language, App Profile templates |
-| **Appearance** | Decides what the interface looks like. | Theme, wallpaper, font, home screen and module card appearance |
+| **Appearance** | Decides what the interface looks like. | Theme, wallpaper, home screen and module card appearance |
 | **Behavior** | Decides how the interface operates and navigates, plus some interaction compatibility. | Navigation, floating bar, gestures, module card behavior |
 | **Features** | Manages kernel features, built-in engines and file system isolation. | Zygisk, Sui, Folk Mount, NoMount, network isolation |
 | **Security** | Manages kernel security boundaries and debugging entry points. | SELinux, ADB Root, Shell Root restrictions |
@@ -66,7 +66,7 @@ First ask yourself "what do I want to do", then look it up in the table below. I
 
 2. **Judge the impact first**
 
-   Replacing wallpaper, font and layout usually only affects the Manager; switching mounts, kernel features, SELinux or partition restore changes system behavior. Read the warnings on that category page first.
+   Replacing wallpaper and layout usually only affects the Manager; switching mounts, kernel features, SELinux or partition restore changes system behavior. Read the warnings on that category page first.
 
 3. **Read same-name features in context**
 
@@ -131,7 +131,7 @@ The current kernel lacks the corresponding capability. Upgrading to a kernel or 
 ## Continue Reading
 
 - [General](/en/setting/general/): updates, language, App Profile templates.
-- [Appearance](/en/setting/appearance/): theme, wallpaper, font, home layout.
+- [Appearance](/en/setting/appearance/): theme, wallpaper, home layout.
 - [Behavior](/en/setting/behavior/): navigation, floating bar, SU compatibility, module display.
 - [Features](/en/setting/function/): mount policy, YukiZygisk, Sui, NoMount and more.
 - [Security](/en/setting/security/): SELinux, ADB Root and Shell restrictions.

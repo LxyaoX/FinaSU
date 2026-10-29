@@ -124,14 +124,10 @@ fun MaterialKernelSUTheme(
         }
     }
 
-    val fontFamily = remember(FontConfig.fontMode, FontConfig.customFontFilename) {
-        FontConfig.getFontFamily(context)
-    }
-
     MaterialExpressiveTheme(
         colorScheme = animatedColorScheme,
         motionScheme = MotionScheme.expressive(),
-        typography = remember(fontFamily) { getTypography(fontFamily) },
+        typography = remember { getTypography() },
         shapes = FolkShape.materialShapes,
         content = {
             // alpha28 has no non-deprecated way to override the ripple alpha, so the constructor is
@@ -147,7 +143,6 @@ fun MaterialKernelSUTheme(
                 isDark = darkTheme,
                 paletteStyle = appSettings.paletteStyle,
                 colorMode = appSettings.colorMode,
-                fontFamily = fontFamily,
             ) {
                 CompositionLocalProvider(
                     LocalRippleConfiguration provides rippleConfiguration,

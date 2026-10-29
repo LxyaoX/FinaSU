@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LayersClear
@@ -139,14 +138,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                     summary = stringResource(id = R.string.settings_wallpaper_summary),
                     startAction = { Icon(Icons.Filled.Wallpaper, stringResource(id = R.string.wallpaper_title)) },
                     onClick = actions.onOpenWallpaper,
-                )
-            }
-            add {
-                ArrowPreference(
-                    title = stringResource(id = R.string.font_title),
-                    summary = stringResource(id = R.string.settings_font_summary),
-                    startAction = { Icon(Icons.Filled.FontDownload, stringResource(id = R.string.font_title)) },
-                    onClick = actions.onOpenFont,
                 )
             }
         }

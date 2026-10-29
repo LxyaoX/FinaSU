@@ -21,9 +21,9 @@ val Typography = Typography(
  * Material's sizes with our line breaking. The sizes stay Material's: a screen that wants one of
  * our three levels asks [FolkType] for it.
  */
-fun getTypography(fontFamily: FontFamily): Typography {
-    fun heading(style: TextStyle) = style.copy(fontFamily = fontFamily).wrapAware(LineBreak.Heading)
-    fun paragraph(style: TextStyle) = style.copy(fontFamily = fontFamily).wrapAware()
+fun getTypography(): Typography {
+    fun heading(style: TextStyle) = style.wrapAware(LineBreak.Heading)
+    fun paragraph(style: TextStyle) = style.wrapAware()
 
     // The M3E emphasized slots match the standard ones in sizing; the weight and tracking
     // treatment is defined here. Our line breaking has to be carried over either way.

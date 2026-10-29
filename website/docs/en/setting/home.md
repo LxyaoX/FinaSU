@@ -58,7 +58,7 @@ The layout decides how the main content is arranged, and the bottom card is inde
 
 :::
 
-Switching the home layout changes the home screen content immediately and does not affect theme colors, wallpaper, font or bottom card settings. The system information card sits in a different place in each layout: CircleUI and GridUI show it after the layout body, while the other layouts place the information in their own panels.
+Switching the home layout changes the home screen content immediately and does not affect theme colors, wallpaper or bottom card settings. The system information card sits in a different place in each layout: CircleUI and GridUI show it after the layout body, while the other layouts place the information in their own panels.
 
 ## Layout Variants
 

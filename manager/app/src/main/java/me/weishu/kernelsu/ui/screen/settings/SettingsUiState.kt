@@ -109,7 +109,6 @@ data class SettingsScreenActions(
     val onOpenTheme: () -> Unit,
     val onOpenLanguage: () -> Unit,
     val onOpenWallpaper: () -> Unit,
-    val onOpenFont: () -> Unit,
     val onOpenProfileTemplate: () -> Unit,
     val onSetSuCompatMode: (Int) -> Unit,
     val onSetKernelUmountEnabled: (Boolean) -> Unit,

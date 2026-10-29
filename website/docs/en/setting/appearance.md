@@ -1,6 +1,6 @@
 ---
 title: Appearance Settings
-description: Theme, wallpaper, font, home layout, titles and information visibility
+description: Theme, wallpaper, home layout, titles and information visibility
 createTime: 2026/10/24 00:00:00
 permalink: /en/setting/appearance/
 copyright:
@@ -14,7 +14,7 @@ copyright:
 
 <Badge text="Settings entry 2/8" type="info" /> <Badge text="Interface only" type="tip" />
 
-Appearance decides what the Manager looks like: colors, background, font, home structure, icons and information cards. Most changes here do not affect Root authorization, module state or kernel features, but "Restore the default theme" clears several customized resources.
+Appearance decides what the Manager looks like: colors, background, home structure, icons and information cards. Most changes here do not affect Root authorization, module state or kernel features, but "Restore the default theme" clears several customized resources.
 
 ::: tip How to get there
 
@@ -30,7 +30,6 @@ Open the Manager → Settings → tap **Appearance**, the second entry in the fi
 | --- | --- |
 | Light and dark, accent color, Material style | Theme settings |
 | Background image, video, transparency, blur | Wallpaper |
-| Interface font | Font |
 | The Manager icon on the home screen | Launcher icon |
 | Whether the home screen is circular, a grid, a dashboard or a stats page | Home layout |
 | Whether the top bar uses a large title or the traditional style | Layout variant |
@@ -96,20 +95,6 @@ After the video background is enabled, the video replaces the static image:
 - Clear the current video file.
 
 The scrim can still be used in video mode, but "Surface opacity", "Blur" and "Pick color from wallpaper" are hidden because they only apply to static images. Video decoding and continuous playback use more power, so use it with care on low-performance devices.
-
-## Font
-
-The font page has three modes:
-
-- **App default**: uses the font bundled with the Manager.
-- **System default**: follows the device system font.
-- **Custom**: picks a font file from the device.
-
-A custom font only affects the manager UI; it does not replace the Android system font. If glyphs are missing, the file is damaged or the format is unsupported, restore the default font.
-
-"Restore default font" deletes the imported file and switches back to **App default**; if you want to follow the system font, restore first and then select "System default" manually.
-
-See [Font](/en/setting/font/).
 
 ## Launcher Icon
 
@@ -262,7 +247,7 @@ If a module author wrote long and important installation notes, do not set this 
 - Choose the home layout, layout variant and home bottom card
   time=Structure
 
-- Set the font, launcher icon, title image, information visibility, scale and description lines
+- Set the launcher icon, title image, information visibility, scale and description lines
   time=Details
 
 :::
@@ -271,5 +256,4 @@ If a module author wrote long and important installation notes, do not set this 
 
 - [Theme & Color](/en/setting/theme/)
 - [Wallpaper](/en/setting/wallpaper/)
-- [Font](/en/setting/font/)
 - [Home & Layout](/en/setting/home/)

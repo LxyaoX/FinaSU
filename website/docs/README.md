@@ -34,7 +34,7 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: 5 套首页布局，可替换壁纸、视频背景、字体、颜色、音乐、音效和振动反馈。
+        details: 5 套首页布局，可替换壁纸、视频背景、颜色、音乐、音效和振动反馈。
         link: /setting/appearance/
       - title: 五套首页布局
         icon:

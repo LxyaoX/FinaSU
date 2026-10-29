@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.FontDownload
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -227,16 +226,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Filled.Wallpaper,
             route = Route.Wallpaper,
             aliases = listOf("wallpaper", "background", "video"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.page(
-            id = "appearance.font",
-            titleRes = R.string.font_title,
-            summaryRes = R.string.settings_font_summary,
-            icon = Icons.Filled.FontDownload,
-            route = Route.Font,
-            aliases = listOf("font", "typeface", "typography"),
         )
     )
     add(

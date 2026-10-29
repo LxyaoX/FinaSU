@@ -29,7 +29,7 @@ copyright:
 | 我想…… | 进入 | 最常见的位置 |
 | --- | --- | --- |
 | 查管理器更新、模块更新，换语言或改 App Profile 模板 | [通用](/setting/general/) | 设置 → 通用 |
-| 换颜色、壁纸、字体、图标或首页布局 | [外观](/setting/appearance/) | 设置 → 外观 |
+| 换颜色、壁纸、图标或首页布局 | [外观](/setting/appearance/) | 设置 → 外观 |
 | 改导航栏、手势、模块卡片、SU 兼容或 WebView 调试 | [行为](/setting/behavior/) | 设置 → 行为 |
 | 改 SELinux、ADB Root、Shell Root 限制 | [安全](/setting/security/) | 设置 → 安全 |
 | 给管理器或敏感操作加密码、图案、指纹 | [验证](/setting/authentication/) | 设置 → 验证 |
@@ -45,7 +45,7 @@ copyright:
 | 入口 | 一句话作用 | 不知道先看什么时 |
 | --- | --- | --- |
 | **通用** | 放置不属于外观、Root 能力或数据维护的全局选项。 | 更新、语言、App Profile 模板 |
-| **外观** | 决定界面看起来是什么样。 | 主题、壁纸、字体、首页与模块卡片外观 |
+| **外观** | 决定界面看起来是什么样。 | 主题、壁纸、首页与模块卡片外观 |
 | **行为** | 决定界面如何操作、如何导航，以及部分交互兼容。 | 导航、悬浮栏、手势、模块卡片行为 |
 | **安全** | 管理内核安全边界与调试入口。 | SELinux、ADB Root、Shell Root 限制 |
 | **验证** | 用管理器自己的凭据保护启动和敏感操作。 | 应用锁、PIN、图案、操作保护 |
@@ -64,7 +64,7 @@ copyright:
 
 2. **先判断影响范围**
 
-   替换壁纸、字体和布局通常只影响管理器；切换挂载、内核特性、SELinux 或分区恢复则会改变系统行为。后者先读对应分类页的警告。
+   替换壁纸和布局通常只影响管理器；切换挂载、内核特性、SELinux 或分区恢复则会改变系统行为。后者先读对应分类页的警告。
 
 3. **同名功能看上下文**
 
@@ -129,7 +129,7 @@ copyright:
 ## 继续阅读
 
 - [通用](/setting/general/)：更新、语言、App Profile 模板。
-- [外观](/setting/appearance/)：主题、壁纸、字体、首页布局。
+- [外观](/setting/appearance/)：主题、壁纸、首页布局。
 - [行为](/setting/behavior/)：导航、悬浮栏、SU 兼容、模块展示。
 - [功能](/setting/function/)：挂载策略、YukiZygisk、Sui、NoMount 等。
 - [安全](/setting/security/)：SELinux、ADB Root 与 Shell 限制。
