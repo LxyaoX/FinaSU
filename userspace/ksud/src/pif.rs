@@ -102,24 +102,25 @@ pub fn install() -> Result<()> {
 /// this payload sets, and its `pif.prop` is where its identity lives, so nothing is lost - but that
 /// directory is someone else's until they say otherwise, hence a separate command.
 pub fn adopt() -> Result<()> {
-    let link = Path::new(LINK);
-    match fs::symlink_metadata(link) {
+    // Named apart from `link()`: a local binding called `link` shadows the function.
+    let module_dir = Path::new(LINK);
+    match fs::symlink_metadata(module_dir) {
         Ok(meta) if meta.file_type().is_symlink() => return install(),
         Ok(_) => {}
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return install(),
         Err(error) => return Err(error).with_context(|| format!("stat {LINK}")),
     }
 
-    let kept = fs::read(link.join(PROP_FILE)).ok();
+    let kept = fs::read(module_dir.join(PROP_FILE)).ok();
     // Upstream's uninstall.sh is the one thing in that tree that knows how to put back the
     // properties it changed; a failure there must not stop the adoption.
-    let uninstaller = link.join("uninstall.sh");
+    let uninstaller = module_dir.join("uninstall.sh");
     if uninstaller.exists()
         && let Err(error) = crate::module::exec_script(&uninstaller, ScriptWait::NoWait)
     {
         warn!("pif: upstream uninstall.sh failed: {error:#}");
     }
-    fs::remove_dir_all(link).with_context(|| format!("remove {LINK}"))?;
+    fs::remove_dir_all(module_dir).with_context(|| format!("remove {LINK}"))?;
 
     install_payload()?;
     let prop = Path::new(ROOT).join(PROP_FILE);
@@ -244,10 +245,11 @@ fn install_payload() -> Result<()> {
 
 fn link_state() -> Result<LinkState> {
     match fs::symlink_metadata(LINK) {
-        Ok(meta) if meta.file_type().is_symlink() => {
-            let ours = fs::read_link(LINK).is_ok_and(|target| target == Path::new(ROOT));
-            Ok(if ours { LinkState::Linked } else { LinkState::Occupied })
-        }
+        Ok(meta) if meta.file_type().is_symlink() => match fs::read_link(LINK) {
+            Ok(target) if target == Path::new(ROOT) => Ok(LinkState::Linked),
+            // A link we cannot read, or one pointing elsewhere, is not ours to write through.
+            _ => Ok(LinkState::Occupied),
+        },
         Ok(_) => Ok(LinkState::Occupied),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(LinkState::Missing),
         Err(error) => Err(error).with_context(|| format!("stat {LINK}")),
@@ -256,20 +258,20 @@ fn link_state() -> Result<LinkState> {
 
 /// Point `/data/adb/modules/playintegrityfix` at [ROOT], replacing a link of ours that went stale.
 fn link() -> Result<LinkState> {
-    let link = Path::new(LINK);
-    match fs::symlink_metadata(link) {
+    let path = Path::new(LINK);
+    match fs::symlink_metadata(path) {
         Ok(meta) if meta.file_type().is_symlink() => {
-            if fs::read_link(link).is_ok_and(|target| target == Path::new(ROOT)) {
+            if fs::read_link(path).is_ok_and(|target| target == Path::new(ROOT)) {
                 return Ok(LinkState::Linked);
             }
-            fs::remove_file(link).with_context(|| format!("remove stale link {LINK}"))?;
+            fs::remove_file(path).with_context(|| format!("remove stale link {LINK}"))?;
         }
         Ok(_) => return Ok(LinkState::Occupied),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
         Err(error) => return Err(error).with_context(|| format!("stat {LINK}")),
     }
     fs::create_dir_all(crate::defs::MODULE_DIR).with_context(|| "create the module directory")?;
-    symlink(ROOT, link).with_context(|| format!("link {LINK} -> {ROOT}"))?;
+    symlink(ROOT, path).with_context(|| format!("link {LINK} -> {ROOT}"))?;
     info!("pif: linked {LINK} -> {ROOT}");
     Ok(LinkState::Linked)
 }
