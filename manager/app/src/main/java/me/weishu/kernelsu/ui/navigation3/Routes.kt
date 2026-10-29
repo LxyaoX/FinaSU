@@ -65,8 +65,6 @@ sealed interface Route : NavKey, Parcelable {
     @Serializable
     data object Wallpaper : Route
 
-    @Parcelize
-    @Serializable
     /** One settings category, opened from the settings hub's category grid. `key` matches
      *  [me.weishu.kernelsu.ui.component.settings.SettingsCategory.key]. */
     @Parcelize
