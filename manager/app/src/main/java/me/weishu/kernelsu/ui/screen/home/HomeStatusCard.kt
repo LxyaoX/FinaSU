@@ -22,14 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
+import me.weishu.kernelsu.ui.theme.ColorMode
 import me.weishu.kernelsu.ui.theme.FolkType
-import me.weishu.kernelsu.ui.theme.isInDarkTheme
+import me.weishu.kernelsu.ui.theme.LocalColorMode
 import me.weishu.kernelsu.wallpaper.surface.SurfaceFlag
 import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
 import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
@@ -43,13 +45,16 @@ private val WorkCardCorner = 20.dp
 /** The card is a hero: it keeps this much height even on a short screen or a narrow font. */
 private val WorkCardMinHeight = 188.dp
 
+/** The mark is drawn far larger than the card and clipped by it, as the reference build does. */
+private val WorkCardMarkSize = 150.dp
+
 /**
  * What state the kernel module is in, as the page's hero card.
  *
- * Loaded: one tall accent surface - the state in display type, the flags that change its behaviour
- * along the top edge, and the version under the title, with an oversized outline mark bleeding off
- * the bottom corner. Not loaded: the same tall card in neutral, saying why and offering the actions
- * that fix it. Tapping either one opens the installer.
+ * Loaded: one tall card - the state in display type, the flags that change its behaviour along the
+ * top edge, and the version under the title, with an oversized outline mark bleeding off the bottom
+ * corner. Not loaded: the same tall card in neutral, saying why and offering the actions that fix
+ * it. Tapping either one opens the installer.
  */
 @Composable
 internal fun StatusCard(
@@ -86,26 +91,22 @@ private fun WorkingCard(
     val modeHidden = rememberHomeThemeSettings().listWorkingCardModeHidden ||
         surface.hasFlag(SurfaceFlag.HideMode)
 
+    val dynamic = ColorMode.fromValue(LocalColorMode.current).isMonet
     val supportingColor = LocalWallpaperSupportingColor.current
-    val onPhotoColor = style.contentColor
     val captionColor = when {
-        onPhotoColor != null -> onPhotoColor.copy(alpha = 0.8f)
+        overPhoto -> style.contentColor?.copy(alpha = 0.8f) ?: MiuixTheme.colorScheme.onSurfaceVariantSummary
         supportingColor != null -> supportingColor
         else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
     }
-    // The mark sits on a neutral card now, so it carries the accent on its own instead of reading
-    // as a second layer over a tinted fill; keep it faint enough that the version line stays legible
-    // where the two overlap.
+    // Over a photo the mark is a watermark; on the card it is the state itself, so it keeps the
+    // accent at full strength outside the dynamic palette, exactly as the reference build draws it.
     val markTint = when {
-        overPhoto -> onPhotoColor?.copy(alpha = 0.12f) ?: MiuixTheme.colorScheme.primary
-        else -> MiuixTheme.colorScheme.primary.copy(alpha = if (isInDarkTheme()) 0.12f else 0.16f)
+        overPhoto -> style.contentColor?.copy(alpha = 0.12f) ?: style.accentColor
+        else -> style.accentColor.copy(alpha = if (dynamic) 0.8f else 1f)
     }
-    val modeTagColor = MiuixTheme.colorScheme.primary
-    val modeTagContent = MiuixTheme.colorScheme.onPrimary
+    val modeTagContent = if (dynamic) MiuixTheme.colorScheme.onPrimary else Color.White
     val errorTagColor = MiuixTheme.colorScheme.errorContainer
     val errorTagContent = MiuixTheme.colorScheme.onErrorContainer
-    val customTagColor = MiuixTheme.colorScheme.tertiaryContainer
-    val customTagContent = MiuixTheme.colorScheme.onTertiaryContainer
 
     HomeCard(
         modifier = modifier.fillMaxWidth(),
@@ -129,8 +130,8 @@ private fun WorkingCard(
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .offset(x = 28.dp, y = 34.dp)
-                        .size(150.dp),
+                        .offset(x = 27.dp, y = 31.dp)
+                        .size(WorkCardMarkSize),
                     tint = markTint,
                 )
             }
@@ -149,14 +150,14 @@ private fun WorkingCard(
                         StatusTag(
                             label = workingMode,
                             contentColor = modeTagContent,
-                            backgroundColor = modeTagColor,
+                            backgroundColor = style.accentColor,
                         )
                     }
                     if (state.showCustomLkmBadge) {
                         StatusTag(
                             label = stringResource(R.string.home_lkm_custom),
-                            contentColor = customTagContent,
-                            backgroundColor = customTagColor,
+                            contentColor = style.tagContentColor,
+                            backgroundColor = style.tagColor,
                         )
                     }
                     if (state.isSafeMode) {
@@ -178,7 +179,6 @@ private fun WorkingCard(
                     Text(
                         text = stringResource(R.string.home_working),
                         style = FolkType.Hero,
-                        color = MiuixTheme.colorScheme.primary,
                     )
                     if (!surface.hasFlag(SurfaceFlag.HideText)) {
                         Text(

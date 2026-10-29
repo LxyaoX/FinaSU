@@ -38,7 +38,7 @@ There is one arrangement: the work card always comes first, because it answers "
 
 The work card is one tall card that states the status in display type:
 
-- **Working**: the word "Working", a stroked check mark that overflows the card and is clipped at its bottom corner, and the version in a monospaced line under the title; along the top edge sit the run mode (LKM / Built-In), the custom LKM, safe mode and jailbreak tags.
+- **Working**: a pale green card with a bright green stroked check mark (bottom corner, overflowing and clipped), the word "Working", and the version in a monospaced line under the title; along the top edge sit the run mode (LKM / Built-In), the custom LKM, safe mode and jailbreak tags. When the theme takes its colours from the wallpaper, the card and the mark use the dynamic palette instead.
 - **Not installed**: the same height, a red "Tap to install" line at the top, "Not installed" in display type, and an "Install" button; a "Jailbreak" button joins it while SELinux is permissive.
 - **Unsupported**: the reason in red at the top and "Unsupported" in display type, with no buttons.
 

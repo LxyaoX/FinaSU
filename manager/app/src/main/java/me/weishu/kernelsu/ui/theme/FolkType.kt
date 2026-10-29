@@ -34,13 +34,14 @@ object FolkType {
         @Composable get() = scale(size = 14.sp, lineHeight = 18.sp)
 
     /**
-     * The one statement a page leads with - the home screen's "Working" or "Not installed": 34sp
-     * over a 40sp line box. It is a heading, so it breaks between phrases instead of mid-word.
+     * The one statement a page leads with - the home screen's "Working" or "Not installed": 36sp
+     * over a 42sp line box, the size the reference build sets it at. It is a heading, so it breaks
+     * between phrases instead of mid-word.
      */
     val Hero: TextStyle
         @Composable get() = scale(
-            size = 34.sp,
-            lineHeight = 40.sp,
+            size = 36.sp,
+            lineHeight = 42.sp,
             weight = FontWeight.Bold,
             lineBreak = LineBreak.Heading,
         )
