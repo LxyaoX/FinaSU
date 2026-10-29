@@ -33,4 +33,4 @@ jobs:
           # scripts (or trimmed copies of them) executed by busybox ash on the
           # device, which accepts `local` and `[[ ]]` that shellcheck rejects as
           # POSIX violations.
-          ignore_paths: ./userspace/ksud/src/installer.sh ./userspace/ksud/bin ./.github/scripts/setup-rust-build.sh
+          ignore_paths: ./userspace/ksud/src/installer.sh './userspace/ksud/bin/*' ./.github/scripts/setup-rust-build.sh

@@ -114,9 +114,11 @@ pub fn adopt() -> Result<()> {
     let kept = fs::read(module_dir.join(PROP_FILE)).ok();
     // Upstream's uninstall.sh is the one thing in that tree that knows how to put back the
     // properties it changed; a failure there must not stop the adoption.
+    // Waited for, not spawned: the next statement deletes the directory the script is being read
+    // from, and upstream's uninstall is the only thing that puts its properties back.
     let uninstaller = module_dir.join("uninstall.sh");
     if uninstaller.exists()
-        && let Err(error) = crate::module::exec_script(&uninstaller, ScriptWait::NoWait)
+        && let Err(error) = crate::module::exec_script(&uninstaller, ScriptWait::Forever)
     {
         warn!("pif: upstream uninstall.sh failed: {error:#}");
     }

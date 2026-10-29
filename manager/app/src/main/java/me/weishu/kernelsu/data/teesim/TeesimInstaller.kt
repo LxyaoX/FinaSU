@@ -79,6 +79,8 @@ object TeesimInstaller {
      */
     private const val DAEMON_START_TIMEOUT_MS = 6_000L
     private const val DAEMON_POLL_MS = 200L
+    /** How long a stopped daemon is given to actually exit before its files are replaced. */
+    private const val DAEMON_STOP_TIMEOUT_MS = 2_000L
 
     /** Directories an earlier build of this manager installed as a module; removed on install. */
     private const val LEGACY_MODULE_DIR = "/data/adb/modules/teesim"
@@ -157,8 +159,13 @@ object TeesimInstaller {
                 "then cp /data/adb/tricky_store/keybox.xml $KEYBOX_PATH; fi",
             "if [ -f $KEYBOX_PATH ]; then chmod 0600 $KEYBOX_PATH; fi",
             // TrickyStore hooks the same keystore path; upstream disables it rather than share it.
+            // Only the modules disabled here are recorded, so an uninstall turns exactly those back
+            // on and leaves one the user had already switched off alone.
+            "rm -f $DATA_DIR/disabled_tricky_store",
             "for ts in /data/adb/modules/tricky_store /data/adb/modules_update/tricky_store; " +
-                "do if [ -d \"\$ts\" ] && [ ! -e \"\$ts/disable\" ]; then touch \"\$ts/disable\"; fi; done",
+                "do if [ -d \"\$ts\" ] && [ ! -e \"\$ts/disable\" ]; then touch \"\$ts/disable\"; " +
+                "echo \"\$ts\" >> $DATA_DIR/disabled_tricky_store; fi; done",
+            "if [ -f $DATA_DIR/disabled_tricky_store ]; then chmod 0600 $DATA_DIR/disabled_tricky_store; fi",
             // Guard against a wrong bundled archive: this daemon only works from that entry point.
             "grep -q 'org.matrix.teesim.App' $RUNTIME_DIR/classes.dex",
         )
@@ -202,6 +209,11 @@ object TeesimInstaller {
             "rm -f $RUN_SCRIPT $DATA_DIR/teesim-uds $DATA_DIR/admin.token $VERSION_PATH $POLICY_PATH",
             // Log files a build with the log reader left behind.
             "rm -rf $LOG_DIR",
+            // Turn back on what installing this runtime switched off. A module the user had already
+            // disabled is not in the list, so it stays disabled.
+            "if [ -f $DATA_DIR/disabled_tricky_store ]; then " +
+                "while IFS= read -r d; do if [ -n \"\$d\" ]; then rm -f \"\$d/disable\"; fi; done " +
+                "< $DATA_DIR/disabled_tricky_store; rm -f $DATA_DIR/disabled_tricky_store; fi",
         )
         check(result.isSuccess) { "could not remove $RUNTIME_DIR" }
     }
@@ -423,6 +435,13 @@ done
             "pkill -f '$RUN_SCRIPT'",
             "kill \$(pidof teesim) 2>/dev/null",
         )
+        // `install()` replaces the tree right after this call. A daemon that has not finished
+        // dying still holds the old files open, so the new build would not be the one running until
+        // the next restart - which is exactly the case a reinstall is meant to fix.
+        val deadline = System.currentTimeMillis() + DAEMON_STOP_TIMEOUT_MS
+        while (daemonAlive() && System.currentTimeMillis() < deadline) {
+            Thread.sleep(DAEMON_POLL_MS)
+        }
     }
 
     /**

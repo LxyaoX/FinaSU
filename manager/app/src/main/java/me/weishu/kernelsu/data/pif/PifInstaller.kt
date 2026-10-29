@@ -34,28 +34,44 @@ object PifInstaller {
     /** The path the library opens by name; a symbolic link to [ROOT]. Mirrors `pif::LINK`. */
     const val MODULE_DIR = "/data/adb/modules/playintegrityfix"
 
-    const val PROP_PATH = "$ROOT/pif.prop"
+    /** The file this page edits; kept as a name because the directory can differ, see [activeDir]. */
+    private const val PROP_FILE = "pif.prop"
 
-    /** ksud's own marker: present means "installed but not loaded". Mirrors `pif::DISABLE`. */
-    const val DISABLE_PATH = "$ROOT/disable"
+    const val PROP_PATH = "$ROOT/$PROP_FILE"
 
     /** Current state of the payload and the file the page edits. */
     fun status(): PifStatus {
+        val external = isExternal()
+        val dir = activeDir(external)
         val probe = output(
-            "if [ -f $ROOT/module.prop ]; then echo installed=1; else echo installed=0; fi",
-            "if [ -f $DISABLE_PATH ]; then echo disabled=1; else echo disabled=0; fi",
-            // Linked means zygiskd will load it; a real directory means an upstream install owns
-            // the path and the built-in payload is sitting there unused.
+            "if [ -f $dir/module.prop ]; then echo installed=1; else echo installed=0; fi",
+            "if [ -f $dir/disable ]; then echo disabled=1; else echo disabled=0; fi",
+            // Linked means zygiskd loads the built-in copy; a real directory at the module path
+            // means an upstream install owns it and the built-in payload is sitting there unused.
             "if [ -L $MODULE_DIR ]; then echo linked=1; fi",
             "if [ -d $MODULE_DIR ] && [ ! -L $MODULE_DIR ]; then echo external=1; fi",
-            "grep -m1 '^version=' $ROOT/module.prop 2>/dev/null",
+            "grep -m1 '^version=' $dir/module.prop 2>/dev/null",
         )
         val installed = probe.lineSequence().any { it.trim() == "installed=1" }
-        // Only read the config once the payload is there; a stale file would otherwise be presented
-        // as the current identity.
-        val config = if (installed) output("cat $PROP_PATH 2>/dev/null") else ""
+        // Only read the config once it is there; a stale file would otherwise be presented as the
+        // current identity. It is the one in force, which for an upstream install is its own.
+        val config = if (installed) output("cat $dir/$PROP_FILE 2>/dev/null") else ""
         return PifStatus.fromProbe(probe, config)
     }
+
+    /**
+     * The directory whose files are the ones in force.
+     *
+     * An upstream install owns the module path, so its `pif.prop` and its `disable` marker are what
+     * decide the verdict - editing the built-in copy next to it would write to a file nothing
+     * reads, and the page would report a state the device is not in.
+     */
+    private fun activeDir(external: Boolean): String = if (external) MODULE_DIR else ROOT
+
+    /** Whether a real directory - not our link - occupies the module path. */
+    private fun isExternal(): Boolean =
+        output("if [ -d $MODULE_DIR ] && [ ! -L $MODULE_DIR ]; then echo 1; else echo 0; fi")
+            .trim() == "1"
 
     /**
      * Asks ksud to write the payload again, keeping `pif.prop`.
@@ -87,24 +103,31 @@ object PifInstaller {
      * library is only handed to zygote at start-up, which is why the caller says "reboot to apply".
      */
     fun setEnabled(enabled: Boolean) {
-        check(status().installed) { "$ROOT is not installed" }
+        val external = isExternal()
+        check(status().installed) { "$MODULE_DIR is not installed" }
+        val marker = "${activeDir(external)}/disable"
         val result = if (enabled) {
-            run("rm -f $DISABLE_PATH")
+            run("rm -f $marker")
         } else {
-            run("touch $DISABLE_PATH", "chmod 0644 $DISABLE_PATH")
+            run("touch $marker", "chmod 0644 $marker")
         }
-        check(result.isSuccess) { "could not write $DISABLE_PATH" }
+        check(result.isSuccess) { "could not write $marker" }
     }
 
     /** Flips one switch in `pif.prop`, leaving every other line untouched. */
     fun setOption(option: PifOption, value: Boolean) {
-        check(status().installed) { "$ROOT is not installed" }
-        val current = output("cat $PROP_PATH 2>/dev/null")
-        check(current.isNotBlank()) { "$PROP_PATH is missing" }
-        writeProp(PifProp.withOption(current, option, value))
+        val external = isExternal()
+        check(status().installed) { "$MODULE_DIR is not installed" }
+        val path = "${activeDir(external)}/$PROP_FILE"
+        val current = output("cat $path 2>/dev/null")
+        check(current.isNotBlank()) { "$path is missing" }
+        writeProp(path, PifProp.withOption(current, option, value))
     }
 
-    fun config(): PifConfig = PifConfig.parse(output("cat $PROP_PATH 2>/dev/null"))
+    fun config(): PifConfig {
+        val dir = activeDir(isExternal())
+        return PifConfig.parse(output("cat $dir/$PROP_FILE 2>/dev/null"))
+    }
 
     /**
      * Publishes `pif.prop` atomically.
@@ -113,17 +136,17 @@ object PifInstaller {
      * shorter config; writing to a temporary name and renaming keeps the previous contents until the
      * replacement is complete.
      */
-    private fun writeProp(text: String) {
+    private fun writeProp(path: String, text: String) {
         val encoded = singleLineBase64(
             Base64.encodeToString(text.toByteArray(Charsets.UTF_8), Base64.NO_WRAP),
         )
         val result = run(
-            "echo '$encoded' | base64 -d > $PROP_PATH.tmp",
-            "chmod 0644 $PROP_PATH.tmp",
-            "chown 0:0 $PROP_PATH.tmp",
-            "mv -f $PROP_PATH.tmp $PROP_PATH",
+            "echo '$encoded' | base64 -d > $path.tmp",
+            "chmod 0644 $path.tmp",
+            "chown 0:0 $path.tmp",
+            "mv -f $path.tmp $path",
         )
-        check(result.isSuccess) { "could not write $PROP_PATH" }
+        check(result.isSuccess) { "could not write $path" }
     }
 
     /** [run] splits on newlines, so a wrapped payload would be executed as several commands. */

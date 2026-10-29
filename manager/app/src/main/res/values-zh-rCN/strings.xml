@@ -774,6 +774,7 @@
     <string name="pif_option_props_summary">同一批字段从系统属性读取时也返回伪装值</string>
     <string name="pif_option_provider">自定义 keystore 提供者</string>
     <string name="pif_option_provider_summary">启用 TEESimulator 时保持关闭：两者应答的是同一个 keystore 调用</string>
+    <string name="pif_option_provider_conflict">TEESimulator 已启用，应答的是同一个 keystore 调用；开启后两者会互相抢答</string>
     <string name="pif_option_signature">伪装 ROM 签名</string>
     <string name="pif_option_signature_summary">适用于用测试密钥签名的 ROM</string>
     <string name="pif_option_vending_build">伪装 Play 商店构建</string>

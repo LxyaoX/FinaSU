@@ -759,6 +759,7 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="pif_option_props_summary">Answer reads of the same fields through system properties</string>
     <string name="pif_option_provider">Custom keystore provider</string>
     <string name="pif_option_provider_summary">Keep this off while TEESimulator is enabled: both answer the same keystore call</string>
+    <string name="pif_option_provider_conflict">TEESimulator is enabled and answers the same keystore call; with this on, the two disagree about which one does</string>
     <string name="pif_option_signature">Spoof ROM signature</string>
     <string name="pif_option_signature_summary">For ROMs signed with a test key</string>
     <string name="pif_option_vending_build">Spoof Play Store build</string>

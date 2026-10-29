@@ -256,7 +256,7 @@ fun TeesimScreen() {
                     item {
                         SwitchPreference(
                             title = pifOptionTitle(option),
-                            summary = pifOptionSummary(option),
+                            summary = pifOptionSummary(option, state.status?.enabled == true),
                             startAction = { Icon(pifOptionIcon(option), null) },
                             checked = state.pif?.config?.isOn(option) == true,
                             onCheckedChange = { viewModel.setPifOption(option, it) },
@@ -264,9 +264,10 @@ fun TeesimScreen() {
                         )
                     }
                 }
-                item {
+                item(visible = state.pif?.external != true) {
                     // The payload is ksud's and refreshes on every boot; this is the escape hatch
-                    // for a damaged tree or a link that went stale, without waiting for one.
+                    // for a damaged tree or a link that went stale, without waiting for one. While
+                    // an upstream install owns the module path there is nothing to rewrite.
                     ArrowPreference(
                         title = stringResource(R.string.pif_reinstall),
                         summary = stringResource(R.string.pif_reinstall_summary, PifInstaller.VERSION),
@@ -373,14 +374,17 @@ private fun pifOptionTitle(option: PifOption): String = stringResource(
 )
 
 @Composable
-private fun pifOptionSummary(option: PifOption): String = stringResource(
-    when (option) {
-        PifOption.SPOOF_BUILD -> R.string.pif_option_build_summary
-        PifOption.SPOOF_PROPS -> R.string.pif_option_props_summary
-        PifOption.SPOOF_PROVIDER -> R.string.pif_option_provider_summary
-        PifOption.SPOOF_SIGNATURE -> R.string.pif_option_signature_summary
-        PifOption.SPOOF_VENDING_BUILD -> R.string.pif_option_vending_build_summary
-        PifOption.SPOOF_VENDING_SDK -> R.string.pif_option_vending_sdk_summary
+private fun pifOptionSummary(option: PifOption, teesimEnabled: Boolean): String = stringResource(
+    when {
+        // Both answer the same keystore call; with TEESimulator running, turning this on means one
+        // of the two is answering into a process that expects the other.
+        option == PifOption.SPOOF_PROVIDER && teesimEnabled -> R.string.pif_option_provider_conflict
+        option == PifOption.SPOOF_BUILD -> R.string.pif_option_build_summary
+        option == PifOption.SPOOF_PROPS -> R.string.pif_option_props_summary
+        option == PifOption.SPOOF_PROVIDER -> R.string.pif_option_provider_summary
+        option == PifOption.SPOOF_SIGNATURE -> R.string.pif_option_signature_summary
+        option == PifOption.SPOOF_VENDING_BUILD -> R.string.pif_option_vending_build_summary
+        else -> R.string.pif_option_vending_sdk_summary
     }
 )
 
