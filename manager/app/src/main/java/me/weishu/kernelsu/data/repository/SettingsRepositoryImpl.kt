@@ -465,10 +465,11 @@ class SettingsRepositoryImpl : SettingsRepository {
         runCatching { PifInstaller.status() }
     }
 
-    override suspend fun installPif(): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun reinstallPif(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            PifInstaller.install()
-            check(PifInstaller.status().installed) { "PlayIntegrityFix is not on disk" }
+            PifInstaller.reinstall()
+            val status = PifInstaller.status()
+            check(status.installed && status.linked) { "PlayIntegrityFix is not linked" }
         }
     }
 
@@ -482,10 +483,11 @@ class SettingsRepositoryImpl : SettingsRepository {
             }
         }
 
-    override suspend fun uninstallPif(): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun adoptPif(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            PifInstaller.uninstall()
-            check(!PifInstaller.status().installed) { "PlayIntegrityFix is still on disk" }
+            PifInstaller.adopt()
+            val status = PifInstaller.status()
+            check(status.installed && status.linked) { "PlayIntegrityFix is not linked" }
         }
     }
 

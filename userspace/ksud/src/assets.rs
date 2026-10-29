@@ -18,8 +18,10 @@ mod android {
                 || file == "waitsys"
                 || file.ends_with(".ko")
                 // The Zygisk payload is installed to its own directory by `yukizygisk::install`,
-                // not extracted next to ksud's helpers.
+                // and the PlayIntegrityFix payload by `pif::install`, not extracted next to ksud's
+                // helpers.
                 || file.starts_with("yukizygisk/")
+                || file.starts_with("pif/")
             {
                 // don't extract internal executables and kernel modules
                 continue;

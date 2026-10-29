@@ -1,0 +1,63 @@
+PlayIntegrityFix
+================
+
+This directory is the payload ksud embeds and installs. It is a subset of the
+official module release:
+
+    Repository:  https://github.com/KOWX712/PlayIntegrityFix
+    Release:     v4.9-inject-s (2026-10-15)
+    Upstream:    PlayIntegrityFix_v4.9-inject-s.zip
+    sha256:      bc7a9d92638a6bd90a41b70d3aaf86bc549dd8d3a1e5e901b315a6c425852697
+
+This project is distributed under the GNU General Public License v3.0. See the
+LICENSE in the upstream repository.
+
+Files taken byte for byte:
+
+    module.prop          crc32 5e27f240 - the library checks this checksum at
+                         start-up and refuses to load the payload when it does
+                         not match, so this file must never be edited.
+    pif.prop             the default identity; ksud only writes it when the
+                         device has none, because it is what the user edits.
+    classes.dex          loaded into Play services when a spoof needs Java code.
+    arm64-v8a.so         the Zygisk library.
+    armeabi-v7a.so       the same for a 32-bit zygote.
+
+Files taken from upstream and trimmed to what applies here:
+
+    post-fs-data.sh      upstream's Magisk denylist block and its action.sh
+                         handling removed - neither exists on this manager - and
+                         a block that assigns PROPS but echoes an unset
+                         PROPERTIES, which has never done anything, dropped.
+    service.sh           upstream's wait for sys.boot_completed removed; ksud
+                         runs this from its boot-completed stage.
+    common_func.sh       only the two resetprop helpers; the download plumbing
+                         belongs to the module installer.
+
+What is not here, and why:
+
+    webroot/**           1.1 MB of WebUI. The manager draws the same controls in
+                         its own page, so shipping a second UI only to hide it
+                         would double the payload.
+    zygisk/x86_64.so     this project ships arm64 and armeabi-v7a only.
+    META-INF/**          nothing is ever flashed.
+    autopif*.sh          the WebUI's fingerprint downloader; this page edits the
+    security_patch.sh    identity directly instead.
+    customize.sh         the module installer's script; ksud does the install.
+    action.sh
+    uninstall.sh         kept upstream's property restore out of the payload on
+                         purpose: ksud never removes the payload, only disables
+                         it, and `ksud pif adopt` runs the file from an upstream
+                         install when one is taken over.
+
+Layout on the device, and why it is not a module:
+
+The library opens /data/adb/modules/playintegrityfix/{module.prop,pif.prop,
+classes.dex} by absolute path in the process it hooks; no argument or variable
+moves them. So ksud writes this payload to
+/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix and links that directory
+into /data/adb/modules under the name the library expects. The link is a
+symbolic link, which is what keeps the payload out of the module list, out of
+NoMount's planner and out of the boot-time module set - those all resolve a
+module directory with symlink_metadata - while zygiskd, which only looks for
+zygisk/<abi>.so behind the path, loads it like any other module.

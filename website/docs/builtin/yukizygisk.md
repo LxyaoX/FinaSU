@@ -25,6 +25,7 @@ YukiZygisk 是随 FinaSU 提供的 Zygisk 引擎。它和早期纯用户态实�
 | 注入库 | `/data/adb/ksu/lib/yukizygisk/lib*.so` | 进入应用进程的运行时 |
 | 设置 | `/data/adb/ksu/yukizygisk/yzconfig.json` | 六个开关，守护进程启动时读取 |
 | 诊断 | `/data/adb/ksu/yukizygisk/diagnostics/current/` | 每个启动周期的日志与证据 |
+| 内置模块 | `/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix`，链接到 `/data/adb/modules/playintegrityfix` | 随 `ksud` 分发的 PlayIntegrityFix 载荷 |
 
 ::: warning 只更新管理器不会产生注入
 
@@ -47,6 +48,26 @@ YukiZygisk 是随 FinaSU 提供的 Zygisk 引擎。它和早期纯用户态实�
 ## 总开关
 
 页面顶部是总开关，默认开启。关闭后守护进程会停止，并且下次开机不再启动——如果某个模块让系统无法使用，这是最直接的恢复手段。开关状态记录为 `/data/adb/ksu/yukizygisk/disabled` 是否存在，不需要写配置文件。
+
+## 内置的 PlayIntegrityFix
+
+管理器自带一份 [PlayIntegrityFix](https://github.com/KOWX712/PlayIntegrityFix)。它不是一个需要安装的模块：载荷随 `ksud` 分发，每次开机写到 `/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix`，再由 `ksud` 链接到 `/data/adb/modules/playintegrityfix`。
+
+之所以还要链过去：这个库在自己的进程里按绝对路径打开 `module.prop`、`pif.prop` 和 `classes.dex`，没有任何参数能改这些路径。链接是一个符号链接，因此：
+
+- 模块列表里看不到它，也不需要单独管理；
+- NoMount 的挂载计划不会把它当成模块；
+- 开机的模块脚本阶段不会执行它的脚本 —— 那两段属性脚本由 `ksud` 自己在 post-fs-data 与 boot-completed 阶段调用。
+
+开关与指纹在 **设置 → 功能 → Play Integrity**。启用/禁用写的是 `disable` 标记，Zygisk 在 zygote 启动时读取，所以改完要重启；`pif.prop` 里的伪装开关直接写回文件，同样重启生效。`pif.prop` 是你自己的身份，重装管理器或重新写入载荷都不会覆盖它。
+
+如果设备上已经装了官方模块，`/data/adb/modules/playintegrityfix` 是一个真实目录，内置载荷会让位并在页面上说明原因。点“接管已安装的模块”会先运行它的 `uninstall.sh` 把属性还原，再用内置载荷替换，配置保留。
+
+::: warning `module.prop` 不要改
+
+这个库启动时会校验 `module.prop` 的 CRC32，不匹配就拒绝加载。载荷里的 `module.prop` 是上游原文件，编辑它等于让 PlayIntegrityFix 直接失效。
+
+:::
 
 ## 设置项
 

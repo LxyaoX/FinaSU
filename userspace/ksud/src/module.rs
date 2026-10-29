@@ -141,6 +141,13 @@ pub fn foreach_module(
     let dir = std::fs::read_dir(modules_dir)?;
     for entry in dir.flatten() {
         let path = entry.path();
+        // A link is not a module. The built-in PlayIntegrityFix payload is linked in from the
+        // manager's own directory so the library it carries finds its files; taking the link for a
+        // module would list it as one and run its stage scripts twice.
+        if entry.file_type().is_ok_and(|kind| kind.is_symlink()) {
+            debug!("{} is a symbolic link, skip", path.display());
+            continue;
+        }
         if !path.is_dir() {
             warn!("{} is not a directory, skip", path.display());
             continue;
@@ -1096,6 +1103,12 @@ fn list_module(path: &str) -> Vec<HashMap<String, String>> {
     for entry in dir.flatten() {
         let path = entry.path();
         info!("path: {}", path.display());
+
+        // Same reasoning as `foreach_module`: the built-in PlayIntegrityFix payload is linked into
+        // this directory so the library it carries finds its files, and a link is not a module.
+        if entry.file_type().is_ok_and(|kind| kind.is_symlink()) {
+            continue;
+        }
 
         if !path.join("module.prop").exists() {
             continue;

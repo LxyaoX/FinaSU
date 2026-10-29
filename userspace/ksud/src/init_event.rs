@@ -164,6 +164,20 @@ pub fn on_post_fs_data() -> Result<()> {
     crate::susfs::boot("post-mount");
     run_stage("post-mount", wait);
 
+    // PlayIntegrityFix travels with ksud instead of as a module, so its payload has to be on disk -
+    // and linked where the library looks for itself - before the engine below starts a daemon that
+    // hands libraries to zygote.
+    if safe_mode {
+        info!("safe mode, skip the built-in PlayIntegrityFix");
+    } else {
+        if let Err(e) = crate::pif::install() {
+            warn!("PlayIntegrityFix install failed: {e:#}");
+        }
+        if let Err(e) = crate::pif::run_stage("post-fs-data", wait) {
+            warn!("PlayIntegrityFix post-fs-data stage failed: {e:#}");
+        }
+    }
+
     if let Err(e) = crate::yukizygisk::post_fs_data(safe_mode) {
         warn!("YukiZygisk startup skipped/failed: {e:#}");
     }
@@ -255,6 +269,12 @@ pub fn on_boot_completed() {
     // scan had not produced anything); by now it certainly has.
     if let Err(e) = crate::dynamic_manager::finish_migration() {
         warn!("finish dynamic manager migration failed: {e:#}");
+    }
+
+    // The payload's late property work runs from here rather than from `service`: this is the
+    // stage where `sys.boot_completed` is already 1, which is what upstream's script waits for.
+    if let Err(e) = crate::pif::run_stage("service", ScriptWait::NoWait) {
+        warn!("PlayIntegrityFix service stage failed: {e:#}");
     }
 
     run_stage("boot-completed", ScriptWait::NoWait);

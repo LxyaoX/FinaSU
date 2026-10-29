@@ -120,12 +120,12 @@ class TeesimViewModel(
     // PlayIntegrityFix is a Zygisk module, so every one of these only takes effect at the next
     // boot; the page says so instead of claiming the new identity is live.
 
-    fun installPif() = write(R.string.pif_installed_toast, R.string.pif_write_failed) {
-        repo.installPif()
+    fun reinstallPif() = write(R.string.pif_reinstalled, R.string.pif_write_failed) {
+        repo.reinstallPif()
     }
 
-    fun uninstallPif() = write(R.string.pif_uninstall_done, R.string.pif_write_failed) {
-        repo.uninstallPif()
+    fun adoptPif() = write(R.string.pif_adopted, R.string.pif_write_failed) {
+        repo.adoptPif()
     }
 
     fun setPifEnabled(enabled: Boolean) =

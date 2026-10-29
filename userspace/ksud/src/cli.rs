@@ -39,6 +39,11 @@ enum Commands {
         #[command(subcommand)]
         command: crate::susfs::Command,
     },
+    /// Manage the bundled PlayIntegrityFix payload
+    Pif {
+        #[command(subcommand)]
+        command: crate::pif::Command,
+    },
     /// Manage KernelSU modules
     Module {
         #[command(subcommand)]
@@ -765,6 +770,7 @@ pub fn run() -> Result<()> {
         }
         Commands::Susfs { command } => crate::susfs::run(command),
         Commands::Yukizygisk { command } => crate::yukizygisk::run(&command),
+        Commands::Pif { command } => crate::pif::run(&command),
         Commands::PostFsData => init_event::on_post_fs_data(),
         Commands::BootCompleted => {
             init_event::on_boot_completed();

@@ -25,6 +25,7 @@ YukiZygisk is the Zygisk engine that ships with FinaSU. Unlike the earlier users
 | Injected libraries | `/data/adb/ksu/lib/yukizygisk/lib*.so` | The runtime that enters app processes |
 | Settings | `/data/adb/ksu/yukizygisk/yzconfig.json` | Six switches, read when a daemon starts |
 | Diagnostics | `/data/adb/ksu/yukizygisk/diagnostics/current/` | Per-boot logs and evidence |
+| Bundled module | `/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix`, linked to `/data/adb/modules/playintegrityfix` | The PlayIntegrityFix payload that ships with `ksud` |
 
 ::: warning Installing the manager alone injects nothing
 
@@ -47,6 +48,26 @@ A daemon forks one companion per loaded module, so `ps` showing several `zygiskd
 ## The master switch
 
 The switch at the top of the page is on by default. Turning it off stops the daemons and keeps them down at the next boot - the quickest way out when a module makes the system unusable. The state is just the presence of `/data/adb/ksu/yukizygisk/disabled`.
+
+## The bundled PlayIntegrityFix
+
+The Manager carries [PlayIntegrityFix](https://github.com/KOWX712/PlayIntegrityFix). It is not a module you install: the payload ships with `ksud`, is written to `/data/adb/ksu/lib/yukizygisk/builtin/playintegrityfix` on every boot, and is linked to `/data/adb/modules/playintegrityfix` from there.
+
+Why the link is still needed: the library opens `module.prop`, `pif.prop` and `classes.dex` by absolute path inside the process it hooks, and no argument moves them. That link is a symbolic link, which means:
+
+- the module list does not show it and nothing has to be managed;
+- NoMount's planner does not treat it as a module;
+- the boot-time module script stage does not run its scripts - `ksud` runs those two property scripts itself, at post-fs-data and boot-completed.
+
+The switch and the identity live in **Settings → Function → Play Integrity**. Enabling and disabling writes the `disable` marker, which Zygisk reads when zygote starts, so a change needs a reboot; the spoof switches in `pif.prop` are written straight back to the file and also apply at the next boot. `pif.prop` is your identity: neither a Manager update nor a rewrite of the payload overwrites it.
+
+If the device already has the official module installed, `/data/adb/modules/playintegrityfix` is a real directory, the built-in payload stands aside and the page says so. "Take over the installed module" runs its `uninstall.sh` to put the properties back, then replaces it with the built-in payload and keeps the configuration.
+
+::: warning Do not edit `module.prop`
+
+The library checks its CRC32 at start-up and refuses to load when it does not match. The copy in the payload is upstream's original file; editing it simply disables PlayIntegrityFix.
+
+:::
 
 ## Settings
 

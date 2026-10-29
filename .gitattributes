@@ -1,1 +1,9 @@
 *.bat eol=crlf
+
+# The PlayIntegrityFix payload is executed by the device shell and checked byte for byte by the
+# library it belongs to; a checkout that rewrote line endings would break both.
+userspace/ksud/bin/*/pif/*.sh -text
+userspace/ksud/bin/*/pif/module.prop -text
+userspace/ksud/bin/*/pif/pif.prop -text
+userspace/ksud/bin/*/pif/*.so binary
+userspace/ksud/bin/*/pif/*.dex binary

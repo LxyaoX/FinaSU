@@ -755,13 +755,15 @@
     <string name="teesim_cancel">取消</string>
     <string name="teesim_save">保存</string>
 
-    <!-- PlayIntegrityFix，与 TEESimulator 运行时一起内置 -->
+    <!-- PlayIntegrityFix，随 ksud 内置，与 TEESimulator 运行时并列 -->
     <string name="pif_section">Play Integrity</string>
     <string name="pif_bundled_version">内置版本 %1$s</string>
     <string name="pif_runtime_unversioned">已安装，版本未知</string>
     <string name="pif_state_missing">未安装</string>
+    <string name="pif_state_external">模块路径被一个独立安装的模块占用</string>
+    <string name="pif_state_unlinked">已安装，但没有链接到模块路径</string>
     <string name="pif_state_disabled">已安装但被禁用</string>
-    <string name="pif_state_pending">已启用；下次开机由 Zygisk 加载</string>
+    <string name="pif_state_pending">已启用；Zygisk 在 zygote 启动时加载</string>
     <string name="pif_enable">启用模块</string>
     <string name="pif_enable_summary">Zygisk 在系统启动时加载该模块，这里的改动重启后生效</string>
     <string name="pif_fingerprint">指纹</string>
@@ -778,15 +780,14 @@
     <string name="pif_option_vending_build_summary">对 Play 商店进程同样提供伪装后的指纹</string>
     <string name="pif_option_vending_sdk">伪装 Play 商店 SDK</string>
     <string name="pif_option_vending_sdk_summary">在 Android 13 及以上对商店上报 SDK 32；会破坏商店部分界面</string>
-    <string name="pif_install">安装</string>
-    <string name="pif_reinstall">重新安装</string>
-    <string name="pif_install_summary">把内置的 %1$s 写入 /data/adb/modules/playintegrityfix，保留当前配置</string>
-    <string name="pif_uninstall">移除</string>
-    <string name="pif_uninstall_summary">删除模块，并恢复它改过的系统属性</string>
-    <string name="pif_installed_toast">已安装；重启后加载</string>
-    <string name="pif_uninstall_done">已移除；重启后完成</string>
+    <string name="pif_reinstall">重新写入内置文件</string>
+    <string name="pif_reinstall_summary">把随 ksud 分发的 %1$s 载荷重新写入磁盘，保留当前配置</string>
+    <string name="pif_adopt">接管已安装的模块</string>
+    <string name="pif_adopt_summary">用内置载荷替换 /data/adb/modules/playintegrityfix，保留其配置</string>
+    <string name="pif_reinstalled">已写入；重启后加载</string>
+    <string name="pif_adopted">已接管；重启后加载</string>
     <string name="pif_saved">已保存；重启后生效</string>
-    <string name="pif_write_failed">写入模块失败</string>
+    <string name="pif_write_failed">写入载荷失败</string>
     <string name="settings_boot_props">开机状态属性</string>
     <string name="boot_props_search_summary">修正检测器读取的开机与构建属性（flash.locked、verifiedbootstate、vbmeta）</string>
     <string name="boot_props_loading">正在读取属性状态…</string>

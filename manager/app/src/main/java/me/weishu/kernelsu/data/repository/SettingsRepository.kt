@@ -126,11 +126,16 @@ interface SettingsRepository {
     suspend fun removeTeesimKeybox(): Result<Unit>
     suspend fun setTeesimTargetApps(packages: List<String>): Result<Unit>
 
-    /** PlayIntegrityFix runs as a Zygisk module, so it lives in the module directory. */
+    /**
+     * PlayIntegrityFix travels inside ksud: its payload is written under the manager's own directory
+     * and linked into `/data/adb/modules` so the library it carries finds its files.
+     */
     suspend fun getPifStatus(): Result<PifStatus>
-    suspend fun installPif(): Result<Unit>
+    /** Writes the payload again, keeping the user's `pif.prop`. */
+    suspend fun reinstallPif(): Result<Unit>
     suspend fun setPifEnabled(enabled: Boolean): Result<Unit>
-    suspend fun uninstallPif(): Result<Unit>
+    /** Takes over an upstream install that owns the module path. */
+    suspend fun adoptPif(): Result<Unit>
     suspend fun setPifOption(option: PifOption, value: Boolean): Result<Unit>
     suspend fun getNomountStatus(): Result<NomountStatus>
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>

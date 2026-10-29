@@ -8,17 +8,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,8 +37,6 @@ import me.weishu.kernelsu.data.pif.PifInstaller
 import me.weishu.kernelsu.data.teesim.TeesimInstaller
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
-import me.weishu.kernelsu.ui.component.material.SegmentedListItem
-import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
 import me.weishu.kernelsu.ui.navigation3.Route
@@ -267,23 +265,23 @@ fun TeesimScreen() {
                     }
                 }
                 item {
+                    // The payload is ksud's and refreshes on every boot; this is the escape hatch
+                    // for a damaged tree or a link that went stale, without waiting for one.
                     ArrowPreference(
-                        title = stringResource(
-                            if (state.pif?.installed == true) R.string.pif_reinstall else R.string.pif_install
-                        ),
-                        summary = stringResource(R.string.pif_install_summary, PifInstaller.VERSION),
-                        startAction = { Icon(Icons.Filled.Download, null) },
-                        onClick = viewModel::installPif,
+                        title = stringResource(R.string.pif_reinstall),
+                        summary = stringResource(R.string.pif_reinstall_summary, PifInstaller.VERSION),
+                        startAction = { Icon(Icons.Filled.Refresh, null) },
+                        onClick = viewModel::reinstallPif,
                         enabled = !state.loading && !state.writing,
                     )
                 }
-                item {
+                item(visible = state.pif?.external == true) {
                     ArrowPreference(
-                        title = stringResource(R.string.pif_uninstall),
-                        summary = stringResource(R.string.pif_uninstall_summary),
-                        startAction = { Icon(Icons.Filled.Delete, null) },
-                        onClick = viewModel::uninstallPif,
-                        enabled = state.pif?.installed == true && !state.writing,
+                        title = stringResource(R.string.pif_adopt),
+                        summary = stringResource(R.string.pif_adopt_summary),
+                        startAction = { Icon(Icons.Filled.SwapVert, null) },
+                        onClick = viewModel::adoptPif,
+                        enabled = !state.writing,
                     )
                 }
             }
@@ -350,7 +348,11 @@ private fun pifSummary(state: TeesimUiState): String {
     return when {
         state.loading -> stringResource(R.string.teesim_loading)
         pif == null -> stringResource(R.string.teesim_read_error)
+        // Upstream's own module owns the path: the built-in payload is on disk but unlinked, and
+        // zygiskd is loading theirs.
+        pif.external -> stringResource(R.string.pif_state_external)
         !pif.installed -> stringResource(R.string.pif_state_missing)
+        !pif.linked -> stringResource(R.string.pif_state_unlinked)
         !pif.enabled -> stringResource(R.string.pif_state_disabled)
         // A Zygisk module is loaded when zygote starts, so an installed module is never live until
         // the device has booted once more.
