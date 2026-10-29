@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="fpt_import_title">テーマのインポートを確認</string>
-    <string name="fpt_resources">リソース: %1$d</string>
-    <string name="fpt_name">名前</string>
-    <string name="fpt_version">バージョン</string>
-    <string name="fpt_author">作者</string>
-    <string name="fpt_description">説明</string>
-</resources>

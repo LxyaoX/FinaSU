@@ -61,6 +61,8 @@ import me.weishu.kernelsu.ui.component.material.ExpressiveDialog
 @Composable
 fun susfsManagementLabel(status: String): String = stringResource(when (status) {
     "applied" -> R.string.susfs_applied
+    "partial" -> R.string.susfs_partial
+    "skipped" -> R.string.susfs_skipped
     "failed" -> R.string.susfs_failed
     "pending_reboot" -> R.string.susfs_pending
     "idle" -> R.string.susfs_idle
@@ -337,6 +339,11 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
                 summaryColor = BasicComponentDefaults.summaryColor(color = MaterialTheme.colorScheme.error),
                 startAction = { Icon(Icons.Rounded.ErrorOutline, null) },
             ) } }
+            report.skipped.forEach { (key, reason) -> item(key = "skipped:$key") { ArrowPreference(
+                title = susfsOperationName(key),
+                summary = reason.ifBlank { stringResource(R.string.susfs_skipped) },
+                startAction = { Icon(Icons.Rounded.Block, null) },
+            ) } }
             report.pendingReboot.forEach { key -> item(key = "pending:$key") { ArrowPreference(
                 title = susfsOperationName(key),
                 summary = stringResource(R.string.susfs_pending),
@@ -369,6 +376,8 @@ private fun SusfsOverview(state: SusfsUiState, config: JSONObject?, writable: Bo
 }
 
 private fun susfsManagementHint(status: SusfsStatus): Int = when {
+    status.management == "partial" -> R.string.susfs_partial_hint
+    status.management == "skipped" -> R.string.susfs_skipped_hint
     status.management == "idle" -> R.string.susfs_idle_hint
     status.management == "saved" && !status.automatic -> R.string.susfs_saved_reboot
     else -> R.string.susfs_ack_hint

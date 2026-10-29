@@ -19,14 +19,12 @@
     <string name="yukizygisk_dmesg_title">内核日志</string>
     <string name="yukizygisk_dmesg_summary">把引擎日志写入内核日志。</string>
     <string name="yukizygisk_denylist_title">拒绝名单模式</string>
-    <string name="yukizygisk_denylist_summary">对拒绝名单内应用的模块处理方式。</string>
     <string name="yukizygisk_denylist_off">关闭</string>
     <string name="yukizygisk_denylist_force">强制</string>
     <string name="yukizygisk_denylist_restore">恢复</string>
 
     <string name="yukizygisk_restart">重启引擎</string>
     <string name="yukizygisk_restarted">引擎已重启</string>
-    <string name="yukizygisk_restart_hint">下次重启生效</string>
     <string name="yukizygisk_apply_failed">修改失败</string>
     <string name="yukizygisk_read_failed">读取引擎状态失败</string>
 

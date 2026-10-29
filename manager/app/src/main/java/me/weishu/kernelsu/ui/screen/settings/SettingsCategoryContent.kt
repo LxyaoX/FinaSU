@@ -446,6 +446,17 @@ fun FunctionCategoryContent(uiState: SettingsUiState, actions: SettingsScreenAct
                             // The magic-mount engine is no longer selectable, so the only hint
                             // left is the one that explains a VFS fallback.
                             val compatHint = when {
+                                // A boot that fell back to another provider is the one case the
+                                // VFS driver asks the user to retry; the daemon's own warning is
+                                // more specific than the generic hint below.
+                                mode == FolkMountMode.NOMOUNT &&
+                                    folkMountStatus.bootProvider != null &&
+                                    folkMountStatus.bootProvider != FolkMountProvider.NOMOUNT ->
+                                    folkMountStatus.bootWarning
+                                        ?: stringResource(
+                                            id = R.string.settings_folk_mount_nomount_unavailable_hint
+                                        )
+
                                 mode == FolkMountMode.NOMOUNT && uiState.nomountStatus?.apiOk == false ->
                                     stringResource(id = R.string.settings_folk_mount_nomount_unavailable_hint)
 

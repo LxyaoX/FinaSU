@@ -20,14 +20,12 @@
     <string name="yukizygisk_dmesg_title">Kernel log</string>
     <string name="yukizygisk_dmesg_summary">Write engine messages to the kernel log.</string>
     <string name="yukizygisk_denylist_title">Denylist mode</string>
-    <string name="yukizygisk_denylist_summary">How modules are treated for apps on the denylist.</string>
     <string name="yukizygisk_denylist_off">Off</string>
     <string name="yukizygisk_denylist_force">Force</string>
     <string name="yukizygisk_denylist_restore">Restore</string>
 
     <string name="yukizygisk_restart">Restart engine</string>
     <string name="yukizygisk_restarted">Engine restarted</string>
-    <string name="yukizygisk_restart_hint">Applied on the next restart</string>
     <string name="yukizygisk_apply_failed">Failed to apply the change</string>
     <string name="yukizygisk_read_failed">Could not read the engine status</string>
 

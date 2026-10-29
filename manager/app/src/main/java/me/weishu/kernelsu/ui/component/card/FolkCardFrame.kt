@@ -59,6 +59,7 @@ fun FolkCardFrame(
 
     val navOriginColor = LocalFolkWallpaperTokens.current?.group?.fill
         ?: MaterialTheme.colorScheme.surfaceBright
+    val opacity = cardSurfaceOpacity()
 
     val clickModifier = Modifier
         .fillMaxWidth()
@@ -97,6 +98,7 @@ fun FolkCardFrame(
             role = WallpaperSurfaceRole.Group,
             modifier = modifier.clip(cardShape).then(clickModifier),
             shape = cardShape,
+            minimumAlpha = opacity,
             fallbackColor = MaterialTheme.colorScheme.surfaceBright,
         ) {
             framed()
