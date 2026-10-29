@@ -74,17 +74,20 @@ data class SurfaceDescriptor(
 /**
  * The registry of every configurable wallpaper surface.
  *
- * The home page draws a single layout, so the grid work card - which paints the status card on that
- * page - is the only surface left. The focus cards, the dashboard hero and the stats top card went
- * away with the layouts that rendered them.
+ * The home page draws a single layout, so the work card - the hero that states what the kernel
+ * module is doing - is the only surface left. The focus cards, the dashboard hero and the stats top
+ * card went away with the layouts that rendered them.
  */
 object SurfaceRegistry {
 
-    /** Stable id of the grid work-card background surface. */
-    val GRID_WORK_CARD = SurfaceId("layout.grid.workCard")
+    /**
+     * The work-card background surface. The id still spells the layout that introduced it: it is the
+     * key this config is stored under, so renaming it would orphan every existing install.
+     */
+    val WORK_CARD = SurfaceId("layout.grid.workCard")
 
-    private val gridWorkCard = SurfaceDescriptor(
-        id = GRID_WORK_CARD,
+    private val workCard = SurfaceDescriptor(
+        id = WORK_CARD,
         titleRes = R.string.wallpaper_work_card_section,
         icon = Icons.Filled.Wallpaper,
         scope = SurfaceScope.Slot,
@@ -171,7 +174,7 @@ object SurfaceRegistry {
     )
 
     /** Every registered surface. */
-    val all: List<SurfaceDescriptor> = listOf(gridWorkCard)
+    val all: List<SurfaceDescriptor> = listOf(workCard)
 
     /** The surfaces this home page offers, in registration order. */
     fun forLayout(): List<SurfaceDescriptor> = all

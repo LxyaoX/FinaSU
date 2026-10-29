@@ -34,16 +34,16 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: 5 套首页布局，可替换壁纸、视频背景、颜色、音乐、音效和振动反馈。
+        details: 可替换壁纸、视频背景、颜色、音乐、音效和振动反馈。
         link: /setting/appearance/
-      - title: 五套首页布局
+      - title: 首页工作卡
         icon:
           src: /icons/home/layout.svg
-          alt: 五套首页布局
+          alt: 首页工作卡
           width: 26
           height: 26
           wrap: true
-        details: CircleUI、GridUI、FocusUI、DashboardUI、StatsUI；FocusUI 和 StatsUI 提供实时指标。
+        details: 大字号状态工作卡、两张统计卡与系统信息卡，工作卡可单独换背景。
         link: /setting/home/
       - title: 内核级 Root
         icon:

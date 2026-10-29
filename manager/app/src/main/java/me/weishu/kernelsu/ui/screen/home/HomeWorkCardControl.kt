@@ -4,117 +4,64 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import me.weishu.kernelsu.ui.theme.isInDarkTheme
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
-import me.weishu.kernelsu.ui.theme.isInDarkTheme
-
-/** Which home layout owns the work (status) card. */
-enum class HomeWorkCardLayout {
-    Circle,
-    Grid,
-}
 
 /**
- * The resolved surface for a home work card.
+ * The resolved surface for the home work card.
  *
  * [wallpaperRole] is non-null while wallpaper mode is active, which routes the card through
  * [me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface] so that it shares the app-wide
- * wallpaper transparency. Outside wallpaper mode it is null and [containerColor] is used as a
- * solid fill, exactly as before.
+ * wallpaper transparency. Otherwise [containerColor] is used as a solid fill.
  *
- * [workCardBackgroundUri] is non-null only for the grid layout when the user opted into a photo
- * background. In that case [containerColor] is transparent and the card paints the image itself.
+ * A work card with its own photo drops to a transparent container and asks the photo for a content
+ * colour, so the hero text stays readable over whatever the user picked.
  */
 @Immutable
-data class HomeWorkCardStyle(
+internal data class HomeWorkCardStyle(
     val containerColor: Color,
     val contentColor: Color?,
     val wallpaperRole: WallpaperSurfaceRole?,
-    val workCardBackgroundUri: String? = null,
 )
 
 /**
- * Unified control core for the home screen work card.
- *
- * Each home layout keeps its own responsibility in [circleStyle] / [gridStyle]; callers only pass
- * their layout and the current state. This is the single place where the work card's surface is
- * decided, so adding a layout means adding one branch instead of editing that layout's card.
+ * The single place that decides how the work card is painted, so the card body only has to lay out
+ * its content. [surface] is the work card's own wallpaper surface: when it carries a decoded photo
+ * the card paints it and switches to the photo's palette, otherwise the semantic accent pair of
+ * [working] is used and wallpaper mode drops it to the shared neutral material - an alpha-reduced
+ * accent container loses the contrast of its paired on-colour once a photo shows through.
  */
-object HomeWorkCardControl {
-
-    @Composable
-    fun style(
-        layout: HomeWorkCardLayout,
-        working: Boolean,
-        surface: SurfaceConfig? = null,
-        photo: SurfacePhoto = SurfacePhoto.None,
-    ): HomeWorkCardStyle = when (layout) {
-        HomeWorkCardLayout.Circle -> circleStyle(working)
-
-        HomeWorkCardLayout.Grid -> gridStyle(working, surface, photo)
+@Composable
+internal fun homeWorkCardStyle(
+    working: Boolean,
+    surface: SurfaceConfig,
+    photo: SurfacePhoto,
+): HomeWorkCardStyle {
+    if (surface.hasImage && photo.ready) {
+        return HomeWorkCardStyle(
+            containerColor = Color.Transparent,
+            contentColor = photo.contentColor(surface, isInDarkTheme()),
+            wallpaperRole = null,
+        )
     }
-
-    /**
-     * CircleUI, plus the status card of every layout that reads as a list of tiles (Focus,
-     * Dashboard and Stats). Outside wallpaper mode the card keeps its semantic accent pair; in
-     * wallpaper mode it drops to the shared neutral material, because an alpha-reduced accent
-     * container loses the contrast of its paired on-colour once a photo shows through.
-     */
-    @Composable
-    private fun circleStyle(working: Boolean): HomeWorkCardStyle {
-        val containerColor = if (working) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            MaterialTheme.colorScheme.errorContainer
-        }
-        return if (LocalFolkWallpaperTokens.current != null) {
-            HomeWorkCardStyle(
-                containerColor = containerColor,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                wallpaperRole = WallpaperSurfaceRole.Group,
-            )
-        } else {
-            HomeWorkCardStyle(
-                containerColor = containerColor,
-                contentColor = null,
-                wallpaperRole = null,
-            )
-        }
+    val containerColor = if (working) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.errorContainer
     }
-
-    /**
-     * GridUI. Outside wallpaper mode the card keeps its semantic accent pair. In wallpaper mode it
-     * joins the shared neutral material. When the user enabled a work-card photo, the surface drops
-     * to a transparent container with white content so the bitmap painted by the card shows through.
-     */
-    @Composable
-    private fun gridStyle(working: Boolean, surface: SurfaceConfig?, photo: SurfacePhoto): HomeWorkCardStyle {
-        if (surface?.hasImage == true && photo.ready) {
-            return HomeWorkCardStyle(
-                containerColor = Color.Transparent,
-                contentColor = photo.contentColor(surface, isInDarkTheme()),
-                wallpaperRole = null,
-                workCardBackgroundUri = surface.imageUri,
-            )
-        }
-        val containerColor = if (working) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            MaterialTheme.colorScheme.errorContainer
-        }
-        return if (LocalFolkWallpaperTokens.current != null) {
-            HomeWorkCardStyle(
-                containerColor = containerColor,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                wallpaperRole = WallpaperSurfaceRole.Group,
-            )
-        } else {
-            HomeWorkCardStyle(
-                containerColor = containerColor,
-                contentColor = null,
-                wallpaperRole = null,
-            )
-        }
+    return if (LocalFolkWallpaperTokens.current != null) {
+        HomeWorkCardStyle(
+            containerColor = containerColor,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            wallpaperRole = WallpaperSurfaceRole.Group,
+        )
+    } else {
+        HomeWorkCardStyle(
+            containerColor = containerColor,
+            contentColor = null,
+            wallpaperRole = null,
+        )
     }
 }

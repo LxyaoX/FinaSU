@@ -198,12 +198,12 @@ fun WallpaperScreen() {
             isSaving = true
             val ok = WallpaperManager.saveSurfaceImage(context, id, picked)
             isSaving = false
-            val savedRes = if (id == SurfaceRegistry.GRID_WORK_CARD) {
+            val savedRes = if (id == SurfaceRegistry.WORK_CARD) {
                 R.string.wallpaper_work_card_saved
             } else {
                 R.string.wallpaper_saved
             }
-            val failedRes = if (id == SurfaceRegistry.GRID_WORK_CARD) {
+            val failedRes = if (id == SurfaceRegistry.WORK_CARD) {
                 R.string.wallpaper_work_card_save_failed
             } else {
                 R.string.wallpaper_save_failed
@@ -379,7 +379,7 @@ fun WallpaperScreen() {
             pendingSurface = id
         },
         onClearSurfaceImage = { id ->
-            val removedRes = if (id == SurfaceRegistry.GRID_WORK_CARD) {
+            val removedRes = if (id == SurfaceRegistry.WORK_CARD) {
                 R.string.wallpaper_work_card_removed
             } else {
                 R.string.wallpaper_removed

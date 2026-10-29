@@ -3,26 +3,19 @@ package me.weishu.kernelsu.ui.screen.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountProvider
 import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
-import me.weishu.kernelsu.ui.theme.FolkType
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -113,7 +106,6 @@ private fun SpecSheet(
     rows: List<SpecRow>,
     modifier: Modifier = Modifier,
 ) {
-    val overColor = LocalHomeTileCardContentColor.current
     val supportingColor = LocalWallpaperSupportingColor.current
     HomeCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
@@ -138,7 +130,7 @@ private fun SpecSheet(
                         text = row.label,
                         fontSize = MiuixTheme.textStyles.body2.fontSize,
                         fontWeight = FontWeight.Medium,
-                        color = overColor ?: MiuixTheme.colorScheme.onSurface,
+                        color = MiuixTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = row.value,
@@ -146,7 +138,7 @@ private fun SpecSheet(
                         fontSize = 13.sp,
                         fontFamily = FontFamily.Monospace,
                         color = if (row.onClick != null) {
-                            overColor ?: MaterialTheme.colorScheme.primary
+                            MiuixTheme.colorScheme.primary
                         } else {
                             supportingColor ?: MiuixTheme.colorScheme.onSurfaceVariantSummary
                         },
@@ -154,43 +146,6 @@ private fun SpecSheet(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-internal fun InfoRow(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    trailingContent: (@Composable () -> Unit)? = null,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // On wallpaper the material carries its own supporting colour, tuned against the translucent
-        // fill; off it we keep the semantic greys.
-        val supportingColor = LocalWallpaperSupportingColor.current
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.size(20.dp),
-            tint = supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = label, style = FolkType.Summary)
-            Text(
-                text = value,
-                style = FolkType.Machine,
-                color = supportingColor ?: MaterialTheme.colorScheme.outline
-            )
-        }
-        if (trailingContent != null) {
-            Spacer(Modifier.width(16.dp))
-            trailingContent()
         }
     }
 }

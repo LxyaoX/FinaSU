@@ -159,7 +159,7 @@ object SurfaceStore {
 
     /** The historical pre-registry key for [field] of [id], or null when it never had one. */
     private fun legacyKey(id: SurfaceId, field: SurfaceField): String? =
-        if (id == SurfaceRegistry.GRID_WORK_CARD) {
+        if (id == SurfaceRegistry.WORK_CARD) {
             when (field) {
                 SurfaceField.Image -> "work_card_background_uri"
                 SurfaceField.Enabled -> "work_card_background_enabled"
@@ -175,7 +175,7 @@ object SurfaceStore {
         }
 
     private fun legacyFlagKey(id: SurfaceId, flag: SurfaceFlag): String? =
-        if (id == SurfaceRegistry.GRID_WORK_CARD) {
+        if (id == SurfaceRegistry.WORK_CARD) {
             when (flag) {
                 SurfaceFlag.HideIcon -> "work_card_check_hidden"
                 SurfaceFlag.HideText -> "work_card_text_hidden"

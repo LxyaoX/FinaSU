@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.material.expressiveTopAppBarColors
+import me.weishu.kernelsu.ui.component.material.FolkIconButton
 import me.weishu.kernelsu.ui.component.rebootlistpopup.RebootListPopup
 import me.weishu.kernelsu.ui.navigation3.LocalNavOriginState
 import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
@@ -86,7 +86,8 @@ fun HomePagerMaterial(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp)
+                .padding(top = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // The order the home page has always had in the reference build: what state the kernel
@@ -94,12 +95,11 @@ fun HomePagerMaterial(
             StatusCard(state = state, actions = actions)
             HomeWarnings(state = state, actions = actions)
             if (useFullFeaturedLayout()) {
-                CountCardPair(
+                StatsTiles(
                     superuserCount = superuserCount,
                     moduleEnabledCount = moduleEnabledCount,
                     onOpenSuperUser = actions.onOpenSuperUser,
                     onOpenModule = actions.onOpenModule,
-                    layout = CountCardLayout.Horizontal,
                 )
             }
             InfoCard(
@@ -139,14 +139,14 @@ private fun TopBar(
     var installBounds by remember { mutableStateOf(Rect.Zero) }
     val barActions: @Composable RowScope.() -> Unit = {
         if (state.susfs.detected) {
-            IconButton(onClick = actions.onSusfs) {
+            FolkIconButton(onClick = actions.onSusfs) {
                 Icon(
                     imageVector = androidx.compose.material.icons.Icons.Rounded.VisibilityOff,
                     contentDescription = stringResource(R.string.susfs_title),
                 )
             }
         }
-        IconButton(
+        FolkIconButton(
             onClick = {
                 if (installBounds != Rect.Zero) {
                     originState.recordOrigin(

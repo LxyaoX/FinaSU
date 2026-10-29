@@ -34,16 +34,16 @@ config:
           width: 26
           height: 26
           wrap: true
-        details: Five home layouts, plus replaceable wallpaper, video backgrounds, colors, music, sound effects, and haptic feedback.
+        details: Replaceable wallpaper, video backgrounds, colors, music, sound effects, and haptic feedback.
         link: /en/setting/appearance/
-      - title: Five Home Layouts
+      - title: Home Work Card
         icon:
           src: /icons/home/layout.svg
-          alt: Five Home Layouts
+          alt: Home Work Card
           width: 26
           height: 26
           wrap: true
-        details: CircleUI, GridUI, FocusUI, DashboardUI, and StatsUI. FocusUI and StatsUI provide live metrics.
+        details: A large-type work card, two stat tiles and a system information card, with its own background image.
         link: /en/setting/home/
       - title: Kernel-Level Root
         icon:

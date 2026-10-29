@@ -100,7 +100,7 @@ flowchart TD
 
 ## What to Check First on the Home Screen
 
-The home layout can be switched in [Appearance → Home & Layout](/en/setting/home/). The information below does not always appear at the same time, but it always comes from the same sources.
+There is one arrangement: the work card first, then the notices and version warnings, the two stat tiles and the system information card. The information below does not always appear at the same time, but it always comes from the same sources.
 
 ### Status Card
 
@@ -156,11 +156,10 @@ If you cannot even reach the "Working" state, do not go on to install modules, c
 
 :::
 
-### Device Facts and Support Card
+### Device Facts
 
 The info card usually shows the Manager version, kernel version, device model, SELinux, Seccomp, and the Zygisk and module mount implementation that were actually detected. SUSFS appears only when it is detected. Some rows can be hidden in [Home Info Settings](/en/setting/home/).
 
-The card at the bottom of the home screen switches between "Learn about FinaSU", "Traditional support content", "Hidden", and "Custom". It only affects presentation and outbound links, not Root or module behavior.
 
 ## What Each Action Changes
 

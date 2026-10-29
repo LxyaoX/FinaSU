@@ -30,10 +30,7 @@ Open the Manager → Settings → tap **Appearance**, the second entry in the fi
 | --- | --- |
 | Light and dark, accent color, Material style | Theme settings |
 | Background image, video, transparency, blur | Wallpaper |
-| The Manager icon on the home screen | Launcher icon |
-| Whether the home screen is circular, a grid, a dashboard or a stats page | Home layout |
 | Whether the top bar uses a large title or the traditional style | Layout variant |
-| Recommended or custom card at the bottom of the home screen | Home bottom card |
 | Home title text or title image | Top bar title and advanced title image |
 | Hide the fingerprint, Zygisk, SUSFS or mount information on the home screen | Home screen information |
 | Overall type density, collapsed lines of the module description | Interface scale, maximum module description lines |
@@ -84,7 +81,12 @@ The wallpaper page layers the background and the interface surfaces:
 
 ### Working Cards
 
-Layouts that support this surface can set the working card background separately: the Grid working card can control the image, opacity, darkness, day and night opacity and three hide switches; the four Focus cards share the parent opacity and darkness; Dashboard uses the Hero image. CircleUI has no separate working card image. Some layouts let you long-press a card to edit it directly.
+The work card - the tall card at the top of the home screen - owns a separate wallpaper surface that does not affect the page background:
+
+- **Image**: pick an image for the work card alone.
+- **Enable work card background**: when off, no image is painted and the card keeps its plain fill.
+- **Opacity / Dim**: both can switch to separate day and night values; the dim keeps the large status word readable.
+- **Hide mark / Hide text / Hide run mode**: drop the check mark in the corner, the version line under the title and the run-mode tag along the top edge respectively.
 
 ### Video Background
 
@@ -96,27 +98,9 @@ After the video background is enabled, the video replaces the static image:
 
 The scrim can still be used in video mode, but "Surface opacity", "Blur" and "Pick color from wallpaper" are hidden because they only apply to static images. Video decoding and continuous playback use more power, so use it with care on low-performance devices.
 
-## Launcher Icon
-
-The launcher icon decides which icon style FinaSU uses on the home screen, for example default, geometric or the KernelSU style. It only changes the launcher presentation and does not change the package name, signature, authorization or runtime mode.
-
 ## Home Layout
 
-Five home layouts are currently available:
-
-::: table Home layouts
-
-| Layout | Main features | Suits |
-| --- | --- | --- |
-| **CircleUI** | A circular working card and a status-focused home screen | Users who like to see Root status in one place |
-| **GridUI** | Two-column cards | Users who want more entries on the home screen |
-| **FocusUI** | Focuses the main status and adapts to screen orientation | Using a phone and a tablet in turn |
-| **DashboardUI** | Dashboard-style information cards | Users who like sectioned information panels |
-| **StatsUI** | Centers on superusers, modules and live metrics | Users who need statistics at a glance |
-
-:::
-
-Switching the layout only changes the home screen arrangement; it does not change theme colors, Root state or module data.
+There is one arrangement and no layout picker: the work card first, then the notices and version warnings, the two stat tiles and the system information card. See [Home & Layout](/en/setting/home/) for what each one shows.
 
 ## Layout Variants
 
@@ -126,65 +110,6 @@ The layout variant applies to the plugins, superuser and modules pages:
 - **Traditional**: compact top bar that takes less vertical space.
 
 If page content is covered by the large title, or you want more entries visible on a tablet in landscape, switch to "Traditional".
-
-## Home Bottom Card
-
-A shortcut card can be placed at the very bottom of the home screen. It appears after the home screen content and takes no part in judging Root or module state.
-
-::: table Four display modes
-
-| Option | Card content | Tap behavior |
-| --- | --- | --- |
-| **Learn about FinaSU** | One line, "Learn about FinaSU / Learn about FinaSU features and modules" | Opens the FinaSU website |
-| **Support development and KernelSU** | Two lines: support development, learn about KernelSU | Opens the donation page and the KernelSU guide respectively |
-| **Hidden** | No card is shown | None |
-| **Custom** | The title, subtitle and link you fill in yourself | Opens the HTTP(S) link you entered |
-
-:::
-
-"Learn about FinaSU" is the default option. Switching to "Hidden", or leaving the custom content empty for now, only affects what the home screen shows; it does not delete custom text you already entered.
-
-### Custom Card
-
-The following three items only appear after you select "Custom":
-
-:::: field-group
-
-::: field Card title
-@type `Custom`
-@default `Bold title`
-Shown on the first line of the card, it is the visual focus.
-:::
-
-::: field Card subtitle
-@type `Custom`
-@default `Descriptive text`
-Shown below the title to explain what the card is for.
-:::
-
-::: field Link address
-@type `HTTP(S)`
-@default `Required`
-Opens when the whole card is tapped. Only `http://` or `https://` addresses are accepted.
-:::
-
-::::
-
-::: warning The card appears only when all three fields are filled in
-
-The title, subtitle and link must all be non-empty. If any one is empty, custom mode does not show a half-finished card; the effect is the same as "Hidden". An invalid link is not saved; the edit box stays open and asks you to enter it again.
-
-:::
-
-Write the content with "who reads this text and what should a tap do" in mind. For example:
-
-```text
-Title: Module usage notes
-Subtitle: See the installation and troubleshooting steps for the current module
-Link: https://example.com/module-guide
-```
-
-`example.com`, `ftp://example.com` and empty content do not qualify; the full `http://` or `https://` is required.
 
 ## Top Bar Title and Title Image
 
@@ -244,10 +169,10 @@ If a module author wrote long and important installation notes, do not set this 
 - Set the wallpaper, blur, scrim and surface opacity so text stays clear
   time=Background
 
-- Choose the home layout, layout variant and home bottom card
+- Pick the layout variant, so list pages use the large title or the compact bar
   time=Structure
 
-- Set the launcher icon, title image, information visibility, scale and description lines
+- Set the title image, information visibility, scale and description lines
   time=Details
 
 :::

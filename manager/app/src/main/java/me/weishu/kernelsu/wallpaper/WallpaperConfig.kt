@@ -139,7 +139,7 @@ object WallpaperConfig {
      * The grid work card's background surface. Persistence lives in [SurfaceStore]; WallpaperConfig
      * only exposes the slot so existing callers keep their names.
      */
-    val workCardSurface: SurfaceConfig get() = SurfaceStore.config(SurfaceRegistry.GRID_WORK_CARD)
+    val workCardSurface: SurfaceConfig get() = SurfaceStore.config(SurfaceRegistry.WORK_CARD)
 
     /** Optional image painted as the background of the grid work card. */
     val workCardBackgroundUri: String? get() = workCardSurface.imageUri
@@ -332,34 +332,34 @@ object WallpaperConfig {
     }
 
     fun updateWorkCardBackgroundUri(value: String?) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(imageUri = value) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(imageUri = value) }
 
     fun updateWorkCardBackgroundEnabled(value: Boolean) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(enabled = value) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(enabled = value) }
 
     fun updateWorkCardOpacity(value: Float) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(opacity = value.coerceIn(0f, 1f)) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(opacity = value.coerceIn(0f, 1f)) }
 
     fun updateWorkCardDim(value: Float) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(dim = value.coerceIn(0f, 1f)) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(dim = value.coerceIn(0f, 1f)) }
 
     fun updateWorkCardDualOpacityEnabled(value: Boolean) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(dualOpacity = value) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(dualOpacity = value) }
 
     fun updateWorkCardDayOpacity(value: Float) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(dayOpacity = value.coerceIn(0f, 1f)) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(dayOpacity = value.coerceIn(0f, 1f)) }
 
     fun updateWorkCardNightOpacity(value: Float) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.copy(nightOpacity = value.coerceIn(0f, 1f)) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.copy(nightOpacity = value.coerceIn(0f, 1f)) }
 
     fun updateWorkCardCheckHidden(value: Boolean) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.withFlag(SurfaceFlag.HideIcon, value) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.withFlag(SurfaceFlag.HideIcon, value) }
 
     fun updateWorkCardTextHidden(value: Boolean) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.withFlag(SurfaceFlag.HideText, value) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.withFlag(SurfaceFlag.HideText, value) }
 
     fun updateWorkCardModeHidden(value: Boolean) =
-        SurfaceStore.update(SurfaceRegistry.GRID_WORK_CARD) { it.withFlag(SurfaceFlag.HideMode, value) }
+        SurfaceStore.update(SurfaceRegistry.WORK_CARD) { it.withFlag(SurfaceFlag.HideMode, value) }
 
     fun load(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

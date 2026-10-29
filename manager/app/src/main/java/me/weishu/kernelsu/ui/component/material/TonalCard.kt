@@ -3,8 +3,6 @@ package me.weishu.kernelsu.ui.component.material
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.Card as MaterialCard
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.LocalContentColor
@@ -23,15 +21,17 @@ import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
+import top.yukonga.miuix.kmp.basic.CardDefaults
 
 /**
  * A rounded card that participates in the unified transparency layering controller.
  *
- * When wallpaper mode is off this is a plain [Card] with [containerColor]. When it is on, the card is
- * drawn through [FolkWallpaperSurface] with [wallpaperRole], so its fill shares one alpha with every
- * other panel instead of staying opaque.
+ * It is a miuix card whatever it is filled with - neutral surface or a semantic container - so the
+ * whole app shares one card shape and one press behaviour. When wallpaper mode is on and the card
+ * has a [wallpaperRole], it is drawn through [FolkWallpaperSurface] instead, so its fill shares one
+ * alpha with every other panel rather than staying opaque.
  *
- * The default is derived from the fill: a plain neutral surface ([MaterialTheme.colorScheme.surfaceBright])
+ * The default role is derived from the fill: a plain neutral surface ([MaterialTheme.colorScheme.surfaceBright])
  * joins the wallpaper layering, while a card that carries a semantic container colour
  * (errorContainer/secondaryContainer/...) keeps that colour untouched. Pass `wallpaperRole` explicitly
  * to override (for example `null` for the theme preview miniature).
@@ -121,35 +121,26 @@ fun TonalCard(
         ) {
             content()
         }
-    } else if (containerColor == MaterialTheme.colorScheme.surfaceBright) {
-        // The neutral card is the one miuix should draw: it is what the home and settings surfaces
-        // are made of, and it is the same fill a settings group has, so a grid of category tiles or
-        // a density panel no longer sits on Material's surfaceBright while the group below it sits on
-        // miuix's surfaceContainer. A card that carries a semantic colour (errorContainer,
-        // secondaryContainer…) keeps Material's tinted card, because miuix would paint it plain.
+    } else {
+        // One card component for every fill: miuix draws the neutral surface and the semantic
+        // containers alike, so a warning card and a settings group agree on shape and press
+        // behaviour instead of one of them being a Material card among miuix ones.
         //
         // Off wallpaper this branch must win even when a wallpaperRole was passed: the role only
         // describes how the fill should join the wallpaper layering, which is not in play here.
         MiuixCard(
             modifier = modifier.then(originModifier).then(clickModifier),
             cornerRadius = cornerRadius,
+            colors = CardDefaults.defaultColors(
+                color = containerColor,
+                contentColor = contentColor,
+            ),
         ) {
             // miuix's card publishes miuix's own content colour; Material's `Text`/`Icon` read
             // Material's local, so the card's colour is published again for them.
             CompositionLocalProvider(LocalContentColor provides contentColor) {
                 content()
             }
-        }
-    } else {
-        MaterialCard(
-            modifier = modifier.then(originModifier).then(clickModifier),
-            colors = CardDefaults.cardColors(
-                containerColor = containerColor,
-                contentColor = contentColor,
-            ),
-            shape = shape,
-        ) {
-            content()
         }
     }
 }

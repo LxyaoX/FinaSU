@@ -1,18 +1,20 @@
 package me.weishu.kernelsu.ui.screen.home
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,190 +22,236 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.ui.component.material.FolkButton
 import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.theme.FolkType
+import me.weishu.kernelsu.ui.theme.isInDarkTheme
+import me.weishu.kernelsu.wallpaper.surface.SurfaceFlag
+import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
+import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+/** The card corner radius, shared with [HomeCard]. */
+private val WorkCardCorner = 20.dp
+
+/** The card is a hero: it keeps this much height even on a short screen or a narrow font. */
+private val WorkCardMinHeight = 188.dp
 
 /**
- * The module states every layout reports, as `label to value` pairs: how the module is loaded and the
- * states that change how it behaves, in a fixed order. The board decides how to draw them. Empty when
- * the module is not loaded, since then it has nothing to report.
+ * What state the kernel module is in, as the page's hero card.
+ *
+ * Loaded: one tall accent surface - the state in display type, the flags that change its behaviour
+ * along the top edge, and the version under the title, with an oversized outline mark bleeding off
+ * the bottom corner. Not loaded: the same tall card in neutral, saying why and offering the actions
+ * that fix it. Tapping either one opens the installer.
  */
-@Composable
-internal fun statusStateTexts(state: HomeUiState): List<Pair<String, String>> {
-    if (state.ksuVersion == null) return emptyList()
-    return buildList {
-        val workingMode = workingModeLabel(state)
-        if (workingMode.isNotEmpty()) {
-            add(stringResource(R.string.home_running_mode) to workingMode)
-        }
-        if (state.isSafeMode) {
-            add(stringResource(R.string.safe_mode) to stringResource(R.string.home_state_on))
-        }
-        if (state.isLateLoadMode) {
-            add(stringResource(R.string.jailbreak_mode) to stringResource(R.string.home_state_on))
-        }
-        if (state.showCustomLkmBadge) {
-            add(stringResource(R.string.home_lkm_custom) to stringResource(R.string.home_state_on))
-        }
-    }
-}
-
-/** The install action for a kernel that has the module but never loaded it. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-internal fun StatusInstallButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    label: String = stringResource(R.string.install),
-) {
-    FolkButton(
-        onClick = onClick,
-        modifier = modifier,
-        contentPadding = ButtonDefaults.MediumContentPadding,
-    ) {
-        Text(label)
-    }
-}
-
-/** The jailbreak action, offered while the module is installed but the kernel refuses to load it. */
-@Composable
-internal fun StatusJailbreakButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    FolkButton(
-        onClick = onClick,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError,
-        ),
-    ) {
-        Text(stringResource(R.string.home_jailbreak))
-    }
-}
-
 @Composable
 internal fun StatusCard(
     state: HomeUiState,
     actions: HomeActions,
     modifier: Modifier = Modifier,
 ) {
-    val ksuActive = state.ksuVersion != null
-    val notInstalled = !ksuActive && state.kernelVersion.isGKI()
-
-    val workCardStyle = HomeWorkCardControl.style(
-        layout = HomeWorkCardLayout.Circle,
-        working = ksuActive,
-    )
-
-    val statusIcon = when {
-        ksuActive -> Icons.Rounded.CheckCircle
-        notInstalled -> Icons.Rounded.Warning
-        else -> Icons.Rounded.Block
+    if (state.ksuVersion == null) {
+        MissingCard(state = state, actions = actions, modifier = modifier)
+    } else {
+        WorkingCard(state = state, actions = actions, modifier = modifier)
     }
-    val statusTitle = when {
-        ksuActive -> stringResource(R.string.home_working)
-        notInstalled -> stringResource(R.string.home_not_installed)
-        else -> stringResource(R.string.home_unsupported)
-    }
-    val statusSummary = when {
-        ksuActive -> stringResource(R.string.home_working_version, "${state.ksuVersion}-${state.kernelUAPIVersion}")
-        notInstalled -> stringResource(R.string.home_click_to_install)
-        else -> stringResource(R.string.home_unsupported_reason)
-    }
-    val workingMode = if (ksuActive) {
-        when (state.lkmMode) {
-            null -> ""
-            true -> "LKM"
-            else -> "Built-In"
-        }
-    } else ""
+}
 
-    val hideMode = rememberHomeThemeSettings().listWorkingCardModeHidden
-    val statusTrailing: (@Composable () -> Unit)? = if (ksuActive && workingMode.isNotEmpty() && !hideMode) {
-        {
-            StatusTag(
-                label = workingMode,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                backgroundColor = MaterialTheme.colorScheme.primary
-            )
-        }
-    } else if (notInstalled && state.isSELinuxPermissive) {
-        {
-            StatusJailbreakButton(onClick = actions.onJailbreakClick)
-        }
-    } else null
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WorkingCard(
+    state: HomeUiState,
+    actions: HomeActions,
+    modifier: Modifier,
+) {
+    // The work card owns a wallpaper surface of its own, so a user-chosen photo is painted here and
+    // the card borrows the photo's palette for its text.
+    val surface = SurfaceStore.config(SurfaceRegistry.WORK_CARD)
+    val photo = rememberSurfacePhoto(surface.imageUri.takeIf { surface.hasImage })
+    val style = homeWorkCardStyle(working = true, surface = surface, photo = photo)
+    val overPhoto = surface.hasImage && photo.ready
+
+    val workingMode = when (state.lkmMode) {
+        null -> null
+        true -> "LKM"
+        else -> "Built-In"
+    }
+    val modeHidden = rememberHomeThemeSettings().listWorkingCardModeHidden ||
+        surface.hasFlag(SurfaceFlag.HideMode)
+
+    val supportingColor = LocalWallpaperSupportingColor.current
+    val onPhotoColor = style.contentColor
+    val captionColor = when {
+        onPhotoColor != null -> onPhotoColor.copy(alpha = 0.8f)
+        supportingColor != null -> supportingColor
+        else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
+    }
+    val markTint = when {
+        overPhoto -> onPhotoColor?.copy(alpha = 0.12f) ?: MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.primary.copy(alpha = if (isInDarkTheme()) 0.22f else 0.28f)
+    }
+    val modeTagColor = MaterialTheme.colorScheme.primary
+    val modeTagContent = MaterialTheme.colorScheme.onPrimary
+    val errorTagColor = MaterialTheme.colorScheme.errorContainer
+    val errorTagContent = MaterialTheme.colorScheme.onErrorContainer
+    val customTagColor = MaterialTheme.colorScheme.tertiaryContainer
+    val customTagContent = MaterialTheme.colorScheme.onTertiaryContainer
 
     HomeCard(
         modifier = modifier.fillMaxWidth(),
-        containerColor = workCardStyle.containerColor,
-        contentColor = workCardStyle.contentColor ?: contentColorFor(workCardStyle.containerColor),
-        wallpaperRole = workCardStyle.wallpaperRole,
-        onClick = {
-            if (!state.isLateLoadMode) {
-                actions.onInstallClick()
-            }
-        }
+        containerColor = style.containerColor,
+        contentColor = style.contentColor ?: contentColorFor(style.containerColor),
+        wallpaperRole = style.wallpaperRole,
+        onClick = { if (!state.isLateLoadMode) actions.onInstallClick() },
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(statusIcon, contentDescription = statusTitle)
-            Spacer(Modifier.width(20.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = statusTitle,
-                        style = FolkType.Title
-                    )
-                    if (ksuActive && state.isSafeMode) {
-                        Spacer(Modifier.width(8.dp))
+        // The mark is larger than the card on purpose; clipping keeps it inside the rounded shape.
+        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(WorkCardCorner))) {
+            if (overPhoto) {
+                SurfaceBackgroundImage(
+                    photo = photo,
+                    surface = surface,
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
+            if (!surface.hasFlag(SurfaceFlag.HideIcon)) {
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircleOutline,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 28.dp, y = 34.dp)
+                        .size(150.dp),
+                    tint = markTint,
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = WorkCardMinHeight)
+                    .padding(22.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    if (workingMode != null && !modeHidden) {
                         StatusTag(
-                            label = stringResource(id = R.string.safe_mode),
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                            backgroundColor = MaterialTheme.colorScheme.errorContainer
+                            label = workingMode,
+                            contentColor = modeTagContent,
+                            backgroundColor = modeTagColor,
                         )
                     }
-                    if (ksuActive && state.isLateLoadMode) {
-                        Spacer(Modifier.width(8.dp))
-                        StatusTag(
-                            label = stringResource(id = R.string.jailbreak_mode),
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                            backgroundColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    }
-                }
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = statusSummary,
-                        modifier = Modifier.weight(1f, fill = false),
-                        style = FolkType.Summary,
-                        color = LocalWallpaperSupportingColor.current
-                            ?: MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                     if (state.showCustomLkmBadge) {
-                        Spacer(Modifier.width(8.dp))
                         StatusTag(
                             label = stringResource(R.string.home_lkm_custom),
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                            backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = customTagContent,
+                            backgroundColor = customTagColor,
+                        )
+                    }
+                    if (state.isSafeMode) {
+                        StatusTag(
+                            label = stringResource(R.string.safe_mode),
+                            contentColor = errorTagContent,
+                            backgroundColor = errorTagColor,
+                        )
+                    }
+                    if (state.isLateLoadMode) {
+                        StatusTag(
+                            label = stringResource(R.string.jailbreak_mode),
+                            contentColor = errorTagContent,
+                            backgroundColor = errorTagColor,
+                        )
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = stringResource(R.string.home_working),
+                        style = FolkType.Hero,
+                    )
+                    if (!surface.hasFlag(SurfaceFlag.HideText)) {
+                        Text(
+                            text = stringResource(
+                                R.string.home_working_version,
+                                "${state.ksuVersion}-${state.kernelUAPIVersion}",
+                            ),
+                            style = FolkType.Machine,
+                            fontFamily = FontFamily.Monospace,
+                            color = captionColor,
                         )
                     }
                 }
             }
-            if (statusTrailing != null) {
-                Spacer(Modifier.width(16.dp))
-                statusTrailing()
+        }
+    }
+}
+
+@Composable
+private fun MissingCard(
+    state: HomeUiState,
+    actions: HomeActions,
+    modifier: Modifier,
+) {
+    val notInstalled = state.kernelVersion.isGKI()
+    val reason = stringResource(
+        if (notInstalled) R.string.home_click_to_install else R.string.home_unsupported_reason
+    )
+    HomeCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = { if (!state.isLateLoadMode) actions.onInstallClick() },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = WorkCardMinHeight)
+                .padding(22.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.ErrorOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+                Text(
+                    text = reason,
+                    style = FolkType.Caption,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            Text(
+                text = stringResource(
+                    if (notInstalled) R.string.home_not_installed else R.string.home_unsupported
+                ),
+                modifier = Modifier.padding(vertical = 12.dp),
+                style = FolkType.Hero,
+            )
+            if (notInstalled) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    MiuixTextButton(
+                        text = stringResource(R.string.install),
+                        onClick = actions.onInstallClick,
+                        colors = ButtonDefaults.textButtonColorsPrimary(),
+                    )
+                    if (state.isSELinuxPermissive) {
+                        MiuixTextButton(
+                            text = stringResource(R.string.home_jailbreak),
+                            onClick = actions.onJailbreakClick,
+                        )
+                    }
+                }
             }
         }
     }

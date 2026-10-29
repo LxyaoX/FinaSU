@@ -33,6 +33,28 @@ object FolkType {
     val Caption: TextStyle
         @Composable get() = scale(size = 14.sp, lineHeight = 18.sp)
 
+    /**
+     * The one statement a page leads with - the home screen's "Working" or "Not installed": 34sp
+     * over a 40sp line box. It is a heading, so it breaks between phrases instead of mid-word.
+     */
+    val Hero: TextStyle
+        @Composable get() = scale(
+            size = 34.sp,
+            lineHeight = 40.sp,
+            weight = FontWeight.Bold,
+            lineBreak = LineBreak.Heading,
+        )
+
+    /** A number a card is built around, 26sp over a 30sp box, with tabular figures. */
+    val Metric: TextStyle
+        @Composable get() = scale(
+            size = 26.sp,
+            lineHeight = 30.sp,
+            weight = FontWeight.Bold,
+            lineBreak = LineBreak.Heading,
+            tabular = true,
+        )
+
     /** [Summary] with tabular figures, so a changing number does not push its neighbours around. */
     val Numeral: TextStyle
         @Composable get() = Summary.copy(fontFeatureSettings = "tnum")
@@ -64,9 +86,11 @@ private fun scale(
     lineHeight: TextUnit,
     weight: FontWeight = FontWeight.Normal,
     lineBreak: LineBreak = LineBreak.Paragraph,
+    tabular: Boolean = false,
 ): TextStyle = MaterialTheme.typography.bodyLarge.copy(
     fontSize = size,
     lineHeight = lineHeight,
     fontWeight = weight,
     letterSpacing = 0.sp,
+    fontFeatureSettings = if (tabular) "tnum" else null,
 ).wrapAware(lineBreak)

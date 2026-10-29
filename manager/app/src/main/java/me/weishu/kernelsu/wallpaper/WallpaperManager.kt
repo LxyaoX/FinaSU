@@ -86,11 +86,11 @@ object WallpaperManager {
 
     /** Copies the picked image into app storage and points the grid work card at it. */
     suspend fun saveWorkCardBackground(context: Context, source: Uri): Boolean =
-        saveSurfaceImage(context, SurfaceRegistry.GRID_WORK_CARD, source)
+        saveSurfaceImage(context, SurfaceRegistry.WORK_CARD, source)
 
     /** Deletes the stored work-card image and turns the feature off, keeping the user's slider values. */
     suspend fun clearWorkCardBackground(context: Context) =
-        clearSurfaceImage(context, SurfaceRegistry.GRID_WORK_CARD)
+        clearSurfaceImage(context, SurfaceRegistry.WORK_CARD)
 
     /**
      * Copies the picked image into app storage and points surface [id] at it.
@@ -309,7 +309,7 @@ object WallpaperManager {
 
     /** The currently stored work-card background file, if any. */
     fun currentWorkCardFile(context: Context): File? =
-        currentSurfaceFile(context, SurfaceRegistry.GRID_WORK_CARD)
+        currentSurfaceFile(context, SurfaceRegistry.WORK_CARD)
 
     /**
      * Best-effort extension (with leading dot) for [source], so a GIF stays a GIF.

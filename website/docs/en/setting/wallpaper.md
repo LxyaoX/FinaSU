@@ -36,5 +36,13 @@ The scrim can still be set in video mode; "Surface opacity", "Blur" and "Pick co
 
 ## Working Cards
 
-Layouts with a dedicated surface can pick an image separately: the Grid working card has full opacity, darkness, day and night opacity and three hide switches; the four Focus cards share the parent values; the Dashboard Hero has its own image and day and night surface parameters; CircleUI has no separate working card image.
+The work card at the top of the home screen owns a wallpaper surface of its own, independent of the page background:
+
+- **Image**: pick an image for the work card alone.
+- **Enable work card background**: when off, no image is painted and the card keeps its plain fill.
+- **Opacity**: the image's own opacity, switchable to separate day and night values.
+- **Dim**: darkens the image so the large status word stays readable, also day and night aware.
+- **Hide mark / Hide text / Hide run mode**: drop the check mark in the corner, the version line under the title and the run-mode tag along the top edge.
+
+The stat tiles and the system information card follow the page background and cannot take an image of their own.
 
