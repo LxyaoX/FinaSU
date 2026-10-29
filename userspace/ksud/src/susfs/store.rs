@@ -179,11 +179,7 @@ pub fn summarize(state: &State, desired: &BTreeMap<String, String>) -> &'static 
         })
         .count();
     if failed {
-        if applied > 0 {
-            "partial"
-        } else {
-            "failed"
-        }
+        if applied > 0 { "partial" } else { "failed" }
     } else if !state.kstat_pending.is_empty()
         || state.pending_reboot.iter().any(|k| desired.contains_key(k))
         || state.applied.iter().any(|(k, v)| {
@@ -202,11 +198,7 @@ pub fn summarize(state: &State, desired: &BTreeMap<String, String>) -> &'static 
     {
         // A rule the kernel accepted but ignored still counts as work done; only a run where
         // nothing was actually applied is reported as skipped.
-        if applied == 0 {
-            "skipped"
-        } else {
-            "applied"
-        }
+        if applied == 0 { "skipped" } else { "applied" }
     } else if desired.is_empty() {
         "idle"
     } else {
