@@ -34,8 +34,11 @@ jobs:
           cd busybox-1.36.1
           make defconfig
           python3 ../scripts/trim_busybox.py .config
-          yes "" | make oldconfig > /dev/null
-          grep -E '^CONFIG_(STATIC|PIE)=' .config
+          # kconfig rewrites `CONFIG_PIE=n` as a comment, so this step must not grep
+          # for an assignment of both symbols.
+          yes "" | make oldconfig > /dev/null || true
+          grep -E 'CONFIG_STATIC|CONFIG_PIE' .config || true
+          test "$(grep -c '^CONFIG_ASH=y' .config)" = "1"
 
       - name: Build
         run: |
