@@ -1839,7 +1839,7 @@ pub fn installed_driver_module() -> Option<String> {
 
 #[cfg(any(target_os = "android", test))]
 fn installed_driver_module_at(path: &Path) -> Option<String> {
-    if path.join(crate::mount_plan::DISABLE_FILE_NAME).exists() {
+    if path.join(crate::defs::DISABLE_FILE_NAME).exists() {
         return None;
     }
     let id = path

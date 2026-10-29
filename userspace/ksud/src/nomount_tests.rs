@@ -564,7 +564,7 @@ fn an_installed_nomount_provider_owns_injection() {
         Some("vendor-nomount".to_string())
     );
 
-    std::fs::write(metamodule.join(crate::mount_plan::DISABLE_FILE_NAME), "").unwrap();
+    std::fs::write(metamodule.join(crate::defs::DISABLE_FILE_NAME), "").unwrap();
     assert_eq!(installed_driver_module_at(&metamodule), None);
 }
 
