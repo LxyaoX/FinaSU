@@ -1,6 +1,6 @@
 package me.weishu.kernelsu.ui.screen.home
 
-import androidx.compose.material3.MaterialTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
@@ -47,14 +47,14 @@ internal fun homeWorkCardStyle(
         )
     }
     val containerColor = if (working) {
-        MaterialTheme.colorScheme.secondaryContainer
+        MiuixTheme.colorScheme.secondaryContainer
     } else {
-        MaterialTheme.colorScheme.errorContainer
+        MiuixTheme.colorScheme.errorContainer
     }
     return if (LocalFolkWallpaperTokens.current != null) {
         HomeWorkCardStyle(
             containerColor = containerColor,
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            contentColor = MiuixTheme.colorScheme.onSurface,
             wallpaperRole = WallpaperSurfaceRole.Group,
         )
     } else {

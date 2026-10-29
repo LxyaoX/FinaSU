@@ -8,9 +8,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,6 +17,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.WarningLevel
 import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.theme.FolkType
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun HomeWarnings(
@@ -114,8 +113,12 @@ private fun WarningCard(
     onClick: (() -> Unit)? = null
 ) {
     val containerColor = when (level) {
-        WarningLevel.Error -> MaterialTheme.colorScheme.errorContainer
-        WarningLevel.Notice -> MaterialTheme.colorScheme.tertiaryContainer
+        WarningLevel.Error -> MiuixTheme.colorScheme.errorContainer
+        WarningLevel.Notice -> MiuixTheme.colorScheme.tertiaryContainer
+    }
+    val contentColor = when (level) {
+        WarningLevel.Error -> MiuixTheme.colorScheme.onErrorContainer
+        WarningLevel.Notice -> MiuixTheme.colorScheme.onTertiaryContainer
     }
     val content = @Composable {
         Row(
@@ -126,7 +129,7 @@ private fun WarningCard(
             Text(
                 text = message,
                 style = FolkType.Summary,
-                color = MaterialTheme.colorScheme.contentColorFor(containerColor)
+                color = contentColor
             )
         }
     }

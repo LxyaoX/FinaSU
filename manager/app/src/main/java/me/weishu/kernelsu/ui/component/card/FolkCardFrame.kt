@@ -24,6 +24,7 @@ import me.weishu.kernelsu.ui.theme.ContinuousCornerShape
 import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import me.weishu.kernelsu.wallpaper.WallpaperConfig
 import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * The shell every card of the module design shares: the animated corner, press scaling and the
@@ -58,7 +59,7 @@ fun FolkCardFrame(
     val insideSplicedGroup = LocalInsideSplicedGroup.current
 
     val navOriginColor = LocalFolkWallpaperTokens.current?.group?.fill
-        ?: MaterialTheme.colorScheme.surfaceBright
+        ?: MiuixTheme.colorScheme.surfaceContainer
     val opacity = cardSurfaceOpacity()
 
     val clickModifier = Modifier
@@ -99,7 +100,7 @@ fun FolkCardFrame(
             modifier = modifier.clip(cardShape).then(clickModifier),
             shape = cardShape,
             minimumAlpha = opacity,
-            fallbackColor = MaterialTheme.colorScheme.surfaceBright,
+            fallbackColor = MiuixTheme.colorScheme.surfaceContainer,
         ) {
             framed()
         }

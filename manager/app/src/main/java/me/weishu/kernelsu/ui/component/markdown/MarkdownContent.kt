@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.CircularProgressIndicator as MiuixCircularProgressIndicator
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MarkdownContent(
@@ -35,7 +35,7 @@ fun MarkdownContent(
         animationSpec = tween(durationMillis = 150),
         label = "MarkdownContentPlaceholderAlpha",
     )
-    val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val containerColor = MiuixTheme.colorScheme.surfaceContainerHigh
     Box(
         modifier = Modifier
             .fillMaxWidth()

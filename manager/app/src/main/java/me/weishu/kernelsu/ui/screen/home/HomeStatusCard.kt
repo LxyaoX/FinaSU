@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -95,15 +94,15 @@ private fun WorkingCard(
         else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
     }
     val markTint = when {
-        overPhoto -> onPhotoColor?.copy(alpha = 0.12f) ?: MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.primary.copy(alpha = if (isInDarkTheme()) 0.22f else 0.28f)
+        overPhoto -> onPhotoColor?.copy(alpha = 0.12f) ?: MiuixTheme.colorScheme.primary
+        else -> MiuixTheme.colorScheme.primary.copy(alpha = if (isInDarkTheme()) 0.22f else 0.28f)
     }
-    val modeTagColor = MaterialTheme.colorScheme.primary
-    val modeTagContent = MaterialTheme.colorScheme.onPrimary
-    val errorTagColor = MaterialTheme.colorScheme.errorContainer
-    val errorTagContent = MaterialTheme.colorScheme.onErrorContainer
-    val customTagColor = MaterialTheme.colorScheme.tertiaryContainer
-    val customTagContent = MaterialTheme.colorScheme.onTertiaryContainer
+    val modeTagColor = MiuixTheme.colorScheme.primary
+    val modeTagContent = MiuixTheme.colorScheme.onPrimary
+    val errorTagColor = MiuixTheme.colorScheme.errorContainer
+    val errorTagContent = MiuixTheme.colorScheme.onErrorContainer
+    val customTagColor = MiuixTheme.colorScheme.tertiaryContainer
+    val customTagContent = MiuixTheme.colorScheme.onTertiaryContainer
 
     HomeCard(
         modifier = modifier.fillMaxWidth(),
@@ -223,12 +222,12 @@ private fun MissingCard(
                     imageVector = Icons.Rounded.ErrorOutline,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.error,
+                    tint = MiuixTheme.colorScheme.error,
                 )
                 Text(
                     text = reason,
                     style = FolkType.Caption,
-                    color = MaterialTheme.colorScheme.error,
+                    color = MiuixTheme.colorScheme.error,
                 )
             }
             Text(
