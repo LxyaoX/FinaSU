@@ -33,6 +33,13 @@ on:
       - 'Cargo.toml'
   workflow_call:
 
+# A second push while a build is still running used to buy a second full pipeline -
+# four kernel containers, a Rust build and a Gradle build - only to be overtaken by
+# the newer commit. Tags are exempt: a release must not be cancelled by a push.
+concurrency:
+  group: build-manager-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type == 'branch' }}
+
 jobs:
   generate-key:
     runs-on: ubuntu-26.04
