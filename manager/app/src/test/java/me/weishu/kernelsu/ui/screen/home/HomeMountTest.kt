@@ -65,7 +65,7 @@ class HomeMountTest {
     @Test
     fun `changing the configured mode still writes`() {
         val status = status(
-            configuredMode = FolkMountMode.BUILTIN,
+            configuredMode = FolkMountMode.OFF,
             nextProvider = FolkMountProvider.BUILTIN,
             bootProvider = FolkMountProvider.BUILTIN,
         )
@@ -73,7 +73,7 @@ class HomeMountTest {
     }
 
     private fun status(
-        configuredMode: FolkMountMode = FolkMountMode.AUTO,
+        configuredMode: FolkMountMode = FolkMountMode.NOMOUNT,
         nextProvider: FolkMountProvider?,
         bootProvider: FolkMountProvider?,
         bootResult: String = "success",
