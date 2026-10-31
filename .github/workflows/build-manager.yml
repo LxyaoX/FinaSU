@@ -234,11 +234,9 @@ jobs:
 
           # Lint writes its findings to a report file, and its own stdout shape does not match the
           # patterns above - so without this a lint error is the one failure the annotations miss.
-          lint_report=manager/app/build/reports/lint-results-debug.txt
-          if [ -f "$lint_report" ]; then
-            grep -E ': (Error|Warning): ' "$lint_report" | head -30 | while IFS= read -r line; do
-              echo "::error title=Lint::${line//$'\n'/ }"
-            done
+          lint_xml=manager/app/build/reports/lint-results-debug.xml
+          if [ -f "$lint_xml" ]; then
+            python3 -c 'import sys, xml.etree.ElementTree as ET;print("\n".join(["::error title=Lint %s at %s::%s" % (i.get("id"), ((i.find("location").get("file") + ":" + i.find("location").get("line")) if i.find("location") is not None else "?"), (i.get("message") or "").replace(chr(10), " ")) for i in ET.parse(sys.argv[1]).getroot().findall("issue") if i.get("severity") in ("Error", "Fatal")]))' "$lint_xml"
           fi
 
       - name: Upload Manager check reports
