@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.media.VisualMediaConfig
 import me.weishu.kernelsu.ui.theme.isInDarkTheme
-import me.weishu.kernelsu.wallpaper.AnimatedFileImage
+import me.weishu.kernelsu.ui.component.AnimatedFileImage
 
 @Composable
 fun HomeTitleImage() {

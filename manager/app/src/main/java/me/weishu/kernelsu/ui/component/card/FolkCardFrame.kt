@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -16,19 +17,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.component.module.LocalInsideSplicedGroup
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.ContinuousCornerShape
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
-import me.weishu.kernelsu.wallpaper.WallpaperConfig
-import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * The shell every card of the module design shares: the animated corner, press scaling and the
- * wallpaper tint.
+ * card fill.
  *
  * Cards only differ in what they put inside, so every card wraps its content in this frame and
  * inherits the same look and interactions.
@@ -58,15 +55,11 @@ fun FolkCardFrame(
     val cardShape = ContinuousCornerShape(cardCorner)
     val insideSplicedGroup = LocalInsideSplicedGroup.current
 
-    val navOriginColor = LocalFolkWallpaperTokens.current?.group?.fill
-        ?: MiuixTheme.colorScheme.surfaceContainer
-    val opacity = cardSurfaceOpacity()
-
     val clickModifier = Modifier
         .fillMaxWidth()
         .navOrigin(
             cornerRadius = cardCorner,
-            color = navOriginColor,
+            color = MiuixTheme.colorScheme.surfaceContainer,
             interactionSource = interactionSource,
         )
         .animateContentSize(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec())
@@ -95,21 +88,12 @@ fun FolkCardFrame(
         // The group already draws the surface; a second one would double the corner and the tint.
         Box(modifier = modifier.then(clickModifier)) { framed() }
     } else {
-        FolkWallpaperSurface(
-            role = WallpaperSurfaceRole.Group,
+        Surface(
             modifier = modifier.clip(cardShape).then(clickModifier),
             shape = cardShape,
-            minimumAlpha = opacity,
-            fallbackColor = MiuixTheme.colorScheme.surfaceContainer,
+            color = MiuixTheme.colorScheme.surfaceContainer,
         ) {
             framed()
         }
     }
-}
-
-/** Tint of a card, raised over a wallpaper so the content stays readable. */
-@Composable
-fun cardSurfaceOpacity(): Float {
-    if (LocalFolkWallpaperTokens.current == null) return 1f
-    return WallpaperConfig.opacity.coerceAtLeast(0.35f)
 }

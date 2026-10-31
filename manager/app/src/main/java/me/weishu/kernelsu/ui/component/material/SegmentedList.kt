@@ -91,8 +91,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.FolkMotion
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
-import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.ui.state.ToggleableState
@@ -104,43 +102,19 @@ private const val SegmentedSpringStiffness = 800f
 private const val SegmentedSpringDamping = 0.9f
 
 /**
- * True while a [SegmentedColumn] is drawing one continuous group material behind its rows. In
- * wallpaper mode a single fill is required: the [ListItemDefaults.SegmentedGap] between rows would
- * otherwise leak the wallpaper through every seam (they were invisible only because the old rows
- * sat on an opaque same-colored surface).
+ * The card a [SegmentedColumn] draws behind its rows.
+ *
+ * miuix preferences draw no background of their own, so without it a column of switches floats bare
+ * on the page while our own rows, which do paint themselves, look like one card each. Inside the
+ * card they stop painting.
  */
-private val LocalWallpaperGroupActive = staticCompositionLocalOf { false }
-
 @Composable
-private fun WallpaperGroupBackground(
+private fun SegmentedGroupCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val tokens = LocalFolkWallpaperTokens.current
-    if (tokens == null) {
-        // Off wallpaper the group is a single miuix card. miuix preferences draw no background of
-        // their own, so without it a column of switches floats bare on the page while our own rows,
-        // which do paint themselves, look like one card each. Inside the card they stop painting.
-        MiuixCard(modifier = modifier, cornerRadius = 20.dp) {
-            CompositionLocalProvider(LocalSegmentedCardGroup provides true) {
-                content()
-            }
-        }
-        return
-    }
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = tokens.group.fill,
-                shape = RoundedCornerShape(SegmentedOuterRadius),
-            )
-    ) {
-        CompositionLocalProvider(
-            LocalWallpaperGroupActive provides true,
-            LocalWallpaperMaterialRole provides WallpaperSurfaceRole.Group,
-            LocalWallpaperSupportingColor provides tokens.group.supportingColor,
-        ) {
+    MiuixCard(modifier = modifier, cornerRadius = 20.dp) {
+        CompositionLocalProvider(LocalSegmentedCardGroup provides true) {
             content()
         }
     }
@@ -160,18 +134,6 @@ internal val LocalSegmentedCardGroup = compositionLocalOf { false }
 
 @Composable
 private fun defaultSegmentedColors(): ListItemColors {
-    // In wallpaper mode each row carries the group material itself, so the list reads as one
-    // translucent group instead of sitting on a solid surface.
-    val material = LocalFolkWallpaperTokens.current?.group
-    if (material != null) {
-        val inGroup = LocalWallpaperGroupActive.current
-        return ListItemDefaults.segmentedColors(
-            containerColor = if (inGroup) Color.Transparent else material.fill,
-            contentColor = material.contentColor,
-            disabledContainerColor = if (inGroup) Color.Transparent else material.fill,
-            supportingContentColor = material.supportingColor,
-        )
-    }
     if (LocalSegmentedCardGroup.current) {
         return ListItemDefaults.segmentedColors(
             containerColor = Color.Transparent,
@@ -187,41 +149,9 @@ private fun defaultSegmentedColors(): ListItemColors {
     )
 }
 
-/**
- * The colours a row with a selection control draws with.
- *
- * In wallpaper mode the whole group is one material, so a selected row must not repaint a second
- * fill over it; the row's own control (checkbox or radio) already shows the state. Folding every
- * selected colour back onto its resting counterpart keeps the row flush with the group. Outside
- * wallpaper mode the stock M3 selected treatment is kept, so non-wallpaper rendering is unchanged.
- */
-@Composable
-private fun selectionRowColors(colors: ListItemColors): ListItemColors {
-    if (LocalFolkWallpaperTokens.current == null) return colors
-    return colors.copy(
-        selectedContainerColor = colors.containerColor,
-        selectedContentColor = colors.contentColor,
-        selectedLeadingContentColor = colors.leadingContentColor,
-        selectedTrailingContentColor = colors.trailingContentColor,
-        selectedOverlineContentColor = colors.overlineContentColor,
-        selectedSupportingContentColor = colors.supportingContentColor,
-    )
-}
-
 @Composable
 private fun defaultSingleSegmentedShape(index: Int, count: Int): ListItemShapes {
     val base = ListItemDefaults.segmentedShapes(index, count)
-    if (LocalFolkWallpaperTokens.current != null) {
-        // Wallpaper mode tiles standalone rows into one continuous group, so only the two ends stay
-        // rounded; square inner corners let adjacent rows meet without a notch.
-        val shape = RoundedCornerShape(
-            topStart = if (index == 0) SegmentedOuterRadius else 0.dp,
-            topEnd = if (index == 0) SegmentedOuterRadius else 0.dp,
-            bottomStart = if (index == count - 1) SegmentedOuterRadius else 0.dp,
-            bottomEnd = if (index == count - 1) SegmentedOuterRadius else 0.dp,
-        )
-        return base.copy(shape = shape)
-    }
     return if (count == 1) {
         base.copy(shape = MaterialTheme.shapes.large)
     } else {
@@ -263,7 +193,7 @@ fun SegmentedColumn(
                 }
             }
         }
-        WallpaperGroupBackground { rows() }
+        SegmentedGroupCard { rows() }
     }
 }
 
@@ -324,7 +254,7 @@ fun SegmentedColumn(
         val firstVisible = entries.indexOfFirst { it.visible }
         val lastVisible = entries.indexOfLast { it.visible }
 
-        WallpaperGroupBackground {
+        SegmentedGroupCard {
             Layout(
                 content = {
                     entries.forEachIndexed { index, entry ->
@@ -425,28 +355,10 @@ fun SegmentedItem(
     count: Int,
     content: @Composable () -> Unit,
 ) {
-    val wallpaper = LocalFolkWallpaperTokens.current != null
     CompositionLocalProvider(
         LocalListItemShapes provides defaultSingleSegmentedShape(index, count),
     ) {
-        if (!wallpaper) {
-            content()
-        } else {
-            // The parent list spaces standalone rows by SegmentedGap, so report a height reduced by
-            // that gap and let the row overflow into it. With square inner corners from
-            // defaultSingleSegmentedShape this joins the rows into one continuous group.
-            val gapPx = with(LocalDensity.current) { ListItemDefaults.SegmentedGap.roundToPx() }
-            Box(
-                modifier = Modifier.layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints)
-                    layout(placeable.width, (placeable.height - gapPx).coerceAtLeast(0)) {
-                        placeable.placeRelative(0, 0)
-                    }
-                }
-            ) {
-                content()
-            }
-        }
+        content()
     }
 }
 
@@ -456,18 +368,6 @@ fun SegmentedItemContainer(
     content: @Composable () -> Unit,
 ) {
     val shapes = LocalListItemShapes.current ?: ListItemDefaults.segmentedShapes(0, 1)
-    if (LocalFolkWallpaperTokens.current != null) {
-        FolkWallpaperSurface(
-            role = WallpaperSurfaceRole.Group,
-            shape = shapes.shape,
-            modifier = modifier.fillMaxWidth(),
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                content()
-            }
-        }
-        return
-    }
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MiuixTheme.colorScheme.surfaceContainer,
@@ -519,13 +419,11 @@ fun SegmentedListItem(
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
-    val tokens = LocalFolkWallpaperTokens.current
     val source = interactionSource ?: remember { MutableInteractionSource() }
     val originModifier = if (onClick != null) {
         modifier.navOrigin(
             cornerRadius = 12.dp,
-            color = tokens?.group?.fill
-                ?: colors.containerColor.takeIf { it.alpha > 0f }
+            color = colors.containerColor.takeIf { it.alpha > 0f }
                 ?: MaterialTheme.colorScheme.surfaceContainer,
             interactionSource = source,
         )
@@ -583,7 +481,7 @@ fun SegmentedListItem(
             shapes = LocalListItemShapes.current ?: ListItemDefaults.segmentedShapes(0, 1),
             modifier = rowModifier,
             enabled = enabled,
-            colors = selectionRowColors(colors),
+            colors = colors,
             interactionSource = source,
             leadingContent = leadingContent,
             trailingContent = trailingContent,
@@ -611,13 +509,11 @@ fun SegmentedListItem(
     trailingContent: @Composable (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
-    val tokens = LocalFolkWallpaperTokens.current
     val source = interactionSource ?: remember { MutableInteractionSource() }
     SegmentedRow(
         modifier = modifier.navOrigin(
             cornerRadius = 12.dp,
-            color = tokens?.group?.fill
-                ?: colors.containerColor.takeIf { it.alpha > 0f }
+            color = colors.containerColor.takeIf { it.alpha > 0f }
                 ?: MaterialTheme.colorScheme.surfaceContainer,
             interactionSource = source,
         ),
@@ -631,7 +527,7 @@ fun SegmentedListItem(
             shapes = LocalListItemShapes.current ?: ListItemDefaults.segmentedShapes(0, 1),
             modifier = rowModifier,
             enabled = enabled,
-            colors = selectionRowColors(colors),
+            colors = colors,
             interactionSource = source,
             leadingContent = leadingContent,
             trailingContent = trailingContent,
@@ -901,7 +797,7 @@ fun SegmentedRadioItem(
     onClick: () -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
-    val rowColors = selectionRowColors(colors)
+    val rowColors = colors
 
     SegmentedListItem(
         selected = selected,
@@ -934,7 +830,7 @@ fun SegmentedCheckboxItem(
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
-    val rowColors = selectionRowColors(colors)
+    val rowColors = colors
 
     SegmentedListItem(
         checked = checked,

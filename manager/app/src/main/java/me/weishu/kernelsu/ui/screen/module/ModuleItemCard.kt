@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.Module
-import me.weishu.kernelsu.ui.component.card.cardSurfaceOpacity
 import me.weishu.kernelsu.ui.component.material.ExpressiveSwitch
 import me.weishu.kernelsu.ui.component.module.AdaptiveModuleButtonRow
 import me.weishu.kernelsu.ui.component.module.ModuleButtonConfig
@@ -184,7 +183,6 @@ fun ModuleItemCard(
                 module = module,
                 hasUpdate = hasUpdate,
                 iconOnly = iconOnly,
-                opacity = cardSurfaceOpacity(),
                 zygiskBlocked = zygiskBlocked,
                 onUninstallClicked = onUninstallClicked,
                 onUpdate = onUpdate,
@@ -202,7 +200,6 @@ private fun ModuleActionRow(
     module: Module,
     hasUpdate: Boolean,
     iconOnly: Boolean,
-    opacity: Float,
     zygiskBlocked: Boolean,
     onUninstallClicked: () -> Unit,
     onUpdate: () -> Unit,
@@ -278,6 +275,5 @@ private fun ModuleActionRow(
         trailingButton = trailing,
         iconOnly = iconOnly,
         spacing = if (iconOnly) 12 else 8,
-        opacity = opacity,
     )
 }

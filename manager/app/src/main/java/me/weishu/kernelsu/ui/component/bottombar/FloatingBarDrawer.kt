@@ -49,10 +49,8 @@ internal fun FloatingBarDrawer(
     if (destinations.isEmpty()) return
     val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
     val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
-    // Outside wallpaper mode the bar's own fill is the raised neutral, so a selected pill in that
-    // same colour would vanish into it. There the selection takes the accent pill the standard form
-    // already draws. In wallpaper mode it follows the wallpaper selection fill, whose alpha tracks
-    // the user's opacity.
+    // The bar's own fill is the raised neutral, so a selected pill in that same colour would vanish
+    // into it; the selection takes the accent pill the standard form already draws.
     val selectedContainer = selectionColor ?: MaterialTheme.colorScheme.secondaryContainer
     BoxWithConstraints(modifier = modifier) {
         val barWidth = (56.dp * destinations.size + 88.dp).coerceAtMost(maxWidth)

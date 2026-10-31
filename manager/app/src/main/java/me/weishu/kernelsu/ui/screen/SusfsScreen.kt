@@ -49,7 +49,6 @@ import me.weishu.kernelsu.ui.theme.FolkShape
 import me.weishu.kernelsu.ui.viewmodel.SusfsUiState
 import me.weishu.kernelsu.ui.viewmodel.SusfsViewModel
 import org.json.JSONObject
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
@@ -209,7 +208,6 @@ fun SusfsScreen() {
 @Composable
 private fun SusfsNavigation(selected: Int, onSelect: (Int) -> Unit) {
     val haptic = LocalHapticFeedback.current
-    val wallpaper = LocalFolkWallpaperTokens.current
     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         susfsPages.forEachIndexed { index, title ->
@@ -222,15 +220,18 @@ private fun SusfsNavigation(selected: Int, onSelect: (Int) -> Unit) {
             LaunchedEffect(active) { if (active) requester.bringIntoView() }
             Box(Modifier.graphicsLayer { scaleX = scale; scaleY = scale }
                 .bringIntoViewRequester(requester)
-                .background(if (active) wallpaper?.raised?.fill ?: MaterialTheme.colorScheme.secondaryContainer
-                    else wallpaper?.group?.fill ?: MaterialTheme.colorScheme.surfaceContainerLow, FolkShape.CornerFull)
+                .background(
+                    if (active) MaterialTheme.colorScheme.secondaryContainer
+                    else MaterialTheme.colorScheme.surfaceContainerLow,
+                    FolkShape.CornerFull,
+                )
                 .selectable(active, interactionSource = source, indication = null, role = Role.Tab) {
                     haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
                     onSelect(index)
                 }.heightIn(min = 48.dp).padding(horizontal = 20.dp), contentAlignment = Alignment.Center) {
                 Text(stringResource(title), style = MaterialTheme.typography.labelLarge,
-                    color = if (active) wallpaper?.raised?.contentColor ?: MaterialTheme.colorScheme.onSecondaryContainer
-                        else wallpaper?.group?.supportingColor ?: MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = if (active) MaterialTheme.colorScheme.onSecondaryContainer
+                    else MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

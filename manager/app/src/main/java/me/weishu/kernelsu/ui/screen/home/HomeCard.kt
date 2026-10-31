@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.theme.FolkShape
-import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 
 /** A full-width tonal surface, the one shape every card on the home screen shares. */
 @Composable
@@ -16,8 +15,6 @@ internal fun HomeCard(
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surfaceBright,
     contentColor: Color = contentColorFor(containerColor),
-    wallpaperRole: WallpaperSurfaceRole? =
-        if (containerColor == MaterialTheme.colorScheme.surfaceBright) WallpaperSurfaceRole.Group else null,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
@@ -26,7 +23,6 @@ internal fun HomeCard(
         modifier = modifier,
         containerColor = containerColor,
         contentColor = contentColor,
-        wallpaperRole = wallpaperRole,
         shape = FolkShape.Corner20,
         cornerRadius = 20.dp,
         onClick = onClick,

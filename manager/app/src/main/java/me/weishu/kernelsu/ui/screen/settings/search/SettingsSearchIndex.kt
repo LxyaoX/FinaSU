@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.rounded.AspectRatio
 import androidx.compose.material.icons.rounded.Bedtime
@@ -217,16 +216,6 @@ val settingsSearchIndex: List<SettingsSearchEntry> = buildList {
             icon = Icons.Filled.Palette,
             route = Route.ColorPalette,
             aliases = listOf("color", "colour", "palette", "monet", "dynamic color", "amoled", "dark"),
-        )
-    )
-    add(
-        SettingsCategory.APPEARANCE.page(
-            id = "appearance.wallpaper",
-            titleRes = R.string.wallpaper_title,
-            summaryRes = R.string.settings_wallpaper_summary,
-            icon = Icons.Filled.Wallpaper,
-            route = Route.Wallpaper,
-            aliases = listOf("wallpaper", "background", "video"),
         )
     )
     add(

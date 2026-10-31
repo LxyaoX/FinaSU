@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
@@ -51,61 +50,57 @@ fun ExpressiveDialog(
     tonalElevation: Dp = 0.dp,
     properties: DialogProperties = DialogProperties(),
 ) {
-    // Wallpaper tokens are cleared so nothing in here asks a wallpaper for a colour: a dialog tinted
-    // by the home background stops being readable the moment that background is dark.
-    CompositionLocalProvider(LocalFolkWallpaperTokens provides null) {
-        Dialog(onDismissRequest = onDismissRequest, properties = properties) {
-            Surface(
-                modifier = modifier,
-                shape = shape,
-                color = containerColor,
-                contentColor = titleContentColor,
-                tonalElevation = tonalElevation,
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    if (icon != null) {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            CompositionLocalProvider(LocalContentColor provides iconContentColor) {
-                                icon()
-                            }
+    Dialog(onDismissRequest = onDismissRequest, properties = properties) {
+        Surface(
+            modifier = modifier,
+            shape = shape,
+            color = containerColor,
+            contentColor = titleContentColor,
+            tonalElevation = tonalElevation,
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                if (icon != null) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CompositionLocalProvider(LocalContentColor provides iconContentColor) {
+                            icon()
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    if (title != null) {
-                        CompositionLocalProvider(LocalContentColor provides titleContentColor) {
-                            title()
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                if (title != null) {
+                    CompositionLocalProvider(LocalContentColor provides titleContentColor) {
+                        title()
                     }
-                    if (text != null) {
-                        CompositionLocalProvider(LocalContentColor provides textContentColor) {
-                            text()
-                        }
-                        Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                if (text != null) {
+                    CompositionLocalProvider(LocalContentColor provides textContentColor) {
+                        text()
                     }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        if (dismissButton != null) {
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                contentAlignment = Alignment.Center,
-                                propagateMinConstraints = true,
-                            ) {
-                                CompositionLocalProvider(LocalContentColor provides titleContentColor) {
-                                    dismissButton()
-                                }
-                            }
-                        }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (dismissButton != null) {
                         Box(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.Center,
                             propagateMinConstraints = true,
                         ) {
-                            CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.primary) {
-                                confirmButton()
+                            CompositionLocalProvider(LocalContentColor provides titleContentColor) {
+                                dismissButton()
                             }
+                        }
+                    }
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center,
+                        propagateMinConstraints = true,
+                    ) {
+                        CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.primary) {
+                            confirmButton()
                         }
                     }
                 }

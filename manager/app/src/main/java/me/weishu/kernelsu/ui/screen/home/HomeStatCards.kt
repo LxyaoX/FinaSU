@@ -14,7 +14,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.FolkMetricValue
-import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.theme.FolkType
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -61,9 +60,6 @@ private fun StatTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // On wallpaper the card material carries its own supporting colour, tuned against the
-    // translucent fill; off it the miuix summary colour matches the card it sits on.
-    val supportingColor = LocalWallpaperSupportingColor.current
     HomeCard(modifier = modifier, onClick = onClick.takeIf { value != null }) {
         Column(
             modifier = Modifier
@@ -78,12 +74,12 @@ private fun StatTile(
                 style = FolkType.Metric,
                 unavailableStyle = FolkType.Caption,
                 color = MiuixTheme.colorScheme.onSurface,
-                unavailableColor = supportingColor ?: MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                unavailableColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             )
             Text(
                 text = label,
                 style = FolkType.Caption,
-                color = supportingColor ?: MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

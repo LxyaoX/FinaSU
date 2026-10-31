@@ -66,7 +66,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.layout
@@ -80,7 +79,6 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import me.weishu.kernelsu.ui.animation.FolkAnimatedSlot
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** Height reserved for the large search bar, used as the scroll range of its collapse animation. */
@@ -262,11 +260,8 @@ fun SearchAppBar(
         }
     }
 
-    // The scaffold's chrome zone already draws the reading platform, so in wallpaper mode this
-    // container must stay transparent instead of painting an opaque band over the wallpaper.
-    val wallpaperTokens = LocalFolkWallpaperTokens.current
     Surface(
-        color = if (wallpaperTokens != null) Color.Transparent else MiuixTheme.colorScheme.surface,
+        color = MiuixTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -304,8 +299,7 @@ fun SearchAppBar(
                     state = searchBarState,
                     inputField = inputField,
                     colors = SearchBarDefaults.colors(
-                        containerColor = wallpaperTokens?.raisedOverChrome()
-                            ?: MiuixTheme.colorScheme.surfaceContainer
+                        containerColor = MiuixTheme.colorScheme.surfaceContainer
                     ),
                 )
             }

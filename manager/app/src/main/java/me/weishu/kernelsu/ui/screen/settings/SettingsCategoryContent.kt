@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.automirrored.rounded.LabelOff
 import androidx.compose.material.icons.rounded.SpaceDashboard
 import androidx.compose.material.icons.rounded.VisibilityOff
@@ -130,14 +129,6 @@ fun AppearanceCategoryContent(uiState: SettingsUiState, actions: SettingsScreenA
                     summary = stringResource(id = R.string.settings_theme_summary),
                     startAction = { Icon(Icons.Filled.Palette, stringResource(id = R.string.settings_theme)) },
                     onClick = actions.onOpenTheme,
-                )
-            }
-            add {
-                ArrowPreference(
-                    title = stringResource(id = R.string.wallpaper_title),
-                    summary = stringResource(id = R.string.settings_wallpaper_summary),
-                    startAction = { Icon(Icons.Filled.Wallpaper, stringResource(id = R.string.wallpaper_title)) },
-                    onClick = actions.onOpenWallpaper,
                 )
             }
         }

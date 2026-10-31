@@ -64,20 +64,18 @@ fun AdaptiveModuleButtonRow(
     trailingButton: ModuleButtonConfig? = null,
     iconOnly: Boolean,
     spacing: Int = 8,
-    opacity: Float = 1f,
 ) {
     if (iconOnly) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            buttons.forEach { config -> ModuleActionButton(config, true, opacity) }
+            buttons.forEach { config -> ModuleActionButton(config, true) }
             Spacer(Modifier.weight(1f))
-            trailingButton?.let { config -> ModuleActionButton(config, true, opacity) }
+            trailingButton?.let { config -> ModuleActionButton(config, true) }
         }
     } else {
         AdaptiveButtonRowLayout(
             buttons = buttons,
             trailingButton = trailingButton,
             spacing = spacing,
-            opacity = opacity,
         )
     }
 }
@@ -87,14 +85,13 @@ private fun AdaptiveButtonRowLayout(
     buttons: List<ModuleButtonConfig>,
     trailingButton: ModuleButtonConfig?,
     spacing: Int,
-    opacity: Float,
 ) {
     var iconOnlyCount by remember(buttons.size) { mutableIntStateOf(0) }
     SubcomposeLayout(modifier = Modifier.fillMaxWidth()) { constraints ->
         val spacingPx = spacing.dp.roundToPx()
         val availableWidth = constraints.maxWidth
         fun measure(tag: String, config: ModuleButtonConfig, iconOnly: Boolean): Int =
-            subcompose(tag) { ModuleActionButton(config, iconOnly, opacity) }.first().measure(Constraints()).width
+            subcompose(tag) { ModuleActionButton(config, iconOnly) }.first().measure(Constraints()).width
 
         val buttonWidthsWithText = buttons.mapIndexed { i, c -> measure("measure_text_$i", c, false) }
         val buttonWidthsIconOnly = buttons.mapIndexed { i, c -> measure("measure_icon_$i", c, true) }
@@ -130,10 +127,10 @@ private fun AdaptiveButtonRowLayout(
             false
         }
         val finalPlaceables = buttons.mapIndexed { i, c ->
-            subcompose("button_$i") { ModuleActionButton(c, i < iconOnlyCount, opacity) }.first().measure(Constraints())
+            subcompose("button_$i") { ModuleActionButton(c, i < iconOnlyCount) }.first().measure(Constraints())
         }
         val trailingPlaceable = trailingButton?.let { c ->
-            subcompose("trailing_button") { ModuleActionButton(c, trailingIconOnly, opacity) }.first().measure(Constraints())
+            subcompose("trailing_button") { ModuleActionButton(c, trailingIconOnly) }.first().measure(Constraints())
         }
         val layoutHeight = maxOf(finalPlaceables.maxOfOrNull { it.height } ?: 0, trailingPlaceable?.height ?: 0)
         layout(availableWidth, layoutHeight) {
@@ -148,9 +145,9 @@ private fun AdaptiveButtonRowLayout(
 }
 
 @Composable
-fun ModuleActionButton(config: ModuleButtonConfig, iconOnly: Boolean, opacity: Float, modifier: Modifier = Modifier) {
+fun ModuleActionButton(config: ModuleButtonConfig, iconOnly: Boolean, modifier: Modifier = Modifier) {
     val colors = config.colors ?: ButtonDefaults.filledTonalButtonColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = (opacity + 0.3f).coerceAtMost(1f)),
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
     )
     val interactionSource = remember { MutableInteractionSource() }
     Surface(

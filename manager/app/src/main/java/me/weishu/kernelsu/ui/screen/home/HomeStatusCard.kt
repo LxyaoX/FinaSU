@@ -27,14 +27,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
 import me.weishu.kernelsu.ui.theme.ColorMode
 import me.weishu.kernelsu.ui.theme.FolkType
 import me.weishu.kernelsu.ui.theme.LocalColorMode
-import me.weishu.kernelsu.wallpaper.surface.SurfaceFlag
-import me.weishu.kernelsu.wallpaper.surface.SurfaceRegistry
-import me.weishu.kernelsu.wallpaper.surface.SurfaceStore
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -76,34 +72,20 @@ private fun WorkingCard(
     actions: HomeActions,
     modifier: Modifier,
 ) {
-    // The work card owns a wallpaper surface of its own, so a user-chosen photo is painted here and
-    // the card borrows the photo's palette for its text.
-    val surface = SurfaceStore.config(SurfaceRegistry.WORK_CARD)
-    val photo = rememberSurfacePhoto(surface.imageUri.takeIf { surface.hasImage })
-    val style = homeWorkCardStyle(surface = surface, photo = photo)
-    val overPhoto = surface.hasImage && photo.ready
+    val style = homeWorkCardStyle()
 
     val workingMode = when (state.lkmMode) {
         null -> null
         true -> "LKM"
         else -> "Built-In"
     }
-    val modeHidden = rememberHomeThemeSettings().listWorkingCardModeHidden ||
-        surface.hasFlag(SurfaceFlag.HideMode)
+    val modeHidden = rememberHomeThemeSettings().listWorkingCardModeHidden
 
     val dynamic = ColorMode.fromValue(LocalColorMode.current).isMonet
-    val supportingColor = LocalWallpaperSupportingColor.current
-    val captionColor = when {
-        overPhoto -> style.contentColor?.copy(alpha = 0.8f) ?: MiuixTheme.colorScheme.onSurfaceVariantSummary
-        supportingColor != null -> supportingColor
-        else -> MiuixTheme.colorScheme.onSurfaceVariantSummary
-    }
-    // Over a photo the mark is a watermark; on the card it is the state itself, so it keeps the
-    // accent at full strength outside the dynamic palette, exactly as the reference build draws it.
-    val markTint = when {
-        overPhoto -> style.contentColor?.copy(alpha = 0.12f) ?: style.accentColor
-        else -> style.accentColor.copy(alpha = if (dynamic) 0.8f else 1f)
-    }
+    val captionColor = MiuixTheme.colorScheme.onSurfaceVariantSummary
+    // On the card the mark is the state itself, so it keeps the accent at full strength outside the
+    // dynamic palette, exactly as the reference build draws it.
+    val markTint = style.accentColor.copy(alpha = if (dynamic) 0.8f else 1f)
     val modeTagContent = if (dynamic) MiuixTheme.colorScheme.onPrimary else Color.White
     val errorTagColor = MiuixTheme.colorScheme.errorContainer
     val errorTagContent = MiuixTheme.colorScheme.onErrorContainer
@@ -112,29 +94,19 @@ private fun WorkingCard(
         modifier = modifier.fillMaxWidth(),
         containerColor = style.containerColor,
         contentColor = style.contentColor ?: contentColorFor(style.containerColor),
-        wallpaperRole = style.wallpaperRole,
         onClick = { if (!state.isLateLoadMode) actions.onInstallClick() },
     ) {
         // The mark is larger than the card on purpose; clipping keeps it inside the rounded shape.
         Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(WorkCardCorner))) {
-            if (overPhoto) {
-                SurfaceBackgroundImage(
-                    photo = photo,
-                    surface = surface,
-                    modifier = Modifier.matchParentSize(),
-                )
-            }
-            if (!surface.hasFlag(SurfaceFlag.HideIcon)) {
-                Icon(
-                    imageVector = Icons.Rounded.CheckCircleOutline,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .offset(x = 27.dp, y = 31.dp)
-                        .size(WorkCardMarkSize),
-                    tint = markTint,
-                )
-            }
+            Icon(
+                imageVector = Icons.Rounded.CheckCircleOutline,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 27.dp, y = 31.dp)
+                    .size(WorkCardMarkSize),
+                tint = markTint,
+            )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -180,17 +152,15 @@ private fun WorkingCard(
                         text = stringResource(R.string.home_working),
                         style = FolkType.Hero,
                     )
-                    if (!surface.hasFlag(SurfaceFlag.HideText)) {
-                        Text(
-                            text = stringResource(
-                                R.string.home_working_version,
-                                "${state.ksuVersion}-${state.kernelUAPIVersion}",
-                            ),
-                            style = FolkType.Machine,
-                            fontFamily = FontFamily.Monospace,
-                            color = captionColor,
-                        )
-                    }
+                    Text(
+                        text = stringResource(
+                            R.string.home_working_version,
+                            "${state.ksuVersion}-${state.kernelUAPIVersion}",
+                        ),
+                        style = FolkType.Machine,
+                        fontFamily = FontFamily.Monospace,
+                        color = captionColor,
+                    )
                 }
             }
         }

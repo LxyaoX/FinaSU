@@ -70,7 +70,6 @@ import me.weishu.kernelsu.ui.component.material.FolkFilledTonalButton
 import me.weishu.kernelsu.ui.component.material.FolkTextButton
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.theme.FolkShape
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 private const val GuidePageCount = 4
 
@@ -93,126 +92,124 @@ fun FirstRunGuide(onDismiss: () -> Unit) {
             dismissOnClickOutside = false,
         ),
     ) {
-        CompositionLocalProvider(LocalFolkWallpaperTokens provides null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.safeDrawing)
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                BoxWithConstraints {
-                    val pageMaxHeight = (maxHeight - 150.dp).coerceAtLeast(1.dp)
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .widthIn(max = 480.dp),
-                        shape = FolkShape.Dialog,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    ) {
-                        Column(modifier = Modifier.padding(28.dp)) {
-                            val slide =
-                                MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
-                            val fade =
-                                MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
-                            AnimatedContent(
-                                targetState = currentPage,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = pageMaxHeight),
-                                transitionSpec = {
-                                    val forward = targetState > initialState
-                                    (slideInHorizontally(slide) { width ->
-                                        if (forward) width else -width
-                                    } + fadeIn(fade)).togetherWith(
-                                        slideOutHorizontally(slide) { width ->
-                                            if (forward) -width else width
-                                        } + fadeOut(fade),
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            BoxWithConstraints {
+                val pageMaxHeight = (maxHeight - 150.dp).coerceAtLeast(1.dp)
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 480.dp),
+                    shape = FolkShape.Dialog,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ) {
+                    Column(modifier = Modifier.padding(28.dp)) {
+                        val slide =
+                            MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
+                        val fade =
+                            MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+                        AnimatedContent(
+                            targetState = currentPage,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = pageMaxHeight),
+                            transitionSpec = {
+                                val forward = targetState > initialState
+                                (slideInHorizontally(slide) { width ->
+                                    if (forward) width else -width
+                                } + fadeIn(fade)).togetherWith(
+                                    slideOutHorizontally(slide) { width ->
+                                        if (forward) -width else width
+                                    } + fadeOut(fade),
+                                )
+                            },
+                            label = "guide-page",
+                        ) { page ->
+                            when (page) {
+                                0 -> GuidePage(
+                                    title = stringResource(R.string.guide_welcome_title),
+                                    description = stringResource(R.string.guide_welcome_desc),
+                                    icon = { GuideIcon(Icons.Outlined.AutoAwesome) },
+                                )
+
+                                1 -> GuidePage(
+                                    title = stringResource(R.string.guide_repo_title),
+                                    description = stringResource(R.string.guide_repo_desc),
+                                    icon = { GuideIcon(painterResource(R.drawable.github)) },
+                                ) {
+                                    LinkBlock(
+                                        url = stringResource(R.string.guide_repo_url),
+                                        action = stringResource(R.string.guide_repo_action),
                                     )
-                                },
-                                label = "guide-page",
-                            ) { page ->
-                                when (page) {
-                                    0 -> GuidePage(
-                                        title = stringResource(R.string.guide_welcome_title),
-                                        description = stringResource(R.string.guide_welcome_desc),
-                                        icon = { GuideIcon(Icons.Outlined.AutoAwesome) },
+                                }
+
+                                2 -> GuidePage(
+                                    title = stringResource(R.string.guide_features_title),
+                                    description = stringResource(R.string.guide_features_desc),
+                                    icon = { GuideIcon(Icons.Outlined.Extension) },
+                                ) {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                                    ) {
+                                        FeatureRow(stringResource(R.string.guide_feature_zygisk))
+                                        FeatureRow(stringResource(R.string.guide_feature_nomount))
+                                    }
+                                }
+
+                                else -> GuidePage(
+                                    title = stringResource(R.string.guide_docs_title),
+                                    description = stringResource(R.string.guide_docs_desc),
+                                    icon = { GuideIcon(Icons.AutoMirrored.Outlined.MenuBook) },
+                                ) {
+                                    LinkBlock(
+                                        url = stringResource(R.string.home_learn_finasu_url),
+                                        action = stringResource(R.string.guide_docs_action),
                                     )
-
-                                    1 -> GuidePage(
-                                        title = stringResource(R.string.guide_repo_title),
-                                        description = stringResource(R.string.guide_repo_desc),
-                                        icon = { GuideIcon(painterResource(R.drawable.github)) },
-                                    ) {
-                                        LinkBlock(
-                                            url = stringResource(R.string.guide_repo_url),
-                                            action = stringResource(R.string.guide_repo_action),
-                                        )
-                                    }
-
-                                    2 -> GuidePage(
-                                        title = stringResource(R.string.guide_features_title),
-                                        description = stringResource(R.string.guide_features_desc),
-                                        icon = { GuideIcon(Icons.Outlined.Extension) },
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            verticalArrangement = Arrangement.spacedBy(14.dp),
-                                        ) {
-                                            FeatureRow(stringResource(R.string.guide_feature_zygisk))
-                                            FeatureRow(stringResource(R.string.guide_feature_nomount))
-                                        }
-                                    }
-
-                                    else -> GuidePage(
-                                        title = stringResource(R.string.guide_docs_title),
-                                        description = stringResource(R.string.guide_docs_desc),
-                                        icon = { GuideIcon(Icons.AutoMirrored.Outlined.MenuBook) },
-                                    ) {
-                                        LinkBlock(
-                                            url = stringResource(R.string.home_learn_finasu_url),
-                                            action = stringResource(R.string.guide_docs_action),
-                                        )
-                                    }
                                 }
                             }
+                        }
 
-                            Spacer(Modifier.height(20.dp))
-                            PageIndicator(currentPage)
-                            Spacer(Modifier.height(16.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                if (currentPage == 0) {
-                                    Spacer(Modifier.width(88.dp).height(48.dp))
-                                } else {
-                                    GuideTextButton(
-                                        text = stringResource(R.string.guide_prev),
-                                        onClick = { currentPage-- },
-                                    )
-                                }
+                        Spacer(Modifier.height(20.dp))
+                        PageIndicator(currentPage)
+                        Spacer(Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (currentPage == 0) {
+                                Spacer(Modifier.width(88.dp).height(48.dp))
+                            } else {
                                 GuideTextButton(
-                                    text = stringResource(R.string.guide_skip),
-                                    onClick = onDismiss,
+                                    text = stringResource(R.string.guide_prev),
+                                    onClick = { currentPage-- },
                                 )
-                                if (currentPage == GuidePageCount - 1) {
-                                    FolkFilledTonalButton(
-                                        onClick = onDismiss,
-                                        modifier = Modifier.heightIn(min = 48.dp),
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.guide_start),
-                                            style = MaterialTheme.typography.labelLarge,
-                                        )
-                                    }
-                                } else {
-                                    GuideTextButton(
-                                        text = stringResource(R.string.guide_next),
-                                        onClick = { currentPage++ },
+                            }
+                            GuideTextButton(
+                                text = stringResource(R.string.guide_skip),
+                                onClick = onDismiss,
+                            )
+                            if (currentPage == GuidePageCount - 1) {
+                                FolkFilledTonalButton(
+                                    onClick = onDismiss,
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.guide_start),
+                                        style = MaterialTheme.typography.labelLarge,
                                     )
                                 }
+                            } else {
+                                GuideTextButton(
+                                    text = stringResource(R.string.guide_next),
+                                    onClick = { currentPage++ },
+                                )
                             }
                         }
                     }

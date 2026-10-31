@@ -42,13 +42,9 @@ import me.weishu.kernelsu.ui.navigation3.captureNavOrigin
 import me.weishu.kernelsu.ui.navigation3.navThemeSignature
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.TopAppBar as MaterialTopAppBar
 import me.weishu.kernelsu.media.VisualMediaConfig
-import me.weishu.kernelsu.ui.component.material.ChromeEdge
-import me.weishu.kernelsu.ui.component.material.WallpaperChromeZone
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
@@ -65,20 +61,11 @@ fun HomePagerMaterial(
     moduleEnabledCount: Int = 0,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val wallpaperActive = LocalFolkWallpaperTokens.current != null
     // miuix's scaffold, not the Material one the rest of the app uses: it measures a top bar whose
     // height changes as it collapses, which a Material scaffold would answer by moving the content.
     MiuixScaffold(
-        topBar = {
-            if (wallpaperActive) {
-                WallpaperChromeZone(edge = ChromeEdge.Top) {
-                    TopBar(state = state, actions = actions, scrollBehavior = scrollBehavior)
-                }
-            } else {
-                TopBar(state = state, actions = actions, scrollBehavior = scrollBehavior)
-            }
-        },
-        containerColor = if (wallpaperActive) Color.Transparent else MiuixTheme.colorScheme.surface,
+        topBar = { TopBar(state = state, actions = actions, scrollBehavior = scrollBehavior) },
+        containerColor = MiuixTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
     ) { innerPadding ->
         Column(
@@ -181,11 +168,7 @@ private fun TopBar(
     } else {
         MiuixTopAppBar(
             title = me.weishu.kernelsu.ui.component.homeTitleText(),
-            color = if (LocalFolkWallpaperTokens.current != null) {
-                Color.Transparent
-            } else {
-                MiuixTheme.colorScheme.surface
-            },
+            color = MiuixTheme.colorScheme.surface,
             scrollBehavior = scrollBehavior,
             actions = barActions,
         )

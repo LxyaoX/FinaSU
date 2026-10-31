@@ -1,4 +1,4 @@
-package me.weishu.kernelsu.wallpaper
+package me.weishu.kernelsu.ui.component
 
 import android.graphics.ImageDecoder
 import android.graphics.RenderEffect

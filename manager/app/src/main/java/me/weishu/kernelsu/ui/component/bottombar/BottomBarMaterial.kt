@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.weishu.kernelsu.ui.LocalMainPagerState
-import me.weishu.kernelsu.ui.component.material.ChromeEdge
-import me.weishu.kernelsu.ui.component.material.WallpaperChromeZone
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.NavigationBar
@@ -19,8 +17,7 @@ import top.yukonga.miuix.kmp.basic.NavigationBarItem
  * The docked bar, drawn with miuix's navigation components.
  *
  * miuix owns the indicator, the selected-icon swap, the ripple and the badge placement, so a
- * destination only has to say which of its two vectors applies. Wallpaper chrome still supplies the
- * container colour, so a theme that paints the bar keeps doing so.
+ * destination only has to say which of its two vectors applies.
  */
 @Composable
 fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
@@ -32,29 +29,27 @@ fun BottomBarMaterial(navigationBadge: NavigationBadgeState) {
     val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
     val barStyle = BottomBarControl.style(BottomBarLayout.Docked)
 
-    WallpaperChromeZone(edge = ChromeEdge.Bottom, material = barStyle.scrim) {
-        NavigationBar(color = barStyle.containerColor) {
-            destinations.forEach { destination ->
-                val selected = mainPagerState.selectedDestination == destination
-                val badge = badgeFor(destination, navigationBadge)
-                val badgeSlot: (@Composable () -> Unit)? = if (badge != null) {
-                    { NavBadgeDot(badge) }
-                } else {
-                    null
-                }
-                NavigationBarItem(
-                    modifier = Modifier.weight(1f),
-                    icon = if (selected) destination.iconSelected else destination.iconNotSelected,
-                    label = stringResource(destination.label),
-                    selected = selected,
-                    onClick = {
-                        if (!selected) {
-                            mainPagerState.animateToDestination(destination)
-                        }
-                    },
-                    badge = badgeSlot,
-                )
+    NavigationBar(color = barStyle.containerColor) {
+        destinations.forEach { destination ->
+            val selected = mainPagerState.selectedDestination == destination
+            val badge = badgeFor(destination, navigationBadge)
+            val badgeSlot: (@Composable () -> Unit)? = if (badge != null) {
+                { NavBadgeDot(badge) }
+            } else {
+                null
             }
+            NavigationBarItem(
+                modifier = Modifier.weight(1f),
+                icon = if (selected) destination.iconSelected else destination.iconNotSelected,
+                label = stringResource(destination.label),
+                selected = selected,
+                onClick = {
+                    if (!selected) {
+                        mainPagerState.animateToDestination(destination)
+                    }
+                },
+                badge = badgeSlot,
+            )
         }
     }
 }

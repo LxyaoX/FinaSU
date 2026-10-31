@@ -1,7 +1,7 @@
 package me.weishu.kernelsu.data.model
 
 /**
- * The home page has one layout, so this is no longer a choice - it is the token the wallpaper
+ * The home page has one layout, so this is no longer a choice - it is the token the page
  * surface registry keys on, and the value a `.fpt` package may still carry.
  *
  * Themes written for the layouts this manager no longer draws keep their `homeLayoutStyle` key; it

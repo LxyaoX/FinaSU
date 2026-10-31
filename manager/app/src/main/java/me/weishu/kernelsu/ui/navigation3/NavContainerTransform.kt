@@ -56,7 +56,6 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.collect
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -460,8 +459,7 @@ private fun NavContainerTransformEntry(
         }
     }
 
-    val wallpaperActive = LocalFolkWallpaperTokens.current != null
-    if (origin == null || wallpaperActive) {
+    if (origin == null) {
         entry.Content()
         return
     }

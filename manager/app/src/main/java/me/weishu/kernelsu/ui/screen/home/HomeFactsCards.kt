@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.FolkMountProvider
-import me.weishu.kernelsu.ui.component.material.LocalWallpaperSupportingColor
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -108,7 +107,6 @@ private fun SpecSheet(
     rows: List<SpecRow>,
     modifier: Modifier = Modifier,
 ) {
-    val supportingColor = LocalWallpaperSupportingColor.current
     HomeCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
             rows.forEachIndexed { index, row ->
@@ -142,7 +140,7 @@ private fun SpecSheet(
                         color = if (row.onClick != null) {
                             MiuixTheme.colorScheme.primary
                         } else {
-                            supportingColor ?: MiuixTheme.colorScheme.onSurfaceVariantSummary
+                            MiuixTheme.colorScheme.onSurfaceVariantSummary
                         },
                         textAlign = TextAlign.End,
                     )

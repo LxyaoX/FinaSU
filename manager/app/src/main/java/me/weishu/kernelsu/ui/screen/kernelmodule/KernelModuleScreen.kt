@@ -81,7 +81,6 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.KernelModule
 import me.weishu.kernelsu.data.model.LoadState
 import me.weishu.kernelsu.modulecard.ModuleCardConfig
-import me.weishu.kernelsu.ui.component.card.cardSurfaceOpacity
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.ExpressiveSwitch
 import me.weishu.kernelsu.ui.component.material.FolkBottomSheet
@@ -658,7 +657,6 @@ private fun KernelModuleCard(
                     trailingButton = moreButton,
                     iconOnly = iconOnly,
                     spacing = if (iconOnly) 12 else 8,
-                    opacity = cardSurfaceOpacity(),
                 )
             }
         }

@@ -10,7 +10,7 @@ import androidx.compose.runtime.setValue
 import org.json.JSONObject
 import java.io.File
 
-/** Appearance media owns its storage and settings, independently of image wallpaper slots. */
+/** Appearance media owns its storage and settings independently of the theme. */
 object VisualMediaConfig {
     var videoEnabled by mutableStateOf(false)
     var videoFilename by mutableStateOf<String?>(null)

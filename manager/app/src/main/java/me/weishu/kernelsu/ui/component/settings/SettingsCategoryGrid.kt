@@ -28,7 +28,6 @@ import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.material.folkPressScale
 import me.weishu.kernelsu.ui.navigation3.navOrigin
 import me.weishu.kernelsu.ui.theme.FolkShape
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 /** One tappable entry in [SettingsCategoryGrid]. */
 data class SettingsCategoryEntry(
@@ -45,7 +44,6 @@ private const val GRID_COLUMNS = 4
  * spacers so the remaining tiles keep the same width as a full row.
  *
  * TonalCard (rather than a plain Surface) is deliberate: it carries the grouped-surface colour and
- * joins the wallpaper transparency layering, so this panel behaves like every other group.
  */
 @Composable
 fun SettingsCategoryGrid(
@@ -84,8 +82,7 @@ private fun CategoryCell(
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
-    val originColor = LocalFolkWallpaperTokens.current?.group?.fill
-        ?: MaterialTheme.colorScheme.surfaceBright
+    val originColor = MaterialTheme.colorScheme.surfaceBright
 
     Column(
         modifier = modifier

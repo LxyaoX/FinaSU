@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import me.weishu.kernelsu.ui.util.useFullFeaturedLayout
 import me.weishu.kernelsu.ui.LocalMainPagerState
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
 
 /** Vertical space the floating bar occupies from the screen bottom, excluding system insets. */
 fun floatingBarReservedHeight(compact: Boolean, style: FloatingBarConfig.Style): Dp =
@@ -53,16 +52,13 @@ internal fun FloatingBar(
     val barStyle = BottomBarControl.style(BottomBarLayout.Floating)
     val containerColor = barStyle.containerColor
     val selectionColor = barStyle.indicatorColor
-    val selectionContentColor = LocalFolkWallpaperTokens.current?.selection?.contentColor
-    val wallpaperActive = LocalFolkWallpaperTokens.current != null
     val visibilityRevision by NavBarVisibilityConfig.revision.collectAsStateWithLifecycle()
     val destinations = remember(visibilityRevision) { NavBarVisibilityConfig.visibleDestinations() }
     val selectedIndex = mainPagerState.selectedPage
-    // Outside wallpaper mode the pill's fill is derived from the page, so it does not carry the raised
-    // neutral's own lift and a tonal tint on top would only pull it back toward the canvas it was
-    // moved off of. It is given a hairline edge instead: an outline depends on nothing the theme
-    // painted behind the bar, so the shape stays legible even where the step is small. Wallpaper mode
-    // keeps the lift it has always had.
+    // The pill's fill is derived from the page, so it does not carry the raised neutral's own lift and
+    // a tonal tint on top would only pull it back toward the canvas it was moved off of. It is given a
+    // hairline edge instead: an outline depends on nothing the theme painted behind the bar, so the
+    // shape stays legible even where the step is small.
 
     BoxWithConstraints(
         modifier = modifier
@@ -92,12 +88,8 @@ internal fun FloatingBar(
                 // A translucent surface cannot carry a shadow: the shadow is painted behind a fill that
                 // no longer hides it, so it reads as a dark halo around the capsule instead of a lift.
                 tonalElevation = 0.dp,
-                shadowElevation = if (wallpaperActive) 0.dp else 8.dp,
-                border = if (wallpaperActive) {
-                    null
-                } else {
-                    BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                },
+                shadowElevation = 8.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 if (style == FloatingBarConfig.Style.Drawer) {
                     FloatingBarDrawer(
@@ -110,7 +102,6 @@ internal fun FloatingBar(
                             mainPagerState.animateToDestination(it)
                         },
                         selectionColor = selectionColor,
-                        selectionContentColor = selectionContentColor,
                     )
                 } else {
                     FloatingBarStandard(
@@ -122,7 +113,6 @@ internal fun FloatingBar(
                             mainPagerState.animateToDestination(it)
                         },
                         selectionColor = selectionColor,
-                        selectionContentColor = selectionContentColor,
                     )
                 }
             }

@@ -7,14 +7,13 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.weishu.kernelsu.ui.theme.ContinuousCornerShape
-import me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface
-import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
 
 val LocalInsideSplicedGroup = compositionLocalOf { false }
 
@@ -57,13 +56,12 @@ fun <T> LazyListScope.splicedLazyColumnGroup(
             bottomEnd = currentBottomRadius,
             bottomStart = currentBottomRadius,
         )
-        FolkWallpaperSurface(
-            role = WallpaperSurfaceRole.Group,
+        Surface(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(top = if (isFirst) 0.dp else 2.dp),
             shape = shape,
-            fallbackColor = MaterialTheme.colorScheme.surfaceBright,
+            color = MaterialTheme.colorScheme.surfaceBright,
         ) {
             CompositionLocalProvider(LocalInsideSplicedGroup provides true) {
                 itemContent(index, item)

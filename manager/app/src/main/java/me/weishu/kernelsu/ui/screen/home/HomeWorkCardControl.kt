@@ -6,9 +6,6 @@ import androidx.compose.ui.graphics.Color
 import me.weishu.kernelsu.ui.theme.ColorMode
 import me.weishu.kernelsu.ui.theme.LocalColorMode
 import me.weishu.kernelsu.ui.theme.isInDarkTheme
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
-import me.weishu.kernelsu.wallpaper.WallpaperSurfaceRole
-import me.weishu.kernelsu.wallpaper.surface.SurfaceConfig
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /** The accent the reference build uses for a working kernel: a bright green. */
@@ -27,10 +24,6 @@ private val SuKiWorkingTagContentDark = Color(0xFFB8E8C5)
 /**
  * The resolved surface for the home work card.
  *
- * [wallpaperRole] is non-null while wallpaper mode is active, which routes the card through
- * [me.weishu.kernelsu.ui.component.material.FolkWallpaperSurface] so that it shares the app-wide
- * wallpaper transparency. Otherwise [containerColor] is used as a solid fill.
- *
  * [accentColor] is the colour of the state: it paints the mark and the run-mode tag.
  * [tagColor]/[tagContentColor] are the quieter pair used by the tags that only annotate.
  */
@@ -38,7 +31,6 @@ private val SuKiWorkingTagContentDark = Color(0xFFB8E8C5)
 internal data class HomeWorkCardStyle(
     val containerColor: Color,
     val contentColor: Color?,
-    val wallpaperRole: WallpaperSurfaceRole?,
     val accentColor: Color,
     val tagColor: Color,
     val tagContentColor: Color,
@@ -49,29 +41,11 @@ internal data class HomeWorkCardStyle(
  * its content.
  *
  * The palette is the reference build's: a pale green card with a bright green mark. When the theme
- * follows the wallpaper's colours the pair comes from the dynamic palette instead, because a fixed
- * green beside a generated accent reads as a mistake rather than as state.
- *
- * [surface] is the work card's own wallpaper surface: when it carries a decoded photo the card
- * paints it and borrows the photo's palette. A wallpaper *background* drops the card to the shared
- * neutral material, because an alpha-reduced tint loses the contrast of its paired on-colour once
- * the page behind it is a photograph.
+ * is monet the pair comes from the dynamic palette instead, because a fixed green beside a generated
+ * accent reads as a mistake rather than as state.
  */
 @Composable
-internal fun homeWorkCardStyle(
-    surface: SurfaceConfig,
-    photo: SurfacePhoto,
-): HomeWorkCardStyle {
-    if (surface.hasImage && photo.ready) {
-        return HomeWorkCardStyle(
-            containerColor = Color.Transparent,
-            contentColor = photo.contentColor(surface, isInDarkTheme()),
-            wallpaperRole = null,
-            accentColor = MiuixTheme.colorScheme.primary,
-            tagColor = MiuixTheme.colorScheme.tertiaryContainer,
-            tagContentColor = MiuixTheme.colorScheme.onTertiaryContainer,
-        )
-    }
+internal fun homeWorkCardStyle(): HomeWorkCardStyle {
     val dynamic = ColorMode.fromValue(LocalColorMode.current).isMonet
     val dark = isInDarkTheme()
     val accentColor = if (dynamic) MiuixTheme.colorScheme.primary else SuKiWorkingGreen
@@ -90,25 +64,13 @@ internal fun homeWorkCardStyle(
         dark -> SuKiWorkingTagContentDark
         else -> SuKiWorkingTagContentLight
     }
-    return if (LocalFolkWallpaperTokens.current != null) {
-        HomeWorkCardStyle(
-            containerColor = containerColor,
-            contentColor = MiuixTheme.colorScheme.onSurface,
-            wallpaperRole = WallpaperSurfaceRole.Group,
-            accentColor = accentColor,
-            tagColor = tagColor,
-            tagContentColor = tagContentColor,
-        )
-    } else {
-        HomeWorkCardStyle(
-            containerColor = containerColor,
-            // miuix's card publishes its own content colour; both greens want the theme's normal
-            // on-surface ink, which is what the reference build draws with.
-            contentColor = MiuixTheme.colorScheme.onSurfaceContainer,
-            wallpaperRole = null,
-            accentColor = accentColor,
-            tagColor = tagColor,
-            tagContentColor = tagContentColor,
-        )
-    }
+    return HomeWorkCardStyle(
+        containerColor = containerColor,
+        // miuix's card publishes its own content colour; both greens want the theme's normal
+        // on-surface ink, which is what the reference build draws with.
+        contentColor = MiuixTheme.colorScheme.onSurfaceContainer,
+        accentColor = accentColor,
+        tagColor = tagColor,
+        tagContentColor = tagContentColor,
+    )
 }

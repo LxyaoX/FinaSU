@@ -1,4 +1,4 @@
-package me.weishu.kernelsu.wallpaper
+package me.weishu.kernelsu.ui.util
 
 import android.app.LocaleManager
 import android.content.Context

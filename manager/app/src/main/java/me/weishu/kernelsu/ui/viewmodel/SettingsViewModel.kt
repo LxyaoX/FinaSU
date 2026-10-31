@@ -188,7 +188,7 @@ class SettingsViewModel(
 
     /**
      * Re-reads only the preference-backed settings and the cheap in-process kernel queries.
-     * Returned-to screens call this instead of [refresh]: a pushed theme or wallpaper page
+     * Returned-to screens call this instead of [refresh]: a pushed theme page
      * can change the stored values, but nothing it does can change the feature states, so
      * the batched root-shell probe round trip is not paid again on every resume.
      */

@@ -122,7 +122,6 @@ import me.weishu.kernelsu.ui.navigation3.rememberNavContainerTransformDecorator
 import me.weishu.kernelsu.ui.navigation3.rememberNavOriginState
 import me.weishu.kernelsu.ui.navigation3.rememberNavigator
 import me.weishu.kernelsu.ui.navigation3.trackNavPointer
-import me.weishu.kernelsu.ui.navigation3.wallpaperPageFor
 import me.weishu.kernelsu.ui.screen.about.AboutScreen
 import me.weishu.kernelsu.ui.screen.appprofile.AppProfileScreen
 import me.weishu.kernelsu.ui.screen.colorpalette.ColorPaletteScreen
@@ -141,7 +140,6 @@ import me.weishu.kernelsu.ui.screen.sulog.SulogScreen
 import me.weishu.kernelsu.ui.screen.superuser.SuperUserPager
 import me.weishu.kernelsu.ui.screen.template.AppProfileTemplateScreen
 import me.weishu.kernelsu.ui.screen.templateeditor.TemplateEditorScreen
-import me.weishu.kernelsu.ui.screen.wallpaper.WallpaperScreen
 import me.weishu.kernelsu.ui.theme.KernelSUTheme
 import me.weishu.kernelsu.ui.theme.LocalColorMode
 import me.weishu.kernelsu.ui.theme.LocalEnableNavigationBadge
@@ -158,10 +156,6 @@ import me.weishu.kernelsu.ui.viewmodel.MainActivityViewModel
 import me.weishu.kernelsu.ui.viewmodel.MainPagerConfig
 import me.weishu.kernelsu.ui.viewmodel.ModuleViewModel
 import me.weishu.kernelsu.ui.viewmodel.SuperUserViewModel
-import me.weishu.kernelsu.wallpaper.LocalFolkWallpaperTokens
-import me.weishu.kernelsu.wallpaper.LocalWallpaperPage
-import me.weishu.kernelsu.wallpaper.WallpaperBackgroundLayer
-import me.weishu.kernelsu.wallpaper.WallpaperConfig
 
 open class MainActivity : FragmentActivity() {
     private val intentChannel = Channel<Intent>(capacity = Channel.BUFFERED)
@@ -170,7 +164,7 @@ open class MainActivity : FragmentActivity() {
     private val splashAnimationDurationMs = 500L
 
     override fun attachBaseContext(newBase: android.content.Context) {
-        super.attachBaseContext(me.weishu.kernelsu.wallpaper.AppLanguage.wrap(newBase))
+        super.attachBaseContext(me.weishu.kernelsu.ui.util.AppLanguage.wrap(newBase))
     }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -197,7 +191,6 @@ open class MainActivity : FragmentActivity() {
             intent?.let(::queueIntent)
         }
 
-        WallpaperConfig.load(this)
         me.weishu.kernelsu.data.LegacyPreferences.purge(this)
         me.weishu.kernelsu.modulecard.ModuleCardConfig.load()
         me.weishu.kernelsu.ui.component.material.SliderTrackConfig.load(this)
@@ -233,8 +226,6 @@ open class MainActivity : FragmentActivity() {
             }
 
             val capability by CapabilityRepository.state.collectAsStateWithLifecycle()
-            // A pushed screen brings its own section's wallpaper instead of keeping the main page's.
-            val wallpaperPage = wallpaperPageFor(navigator.backStack.toList(), selectedMainPage)
 
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
@@ -243,7 +234,6 @@ open class MainActivity : FragmentActivity() {
                 LocalColorMode provides appSettings.colorMode.value,
                 LocalEnableNavigationBadge provides uiState.enableNavigationBadge,
                 LocalModuleDescriptionMaxLines provides uiState.moduleDescriptionMaxLines,
-                LocalWallpaperPage provides wallpaperPage,
                 LocalCapabilityState provides capability,
             ) {
                 KernelSUTheme(appSettings = appSettings) {
@@ -273,21 +263,15 @@ open class MainActivity : FragmentActivity() {
                         containerTransformDecorator,
                     )
                     val layoutDirection = LocalLayoutDirection.current
-                    val wallpaperActive = LocalFolkWallpaperTokens.current != null
-                    val transition = remember(layoutDirection, navOriginState, wallpaperActive) {
-                        navTransition(layoutDirection, navOriginState, wallpaperActive)
+                    val transition = remember(layoutDirection, navOriginState) {
+                        navTransition(layoutDirection, navOriginState)
                     }
-                    val popTransition = remember(layoutDirection, navOriginState, wallpaperActive) {
-                        navPopTransition(layoutDirection, navOriginState, wallpaperActive)
+                    val popTransition = remember(layoutDirection, navOriginState) {
+                        navPopTransition(layoutDirection, navOriginState)
                     }
-                    val predictivePopTransition =
-                        remember(layoutDirection, navOriginState, wallpaperActive) {
-                            navPredictivePopTransition(
-                                layoutDirection,
-                                navOriginState,
-                                wallpaperActive,
-                            )
-                        }
+                    val predictivePopTransition = remember(layoutDirection, navOriginState) {
+                        navPredictivePopTransition(layoutDirection, navOriginState)
+                    }
                     val mainScreenEntry = @Composable {
                         MainScreen(
                             initialPage = selectedMainPage,
@@ -343,7 +327,6 @@ open class MainActivity : FragmentActivity() {
                                         key.fromShortcut
                                     )
                                 }
-                                entry<Route.Wallpaper> { WallpaperScreen() }
                                 entry<Route.SettingsCategory> { key -> CategorySettingsScreen(key.key) }
                                 entry<Route.WebDavBrowser> { key ->
                                     me.weishu.kernelsu.ui.screen.settings.WebDavBrowserScreen(key.path)
@@ -407,13 +390,8 @@ open class MainActivity : FragmentActivity() {
                             .fillMaxSize()
                             .trackNavPointer(navOriginState)
                     ) {
-                        WallpaperBackgroundLayer()
                         androidx.compose.material3.Scaffold(
-                            containerColor = if (LocalFolkWallpaperTokens.current != null) {
-                                Color.Transparent
-                            } else {
-                                MaterialTheme.colorScheme.surfaceContainer
-                            }
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
                         ) { navDisplay() }
                     }
                     val prefs = remember {
@@ -609,7 +587,7 @@ fun MainScreen(
     val settledPage = mainPagerState.pagerState.settledPage
     val livePage = mainPagerState.pagerState.currentPage
     // Report the page as soon as the swipe crosses into it rather than when the fling settles, so
-    // anything scoped to the page (the wallpaper layer) follows the gesture instead of arriving a
+    // anything scoped to the page follows the gesture instead of arriving a
     // beat late.
     LaunchedEffect(livePage) {
         destinations.getOrNull(livePage)?.let { onPageChanged(it.ordinal) }
@@ -672,18 +650,13 @@ fun MainScreen(
             }
         }
 
-        val wallpaperActive = LocalFolkWallpaperTokens.current != null
         if (useNavigationRail) {
             val startInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
                 .only(WindowInsetsSides.Start)
             val navBarBottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
             androidx.compose.material3.Scaffold(
-                containerColor = if (wallpaperActive) {
-                    Color.Transparent
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer
-                }
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
             ) {
                 Row {
                     SideRail(
@@ -741,11 +714,7 @@ fun MainScreen(
 
             androidx.compose.material3.Scaffold(
                 bottomBar = bottomBar,
-                containerColor = if (wallpaperActive) {
-                    Color.Transparent
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer
-                }
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
             ) { innerPadding ->
                 pagerContent(innerPadding.calculateBottomPadding())
             }
@@ -756,63 +725,48 @@ fun MainScreen(
 private fun navTransition(
     layoutDirection: LayoutDirection,
     originState: NavOriginState,
-    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    if (wallpaperActive) {
-        wallpaperPushTransform()
-    } else {
-        val expandable = originState.hasExpandableOrigin()
-        val targetKey = targetState.entries.lastOrNull()?.contentKey
-        if (expandable) {
-            targetKey?.let { key ->
-                val origin = originState.consumePendingIfFresh()
-                if (origin != null) {
-                    originState.putOrigin(key, origin)
-                } else {
-                    originState.removeOrigin(key)
-                }
+    val expandable = originState.hasExpandableOrigin()
+    val targetKey = targetState.entries.lastOrNull()?.contentKey
+    if (expandable) {
+        targetKey?.let { key ->
+            val origin = originState.consumePendingIfFresh()
+            if (origin != null) {
+                originState.putOrigin(key, origin)
+            } else {
+                originState.removeOrigin(key)
             }
         }
-        if (originState.hasCachedOrigin(targetKey)) {
-            containerPushTransform()
-        } else {
-            targetKey?.let(originState::removeOrigin)
-            slideTransition(layoutDirection).invoke(this)
-        }
+    }
+    if (originState.hasCachedOrigin(targetKey)) {
+        containerPushTransform()
+    } else {
+        targetKey?.let(originState::removeOrigin)
+        slideTransition(layoutDirection).invoke(this)
     }
 }
 
 private fun navPopTransition(
     layoutDirection: LayoutDirection,
     originState: NavOriginState,
-    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    if (wallpaperActive) {
-        wallpaperPopTransform()
+    val sourceKey = initialState.entries.lastOrNull()?.contentKey
+    if (originState.hasCachedOrigin(sourceKey)) {
+        cardPopTransform()
     } else {
-        val sourceKey = initialState.entries.lastOrNull()?.contentKey
-        if (originState.hasCachedOrigin(sourceKey)) {
-            cardPopTransform()
-        } else {
-            containerPopTransform()
-        }
+        containerPopTransform()
     }
 }
 
 private fun navPredictivePopTransition(
     layoutDirection: LayoutDirection,
     originState: NavOriginState,
-    wallpaperActive: Boolean,
 ): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
-    if (wallpaperActive) {
-        wallpaperPopTransform()
+    val sourceKey = initialState.entries.lastOrNull()?.contentKey
+    if (originState.hasCachedOrigin(sourceKey)) {
+        cardPopTransform()
     } else {
-        val sourceKey = initialState.entries.lastOrNull()?.contentKey
-        if (originState.hasCachedOrigin(sourceKey)) {
-            cardPopTransform()
-        } else {
-            containerPopTransform()
-        }
+        containerPopTransform()
     }
 }
 
@@ -866,19 +820,6 @@ private fun slideTransition(
         defaultTransitionSpec<NavKey>().invoke(this)
     }
 }
-
-private fun wallpaperPushTransform(): ContentTransform =
-    ContentTransform(
-        targetContentEnter = slideInHorizontally(initialOffsetX = { it }),
-        initialContentExit = slideOutHorizontally(targetOffsetX = { -it / 4 }) + fadeOut(),
-    )
-
-private fun wallpaperPopTransform(): ContentTransform =
-    ContentTransform(
-        targetContentEnter = fadeIn(animationSpec = tween(durationMillis = 340)),
-        initialContentExit = scaleOut(targetScale = 0.9f) + fadeOut(),
-        targetContentZIndex = -1f,
-    )
 
 private fun slideBackTransform(layoutDirection: LayoutDirection): ContentTransform =
     ContentTransform(

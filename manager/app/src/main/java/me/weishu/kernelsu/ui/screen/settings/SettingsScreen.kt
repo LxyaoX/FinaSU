@@ -83,7 +83,6 @@ fun rememberSettingsActions(
         onSetCheckModuleUpdate = viewModel::setCheckModuleUpdate,
         onOpenTheme = { navigator.push(Route.ColorPalette) },
         onOpenLanguage = { navigator.push(Route.Language) },
-        onOpenWallpaper = { navigator.push(Route.Wallpaper) },
         onOpenProfileTemplate = { navigator.push(Route.AppProfileTemplate) },
         onSetSuCompatMode = viewModel::setSuCompatMode,
         onSetKernelUmountEnabled = viewModel::setKernelUmountEnabled,

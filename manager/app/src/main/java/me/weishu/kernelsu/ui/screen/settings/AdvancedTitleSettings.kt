@@ -30,7 +30,7 @@ import me.weishu.kernelsu.ui.component.material.SegmentedSliderItem
  *
  * It is an independent layout feature (the header of the home screen), so it sits next to the other
  * layout entries in the appearance category, not with the background media. The video background,
- * which *is* part of the background, lives on the wallpaper page instead.
+ * which *is* part of the background, is chosen separately.
  *
  * The section title lives on the surrounding layout column, so this renders as a second card under
  * it and takes its spacing from [modifier].

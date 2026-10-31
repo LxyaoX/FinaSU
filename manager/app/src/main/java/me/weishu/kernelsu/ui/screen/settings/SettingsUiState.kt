@@ -110,7 +110,6 @@ data class SettingsScreenActions(
     val onSetCheckModuleUpdate: (Boolean) -> Unit,
     val onOpenTheme: () -> Unit,
     val onOpenLanguage: () -> Unit,
-    val onOpenWallpaper: () -> Unit,
     val onOpenProfileTemplate: () -> Unit,
     val onSetSuCompatMode: (Int) -> Unit,
     val onSetKernelUmountEnabled: (Boolean) -> Unit,
