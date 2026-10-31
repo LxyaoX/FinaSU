@@ -232,6 +232,15 @@ jobs:
               echo "::error title=Gradle::${line//$'\n'/ }"
             done
 
+          # Lint writes its findings to a report file, and its own stdout shape does not match the
+          # patterns above - so without this a lint error is the one failure the annotations miss.
+          lint_report=manager/app/build/reports/lint-results-debug.txt
+          if [ -f "$lint_report" ]; then
+            grep -E ': (Error|Warning): ' "$lint_report" | head -30 | while IFS= read -r line; do
+              echo "::error title=Lint::${line//$'\n'/ }"
+            done
+          fi
+
       - name: Upload Manager check reports
         if: always()
         uses: actions/upload-artifact@v7
