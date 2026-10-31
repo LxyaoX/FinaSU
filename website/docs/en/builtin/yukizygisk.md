@@ -60,7 +60,7 @@ Why the link is still needed: the library opens `module.prop`, `pif.prop` and `c
 - NoMount's planner does not treat it as a module;
 - the boot-time module script stage does not run its scripts - `ksud` runs those two property scripts itself, at post-fs-data and boot-completed.
 
-The switch and the identity live in **Settings → Function → Play Integrity**. Enabling and disabling writes the `disable` marker, which Zygisk reads when zygote starts, so a change needs a reboot; the spoof switches in `pif.prop` are written straight back to the file and also apply at the next boot. `pif.prop` is your identity: neither a Manager update nor a rewrite of the payload overwrites it.
+The switch and the identity live in **Settings → Function → Play Integrity**; the "Import a configuration" row below the fingerprint replaces `pif.prop` wholesale - upstream does the same through a WebUI, while here the file is the editor, and a file without a usable `FINGERPRINT` is refused before it reaches the payload. Enabling and disabling writes the `disable` marker, which Zygisk reads when zygote starts, so a change needs a reboot; the spoof switches in `pif.prop` are written straight back to the file and also apply at the next boot. `pif.prop` is your identity: neither a Manager update nor a rewrite of the payload overwrites it.
 
 If the device already has the official module installed, `/data/adb/modules/playintegrityfix` is a real directory, the built-in payload stands aside and the page says so. "Take over the installed module" runs its `uninstall.sh` to put the properties back, then replaces it with the built-in payload and keeps the configuration.
 

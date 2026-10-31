@@ -3,6 +3,7 @@ package me.weishu.kernelsu.data.pif
 import android.util.Base64
 import com.topjohnwu.superuser.Shell
 import java.io.File
+import me.weishu.kernelsu.data.block
 import me.weishu.kernelsu.data.model.PifConfig
 import me.weishu.kernelsu.data.model.PifOption
 import me.weishu.kernelsu.data.model.PifProp
@@ -37,26 +38,28 @@ object PifInstaller {
     /** The file this page edits; kept as a name because the directory can differ, see [activeDir]. */
     private const val PROP_FILE = "pif.prop"
 
+    /** Markers around the configuration inside the single probe; no prop file carries these. */
+    private const val CONFIG_BEGIN = "__pif_config_begin__"
+    private const val CONFIG_END = "__pif_config_end__"
+
     const val PROP_PATH = "$ROOT/$PROP_FILE"
 
     /** Current state of the payload and the file the page edits. */
     fun status(): PifStatus {
-        val external = isExternal()
-        val dir = activeDir(external)
-        val probe = output(
-            "if [ -f $dir/module.prop ]; then echo installed=1; else echo installed=0; fi",
-            "if [ -f $dir/disable ]; then echo disabled=1; else echo disabled=0; fi",
-            // Linked means zygiskd loads the built-in copy; a real directory at the module path
-            // means an upstream install owns it and the built-in payload is sitting there unused.
-            "if [ -L $MODULE_DIR ]; then echo linked=1; fi",
-            "if [ -d $MODULE_DIR ] && [ ! -L $MODULE_DIR ]; then echo external=1; fi",
-            "grep -m1 '^version=' $dir/module.prop 2>/dev/null",
+        // One shell for the whole picture. Which directory is in force and what is in it are
+        // decided on a single line, so opening the page costs one round trip instead of three.
+        val raw = output(
+            "d=$ROOT; " +
+                "if [ -d $MODULE_DIR ] && [ ! -L $MODULE_DIR ]; then d=$MODULE_DIR; echo external=1; fi; " +
+                "if [ -f \"\$d/module.prop\" ]; then echo installed=1; else echo installed=0; fi; " +
+                "if [ -f \"\$d/disable\" ]; then echo disabled=1; else echo disabled=0; fi; " +
+                // Linked means zygiskd loads the built-in copy; a real directory at the module path
+                // means an upstream install owns it and the built-in payload sits there unused.
+                "if [ -L $MODULE_DIR ]; then echo linked=1; fi; " +
+                "grep -m1 '^version=' \"\$d/module.prop\" 2>/dev/null; " +
+                "echo $CONFIG_BEGIN; cat \"\$d/$PROP_FILE\" 2>/dev/null; echo $CONFIG_END",
         )
-        val installed = probe.lineSequence().any { it.trim() == "installed=1" }
-        // Only read the config once it is there; a stale file would otherwise be presented as the
-        // current identity. It is the one in force, which for an upstream install is its own.
-        val config = if (installed) output("cat $dir/$PROP_FILE 2>/dev/null") else ""
-        return PifStatus.fromProbe(probe, config)
+        return PifStatus.fromProbe(raw, block(raw, CONFIG_BEGIN, CONFIG_END))
     }
 
     /**
@@ -68,10 +71,6 @@ object PifInstaller {
      */
     private fun activeDir(external: Boolean): String = if (external) MODULE_DIR else ROOT
 
-    /** Whether a real directory - not our link - occupies the module path. */
-    private fun isExternal(): Boolean =
-        output("if [ -d $MODULE_DIR ] && [ ! -L $MODULE_DIR ]; then echo 1; else echo 0; fi")
-            .trim() == "1"
 
     /**
      * Asks ksud to write the payload again, keeping `pif.prop`.
@@ -97,15 +96,31 @@ object PifInstaller {
     }
 
     /**
+     * Replaces `pif.prop` with a file the user picked.
+     *
+     * The identity is what this payload is for, and upstream ships a WebUI to edit it; here the
+     * file the module actually reads is the editor, so an import is the edit. [base64] carries the
+     * bytes over the shell the manager already holds, the same way the keybox import does.
+     */
+    fun importProp(base64: String) {
+        require(base64.isNotBlank()) { "empty configuration" }
+        val current = status()
+        check(current.installed) { "$MODULE_DIR is not installed" }
+        val text = String(Base64.decode(base64, Base64.NO_WRAP), Charsets.UTF_8)
+        check(PifProp.isUsable(text)) { "not a PlayIntegrityFix configuration" }
+        writeProp("${activeDir(current.external)}/$PROP_FILE", text)
+    }
+
+    /**
      * Turns the payload on or off.
      *
      * The marker is ksud's and zygiskd's, so this is the same switch the engine's own page uses; the
      * library is only handed to zygote at start-up, which is why the caller says "reboot to apply".
      */
     fun setEnabled(enabled: Boolean) {
-        val external = isExternal()
-        check(status().installed) { "$MODULE_DIR is not installed" }
-        val marker = "${activeDir(external)}/disable"
+        val current = status()
+        check(current.installed) { "$MODULE_DIR is not installed" }
+        val marker = "${activeDir(current.external)}/disable"
         val result = if (enabled) {
             run("rm -f $marker")
         } else {
@@ -116,18 +131,15 @@ object PifInstaller {
 
     /** Flips one switch in `pif.prop`, leaving every other line untouched. */
     fun setOption(option: PifOption, value: Boolean) {
-        val external = isExternal()
-        check(status().installed) { "$MODULE_DIR is not installed" }
-        val path = "${activeDir(external)}/$PROP_FILE"
+        val current = status()
+        check(current.installed) { "$MODULE_DIR is not installed" }
+        val path = "${activeDir(current.external)}/$PROP_FILE"
         val current = output("cat $path 2>/dev/null")
         check(current.isNotBlank()) { "$path is missing" }
         writeProp(path, PifProp.withOption(current, option, value))
     }
 
-    fun config(): PifConfig {
-        val dir = activeDir(isExternal())
-        return PifConfig.parse(output("cat $dir/$PROP_FILE 2>/dev/null"))
-    }
+    fun config(): PifConfig = status().config
 
     /**
      * Publishes `pif.prop` atomically.

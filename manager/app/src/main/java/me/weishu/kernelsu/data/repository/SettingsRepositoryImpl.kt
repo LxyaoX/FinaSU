@@ -491,6 +491,14 @@ class SettingsRepositoryImpl : SettingsRepository {
         }
     }
 
+    override suspend fun importPifProp(base64: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            PifInstaller.importProp(base64)
+            // Read it back: the write is only as good as the file the library will parse.
+            check(PifInstaller.config().fingerprint.isNotBlank()) { "pif.prop did not take" }
+        }
+    }
+
     override suspend fun setPifOption(option: PifOption, value: Boolean): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {

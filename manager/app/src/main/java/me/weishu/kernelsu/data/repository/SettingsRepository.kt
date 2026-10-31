@@ -136,6 +136,8 @@ interface SettingsRepository {
     suspend fun setPifEnabled(enabled: Boolean): Result<Unit>
     /** Takes over an upstream install that owns the module path. */
     suspend fun adoptPif(): Result<Unit>
+    /** Replaces `pif.prop` with the content the user picked, base64 encoded. */
+    suspend fun importPifProp(base64: String): Result<Unit>
     suspend fun setPifOption(option: PifOption, value: Boolean): Result<Unit>
     suspend fun getNomountStatus(): Result<NomountStatus>
     suspend fun setNomountIsolated(enabled: Boolean): Result<Unit>

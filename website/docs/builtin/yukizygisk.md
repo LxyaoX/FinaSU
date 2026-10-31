@@ -60,7 +60,7 @@ YukiZygisk 是随 FinaSU 提供的 Zygisk 引擎。它和早期纯用户态实�
 - NoMount 的挂载计划不会把它当成模块；
 - 开机的模块脚本阶段不会执行它的脚本 —— 那两段属性脚本由 `ksud` 自己在 post-fs-data 与 boot-completed 阶段调用。
 
-开关与指纹在 **设置 → 功能 → Play Integrity**。启用/禁用写的是 `disable` 标记，Zygisk 在 zygote 启动时读取，所以改完要重启；`pif.prop` 里的伪装开关直接写回文件，同样重启生效。`pif.prop` 是你自己的身份，重装管理器或重新写入载荷都不会覆盖它。
+开关与指纹在 **设置 → 功能 → Play Integrity**；指纹下面那行“导入配置”可以整份替换 `pif.prop`——上游用 WebUI 做同一件事，这里把文件本身当编辑框，导入前会检查里面有没有可用的 `FINGERPRINT`。启用/禁用写的是 `disable` 标记，Zygisk 在 zygote 启动时读取，所以改完要重启；`pif.prop` 里的伪装开关直接写回文件，同样重启生效。`pif.prop` 是你自己的身份，重装管理器或重新写入载荷都不会覆盖它。
 
 如果设备上已经装了官方模块，`/data/adb/modules/playintegrityfix` 是一个真实目录，内置载荷会让位并在页面上说明原因。点“接管已安装的模块”会先运行它的 `uninstall.sh` 把属性还原，再用内置载荷替换，配置保留。
 

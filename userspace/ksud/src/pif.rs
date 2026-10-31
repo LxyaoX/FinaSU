@@ -294,7 +294,11 @@ fn ensure_dir(path: &Path) -> Result<()> {
 fn write_payload(asset_name: &str, target: &Path) -> Result<()> {
     let asset = crate::assets::embedded(&format!("pif/{asset_name}"))
         .with_context(|| format!("embedded pif/{asset_name} is missing"))?;
-    if fs::read(target).is_ok_and(|on_disk| on_disk.as_slice() == asset.data.as_ref()) {
+    // Size first: the compare below reads the whole file, and that read is the only work the step
+    // does on a boot where nothing changed.
+    if fs::metadata(target).is_ok_and(|meta| meta.len() == asset.data.len() as u64)
+        && fs::read(target).is_ok_and(|on_disk| on_disk.as_slice() == asset.data.as_ref())
+    {
         return Ok(());
     }
     let temp = target.with_extension("new");

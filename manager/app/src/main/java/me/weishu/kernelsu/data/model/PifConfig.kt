@@ -70,6 +70,20 @@ data class PifConfig(
  * replaces the one line it owns.
  */
 object PifProp {
+    /**
+     * Whether this looks like a configuration the library can use.
+     *
+     * `FINGERPRINT` is the one key that has to be there: without it `spoofBuild` has nothing to
+     * present and the module loads into Play services and changes nothing, which is exactly the
+     * silent failure an import is supposed to avoid. Its shape is
+     * `BRAND/PRODUCT/DEVICE:RELEASE/ID/INCREMENTAL:TYPE/TAGS`, so three slashes and a colon are the
+     * cheapest honest check.
+     */
+    fun isUsable(text: String): Boolean {
+        val fingerprint = PifConfig.parse(text).fingerprint
+        return fingerprint.count { it == '/' } >= 3 && fingerprint.contains(':')
+    }
+
     fun withOption(text: String, option: PifOption, value: Boolean): String {
         val replacement = "${option.key}=$value"
         // The file arrives from `cat`, so it ends in a newline and `lines()` would hand back a

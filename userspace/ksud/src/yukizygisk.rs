@@ -102,8 +102,11 @@ pub fn install() -> Result<()> {
         let asset = crate::assets::embedded(&format!("yukizygisk/{name}"))
             .with_context(|| format!("embedded payload {name} is missing"))?;
         let target = target_path(name);
-        let unchanged =
-            fs::read(&target).is_ok_and(|on_disk| on_disk.as_slice() == asset.data.as_ref());
+        // Size first. The compare below reads the library in full, and on a boot where the payload
+        // did not change that read is the only work this function does - several megabytes of it.
+        let unchanged = fs::metadata(&target)
+            .is_ok_and(|meta| meta.len() == asset.data.len() as u64)
+            && fs::read(&target).is_ok_and(|on_disk| on_disk.as_slice() == asset.data.as_ref());
         if unchanged {
             continue;
         }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.data.model.PifOption
+import me.weishu.kernelsu.data.model.PifProp
 import me.weishu.kernelsu.data.model.PifStatus
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.data.repository.SettingsRepository
@@ -138,6 +139,38 @@ class TeesimViewModel(
             repo.setPifOption(option, value)
         }
 
+    /**
+     * Validates the picked file before it reaches the payload.
+     *
+     * A configuration without a fingerprint leaves the module loaded and doing nothing, which reads
+     * as a broken module rather than as a bad file - so the check happens here.
+     */
+    fun importPifProp(uri: Uri) {
+        if (_uiState.value.writing) return
+        _uiState.update { it.copy(writing = true) }
+        viewModelScope.launch {
+            val message = withContext(Dispatchers.IO) {
+                val encoded = runCatching {
+                    ksuApp.contentResolver.openInputStream(uri)?.use { stream ->
+                        val bytes = stream.readBytes()
+                        check(bytes.size in 1..MAX_PIF_PROP_BYTES) { "unexpected pif.prop size" }
+                        val text = String(bytes, Charsets.UTF_8)
+                        check(PifProp.isUsable(text)) { "not a PlayIntegrityFix configuration" }
+                        Base64.encodeToString(bytes, Base64.NO_WRAP)
+                    }
+                }.getOrNull()
+                when {
+                    encoded == null -> R.string.pif_import_invalid
+                    repo.importPifProp(encoded).isSuccess -> R.string.pif_imported
+                    else -> R.string.pif_write_failed
+                }
+            }
+            val status = repo.getPifStatus()
+            _uiState.update { it.copy(writing = false, pif = status.getOrNull() ?: it.pif) }
+            toast(message)
+        }
+    }
+
     fun setTargets(packages: List<String>) =
         write(R.string.teesim_targets_saved, R.string.teesim_write_failed) {
             repo.setTeesimTargetApps(packages)
@@ -246,5 +279,8 @@ class TeesimViewModel(
     private companion object {
         /** A real keybox is a few dozen kilobytes; anything past this is not one. */
         const val MAX_KEYBOX_BYTES = 1_048_576
+
+        /** `pif.prop` is a dozen lines; a megabyte of it is a file picker mistake. */
+        const val MAX_PIF_PROP_BYTES = 65_536
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
@@ -72,6 +73,13 @@ fun TeesimScreen() {
         contract = ActivityResultContracts.OpenDocument(),
     ) { uri ->
         if (uri != null) viewModel.importKeybox(uri)
+    }
+    // The same picker for the PlayIntegrityFix configuration: upstream edits that file through a
+    // WebUI, and the file itself is the editor here.
+    val propPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) viewModel.importPifProp(uri)
     }
     // The target picker is a separate screen with its own state, so the counts above go stale
     // while it is on top; re-read on the way back.
@@ -250,6 +258,15 @@ fun TeesimScreen() {
                             stringResource(R.string.pif_fingerprint_missing)
                         },
                         startAction = { Icon(Icons.Filled.Lock, null) },
+                    )
+                }
+                item {
+                    ArrowPreference(
+                        title = stringResource(R.string.pif_import),
+                        summary = stringResource(R.string.pif_import_summary),
+                        startAction = { Icon(Icons.Filled.Edit, null) },
+                        onClick = { propPicker.launch(arrayOf("text/plain", "*/*")) },
+                        enabled = state.pif?.installed == true && !state.writing,
                     )
                 }
                 PifOption.entries.forEach { option ->

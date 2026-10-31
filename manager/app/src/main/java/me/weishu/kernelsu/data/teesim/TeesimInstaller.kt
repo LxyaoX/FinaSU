@@ -7,6 +7,7 @@ import java.io.File
 import java.util.zip.ZipInputStream
 import org.tukaani.xz.XZInputStream
 import me.weishu.kernelsu.data.model.TeesimConfig
+import me.weishu.kernelsu.data.block
 import me.weishu.kernelsu.data.model.TeesimStatus
 import me.weishu.kernelsu.ksuApp
 import org.json.JSONArray
@@ -100,13 +101,17 @@ object TeesimInstaller {
         "if [ -s $KEYBOX_PATH ]; then echo tee:keybox=1; else echo tee:keybox=0; fi",
         "if [ -f $KEYBOX_PATH ]; then echo \"tee:keyboxbytes=\$(stat -c %s $KEYBOX_PATH)\"; " +
             "else echo tee:keyboxbytes=0; fi",
+        // The configuration rides in the same probe: two round trips to open one page is one too
+        // many, and the markers keep a JSON line from being read as a state key.
+        "if [ -f $CONFIG_PATH ]; then echo tee:config-begin; cat $CONFIG_PATH; echo tee:config-end; fi",
     )
 
     /** Current state of the payload, its daemon and the configuration the manager edits. */
     fun status(): TeesimStatus {
-        val probe = TeesimStatus.fromProbe(output(*probeCommands))
+        val raw = output(*probeCommands)
+        val probe = TeesimStatus.fromProbe(raw)
         if (!probe.installed) return probe
-        return probe.copy(config = TeesimConfig.parse(output("cat $CONFIG_PATH 2>/dev/null")))
+        return probe.copy(config = TeesimConfig.parse(block(raw, "tee:config-begin", "tee:config-end")))
     }
 
     /**

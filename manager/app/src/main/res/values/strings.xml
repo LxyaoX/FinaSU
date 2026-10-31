@@ -766,6 +766,10 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="pif_option_vending_build_summary">Present the fingerprint to the Play Store process as well</string>
     <string name="pif_option_vending_sdk">Spoof Play Store SDK</string>
     <string name="pif_option_vending_sdk_summary">Report SDK 32 to the Play Store on Android 13 and newer; breaks parts of the store UI</string>
+    <string name="pif_import">Import a configuration</string>
+    <string name="pif_import_summary">Reads pif.prop from a file; the identity and the spoof switches come from it</string>
+    <string name="pif_imported">Imported; reboot to apply</string>
+    <string name="pif_import_invalid">That file is not a PlayIntegrityFix configuration</string>
     <string name="pif_reinstall">Rewrite the built-in files</string>
     <string name="pif_reinstall_summary">Writes the %1$s payload that ships with ksud into place again, keeping this device\'s configuration</string>
     <string name="pif_adopt">Take over the installed module</string>

@@ -781,6 +781,10 @@
     <string name="pif_option_vending_build_summary">对 Play 商店进程同样提供伪装后的指纹</string>
     <string name="pif_option_vending_sdk">伪装 Play 商店 SDK</string>
     <string name="pif_option_vending_sdk_summary">在 Android 13 及以上对商店上报 SDK 32；会破坏商店部分界面</string>
+    <string name="pif_import">导入配置</string>
+    <string name="pif_import_summary">从文件读取 pif.prop，设备身份与伪装开关都取自它</string>
+    <string name="pif_imported">已导入；重启后生效</string>
+    <string name="pif_import_invalid">这个文件不是 PlayIntegrityFix 配置</string>
     <string name="pif_reinstall">重新写入内置文件</string>
     <string name="pif_reinstall_summary">把随 ksud 分发的 %1$s 载荷重新写入磁盘，保留当前配置</string>
     <string name="pif_adopt">接管已安装的模块</string>
