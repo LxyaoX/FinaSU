@@ -118,6 +118,50 @@ class TeesimStatusTest {
     }
 
     @Test
+    fun `config reports the default profile taking in new apps`() {
+        val config = TeesimConfig.parse(
+            """
+            {
+              "profiles": {
+                "default": { "autoIncludeNewApps": true, "apps": ["com.a.app"] },
+                "banking": { "apps": ["com.bank.app"] }
+              }
+            }
+            """.trimIndent()
+        )
+
+        assertTrue(config.autoInclude)
+        assertEquals("", config.autoIncludeElsewhere)
+    }
+
+    @Test
+    fun `a profile that already claims auto-include is named, so the switch can stay off`() {
+        val config = TeesimConfig.parse(
+            """
+            {
+              "profiles": {
+                "default": { "apps": [] },
+                "banking": { "autoIncludeNewApps": true, "apps": ["com.bank.app"] }
+              }
+            }
+            """.trimIndent()
+        )
+
+        // An empty list is only legal because some profile takes apps in, and it is not this one:
+        // the picker has to know which profile to point at rather than overwrite the flag.
+        assertFalse(config.autoInclude)
+        assertEquals("banking", config.autoIncludeElsewhere)
+    }
+
+    @Test
+    fun `config without the key reports auto-include as off`() {
+        val config = TeesimConfig.parse("""{"profiles":{"default":{"apps":["com.a.app"]}}}""")
+
+        assertFalse(config.autoInclude)
+        assertEquals("", config.autoIncludeElsewhere)
+    }
+
+    @Test
     fun `unreadable config is marked broken instead of empty`() {
         assertTrue(TeesimConfig.parse(null).broken)
         assertTrue(TeesimConfig.parse("").broken)

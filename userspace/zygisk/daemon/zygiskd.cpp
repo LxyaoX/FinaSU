@@ -1118,31 +1118,27 @@ yz_config g_yz_config = yukizygisk::config::defaults;
 
 void read_yzconfig() {
   yz_config cfg = yukizygisk::config::defaults;
-  int fd = open(ksud::YUKIZYGISK_CONFIG_PATH, O_RDONLY | O_CLOEXEC);
-  if (fd >= 0) {
-    std::string buf;
-    char tmp[1024];
-    for (ssize_t n; (n = read(fd, tmp, sizeof(tmp))) > 0;)
-      buf.append(tmp, static_cast<size_t>(n));
-    close(fd);
-    json::Value root = json::parse(buf);
-    if (root.type == json::Type::Object) {
-      if (root.contains("yukilinker"))
-        cfg.yukilinker = root.at("yukilinker").as_bool() ? 1 : 0;
-      if (root.at("anonymous_memory").type == json::Type::Bool)
-        cfg.memory_type = root.at("anonymous_memory").as_bool()
-                              ? YZ_MEMORY_ANONYMOUS
-                              : YZ_MEMORY_FILE;
-      if (root.contains("denylist_mode"))
-        cfg.denylist_mode =
-            static_cast<__u8>(root.at("denylist_mode").as_number());
-      if (root.contains("dmesg_log"))
-        cfg.dmesg_log = root.at("dmesg_log").as_bool() ? 1 : 0;
-    }
+  json::Value root;
+  const bool config_read =
+      yukizygisk::settings::read(ksud::YUKIZYGISK_CONFIG_PATH, &root);
+  if (config_read) {
+    if (root.contains("yukilinker"))
+      cfg.yukilinker = root.at("yukilinker").as_bool() ? 1 : 0;
+    if (root.at("anonymous_memory").type == json::Type::Bool)
+      cfg.memory_type = root.at("anonymous_memory").as_bool()
+                            ? YZ_MEMORY_ANONYMOUS
+                            : YZ_MEMORY_FILE;
+    if (root.contains("denylist_mode"))
+      cfg.denylist_mode =
+          static_cast<__u8>(root.at("denylist_mode").as_number());
+    if (root.contains("dmesg_log"))
+      cfg.dmesg_log = root.at("dmesg_log").as_bool() ? 1 : 0;
+  } else {
+    DLOGE("yzconfig: read failed: %s", strerror(errno));
   }
   g_yz_config = cfg;
   g_crash_monitor.set_protection_enabled(
-      yukizygisk::settings::protection_enabled(ksud::YUKIZYGISK_CONFIG_PATH));
+      config_read && root.at("crash_protection").bool_or(false));
   zygiskd::logging::set_kernel_mirror(cfg.dmesg_log != 0);
   yz_yukilinker_cmd yc{};
   yc.enabled = cfg.yukilinker;
@@ -2035,7 +2031,42 @@ void handle_client(int client) {
 
 int bind_listen() { return yukizygisk::endpoint::listen(); }
 
+uint32_t g_event_generation;
+/**
+ * Whether the kernel can name the channel at all.
+ *
+ * The command that reports a generation arrived together with the runtime that creates the channel
+ * on activation. A module built before it answers ENOTTY, and those kernels stamped every event
+ * with seq 0 - leaving the generation at 0 matches them by type again, which is what this daemon
+ * did before the check existed. Refusing to run instead would turn "manager updated, kernel not"
+ * into silently dead injection.
+ */
+bool g_event_generation_known;
+
+bool event_channel_current() {
+  if (!g_event_generation_known)
+    return true;
+  yz_event_channel_cmd channel{};
+  return ksud::ksuctl(KSU_IOCTL_YZ_GET_EVENT_CHANNEL, &channel) == 0 &&
+         channel.version == 1 && channel.generation == g_event_generation;
+}
+
 int nl_listen() {
+  yz_event_channel_cmd channel{};
+  if (ksud::ksuctl(KSU_IOCTL_YZ_GET_EVENT_CHANNEL, &channel) == 0) {
+    if (channel.version != 1 || channel.generation == 0) {
+      DLOGE("event channel identity unusable; matching kernel required");
+      return -1;
+    }
+    g_event_generation = channel.generation;
+    g_event_generation_known = true;
+  } else if (errno != ENOTTY) {
+    // ENOTCONN means the runtime is not active in this boot: there is no channel to listen to yet.
+    DLOGE("event channel unavailable: %s", strerror(errno));
+    return -1;
+  } else {
+    DLOGI("kernel does not report an event channel generation; matching by type");
+  }
   int fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, YZ_NETLINK_PROTO);
   if (fd < 0) {
     DLOGE("netlink socket: %s", strerror(errno));
@@ -2047,6 +2078,10 @@ int nl_listen() {
   addr.nl_groups = 1U;
   if (bind(fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) < 0) {
     DLOGE("netlink bind: %s", strerror(errno));
+    close(fd);
+    return -1;
+  }
+  if (!event_channel_current()) {
     close(fd);
     return -1;
   }
@@ -2104,7 +2139,8 @@ bool nl_receive_one(int fd) {
   int len = static_cast<int>(got);
   for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len);
        nlh = NLMSG_NEXT(nlh, len)) {
-    if (nlh->nlmsg_type != YZ_NL_MSG_EVENT)
+    if (nlh->nlmsg_type != YZ_NL_MSG_EVENT ||
+        nlh->nlmsg_seq != g_event_generation)
       continue;
     if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(yz_event)))
       continue;
@@ -2393,6 +2429,8 @@ int run_daemon() {
     if (!g_terminating_companions.empty())
       poll_timeout = poll_timeout < 0 ? 1000 : std::min(poll_timeout, 1000);
 
+    // Netlink does not guarantee a HUP when its kernel provider is removed.
+    poll_timeout = poll_timeout < 0 ? 1000 : std::min(poll_timeout, 1000);
     const int poll_result =
         poll(poll_fds.data(), poll_fds.size(), poll_timeout);
     if (poll_result < 0) {
@@ -2435,6 +2473,14 @@ int run_daemon() {
         (void)refresh_native_companion(native_companion_indices[index]);
     }
 
+    // Check ownership before consuming a protocol that another module can
+    // reuse.
+    if (!event_channel_current()) {
+      DLOGI("event channel stopped or replaced; exiting");
+      close(nlfd);
+      close(srv);
+      return 0;
+    }
     // Apply crash decisions before serving new module image requests.
     nl_drain(nlfd);
     if (poll_fds[history_index].revents & POLLNVAL)

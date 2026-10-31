@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Deselect
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,7 +40,6 @@ import me.weishu.kernelsu.ui.component.AppIconImage
 import me.weishu.kernelsu.ui.component.material.ExpressiveScaffold
 import me.weishu.kernelsu.ui.component.material.SegmentedColumn
 import me.weishu.kernelsu.ui.component.material.SegmentedListItem
-import me.weishu.kernelsu.ui.component.material.SegmentedSwitchItem
 import me.weishu.kernelsu.ui.component.material.SegmentedTextField
 import me.weishu.kernelsu.ui.component.material.TopBarBackButton
 import me.weishu.kernelsu.ui.navigation3.LocalNavigator
@@ -55,6 +55,11 @@ import top.yukonga.miuix.kmp.basic.TextButton as MiuixTextButton
  * Selection is by package name because that is what `config.json` stores. Apps that belong to a
  * profile other than `default` are left out of the list on purpose: those profiles carry their own
  * keybox, and moving an app into `default` from here would silently change what signs it.
+ *
+ * The profile can also auto-include, in which case the ticks below are only the apps that had to be
+ * named by hand; anything installed later joins on its own. Both halves are saved together because
+ * upstream turns a profile that names nothing and includes nothing into a configuration error, not
+ * an empty target set.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,19 +90,42 @@ fun TeesimTargetsScreen() {
     val configUsable = config != null && !config.broken
     val canEdit = !state.appsLoading && !state.writing && !state.loading && configUsable
 
+    // Upstream's `autoIncludeNewApps`: the daemon answers for user apps installed after it first
+    // ran, so the list below is no longer the whole story. Two profiles asking for it would claim
+    // the same apps and the daemon treats that as a broken configuration, so a profile that
+    // already holds the flag blocks ours instead of being overwritten from here.
+    val savedAutoInclude = config?.autoInclude == true
+    var autoInclude by remember(savedAutoInclude) { mutableStateOf(savedAutoInclude) }
+    val autoIncludeHolder = config?.autoIncludeElsewhere.orEmpty()
+    // An empty list is legal precisely because auto-include covers the profile; upstream rejects a
+    // profile that names nothing and includes nothing.
+    val canSave = canEdit && autoIncludeHolder.isEmpty() && (selected.isNotEmpty() || autoInclude)
+
     ExpressiveScaffold(
         topBar = {
             MiuixTopAppBar(
                 title = stringResource(R.string.teesim_targets_title),
                 navigationIcon = { TopBarBackButton(onClick = { navigator.pop() }) },
                 actions = {
+                    // Only a profile that takes apps in runs out of date on its own, so the button
+                    // is offered exactly where re-reading the installed packages can change
+                    // something.
+                    IconButton(
+                        enabled = canEdit && autoInclude && autoIncludeHolder.isEmpty(),
+                        onClick = viewModel::rescan,
+                    ) {
+                        Icon(
+                            Icons.Filled.Refresh,
+                            contentDescription = stringResource(R.string.teesim_rescan),
+                        )
+                    }
                     MiuixTextButton(
                         text = stringResource(R.string.teesim_save),
                         onClick = {
-                            viewModel.setTargets(selected.toList())
+                            viewModel.setTargets(selected.toList(), autoInclude)
                             navigator.pop()
                         },
-                        enabled = canEdit,
+                        enabled = canSave,
                     )
                 },
                 scrollBehavior = scrollBehavior,
@@ -117,6 +145,19 @@ fun TeesimTargetsScreen() {
                         value = query,
                         onValueChange = { query = it },
                         singleLine = true,
+                    )
+                }
+                item {
+                    SwitchPreference(
+                        title = stringResource(R.string.teesim_auto_include),
+                        summary = if (autoIncludeHolder.isEmpty()) {
+                            stringResource(R.string.teesim_auto_include_summary)
+                        } else {
+                            stringResource(R.string.teesim_auto_include_taken, autoIncludeHolder)
+                        },
+                        checked = autoInclude,
+                        enabled = canEdit && autoIncludeHolder.isEmpty(),
+                        onCheckedChange = { autoInclude = it },
                     )
                 }
                 item {
@@ -179,6 +220,16 @@ fun TeesimTargetsScreen() {
                                 text = stringResource(R.string.teesim_read_error),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                        }
+                    }
+                    if (autoInclude && selected.isEmpty()) {
+                        item(key = "auto-only") {
+                            Text(
+                                text = stringResource(R.string.teesim_auto_include_only),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(bottom = 8.dp),
                             )
                         }

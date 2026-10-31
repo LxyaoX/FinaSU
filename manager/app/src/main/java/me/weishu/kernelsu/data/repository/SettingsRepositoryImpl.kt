@@ -450,16 +450,26 @@ class SettingsRepositoryImpl : SettingsRepository {
         }
     }
 
-    override suspend fun setTeesimTargetApps(packages: List<String>): Result<Unit> =
+    override suspend fun setTeesimTargetApps(
+        packages: List<String>,
+        autoInclude: Boolean,
+    ): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
-                TeesimInstaller.setTargetApps(packages)
+                TeesimInstaller.setTargetApps(packages, autoInclude)
                 val after = TeesimInstaller.status().config
                 check(after.defaultApps.toSet() == packages.toSet()) {
                     "TEESimulator target apps did not change"
                 }
+                check(after.autoInclude == autoInclude) {
+                    "TEESimulator auto-include did not change"
+                }
             }
         }
+
+    override suspend fun rescanTeesimTargets(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching { TeesimInstaller.rescan() }
+    }
 
     override suspend fun getPifStatus(): Result<PifStatus> = withContext(Dispatchers.IO) {
         runCatching { PifInstaller.status() }

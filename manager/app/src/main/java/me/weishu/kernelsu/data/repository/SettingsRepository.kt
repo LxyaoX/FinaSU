@@ -124,7 +124,9 @@ interface SettingsRepository {
     suspend fun uninstallTeesim(): Result<Unit>
     suspend fun importTeesimKeybox(base64: String): Result<Unit>
     suspend fun removeTeesimKeybox(): Result<Unit>
-    suspend fun setTeesimTargetApps(packages: List<String>): Result<Unit>
+    suspend fun setTeesimTargetApps(packages: List<String>, autoInclude: Boolean): Result<Unit>
+    /** Asks the daemon to re-read the installed packages, for profiles that auto-include new apps. */
+    suspend fun rescanTeesimTargets(): Result<Unit>
 
     /**
      * PlayIntegrityFix travels inside ksud: its payload is written under the manager's own directory

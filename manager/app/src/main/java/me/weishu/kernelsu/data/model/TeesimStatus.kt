@@ -82,11 +82,26 @@ data class TeesimConfig(
     /** Packages owned by other profiles; the picker leaves them alone. */
     val otherProfileApps: List<String> = emptyList(),
     val profileCount: Int = 0,
+    /**
+     * The `default` profile carries `autoIncludeNewApps`: the daemon also answers for every app
+     * installed after it first ran, whether or not that app is named here.
+     */
+    val autoInclude: Boolean = false,
+    /**
+     * A profile other than `default` that already carries `autoIncludeNewApps`, or empty.
+     *
+     * The daemon allows that flag on one profile only - two would claim the same apps - and rejects
+     * a configuration that sets it twice, so the switch cannot be turned on while this is non-empty.
+     */
+    val autoIncludeElsewhere: String = "",
     /** `config.json` is missing or does not parse, so the app list cannot be trusted. */
     val broken: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_PROFILE = "default"
+
+        /** Upstream's key in a profile object; the daemon reads it as a plain boolean. */
+        const val AUTO_INCLUDE_KEY = "autoIncludeNewApps"
 
         fun parse(json: String?): TeesimConfig {
             if (json.isNullOrBlank()) return TeesimConfig(broken = true)
@@ -96,11 +111,16 @@ data class TeesimConfig(
             val default = LinkedHashSet<String>()
             val others = LinkedHashSet<String>()
             var count = 0
+            var autoInclude = false
+            var autoIncludeElsewhere = ""
             val names = profiles.keys()
             while (names.hasNext()) {
                 val name = names.next()
                 val profile = profiles.optJSONObject(name) ?: continue
                 count++
+                val claimsAutoInclude = profile.optBoolean(AUTO_INCLUDE_KEY, false)
+                if (name == DEFAULT_PROFILE) autoInclude = claimsAutoInclude
+                else if (claimsAutoInclude) autoIncludeElsewhere = name
                 val apps = profile.optJSONArray("apps") ?: continue
                 val sink = if (name == DEFAULT_PROFILE) default else others
                 for (index in 0 until apps.length()) {
@@ -112,6 +132,8 @@ data class TeesimConfig(
                 defaultApps = default.sorted(),
                 otherProfileApps = others.sorted(),
                 profileCount = count,
+                autoInclude = autoInclude,
+                autoIncludeElsewhere = autoIncludeElsewhere,
             )
         }
     }

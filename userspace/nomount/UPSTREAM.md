@@ -12,12 +12,17 @@ Rust, so no upstream shell scripts or WebUI are imported.
 ## Pinned sources
 
 - NoMount: https://github.com/maxsteeel/nomount
-  commit `bf1847f98fed382369c43bfd652cd93774b9b8e3` (tag `v2.2.0`).
+  commit `71883de7ab2e2468bbbaf78ef64ac44a33069531` (branch `dev`, ten commits
+  past tag `v2.2.0`). The driver is taken from `dev` because every change since
+  the tag is a kernel-side fix - a readdir reference count that moved the wrong way,
+  a denied UID range that an exact `target_uid` match bypassed, a dentry
+  revalidate that recognised too few of our `d_op` variants, and a duplicated
+  materialisation - while the wire protocol did not move (`22`).
   Imported from `kernel/src/` only:
 
   | upstream path | vendored path | sha256 |
   | --- | --- | --- |
-  | `kernel/src/nomount.c` | `kernel/src/nomount.c` | `25452d96684d066446fbd1b433f4fdeab1c5b0ade11701d9b46bb8dfb5acfc1b` |
+  | `kernel/src/nomount.c` | `kernel/src/nomount.c` | `b8db2cdffb06526c31817f93695dd62c8b3416c92cbe7a1768267f8501603669` |
   | `kernel/src/nomount.h` | `kernel/src/nomount.h` | `8f15ffcb4b998d8a05219b793cf22c0e25a383296376fc49a331e07bc7c93766` |
   | `kernel/src/Kconfig` | `kernel/src/Kconfig` | `1df7ad3589a282128f797f7a46b28aee315d080550aae26b681a898f11c7abc7` |
   | `kernel/src/Makefile` | `kernel/src/Makefile` | `1191fe9ef8e2f3549419fd90a118fbe3d11fc02a04b6353bae0e81be27e03e62` |
@@ -28,12 +33,14 @@ All imported files are byte-identical to upstream. No copyright notice has been
 replaced or added inside them; FinaSU attribution is not applied to upstream
 files.
 
-## v2.2.0 integration boundary
+## v22 integration boundary
 
 The imported driver speaks protocol v22. Its rule-add and list headers are 24
 bytes (`flags`, `uid`, `uid_end`, `deny_start`, `deny_end`, `v_len`, `r_len`)
 and its delete header is 18 bytes (the same UID fields followed by `v_len`).
-v21 and v22 headers are not compatible.
+v21 and v22 headers are not compatible. The `dev` snapshot vendored here did
+not change the protocol - its `userspace/src/nm.h` delta is a CLI parsing
+helper only - so the Rust codec needed no change for it.
 
 FinaSU's Rust control path accepts v22 and rejects older drivers. Existing
 rules keep the protocol's default scope (`uid = uid_end = 0`, no denied range),

@@ -180,9 +180,11 @@ pub fn set_enabled(enable: bool) -> Result<()> {
             Err(error) => return Err(error).context("remove the disable marker"),
         }
         install()?;
-        // Daemon first: the kernel only accepts the enable bit once the injection runtime is up.
-        start()?;
+        // Kernel first: the event channel a daemon subscribes to is created when the runtime is
+        // activated and released when it is switched off, so a daemon started before this point
+        // would fail to bind it and exit.
         set_kernel_enabled(true)?;
+        start()?;
     } else {
         // Injection off before the daemon goes away, so nothing tries to inject into a zygote whose
         // daemon is gone.
@@ -762,10 +764,12 @@ pub fn post_fs_data(safe_mode: bool) -> Result<()> {
         return Ok(());
     }
     install()?;
-    start()?;
+    // Same order as elsewhere: the kernel owns the event channel the daemon binds to, and it only
+    // exists while the runtime is active.
     if let Err(error) = set_kernel_enabled(true) {
         log::warn!("yukizygisk: could not enable injection in the kernel: {error:#}");
     }
+    start()?;
     Ok(())
 }
 
@@ -776,12 +780,14 @@ pub fn ensure_running() -> Result<()> {
         return Ok(());
     }
     let before = running().len();
+    // The kernel keeps the event channel, so it has to be active before a daemon is spawned into
+    // this boot - otherwise the daemon exits on a channel that does not exist yet.
+    if let Err(error) = set_kernel_enabled(true) {
+        log::warn!("yukizygisk: could not enable injection in the kernel: {error:#}");
+    }
     start()?;
     if running().len() > before {
         log::warn!("yukizygisk: restarted a daemon that had died before zygote started");
-    }
-    if let Err(error) = set_kernel_enabled(true) {
-        log::warn!("yukizygisk: could not enable injection in the kernel: {error:#}");
     }
     Ok(())
 }

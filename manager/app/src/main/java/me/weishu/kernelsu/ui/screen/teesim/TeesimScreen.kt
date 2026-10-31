@@ -181,9 +181,13 @@ fun TeesimScreen() {
                     ArrowPreference(
                         title = stringResource(R.string.teesim_targets),
                         summary = stringResource(
-                                      R.string.teesim_targets_summary,
-                                      state.status?.targetApps.orEmpty().size,
-                                  ),
+                                     if (state.status?.config?.autoInclude == true) {
+                                         R.string.teesim_targets_summary_auto
+                                     } else {
+                                         R.string.teesim_targets_summary
+                                     },
+                                     state.status?.targetApps.orEmpty().size,
+                                 ),
                         startAction = { Icon(Icons.Filled.Apps, null) },
                         onClick = { navigator.push(Route.TeesimTargets) },
                         enabled = state.status?.installed == true && !state.writing,

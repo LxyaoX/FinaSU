@@ -730,10 +730,17 @@
     <string name="teesim_keybox_write_failed">写入 keybox 失败</string>
     <string name="teesim_targets">目标应用</string>
     <string name="teesim_targets_summary">目标应用数：%1$d</string>
+    <string name="teesim_targets_summary_auto">目标应用数：%1$d，另含之后安装的应用</string>
     <string name="teesim_targets_title">目标应用</string>
     <string name="teesim_targets_hint">属于其他配置档的应用数：%1$d（此处不列出，请改 /data/adb/teesim/config.json，默认档 %2$s）</string>
     <string name="teesim_targets_saved">目标应用已保存</string>
     <string name="teesim_search_apps">搜索应用</string>
+    <string name="teesim_auto_include">自动纳入新安装的应用</string>
+    <string name="teesim_auto_include_summary">TEESimulator 首次运行之后安装的应用也会自动生效，配置重载时纳入；设备上已有的应用不受影响</string>
+    <string name="teesim_auto_include_taken">配置档 %1$s 已经开启了自动纳入，而只能有一个配置档开启。请先在 /data/adb/teesim/config.json 里把它关掉</string>
+    <string name="teesim_auto_include_only">没有勾选应用；该配置档覆盖所有新安装的应用，以及上面勾选的应用</string>
+    <string name="teesim_rescan">重新扫描已安装的应用</string>
+    <string name="teesim_rescan_done">已重新扫描应用</string>
     <string name="teesim_show_system_apps">显示系统应用</string>
     <string name="teesim_selected_count">已选：%1$d</string>
     <string name="teesim_select_all">全选当前列表</string>

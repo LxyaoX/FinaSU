@@ -715,10 +715,17 @@ Switching takes effect after a reboot. To hide them from an app, tick it in NoMo
     <string name="teesim_keybox_write_failed">Could not write the keybox</string>
     <string name="teesim_targets">Target apps</string>
     <string name="teesim_targets_summary">Targeted apps: %1$d</string>
+    <string name="teesim_targets_summary_auto">Targeted apps: %1$d, plus apps installed later</string>
     <string name="teesim_targets_title">Target apps</string>
     <string name="teesim_targets_hint">Already in another profile: %1$d (not listed here; edit /data/adb/teesim/config.json, default profile %2$s)</string>
     <string name="teesim_targets_saved">Target apps saved</string>
     <string name="teesim_search_apps">Search apps</string>
+    <string name="teesim_auto_include">Auto-include new apps</string>
+    <string name="teesim_auto_include_summary">Also answer for apps installed after TEESimulator first ran, taken in when the configuration reloads; apps already on the device stay untouched</string>
+    <string name="teesim_auto_include_taken">Profile %1$s already auto-includes new apps, and only one profile may. Turn it off there in /data/adb/teesim/config.json first</string>
+    <string name="teesim_auto_include_only">No app picked; the profile covers every new app and the apps ticked above</string>
+    <string name="teesim_rescan">Rescan installed apps</string>
+    <string name="teesim_rescan_done">Packages rescanned</string>
     <string name="teesim_show_system_apps">Show system apps</string>
     <string name="teesim_selected_count">Selected: %1$d</string>
     <string name="teesim_select_all">Select all shown</string>

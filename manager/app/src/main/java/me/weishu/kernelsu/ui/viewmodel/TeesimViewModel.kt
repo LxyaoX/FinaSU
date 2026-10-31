@@ -171,9 +171,21 @@ class TeesimViewModel(
         }
     }
 
-    fun setTargets(packages: List<String>) =
+    fun setTargets(packages: List<String>, autoInclude: Boolean) =
         write(R.string.teesim_targets_saved, R.string.teesim_write_failed) {
-            repo.setTeesimTargetApps(packages)
+            repo.setTeesimTargetApps(packages, autoInclude)
+        }
+
+    /**
+     * Re-reads the installed packages on the daemon's side without changing anything.
+     *
+     * Only a configuration change makes it re-resolve a profile, so this is what puts an app
+     * installed a minute ago into a profile that auto-includes new apps - no reboot, and no need to
+     * toggle the switch off and on again.
+     */
+    fun rescan() =
+        write(R.string.teesim_rescan_done, R.string.teesim_write_failed) {
+            repo.rescanTeesimTargets()
         }
 
     /**

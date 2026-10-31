@@ -259,15 +259,58 @@ object TeesimInstaller {
     /**
      * Replaces the app list of the `default` profile, leaving every other profile by itself.
      *
+     * [autoInclude] writes the profile's `autoIncludeNewApps`. With it on the daemon also answers
+     * for every user app installed after it first ran, which is why an empty [packages] is allowed,
+     * and only then: upstream rejects a profile that targets nothing at all. The daemon permits
+     * that flag on a single profile - two would claim the same apps - and treats a configuration
+     * that sets it twice as broken, so turning it on while another profile holds it fails here
+     * instead.
+     *
      * The daemon validates the file and reloads it live, so no reboot is needed here. A profile is
      * never created implicitly: a missing `default` means the configuration was edited into
      * something the manager does not understand, and guessing would be worse than failing.
      */
-    fun setTargetApps(packages: List<String>) {
+    fun setTargetApps(packages: List<String>, autoInclude: Boolean) {
         val root = readConfig() ?: error("$CONFIG_PATH is missing or not valid JSON")
-        val profile = defaultProfile(root)
+        val profiles = root.optJSONObject("profiles")
+            ?: error("$CONFIG_PATH has no profiles object")
+        val profile = profiles.optJSONObject(TeesimConfig.DEFAULT_PROFILE)
             ?: error("$CONFIG_PATH has no ${TeesimConfig.DEFAULT_PROFILE} profile")
+        require(packages.isNotEmpty() || autoInclude) {
+            "the profile targets nothing and does not auto-include new apps"
+        }
+        if (autoInclude) {
+            val claimant = profiles.keys().asSequence()
+                .firstOrNull { name ->
+                    name != TeesimConfig.DEFAULT_PROFILE &&
+                        profiles.optJSONObject(name)
+                            ?.optBoolean(TeesimConfig.AUTO_INCLUDE_KEY, false) == true
+                }
+            check(claimant == null) { "profile '$claimant' already auto-includes new apps" }
+        }
         profile.put("apps", JSONArray(packages.distinct().sorted()))
+        if (autoInclude) {
+            profile.put(TeesimConfig.AUTO_INCLUDE_KEY, true)
+        } else {
+            // Removing instead of writing `false` keeps turning the switch off from leaving a key
+            // behind that upstream would only read as its own default anyway.
+            profile.remove(TeesimConfig.AUTO_INCLUDE_KEY)
+        }
+        writeConfig(root)
+    }
+
+    /**
+     * Makes the daemon look at the installed packages again.
+     *
+     * Discovery is deliberately lazy upstream - a broadcast receiver in a bare `app_process` is
+     * dropped by AMS - so the set of installed apps is only re-read when the configuration changes,
+     * at daemon start, or on the WebUI's pull-to-refresh. Rewriting the same document is the
+     * supported way to ask for that from here: the daemon watches the directory, sees the
+     * replacement and re-resolves each profile, which is when an app installed after the baseline
+     * joins one that auto-includes new apps.
+     */
+    fun rescan() {
+        val root = readConfig() ?: error("$CONFIG_PATH is missing or not valid JSON")
         writeConfig(root)
     }
 

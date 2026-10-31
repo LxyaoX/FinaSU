@@ -73,7 +73,6 @@ static struct nm_rule *nm_select_rule(struct nm_leaf *leaf, unsigned int uid)
             continue;
         }
         if (r->target_uid > uid) break;
-        if (r->target_uid == uid) return r;
         if (uid <= r->uid_end) {
             if (r->deny_start && uid >= r->deny_start && uid <= r->deny_end) continue;
             return r;
@@ -301,24 +300,17 @@ static struct dentry *nm_materialize_rule(struct inode *dir, struct dentry *dent
         inode = iget5_locked(dir->i_sb, (unsigned long)rule_info->this_dir, nm_cached_inode_test, nm_cached_inode_set, &probe);
         if (!inode) goto out;
 
-        if (!nm_inode_is_new(inode)) {
-            res = d_splice_alias(inode, dentry);
-            if (!IS_ERR(res))
-                nm_hijack_dentry_ops(dir, res ? res : dentry, true);
-            goto out;
+        if (nm_inode_is_new(inode)) {
+            if (!(info = kmalloc(sizeof(*info), GFP_KERNEL))) { iget_failed(inode); goto out; }
+            *info = probe;
+            nm_init_prealloc_inode(inode, info, rule_info->v_ino);
+            unlock_new_inode(inode);
         }
-
-        if (!(info = kmalloc(sizeof(*info), GFP_KERNEL))) {
-            iget_failed(inode);
-            goto out;
-        }
-        *info = probe;
-        nm_init_prealloc_inode(inode, info, rule_info->v_ino);
-        unlock_new_inode(inode);
         res = d_splice_alias(inode, dentry);
         if (!IS_ERR(res))
             nm_hijack_dentry_ops(dir, res ? res : dentry, true);
-        return res;
+        if (info) return res;
+        goto out;
     }
 
     if (!(info = kmalloc(sizeof(*info), GFP_KERNEL))) goto out;
@@ -797,6 +789,11 @@ static int nm_xattr_set(const struct xattr_handler *handler, IDMAP_ARG struct de
     return proxy->orig->set(proxy->orig, IDMAP_CALL dentry, inode, name, buffer, size, flags);
 }
 
+static bool nm_is_our_dops(struct nm_dir_ops *iop, const struct dentry_operations *dop)
+{
+    return dop == &nm_owned_dops || dop == &nm_dops || (iop && dop == &iop->fake_dops);
+}
+
 static int nm_d_revalidate_common(struct inode *parent_inode, const struct qstr *name,
                                   struct dentry *dentry, unsigned int flags)
 {
@@ -834,14 +831,12 @@ static int nm_d_revalidate_common(struct inode *parent_inode, const struct qstr 
 
     if (whiteout) return !inode;
     if (match_rule) return 1;
-    if (has_rule || READ_ONCE(dentry->d_op) == &nm_owned_dops || (inode && nm_inode_is_virtual(inode))) goto drop_it;
-
+    if (has_rule || nm_is_our_dops(iop, READ_ONCE(dentry->d_op)) || (inode && nm_inode_is_virtual(inode))) {
+        if (flags & LOOKUP_RCU) return -ECHILD;
+        d_drop(dentry);
+        return 0;
+    }
     return nm_call_orig_revalidate(orig_dops, parent_inode, name, dentry, flags);
-
-drop_it:
-    if (flags & LOOKUP_RCU) return -ECHILD;
-    d_drop(dentry);
-    return 0;
 }
 
 static int nm_d_weak_revalidate(struct dentry *dentry, unsigned int flags)
@@ -1038,12 +1033,11 @@ static void nm_hijack_dentry_ops(struct inode *dir, struct dentry *dentry, bool 
     if (unlikely(!dentry || !dir)) return;
     iop = nm_get_nm_iop(smp_load_acquire(&dir->i_op));
     orig = READ_ONCE(dentry->d_op);
-    if (unlikely(!injected && !iop && orig)) return;
-    if (orig == &nm_owned_dops || orig == &nm_dops || (iop && orig == &iop->fake_dops)) return;
+    if (unlikely(!injected && !iop && orig) || nm_is_our_dops(iop, orig)) return;
 
     spin_lock(&dentry->d_lock);
     orig = dentry->d_op;
-    if (orig == &nm_owned_dops || orig == &nm_dops || (iop && orig == &iop->fake_dops)) {
+    if (nm_is_our_dops(iop, orig)) {
         spin_unlock(&dentry->d_lock);
         return;
     }
@@ -1200,7 +1194,7 @@ static int nm_inject_child_locked(struct nm_dir_node *dir_node, struct nm_leaf *
     leaf->parent_dir = dir_node;
     atomic_inc(&dir_node->refs);
     if (nm_rules_need_readdir(leaf, rcu_dereference_protected(leaf->rules, lockdep_is_held(&nm_mutex))))
-        WRITE_ONCE(dir_node->readdir_count, dir_node->readdir_count - 1);
+        WRITE_ONCE(dir_node->readdir_count, dir_node->readdir_count + 1);
     nm_publish_child_view_locked(dir_node, array);
     return 0;
 }
@@ -1229,7 +1223,7 @@ static struct nm_dir_node *nm_delete_child_locked(struct nm_leaf *leaf, bool cle
         }
     }
     nm_publish_child_view_locked(dir_node, array);
-    if (nm_rules_need_readdir(leaf, rcu_dereference_protected(leaf->rules, lockdep_is_held(&nm_mutex))))
+    if (array && nm_rules_need_readdir(leaf, rcu_dereference_protected(leaf->rules, lockdep_is_held(&nm_mutex))))
         WRITE_ONCE(dir_node->readdir_count, dir_node->readdir_count - 1);
     return dir_node;
 }
