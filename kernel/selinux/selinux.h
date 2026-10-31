@@ -72,6 +72,19 @@ int ksu_file_load_policy_allow_execmem_current(struct ksu_file_load_policy *stat
 int ksu_file_load_policy_allow_execmem_cred(const struct cred *cred, struct ksu_file_load_policy *state);
 int ksu_file_load_policy_restore(const struct ksu_file_load_policy *state);
 
+struct inode;
+struct inode_security_struct;
+struct inode_security_struct *ksu_selinux_inode(const struct inode *inode);
+
+#if defined(MODULE) && defined(CONFIG_DEBUG_INFO_BTF)
+int __init ksu_selinux_inode_init(void);
+#else
+static inline int ksu_selinux_inode_init(void)
+{
+    return 0;
+}
+#endif
+
 extern u32 ksu_file_sid;
 
 #ifdef CONFIG_KSU_SUSFS
