@@ -51,10 +51,6 @@ sealed interface Route : NavKey, Parcelable {
 
     @Parcelize
     @Serializable
-    data object UmountPaths : Route
-
-    @Parcelize
-    @Serializable
     data object Teesim : Route
 
     @Parcelize

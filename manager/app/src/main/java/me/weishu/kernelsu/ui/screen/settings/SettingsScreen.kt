@@ -87,7 +87,6 @@ fun rememberSettingsActions(
         onOpenProfileTemplate = { navigator.push(Route.AppProfileTemplate) },
         onSetSuCompatMode = viewModel::setSuCompatMode,
         onSetKernelUmountEnabled = viewModel::setKernelUmountEnabled,
-        onOpenUmountPaths = { navigator.push(Route.UmountPaths) },
         onSetSelinuxHideEnabled = viewModel::setSelinuxHideEnabled,
         onSetMountViewFilterEnabled = viewModel::setMountViewFilterEnabled,
         onSetSELinuxMode = viewModel::setSELinuxMode,

@@ -310,9 +310,6 @@ open class MainActivity : FragmentActivity() {
                                 entry<Route.Nomount> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountScreen()
                                 }
-                                entry<Route.UmountPaths> {
-                                    me.weishu.kernelsu.ui.screen.umount.UmountPathsScreen()
-                                }
                                 entry<Route.NomountExclusions> {
                                     me.weishu.kernelsu.ui.screen.nomount.NomountExclusionsScreen()
                                 }

@@ -215,25 +215,6 @@ static const __u8 KSU_UMOUNT_WIPE = 0; /* ignore everything and wipe list */
 static const __u8 KSU_UMOUNT_ADD = 1; /* add entry (path + flags) */
 static const __u8 KSU_UMOUNT_DEL = 2; /* delete entry, strcmp */
 
-#define KSU_TRY_UMOUNT_PATH_MAX 256
-/*
- * Every zygote setuid walks this list. Keep the hard cap small enough that a
- * corrupt or runaway writer cannot hide an unbounded cost behind app launches.
- */
-#define KSU_TRY_UMOUNT_MAX_ENTRIES 256
-
-struct ksu_try_umount_entry {
-    char path[KSU_TRY_UMOUNT_PATH_MAX];
-    __u32 flags;
-    __u32 reserved; /* Input/output: must be 0 */
-};
-
-struct ksu_get_try_umount_cmd {
-    __u32 size; /* Input: bytes available; Output: bytes required */
-    __u32 count; /* Output: number of entries */
-    __aligned_u64 entries; /* Input: array of struct ksu_try_umount_entry */
-};
-
 /* IOCTL command definitions */
 static const __u32 KSU_IOCTL_GRANT_ROOT = _IOC(_IOC_NONE, 'K', 1, 0);
 static const __u32 KSU_IOCTL_GET_INFO = _IOR('K', 2, struct ksu_get_info_cmd);
@@ -266,10 +247,6 @@ static const __u32 KSU_IOCTL_LOOKUP_SYMBOLS = _IOW('K', 22, struct ksu_lookup_sy
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGERS = _IOC(_IOC_WRITE, 'K', 22, 0);
 static const __u32 KSU_IOCTL_GET_DYNAMIC_MANAGERS = _IOWR('K', 23, struct ksu_get_dynamic_managers_cmd);
 static const __u32 KSU_IOCTL_SET_DYNAMIC_MANAGER_GRANTS = _IOC(_IOC_WRITE, 'K', 24, 0);
-/* 33 is the number upstream assigns; 25-32 are free here because this tree
- * carries neither UTS view nor netisolate. */
-static const __u32 KSU_IOCTL_GET_TRY_UMOUNT =
-    _IOWR('K', 33, struct ksu_get_try_umount_cmd);
 static const __u32 KSU_IOCTL_GET_FULL_VERSION = _IOR('K', 29, struct ksu_get_full_version_cmd);
 
 /* prctl(2) command the YukiZygisk daemon uses to obtain the driver fd. This tree has

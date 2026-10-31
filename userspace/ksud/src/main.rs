@@ -93,8 +93,6 @@ mod su;
 #[cfg(target_os = "android")]
 mod sulog;
 #[cfg(any(target_os = "android", test))]
-mod umount_config;
-#[cfg(any(target_os = "android", test))]
 #[cfg_attr(not(target_os = "android"), allow(dead_code))]
 mod yukizygisk;
 // SUSFS is an Android control interface; Linux hosts only compile it for tests.
