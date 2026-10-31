@@ -239,7 +239,6 @@
     <string name="settings_sucompat_summary">新規プロセスで /system/bin/su 経由での root アクセスを許可します。</string>
     <string name="settings_kernel_umount">モジュールのアンマウント (カーネルレベル)</string>
     <string name="settings_kernel_umount_summary">アプリプロファイルに基づいて、カーネルからモジュールをアンマウントします。</string>
-    <string name="settings_finasu_hide">FinaSU Hide</string>
     <string name="umount_paths_title">カスタムアンマウントマウントポイント</string>
     <string name="umount_paths_summary">選択したアプリの起動時に表示しないマウントポイントを管理します</string>
     <string name="umount_paths_intro_title">アプリが実際に参照するファイルを変更します</string>

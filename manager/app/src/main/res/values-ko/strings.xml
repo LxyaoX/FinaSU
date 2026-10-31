@@ -239,7 +239,6 @@
     <string name="settings_sucompat_summary">/system/bin/su를 통한 루트 권한 획득 허용 (새 프로세스 전용)</string>
     <string name="settings_kernel_umount">모듈 언마운트</string>
     <string name="settings_kernel_umount_summary">앱 프로필에 따라 커널에서 모듈을 언마운트합니다</string>
-    <string name="settings_finasu_hide">FinaSU Hide</string>
     <string name="umount_paths_title">사용자 지정 언마운트 마운트 지점</string>
     <string name="umount_paths_summary">선택한 앱이 시작할 때 보지 않아야 하는 마운트 지점을 관리합니다</string>
     <string name="umount_paths_intro_title">앱이 실제로 보는 파일을 변경합니다</string>

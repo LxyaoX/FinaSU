@@ -241,7 +241,6 @@
     <string name="settings_sucompat_summary">Разрешить root-доступ через /system/bin/su в новых процессах.</string>
     <string name="settings_kernel_umount">Размонтировать модули (на уровне ядра)</string>
     <string name="settings_kernel_umount_summary">Размонтировать модули в ядре для профиля приложения.</string>
-    <string name="settings_finasu_hide">FinaSU Hide</string>
     <string name="umount_paths_title">Пользовательские точки монтирования для размонтирования</string>
     <string name="umount_paths_summary">Управление точками монтирования, которые выбранные приложения не должны видеть при запуске</string>
     <string name="umount_paths_intro_title">Изменяет файлы, которые приложение действительно видит</string>
