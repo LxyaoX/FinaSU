@@ -225,19 +225,18 @@ jobs:
             echo "::error title=Build::no log captured"
             exit 0
           fi
+          # Lint prints "file:line: Error: message [Id]" lines; surface them first, or Gradle's own
+          # progress lines eat the annotation budget and the reason is the part that gets cut.
+          grep -E ': (Error|Warning|Fatal): ' "$RUNNER_TEMP/build.log" | head -15 | while IFS= read -r line; do
+            echo "::error title=Lint::${line}"
+          done
+
           # AAPT and the resource merger report on their own lines, without the "e:" prefix the
           # Kotlin compiler uses; keep both shapes or a resource failure prints nothing useful.
-          grep -E '^(e|w): |error:|ERROR:|AAPT|^\* What went wrong|^Execution failed|^> Task .* FAILED|^ *> A failure occurred|^ *> [A-Za-z].*' "$RUNNER_TEMP/build.log" \
+          grep -E '^(e|w): |error:|ERROR:|Error: |Fatal: |AAPT|^\* What went wrong|^Execution failed|^> Task .* FAILED|^ *> A failure occurred|^ *> [A-Za-z].*' "$RUNNER_TEMP/build.log" \
             | grep -v '^w: ' | grep -v '^ *> Task :[a-z]' | head -25 | while IFS= read -r line; do
               echo "::error title=Gradle::${line//$'\n'/ }"
             done
-
-          # Lint writes its findings to a report file, and its own stdout shape does not match the
-          # patterns above - so without this a lint error is the one failure the annotations miss.
-          lint_xml=manager/app/build/reports/lint-results-debug.xml
-          if [ -f "$lint_xml" ]; then
-            python3 -c 'import sys, xml.etree.ElementTree as ET;print("\n".join(["::error title=Lint %s at %s::%s" % (i.get("id"), ((i.find("location").get("file") + ":" + i.find("location").get("line")) if i.find("location") is not None else "?"), (i.get("message") or "").replace(chr(10), " ")) for i in ET.parse(sys.argv[1]).getroot().findall("issue") if i.get("severity") in ("Error", "Fatal")]))' "$lint_xml"
-          fi
 
       - name: Upload Manager check reports
         if: always()
