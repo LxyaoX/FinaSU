@@ -36,7 +36,6 @@ private val NavKey.wallpaperPage: Int?
         Route.About,
         Route.Nomount,
         Route.NomountExclusions,
-        Route.UmountPaths,
         Route.YukiZygisk,
         Route.Teesim,
         Route.TeesimTargets,
