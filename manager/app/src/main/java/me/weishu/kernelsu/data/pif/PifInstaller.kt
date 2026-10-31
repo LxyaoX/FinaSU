@@ -42,8 +42,6 @@ object PifInstaller {
     private const val CONFIG_BEGIN = "__pif_config_begin__"
     private const val CONFIG_END = "__pif_config_end__"
 
-    const val PROP_PATH = "$ROOT/$PROP_FILE"
-
     /** Current state of the payload and the file the page edits. */
     fun status(): PifStatus {
         // One shell for the whole picture. Which directory is in force and what is in it are
@@ -70,7 +68,6 @@ object PifInstaller {
      * reads, and the page would report a state the device is not in.
      */
     private fun activeDir(external: Boolean): String = if (external) MODULE_DIR else ROOT
-
 
     /**
      * Asks ksud to write the payload again, keeping `pif.prop`.
@@ -131,9 +128,9 @@ object PifInstaller {
 
     /** Flips one switch in `pif.prop`, leaving every other line untouched. */
     fun setOption(option: PifOption, value: Boolean) {
-        val current = status()
-        check(current.installed) { "$MODULE_DIR is not installed" }
-        val path = "${activeDir(current.external)}/$PROP_FILE"
+        val state = status()
+        check(state.installed) { "$MODULE_DIR is not installed" }
+        val path = "${activeDir(state.external)}/$PROP_FILE"
         val current = output("cat $path 2>/dev/null")
         check(current.isNotBlank()) { "$path is missing" }
         writeProp(path, PifProp.withOption(current, option, value))
