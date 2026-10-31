@@ -37,7 +37,6 @@ import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue

@@ -21,7 +21,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
